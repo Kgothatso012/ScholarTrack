@@ -84,7 +84,14 @@ export default function App() {
 
   useEffect(() => {
     (window as any).logout = async () => { await AsyncStorage.removeItem('userRole'); setUserRole(null); };
-    (window as any).setRole = async (r: string) => { await AsyncStorage.setItem('userRole', r); setUserRole(r); };
+    (window as any).setRole = async (r: string) => { 
+      await AsyncStorage.setItem('userRole', r); 
+      let defaultScreen = 'Home';
+      if (r === 'driver') defaultScreen = 'DriverApp';
+      else if (r === 'admin' || r === 'dev') defaultScreen = 'Settings';
+      setScreen(defaultScreen); 
+      setUserRole(r); 
+    };
   }, []);
 
   if (loading) return (
