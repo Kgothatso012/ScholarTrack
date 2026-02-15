@@ -9,10 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+
+const { width } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -28,7 +31,6 @@ export default function LoginScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      // Try Supabase auth first
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -36,7 +38,6 @@ export default function LoginScreen({ navigation }: any) {
 
       if (error) throw error;
 
-      // Get user role from database
       const { data: userData } = await supabase
         .from('users')
         .select('role')
@@ -50,11 +51,9 @@ export default function LoginScreen({ navigation }: any) {
           routes: [{ name: getRouteName(userData.role) }],
         });
       } else {
-        // Fallback: infer role from email
         await handleDemoLogin();
       }
     } catch (error: any) {
-      // Fallback to demo login if Supabase fails
       await handleDemoLogin();
     } finally {
       setLoading(false);
@@ -62,7 +61,6 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleDemoLogin = async () => {
-    // Demo login based on email
     if (email.toLowerCase().includes('admin')) {
       await AsyncStorage.setItem('userRole', 'admin');
       navigation.reset({ index: 0, routes: [{ name: 'AdminApp' }] });
@@ -95,7 +93,11 @@ export default function LoginScreen({ navigation }: any) {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
+      <ScrollView 
+        contentContainerStyle={styles.scrollView} 
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
             <Text style={styles.logoText}>🚗</Text>
@@ -163,11 +165,6 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.socialButton}>
-            <Ionicons name="logo-apple" size={20} color="#333" />
-            <Text style={styles.socialButtonText}>Continue with Apple</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.signupContainer}>
             <Text style={styles.signupText}>
               Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
@@ -176,11 +173,9 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         <View style={styles.demoBox}>
-          <Text style={styles.demoTitle}>🇿🇦 Demo Credentials:</Text>
-          <Text style={styles.demoText}>Parent: parent@test.com</Text>
-          <Text style={styles.demoText}>Driver: driver@test.com</Text>
-          <Text style={styles.demoText}>Admin: admin@test.com</Text>
-          <Text style={styles.demoText}>Dev: dev@test.com</Text>
+          <Text style={styles.demoTitle}>Demo Credentials:</Text>
+          <Text style={styles.demoText}>parent@test.com | driver@test.com</Text>
+          <Text style={styles.demoText}>admin@test.com | dev@test.com</Text>
           <Text style={styles.demoText}>Password: any</Text>
         </View>
       </ScrollView>
@@ -196,20 +191,21 @@ const styles = StyleSheet.create({
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 40,
     marginBottom: 20,
   },
   logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: '#FFB81C',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -217,29 +213,29 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   logoText: {
-    fontSize: 42,
+    fontSize: 32,
   },
   appTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 5,
   },
   appSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#FFB81C',
     letterSpacing: 1,
   },
   formContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderRadius: 20,
     paddingHorizontal: 24,
-    paddingTop: 30,
-    paddingBottom: 20,
+    paddingVertical: 25,
+    width: width > 500 ? 400 : '85%',
+    maxWidth: 420,
   },
   welcomeText: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#002395',
     marginBottom: 5,
@@ -247,46 +243,46 @@ const styles = StyleSheet.create({
   subtitleText: {
     fontSize: 14,
     color: '#666666',
-    marginBottom: 25,
+    marginBottom: 20,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    marginBottom: 10,
     backgroundColor: '#F8F8F8',
-    height: 52,
+    height: 48,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     color: '#333333',
   },
   eyeIcon: {
-    padding: 8,
+    padding: 6,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 15,
+    marginBottom: 12,
   },
   forgotPasswordText: {
     color: '#007749',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
   },
   loginButton: {
     backgroundColor: '#007749',
-    borderRadius: 12,
-    height: 52,
+    borderRadius: 10,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
     shadowColor: '#007749',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -298,13 +294,13 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   dividerLine: {
     flex: 1,
@@ -312,9 +308,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   dividerText: {
-    marginHorizontal: 15,
+    marginHorizontal: 12,
     color: '#999',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   socialButton: {
@@ -323,24 +319,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 12,
-    height: 48,
+    borderRadius: 10,
+    height: 44,
     marginBottom: 12,
     backgroundColor: '#FFFFFF',
   },
   socialButtonText: {
     marginLeft: 10,
-    fontSize: 15,
+    fontSize: 14,
     color: '#333',
     fontWeight: '500',
   },
   signupContainer: {
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 5,
   },
   signupText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666666',
   },
   signupLink: {
@@ -348,22 +343,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   demoBox: {
-    margin: 15,
-    padding: 16,
+    marginTop: 20,
+    padding: 12,
     backgroundColor: '#FFF4E0',
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FFB81C',
+    width: width > 500 ? 400 : '85%',
+    maxWidth: 420,
   },
   demoTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#002395',
-    marginBottom: 8,
+    marginBottom: 5,
   },
   demoText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666666',
-    marginBottom: 3,
+    marginBottom: 2,
   },
 });
