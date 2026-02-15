@@ -32,7 +32,7 @@ export default function App() {
   const [screen, setScreen] = useState('Home');
   const [darkMode, setDarkMode] = useState(false);
 
-  useEffect(() => { init(); }, []);
+  useEffect(() => { init(); window.addEventListener('login', () => init()); }, []);
   
   const init = async () => {
     try {

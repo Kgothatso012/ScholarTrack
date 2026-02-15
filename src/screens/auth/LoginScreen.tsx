@@ -66,7 +66,9 @@ export default function LoginScreen({ navigation }: any) {
     
     await AsyncStorage.setItem('userRole', role);
     await AsyncStorage.setItem('userEmail', email);
-    (window as any).setRole(role);
+    
+    // Navigate to correct screen based on role
+    (window as any).navigateToRole?.(role);
   };
 
   const handleRegister = async () => {
