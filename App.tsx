@@ -19,6 +19,7 @@ import ChildrenScreen from './src/screens/parent/ChildrenScreen';
 import EmergencyScreen from './src/screens/safety/EmergencyScreen';
 import SupportScreen from './src/screens/support/SupportScreen';
 import SafetyTipsScreen from './src/screens/support/SafetyTipsScreen';
+import AdminDashboardScreen from './src/screens/admin/AdminDashboardScreen';
 import LoginScreen from './src/screens/auth/LoginScreen';
 
 const { width } = Dimensions.get('window');
@@ -42,7 +43,7 @@ export default function App() {
       setDarkMode(dark === 'true');
       // Set correct screen based on role
       if (role === 'driver') setScreen('DriverApp');
-      else if (role === 'admin' || role === 'dev') setScreen('Settings');
+      else if (role === 'admin' || role === 'dev') setScreen('AdminDashboard');
       else setScreen('Home');
     } catch (e) { console.log(e); 
     } finally { setLoading(false); }
@@ -58,6 +59,7 @@ export default function App() {
     Hire: HireDriverScreen, Review: ReviewDriverScreen, Payments: PaymentDetailsScreen,
     Reports: IncidentReportScreen, Settings: SettingsScreen, DriverApp: DriverAppScreen,
     Children: ChildrenScreen, Emergency: EmergencyScreen, Support: SupportScreen, SafetyTips: SafetyTipsScreen,
+    AdminDashboard: AdminDashboardScreen,
   };
 
   const menuItems = [
