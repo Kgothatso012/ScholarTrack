@@ -138,7 +138,7 @@ function App() {
         <View style={[styles.splashLogo, { backgroundColor: themes.light.accent }]}>
           <Text style={styles.splashEmoji}>🚗</Text>
         </View>
-        <Text style={styles.splashText}>ScholarTrack</Text>
+        <Text style={styles.splashText}></Text>
         <Text style={[styles.splashSub, { color: themes.light.accent }]}>Safe Student Transport</Text>
       </View>
     );
@@ -163,11 +163,11 @@ function App() {
         <StatusBar style="light" />
         
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <View style={[styles.header, { backgroundColor: 'transparent' }]}>
           <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
             <Ionicons name="menu" size={28} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>ScholarTrack</Text>
+          <Text style={styles.headerTitle}></Text>
           <TouchableOpacity style={styles.notifBtn}>
             <Ionicons name="notifications" size={24} color="#fff" />
           </TouchableOpacity>
@@ -175,6 +175,8 @@ function App() {
 
         {/* Current Screen */}
         <View style={{ flex: 1 }}>
+        
+
           <CurrentScreen />
         </View>
 
@@ -182,13 +184,13 @@ function App() {
         <Modal visible={menuVisible} animationType="slide" transparent>
           <View style={styles.modalWrap}>
             <TouchableOpacity style={styles.modalBack} onPress={() => setMenuVisible(false)} />
-            <View style={[styles.menu, { backgroundColor: colors.surface }]}>
+            <View style={[styles.menu, { backgroundColor: 'transparent' }]}>
               {/* Menu Header */}
-              <View style={[styles.menuHeader, { backgroundColor: colors.primary }]}>
+              <View style={[styles.menuHeader, { backgroundColor: 'transparent' }]}>
                 <View style={[styles.menuLogo, { backgroundColor: colors.accent }]}>
                   <Text style={styles.menuLogoEmoji}>🚗</Text>
                 </View>
-                <Text style={styles.menuTitle}>ScholarTrack</Text>
+                <Text style={styles.menuTitle}></Text>
                 <Text style={[styles.menuSub, { color: colors.accent }]}>Safe Student Transport</Text>
               </View>
 
@@ -200,7 +202,7 @@ function App() {
                     style={[
                       styles.menuItem,
                       { borderBottomColor: colors.border },
-                      currentScreen === item.screen && { backgroundColor: colors.primary + '15' }
+                      currentScreen === item.screen && { backgroundColor: 'transparent' + '15' }
                     ]}
                     onPress={() => {
                       setCurrentScreen(item.screen);
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
 
   // Modal
   modalWrap: { flex: 1, flexDirection: 'row' },
-  modalBack: { flex: 1, backgroundColor: 'transparent' },
+  modalBack: { flex: 1, elevation: 0 },
   menu: { width: width * 0.8, height: '100%' },
   menuHeader: { paddingTop: 60, paddingBottom: 30, alignItems: 'center' },
   menuLogo: { width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
