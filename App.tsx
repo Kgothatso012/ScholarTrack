@@ -68,7 +68,6 @@ export default function App() {
 
   const menuItems = [
     { name: 'Home', icon: 'home', to: 'Home' }, 
-    { name: 'Driver App', icon: 'car', to: 'DriverApp' },
     { name: 'My Children', icon: 'people', to: 'Children' },
     { name: 'Live Tracking', icon: 'map', to: 'Live' },
     { name: 'Emergency SOS', icon: 'warning', to: 'Emergency' },
@@ -160,7 +159,7 @@ export default function App() {
                 ))}
                 
                 <View style={[styles.darkToggle, { borderColor: border }]}>
-                  <Text style={[styles.darkToggleText, { color: textMain }]}>🌙 Dark Mode</Text>
+                  <Text style={[styles.darkToggleText, { color: textMain }]}>Dark Dark Mode</Text>
                   <Switch value={darkMode} onValueChange={toggleDark} trackColor={{ false: '#888', true: COLORS.primary }} thumbColor="#fff" />
                 </View>
               </View>
@@ -198,6 +197,6 @@ const styles = StyleSheet.create({
   menuItemText: { fontSize: 16 }, menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
   darkToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#eee', marginTop: 10 },
   darkToggleText: { fontSize: 16 },
-  logoutBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, backgroundColor: '#ffebee', margin: 20, borderRadius: 12 },
+  
   logoutText: { color: '#d32f2f', fontSize: 16, fontWeight: '600', marginLeft: 10 },
 });
