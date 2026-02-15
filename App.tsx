@@ -67,13 +67,19 @@ export default function App() {
   };
 
   const menuItems = [
-    { name: '🏠 Home', to: 'Home' }, { name: '🚗 Driver App', to: 'DriverApp' }, 
-    { name: '👶 My Children', to: 'Children' }, { name: '🗺️ Live Tracking', to: 'Live' },
-    { name: '🚨 Emergency', to: 'Emergency' }, { name: '📅 Trip History', to: 'History' },
-    { name: '🚗 Hire Driver', to: 'Hire' }, { name: '⭐ Reviews', to: 'Review' },
-    { name: '💳 Payments', to: 'Payments' }, { name: '📋 Reports', to: 'Reports' },
-    { name: '⚙️ Settings', to: 'Settings' }, { name: '🆘 Support', to: 'Support' },
-    { name: '🛡️ Safety Tips', to: 'SafetyTips' },
+    { name: 'Home', icon: 'home', to: 'Home' }, 
+    { name: 'Driver App', icon: 'car', to: 'DriverApp' },
+    { name: 'My Children', icon: 'people', to: 'Children' },
+    { name: 'Live Tracking', icon: 'map', to: 'Live' },
+    { name: 'Emergency SOS', icon: 'warning', to: 'Emergency' },
+    { name: 'Trip History', icon: 'time', to: 'History' },
+    { name: 'Hire Driver', icon: 'person-add', to: 'Hire' },
+    { name: 'Reviews', icon: 'star', to: 'Review' },
+    { name: 'Payments', icon: 'card', to: 'Payments' },
+    { name: 'Reports', icon: 'document-text', to: 'Reports' },
+    { name: 'Settings', icon: 'settings', to: 'Settings' },
+    { name: 'Support', icon: 'help-circle', to: 'Support' },
+    { name: 'Safety Tips', icon: 'shield-checkmark', to: 'SafetyTips' },
   ];
 
   useEffect(() => {
@@ -138,7 +144,10 @@ export default function App() {
                     style={[styles.menuItem, { borderBottomColor: border }]}
                     onPress={() => { setScreen(item.to); setMenuOpen(false); }}
                   >
-                    <Text style={[styles.menuItemText, { color: textMain }]}>{item.name}</Text>
+                    <View style={styles.menuItemLeft}>
+                      <Ionicons name={item.icon as any} size={20} color={textMain} />
+                      <Text style={[styles.menuItemText, { color: textMain, marginLeft: 12 }]}>{item.name}</Text>
+                    </View>
                     {screen === item.to && <Ionicons name="checkmark" size={20} color={COLORS.accent} />}
                   </TouchableOpacity>
                 ))}
@@ -179,7 +188,7 @@ const styles = StyleSheet.create({
   menuTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
   menuScroll: { flex: 1, paddingTop: 15 },
   menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  menuItemText: { fontSize: 16 },
+  menuItemText: { fontSize: 16 }, menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
   darkToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#eee', marginTop: 10 },
   darkToggleText: { fontSize: 16 },
   logoutBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, backgroundColor: '#ffebee', margin: 20, borderRadius: 12 },
