@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions, Switch, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,11 +24,10 @@ import LoginScreen from './src/screens/auth/LoginScreen';
 
 const { width } = Dimensions.get('window');
 
-// Theme colors
+// Theme
 const themes = {
   light: {
     primary: '#000000',
-    secondary: '#1a1a1a',
     accent: '#FFB81C',
     background: '#F5F5F5',
     surface: '#FFFFFF',
@@ -38,7 +37,6 @@ const themes = {
   },
   dark: {
     primary: '#333333',
-    secondary: '#1A1A1A',
     accent: '#FFB81C',
     background: '#121212',
     surface: '#1E1E1E',
@@ -82,11 +80,6 @@ function App() {
   // Screen components
   const screens: any = {
     Home: ParentDashboard,
-    DriverApp: DriverAppScreen,
-    Children: ChildrenScreen,
-    Emergency: EmergencyScreen,
-    Support: SupportScreen,
-    SafetyTips: SafetyTipsScreen,
     Live: LiveTrackScreen,
     Safety: PanicScreen,
     History: TripHistoryScreen,
@@ -95,6 +88,9 @@ function App() {
     Payments: PaymentDetailsScreen,
     Reports: IncidentReportScreen,
     Settings: SettingsScreen,
+    DriverApp: DriverAppScreen,
+    Children: ChildrenScreen,
+    Emergency: EmergencyScreen,
     Support: SupportScreen,
     SafetyTips: SafetyTipsScreen,
   };
@@ -106,9 +102,8 @@ function App() {
     { name: '🏠 Home', screen: 'Home' },
     { name: '🚗 Driver App', screen: 'DriverApp' },
     { name: '👶 My Children', screen: 'Children' },
-    { name: '🚨 Emergency', screen: 'Emergency' },,
     { name: '🗺️ Live Tracking', screen: 'Live' },
-    { name: '🚨 Safety SOS', screen: 'Safety' },
+    { name: '🚨 Emergency SOS', screen: 'Emergency' },
     { name: '📅 Trip History', screen: 'History' },
     { name: '🚗 Hire Driver', screen: 'Hire' },
     { name: '⭐ Reviews', screen: 'Review' },
@@ -119,7 +114,7 @@ function App() {
     { name: '🛡️ Safety Tips', screen: 'SafetyTips' },
   ];
 
-  // Global logout
+  // Global functions
   useEffect(() => {
     (window as any).logout = async () => {
       await AsyncStorage.removeItem('userRole');
@@ -138,7 +133,7 @@ function App() {
         <View style={[styles.splashLogo, { backgroundColor: themes.light.accent }]}>
           <Text style={styles.splashEmoji}>🚗</Text>
         </View>
-        <Text style={styles.splashText}></Text>
+        <Text style={styles.splashText}>ScholarTrack</Text>
         <Text style={[styles.splashSub, { color: themes.light.accent }]}>Safe Student Transport</Text>
       </View>
     );
@@ -156,42 +151,40 @@ function App() {
     );
   }
 
-  // Main app with menu
+  // Main app with menu from RIGHT
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar style="light" />
         
-        {/* Header */}
-        <View style={[styles.header, { backgroundColor: 'transparent' }]}>
+        {/* Header with menu button RIGHT */}
+        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+          <Text style={styles.headerTitle}>Safe Student Transport</Text>
           <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
             <Ionicons name="menu" size={28} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}></Text>
-          <TouchableOpacity style={styles.notifBtn}>
-            <Ionicons name="notifications" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
         {/* Current Screen */}
         <View style={{ flex: 1 }}>
-        
-
           <CurrentScreen />
         </View>
 
-        {/* Menu Modal */}
+        {/* Menu Modal - slides from RIGHT */}
         <Modal visible={menuVisible} animationType="slide" transparent>
           <View style={styles.modalWrap}>
+            {/* Dark backdrop */}
             <TouchableOpacity style={styles.modalBack} onPress={() => setMenuVisible(false)} />
-            <View style={[styles.menu, { backgroundColor: 'transparent' }]}>
+            
+            {/* Menu panel from RIGHT */}
+            <View style={[styles.menu, { backgroundColor: colors.surface }]}>
               {/* Menu Header */}
-              <View style={[styles.menuHeader, { backgroundColor: 'transparent' }]}>
-                <View style={[styles.menuLogo, { backgroundColor: colors.accent }]}>
-                  <Text style={styles.menuLogoEmoji}>🚗</Text>
-                </View>
-                <Text style={styles.menuTitle}></Text>
-                <Text style={[styles.menuSub, { color: colors.accent }]}>Safe Student Transport</Text>
+              <View style={[styles.menuHeader, { backgroundColor: colors.primary }]}>
+                <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeBtn}>
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.menuTitle}>Menu</Text>
+                <View style={{ width: 30 }} />
               </View>
 
               {/* Menu Items */}
@@ -202,7 +195,7 @@ function App() {
                     style={[
                       styles.menuItem,
                       { borderBottomColor: colors.border },
-                      currentScreen === item.screen && { backgroundColor: 'transparent' + '15' }
+                      currentScreen === item.screen && { backgroundColor: colors.primary + '15' }
                     ]}
                     onPress={() => {
                       setCurrentScreen(item.screen);
@@ -266,24 +259,27 @@ const styles = StyleSheet.create({
 
   // Header
   header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
   menuBtn: { padding: 5 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  notifBtn: { padding: 5 },
 
-  // Modal
+  // Modal - RIGHT side
   modalWrap: { flex: 1, flexDirection: 'row' },
-  modalBack: { flex: 1, elevation: 0 },
+  modalBack: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   menu: { width: width * 0.8, height: '100%' },
-  menuHeader: { paddingTop: 60, paddingBottom: 30, alignItems: 'center' },
-  menuLogo: { width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  menuLogoEmoji: { fontSize: 35 },
-  menuTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  menuSub: { fontSize: 13, marginTop: 3 },
+
+  // Menu Header
+  menuHeader: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  closeBtn: { padding: 5 },
+  menuTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
+
+  // Menu Items
   menuList: { flex: 1, paddingTop: 15 },
   menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
   menuItemText: { fontSize: 16 },
   darkToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
   darkToggleText: { fontSize: 16 },
+
+  // Footer
   menuFooter: { padding: 20, borderTopWidth: 1 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12, marginBottom: 10 },
   logoutText: { color: '#d32f2f', fontSize: 16, fontWeight: '600', marginLeft: 10 },
