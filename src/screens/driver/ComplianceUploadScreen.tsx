@@ -377,11 +377,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
           {
             text: 'OK',
             onPress: () => {
-              // Navigate to driver dashboard or home
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'DriverDashboard' }],
-              });
+              (window as any).setRole('driver');
             },
           },
         ]
@@ -404,13 +400,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         {
           text: 'Logout',
           onPress: async () => {
-            await AsyncStorage.removeItem('userRole');
-            await AsyncStorage.removeItem('userEmail');
-            await AsyncStorage.removeItem('driverCompliance');
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
+            (window as any).logout();
           },
         },
       ],

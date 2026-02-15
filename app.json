@@ -1,10 +1,15 @@
 {
   "expo": {
-    "name": "ScholarTrack-Expo54",
+    "name": "ScholarTrack",
     "slug": "scholartrack-expo54",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5D3FD3"
+    },
     "extra": {
       "EXPO_PUBLIC_SUPABASE_URL": "https://zjcribmwgavpzycgpwva.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "REDACTED_SUPABASE_JWT_2"
@@ -14,13 +19,13 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.scholartrack"
+      "bundleIdentifier": "com.scholartrack.sa"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#5D3FD3"
       },
-      "package": "com.yourcompany.scholartrack"
+      "package": "com.scholartrack.sa"
     }
   }
 }

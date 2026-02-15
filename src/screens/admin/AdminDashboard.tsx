@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AdminDashboard = ({ navigation }: any) => {
   const adminTools = [
@@ -12,10 +13,25 @@ const AdminDashboard = ({ navigation }: any) => {
     { name: 'Reports', icon: 'document-text', color: '#002395' },
   ];
 
+  const handleLogout = async () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: async () => {
+        (window as any).logout();
+        (window as any).logout();
+      }}
+    ]);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏫 Admin Dashboard</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>🏫 Admin Dashboard</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <Ionicons name="log-out-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerSubtitle}>School Transport Management</Text>
       </View>
 
@@ -40,7 +56,7 @@ const AdminDashboard = ({ navigation }: any) => {
           {adminTools.map((tool, index) => (
             <TouchableOpacity key={index} style={styles.card}>
               <View style={[styles.iconContainer, { backgroundColor: tool.color + '20' }]}>
-                <Ionicons name={tool.icon as keyof typeof Ionicons.glyphMap} size={28} color={tool.color} />
+                <Ionicons name={tool.icon as any} size={28} color={tool.color} />
               </View>
               <Text style={styles.cardText}>{tool.name}</Text>
               {tool.count && <Text style={styles.cardCount}>{tool.count}</Text>}
@@ -86,139 +102,31 @@ const AdminDashboard = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#002395',
-    padding: 20,
-    paddingTop: 40,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#FFB81C',
-    marginTop: 5,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 20,
-    backgroundColor: '#fff',
-    marginTop: -20,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    elevation: 4,
-  },
-  statCard: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#002395',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-  },
-  section: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  card: {
-    width: '48%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cardText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  cardCount: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-  },
-  activityCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    elevation: 2,
-  },
-  activityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  activityText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 10,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: '#999',
-  },
-  actionButton: {
-    backgroundColor: '#007749',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 10,
-  },
-  secondaryButton: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#002395',
-  },
-  secondaryButtonText: {
-    color: '#002395',
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  logoutBtn: { padding: 5 },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  headerSubtitle: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
+  statsContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 20, backgroundColor: '#fff', marginTop: -20, marginHorizontal: 20, borderRadius: 10, elevation: 4 },
+  statCard: { alignItems: 'center' },
+  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#002395' },
+  statLabel: { fontSize: 12, color: '#666', marginTop: 5 },
+  section: { padding: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  card: { width: '48%', backgroundColor: '#fff', borderRadius: 10, padding: 15, marginBottom: 15, alignItems: 'center', elevation: 2 },
+  iconContainer: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+  cardText: { fontSize: 14, fontWeight: '600', color: '#333' },
+  cardCount: { fontSize: 12, color: '#666', marginTop: 5 },
+  activityCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
+  activityRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  activityText: { flex: 1, fontSize: 14, color: '#333', marginLeft: 10 },
+  activityTime: { fontSize: 12, color: '#999' },
+  actionButton: { backgroundColor: '#007749', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginBottom: 10 },
+  actionButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 10 },
+  secondaryButton: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#002395' },
+  secondaryButtonText: { color: '#002395' },
 });
 
 export default AdminDashboard;

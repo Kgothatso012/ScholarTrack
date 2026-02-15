@@ -1,8 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DevDashboard = ({ navigation }: any) => {
+  
+  const handleLogout = async () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: async () => {
+        (window as any).logout();
+        (window as any).logout();
+      }}
+    ]);
+  };
   const devTools = [
     { name: 'API Console', icon: 'code-slash', color: '#007749' },
     { name: 'Database', icon: 'server', color: '#002395' },
@@ -15,7 +26,12 @@ const DevDashboard = ({ navigation }: any) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🛠️ Dev Dashboard</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>🛠️ Dev Dashboard</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <Ionicons name="log-out-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerSubtitle}>ScholarTrack Development Tools</Text>
       </View>
 
@@ -73,6 +89,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#002395',
     padding: 20,
     paddingTop: 40,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logoutBtn: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 24,

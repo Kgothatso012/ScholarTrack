@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ParentDashboard = ({ navigation }: any) => {
+  
+  const handleLogout = async () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: async () => {
+        (window as any).logout();
+      }}
+    ]);
+  };
+  
   const [children] = useState([
     { id: 1, name: 'Thato', school: 'Mamelodi High', status: 'On route', driver: 'Mr. Molaba' },
     { id: 2, name: 'Lesego', school: 'St. Martins Primary', status: 'At school', driver: 'Pending' },
@@ -11,7 +22,12 @@ const ParentDashboard = ({ navigation }: any) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>👨‍👩‍👧 Parent Dashboard</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>👨‍👩‍👧 Parent Dashboard</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <Ionicons name="log-out-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerSubtext}>Welcome back!</Text>
       </View>
 
@@ -76,6 +92,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#002395',
     padding: 20,
     paddingTop: 40,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logoutBtn: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 22,

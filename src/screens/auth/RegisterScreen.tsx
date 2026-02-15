@@ -61,7 +61,7 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert(
         'Success!', 
         'Account created successfully!',
-        [{ text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: getRouteName(selectedRole) }] }) }]
+        [{ text: 'OK', onPress: () => { (window as any).setRole(selectedRole); } }]
       );
     } catch (error: any) {
       // Fallback to demo registration
@@ -69,7 +69,7 @@ export default function RegisterScreen({ navigation }: any) {
       Alert.alert(
         'Success!', 
         'Demo account created!',
-        [{ text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: getRouteName(selectedRole) }] }) }]
+        [{ text: 'OK', onPress: () => { (window as any).setRole(selectedRole); } }]
       );
     } finally {
       setLoading(false);

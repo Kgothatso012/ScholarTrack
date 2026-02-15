@@ -1,240 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-// Import screens
-import LoginScreen from './src/screens/auth/LoginScreen';
-import RegisterScreen from './src/screens/auth/RegisterScreen';
-import ComplianceUploadScreen from './src/screens/driver/ComplianceUploadScreen';
-import DriverDashboard from './src/screens/driver/DriverDashboard';
-import TripScreen from './src/screens/driver/TripScreen';
-import EarningsScreen from './src/screens/driver/EarningsScreen';
-import AdminDashboard from './src/screens/admin/AdminDashboard';
-import ManageDriversScreen from './src/screens/admin/ManageDriversScreen';
-import AdminPaymentsScreen from './src/screens/admin/AdminPaymentsScreen';
-import AdminReportsScreen from './src/screens/admin/AdminReportsScreen';
-import DevDashboard from './src/screens/dev/DevDashboard';
-import DevDatabaseScreen from './src/screens/dev/DevDatabaseScreen';
+// Screens
 import ParentDashboard from './src/screens/parent/ParentDashboard';
-import TrackChildScreen from './src/screens/parent/TrackChildScreen';
+import LiveTrackScreen from './src/screens/safety/LiveTrackScreen';
+import PanicScreen from './src/screens/safety/PanicScreen';
+import TripHistoryScreen from './src/screens/safety/TripHistoryScreen';
+import IncidentReportScreen from './src/screens/safety/IncidentReportScreen';
 import HireDriverScreen from './src/screens/parent/HireDriverScreen';
 import ReviewDriverScreen from './src/screens/parent/ReviewDriverScreen';
-import PaymentScreen from './src/screens/parent/PaymentScreen';
+import PaymentDetailsScreen from './src/screens/payments/PaymentDetailsScreen';
+import SettingsScreen from './src/screens/settings/SettingsScreen';
+import DriverAppScreen from './src/screens/driver/DriverAppScreen';
+import ChildrenScreen from './src/screens/parent/ChildrenScreen';
+import EmergencyScreen from './src/screens/safety/EmergencyScreen';
+import SupportScreen from './src/screens/support/SupportScreen';
+import SafetyTipsScreen from './src/screens/support/SafetyTipsScreen';
+import LoginScreen from './src/screens/auth/LoginScreen';
 
-const RoleSelectionScreen = () => {
-  const roles = [
-    { id: 'parent', name: 'Parent', icon: 'people', color: '#007749' },
-    { id: 'driver', name: 'Driver', icon: 'car', color: '#002395' },
-    { id: 'admin', name: 'School Admin', icon: 'school', color: '#FFB81C' },
-    { id: 'dev', name: 'Developer', icon: 'code-slash', color: '#666' },
-  ];
+const { width } = Dimensions.get('window');
 
-  const selectRole = async (roleId: string) => {
-    await AsyncStorage.setItem('userRole', roleId);
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.placeholderText}>Select Your Role</Text>
-      <View style={styles.roleContainer}>
-        {roles.map((role) => (
-          <TouchableOpacity key={role.id} style={[styles.roleButton, { borderColor: role.color }]} onPress={() => selectRole(role.id)}>
-            <Ionicons name={role.icon as keyof typeof Ionicons.glyphMap} size={32} color={role.color} />
-            <Text style={[styles.roleText, { color: role.color }]}>{role.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
+// Theme colors
+const themes = {
+  light: {
+    primary: '#000000',
+    secondary: '#1a1a1a',
+    accent: '#FFB81C',
+    background: '#F5F5F5',
+    surface: '#FFFFFF',
+    text: '#1A1A1A',
+    textSecondary: '#666666',
+    border: '#E0E0E0',
+  },
+  dark: {
+    primary: '#333333',
+    secondary: '#1A1A1A',
+    accent: '#FFB81C',
+    background: '#121212',
+    surface: '#1E1E1E',
+    text: '#FFFFFF',
+    textSecondary: '#AAAAAA',
+    border: '#333333',
+  },
 };
 
-const DevTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName: keyof typeof Ionicons.glyphMap = 'code-slash';
-        if (route.name === 'Dashboard') {
-          iconName = focused ? 'code-slash' : 'code-slash-outline';
-        } else if (route.name === 'Database') {
-          iconName = focused ? 'server' : 'server-outline';
-        } else if (route.name === 'Logs') {
-          iconName = focused ? 'list' : 'list-outline';
-        }
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: '#007749',
-      tabBarInactiveTintColor: 'gray',
-      tabBarStyle: {
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        paddingBottom: 5,
-        paddingTop: 5,
-        height: 60,
-      },
-      headerStyle: {
-        backgroundColor: '#002395',
-      },
-      headerTintColor: '#fff',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-    })}
-  >
-    <Tab.Screen name="Dashboard" component={DevDashboard} />
-    <Tab.Screen name="Database" component={DevDatabaseScreen} />
-    <Tab.Screen name="Logs" component={() => <View style={styles.container}><Text>Logs</Text></View>} />
-  </Tab.Navigator>
-);
-
-const AdminTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName: keyof typeof Ionicons.glyphMap = 'school';
-        if (route.name === 'Dashboard') {
-          iconName = focused ? 'school' : 'school-outline';
-        } else if (route.name === 'Drivers') {
-          iconName = focused ? 'car' : 'car-outline';
-        } else if (route.name === 'Payments') {
-          iconName = focused ? 'card' : 'card-outline';
-        } else if (route.name === 'Reports') {
-          iconName = focused ? 'document-text' : 'document-text-outline';
-        }
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: '#007749',
-      tabBarInactiveTintColor: 'gray',
-      tabBarStyle: {
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        paddingBottom: 5,
-        paddingTop: 5,
-        height: 60,
-      },
-      headerStyle: {
-        backgroundColor: '#002395',
-      },
-      headerTintColor: '#fff',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-    })}
-  >
-    <Tab.Screen name="Dashboard" component={AdminDashboard} />
-    <Tab.Screen name="Drivers" component={ManageDriversScreen} />
-    <Tab.Screen name="Payments" component={AdminPaymentsScreen} />
-    <Tab.Screen name="Reports" component={AdminReportsScreen} />
-  </Tab.Navigator>
-);
-
-const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
-
-// Parent Tab Navigator with Icons
-function ParentTabs() {
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'home';
-          if (route.name === 'Dashboard') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Track') {
-            iconName = focused ? 'map' : 'map-outline';
-          } else if (route.name === 'Hire') {
-            iconName = focused ? 'car' : 'car-outline';
-          } else if (route.name === 'Review') {
-            iconName = focused ? 'star' : 'star-outline';
-          } else if (route.name === 'Payments') {
-            iconName = focused ? 'card' : 'card-outline';
-          }
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#007749',
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-        headerStyle: {
-          backgroundColor: '#002395',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      })}
-    >
-      <Tab.Screen name="Dashboard" component={ParentDashboard} />
-      <Tab.Screen name="Track" component={TrackChildScreen} />
-      <Tab.Screen name="Hire" component={HireDriverScreen} />
-      <Tab.Screen name="Review" component={ReviewDriverScreen} />
-      <Tab.Screen name="Payments" component={PaymentScreen} />
-    </Tab.Navigator>
-  );
-}
-
-// Driver Tab Navigator with Icons
-function DriverTabs() {
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'home';
-          if (route.name === 'Dashboard') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Compliance') {
-            iconName = focused ? 'document' : 'document-outline';
-          } else if (route.name === 'Trip') {
-            iconName = focused ? 'navigate' : 'navigate-outline';
-          } else if (route.name === 'Earnings') {
-            iconName = focused ? 'cash' : 'cash-outline';
-          }
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#007749',
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-        headerStyle: {
-          backgroundColor: '#002395',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      })}
-    >
-      <Tab.Screen name="Dashboard" component={DriverDashboard} />
-      <Tab.Screen name="Compliance" component={ComplianceUploadScreen} />
-      <Tab.Screen name="Trip" component={TripScreen} />
-      <Tab.Screen name="Earnings" component={EarningsScreen} />
-    </Tab.Navigator>
-  );
-}
-
-// Main App Navigator with Authentication Flow
-function AppNavigator() {
+function App() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState('Home');
+  const [isDark, setIsDark] = useState(false);
+
+  const colors = isDark ? themes.dark : themes.light;
 
   useEffect(() => {
     checkUserRole();
@@ -243,117 +64,228 @@ function AppNavigator() {
   const checkUserRole = async () => {
     try {
       const role = await AsyncStorage.getItem('userRole');
+      const dark = await AsyncStorage.getItem('darkMode');
       setUserRole(role);
+      setIsDark(dark === 'true');
     } catch (error) {
-      console.error('Error loading user role:', error);
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const toggleDarkMode = async (value: boolean) => {
+    setIsDark(value);
+    await AsyncStorage.setItem('darkMode', value.toString());
+  };
+
+  // Screen components
+  const screens: any = {
+    Home: ParentDashboard,
+    DriverApp: DriverAppScreen,
+    Children: ChildrenScreen,
+    Emergency: EmergencyScreen,
+    Support: SupportScreen,
+    SafetyTips: SafetyTipsScreen,
+    Live: LiveTrackScreen,
+    Safety: PanicScreen,
+    History: TripHistoryScreen,
+    Hire: HireDriverScreen,
+    Review: ReviewDriverScreen,
+    Payments: PaymentDetailsScreen,
+    Reports: IncidentReportScreen,
+    Settings: SettingsScreen,
+    Support: SupportScreen,
+    SafetyTips: SafetyTipsScreen,
+  };
+
+  const CurrentScreen = screens[currentScreen] || ParentDashboard;
+
+  // Menu items
+  const menuItems = [
+    { name: '🏠 Home', screen: 'Home' },
+    { name: '🚗 Driver App', screen: 'DriverApp' },
+    { name: '👶 My Children', screen: 'Children' },
+    { name: '🚨 Emergency', screen: 'Emergency' },,
+    { name: '🗺️ Live Tracking', screen: 'Live' },
+    { name: '🚨 Safety SOS', screen: 'Safety' },
+    { name: '📅 Trip History', screen: 'History' },
+    { name: '🚗 Hire Driver', screen: 'Hire' },
+    { name: '⭐ Reviews', screen: 'Review' },
+    { name: '💳 Payments', screen: 'Payments' },
+    { name: '📋 Reports', screen: 'Reports' },
+    { name: '⚙️ Settings', screen: 'Settings' },
+    { name: '🆘 Support', screen: 'Support' },
+    { name: '🛡️ Safety Tips', screen: 'SafetyTips' },
+  ];
+
+  // Global logout
+  useEffect(() => {
+    (window as any).logout = async () => {
+      await AsyncStorage.removeItem('userRole');
+      setUserRole(null);
+    };
+    (window as any).setRole = async (role: string) => {
+      await AsyncStorage.setItem('userRole', role);
+      setUserRole(role);
+    };
+  }, []);
+
+  // Loading screen
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>🚗 ScholarTrack SA</Text>
-        <Text style={styles.loadingSubtext}>Loading...</Text>
+      <View style={[styles.splash, { backgroundColor: themes.light.primary }]}>
+        <View style={[styles.splashLogo, { backgroundColor: themes.light.accent }]}>
+          <Text style={styles.splashEmoji}>🚗</Text>
+        </View>
+        <Text style={styles.splashText}>ScholarTrack</Text>
+        <Text style={[styles.splashSub, { color: themes.light.accent }]}>Safe Student Transport</Text>
       </View>
     );
   }
 
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!userRole ? (
-        // Auth Stack
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-        </>
-      ) : userRole === 'parent' ? (
-        // Parent Stack
-        <Stack.Screen name="ParentApp" component={ParentTabs} />
-      ) : userRole === 'driver' ? (
-        // Driver Stack
-        <Stack.Screen name="DriverApp" component={DriverTabs} />
-      ) : userRole === 'admin' ? (
-        // Admin Stack
-        <Stack.Screen name="AdminApp" component={AdminTabs} />
-      ) : userRole === 'dev' ? (
-        // Dev Stack
-        <Stack.Screen name="DevApp" component={DevTabs} />
-      ) : (
-        // Default to role selection
-        <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-      )}
-    </Stack.Navigator>
-  );
-}
+  // Login screen
+  if (!userRole) {
+    return (
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <StatusBar style="light" />
+          <LoginScreen />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
-export default function App() {
+  // Main app with menu
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-      <StatusBar style="light" />
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar style="light" />
+        
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
+            <Ionicons name="menu" size={28} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>ScholarTrack</Text>
+          <TouchableOpacity style={styles.notifBtn}>
+            <Ionicons name="notifications" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Current Screen */}
+        <View style={{ flex: 1 }}>
+          <CurrentScreen />
+        </View>
+
+        {/* Menu Modal */}
+        <Modal visible={menuVisible} animationType="slide" transparent>
+          <View style={styles.modalWrap}>
+            <TouchableOpacity style={styles.modalBack} onPress={() => setMenuVisible(false)} />
+            <View style={[styles.menu, { backgroundColor: colors.surface }]}>
+              {/* Menu Header */}
+              <View style={[styles.menuHeader, { backgroundColor: colors.primary }]}>
+                <View style={[styles.menuLogo, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.menuLogoEmoji}>🚗</Text>
+                </View>
+                <Text style={styles.menuTitle}>ScholarTrack</Text>
+                <Text style={[styles.menuSub, { color: colors.accent }]}>Safe Student Transport</Text>
+              </View>
+
+              {/* Menu Items */}
+              <ScrollView style={styles.menuList}>
+                {menuItems.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.menuItem,
+                      { borderBottomColor: colors.border },
+                      currentScreen === item.screen && { backgroundColor: colors.primary + '15' }
+                    ]}
+                    onPress={() => {
+                      setCurrentScreen(item.screen);
+                      setMenuVisible(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.menuItemText,
+                      { color: colors.text },
+                      currentScreen === item.screen && { color: colors.primary, fontWeight: '600' }
+                    ]}>
+                      {item.name}
+                    </Text>
+                    {currentScreen === item.screen && (
+                      <Ionicons name="checkmark" size={22} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+
+                {/* Dark Mode Toggle */}
+                <View style={[styles.darkToggle, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.darkToggleText, { color: colors.text }]}>🌙 Dark Mode</Text>
+                  <Switch
+                    value={isDark}
+                    onValueChange={toggleDarkMode}
+                    trackColor={{ false: '#767577', true: colors.primary }}
+                    thumbColor="#f4f3f4"
+                  />
+                </View>
+              </ScrollView>
+
+              {/* Footer */}
+              <View style={[styles.menuFooter, { borderTopColor: colors.border }]}>
+                <TouchableOpacity
+                  style={styles.logoutBtn}
+                  onPress={async () => {
+                    await AsyncStorage.removeItem('userRole');
+                    setMenuVisible(false);
+                  }}
+                >
+                  <Ionicons name="log-out" size={20} color="#d32f2f" />
+                  <Text style={styles.logoutText}>Logout</Text>
+                </TouchableOpacity>
+                <Text style={[styles.version, { color: colors.textSecondary }]}>v1.0.0</Text>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#002395',
-  },
-  loadingText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
-  },
-  loadingSubtext: {
-    fontSize: 16,
-    color: '#FFB81C',
-  },
-  placeholderText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#002395',
-    marginBottom: 10,
-  },
-  placeholderSubtext: {
-    fontSize: 16,
-    color: '#666',
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 30,
-    paddingHorizontal: 20,
-  },
-  roleButton: {
-    width: '40%',
-    aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 10,
-    borderRadius: 15,
-    borderWidth: 3,
-    backgroundColor: '#fff',
-    elevation: 3,
-  },
-  roleText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  // Splash
+  splash: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  splashLogo: { width: 120, height: 120, borderRadius: 60, justifyContent: 'center', alignItems: 'center', marginBottom: 20, elevation: 20 },
+  splashEmoji: { fontSize: 60 },
+  splashText: { fontSize: 32, fontWeight: 'bold', color: '#fff' },
+  splashSub: { fontSize: 16, marginTop: 5 },
+
+  // Header
+  header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  menuBtn: { padding: 5 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
+  notifBtn: { padding: 5 },
+
+  // Modal
+  modalWrap: { flex: 1, flexDirection: 'row' },
+  modalBack: { flex: 1, backgroundColor: 'transparent' },
+  menu: { width: width * 0.8, height: '100%' },
+  menuHeader: { paddingTop: 60, paddingBottom: 30, alignItems: 'center' },
+  menuLogo: { width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  menuLogoEmoji: { fontSize: 35 },
+  menuTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+  menuSub: { fontSize: 13, marginTop: 3 },
+  menuList: { flex: 1, paddingTop: 15 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  menuItemText: { fontSize: 16 },
+  darkToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  darkToggleText: { fontSize: 16 },
+  menuFooter: { padding: 20, borderTopWidth: 1 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12, marginBottom: 10 },
+  logoutText: { color: '#d32f2f', fontSize: 16, fontWeight: '600', marginLeft: 10 },
+  version: { textAlign: 'center', fontSize: 12 },
 });
+
+export default App;

@@ -29,52 +29,23 @@ export default function LoginScreen({ navigation }: any) {
       return;
     }
 
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (userData?.role) {
-        await AsyncStorage.setItem('userRole', userData.role);
-        navigation.reset({
-          index: 0,
-          routes: [{ name: getRouteName(userData.role) }],
-        });
-      } else {
-        await handleDemoLogin();
-      }
-    } catch (error: any) {
-      await handleDemoLogin();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    if (email.toLowerCase().includes('admin')) {
+    // Check for demo emails first - set role and navigate to appropriate app
+    const emailLower = email.toLowerCase();
+    
+    if (emailLower.includes('admin')) {
       await AsyncStorage.setItem('userRole', 'admin');
-      navigation.reset({ index: 0, routes: [{ name: 'AdminApp' }] });
-    } else if (email.toLowerCase().includes('dev')) {
+      (window as any).setRole('admin');
+    } else if (emailLower.includes('dev')) {
       await AsyncStorage.setItem('userRole', 'dev');
-      navigation.reset({ index: 0, routes: [{ name: 'DevApp' }] });
-    } else if (email.toLowerCase().includes('driver')) {
+      (window as any).setRole('dev');
+    } else if (emailLower.includes('driver')) {
       await AsyncStorage.setItem('userRole', 'driver');
-      navigation.reset({ index: 0, routes: [{ name: 'DriverApp' }] });
-    } else if (email.toLowerCase().includes('parent')) {
+      (window as any).setRole('driver');
+    } else if (emailLower.includes('parent')) {
       await AsyncStorage.setItem('userRole', 'parent');
-      navigation.reset({ index: 0, routes: [{ name: 'ParentApp' }] });
+      (window as any).setRole('parent');
     } else {
-      Alert.alert('Error', 'Use email containing: parent, driver, admin, or dev');
+      Alert.alert('Error', 'Use email: parent@test.com, driver@test.com, admin@test.com, or dev@test.com');
     }
   };
 
