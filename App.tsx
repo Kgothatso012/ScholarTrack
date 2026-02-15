@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   splash: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
   splashLogo: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFB81C', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
   splashEmoji: { fontSize: 50 },
-  splashText: { fontSize: 28, fontWeight: 'bold', color: '#FFB81C' },
+  splashText: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
   header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   menuBtn: { padding: 5 },
   headerRight: { flexDirection: 'row', alignItems: 'center' },
