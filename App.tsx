@@ -20,6 +20,7 @@ import EmergencyScreen from './src/screens/safety/EmergencyScreen';
 import SupportScreen from './src/screens/support/SupportScreen';
 import SafetyTipsScreen from './src/screens/support/SafetyTipsScreen';
 import AdminDashboardScreen from './src/screens/admin/AdminDashboardScreen';
+import MT5Dashboard from './src/screens/mt5/MT5Dashboard';
 import LoginScreen from './src/screens/auth/LoginScreen';
 
 const { width } = Dimensions.get('window');
@@ -60,6 +61,7 @@ export default function App() {
     Reports: IncidentReportScreen, Settings: SettingsScreen, DriverApp: DriverAppScreen,
     Children: ChildrenScreen, Emergency: EmergencyScreen, Support: SupportScreen, SafetyTips: SafetyTipsScreen,
     AdminDashboard: AdminDashboardScreen,
+    MT5Trading: MT5Dashboard,
   };
 
   const menuItems = [
@@ -67,7 +69,7 @@ export default function App() {
     { name: 'Live Tracking', icon: 'map', to: 'Live' }, { name: 'Emergency SOS', icon: 'warning', to: 'Emergency' },
     { name: 'Trip History', icon: 'time', to: 'History' }, { name: 'Hire Driver', icon: 'person-add', to: 'Hire' },
     { name: 'Reviews', icon: 'star', to: 'Review' }, { name: 'Payments', icon: 'card', to: 'Payments' },
-    { name: 'Reports', icon: 'document-text', to: 'Reports' }, { name: 'Settings', icon: 'settings', to: 'Settings' },
+    { name: 'Reports', icon: 'document-text', to: 'Reports' }, { name: 'MT5 Trading', icon: 'trending-up', to: 'MT5Trading' }, { name: 'Settings', icon: 'settings', to: 'Settings' },
     { name: 'Support', icon: 'help-circle', to: 'Support' }, { name: 'Safety Tips', icon: 'shield-checkmark', to: 'SafetyTips' },
   ];
 
