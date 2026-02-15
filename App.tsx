@@ -134,7 +134,7 @@ function App() {
           <Text style={styles.splashEmoji}>🚗</Text>
         </View>
         <Text style={styles.splashText}>ScholarTrack</Text>
-        <Text style={[styles.splashSub, { color: themes.light.accent }]}>Safe Student Transport</Text>
+        <Text style={[styles.splashSub, { color: themes.light.accent }]}></Text>
       </View>
     );
   }
@@ -158,8 +158,8 @@ function App() {
         <StatusBar style="light" />
         
         {/* Header with menu button RIGHT */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <Text style={styles.headerTitle}>Safe Student Transport</Text>
+        <View style={[styles.header, { backgroundColor: 'transparent' }]}>
+          <Text style={styles.headerTitle}></Text>
           <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
             <Ionicons name="menu" size={28} color="#fff" />
           </TouchableOpacity>
@@ -179,7 +179,7 @@ function App() {
             {/* Menu panel from RIGHT */}
             <View style={[styles.menu, { backgroundColor: colors.surface }]}>
               {/* Menu Header */}
-              <View style={[styles.menuHeader, { backgroundColor: colors.primary }]}>
+              <View style={[styles.menuHeader, { backgroundColor: 'transparent' }]}>
                 <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeBtn}>
                   <Ionicons name="close" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -195,7 +195,7 @@ function App() {
                     style={[
                       styles.menuItem,
                       { borderBottomColor: colors.border },
-                      currentScreen === item.screen && { backgroundColor: colors.primary + '15' }
+                      currentScreen === item.screen && { backgroundColor: 'transparent' + '15' }
                     ]}
                     onPress={() => {
                       setCurrentScreen(item.screen);
@@ -258,30 +258,30 @@ const styles = StyleSheet.create({
   splashSub: { fontSize: 16, marginTop: 5 },
 
   // Header
-  header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start' },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
   menuBtn: { padding: 5 },
 
   // Modal - RIGHT side
-  modalWrap: { flex: 1, flexDirection: 'row' },
+  modalWrap: { flex: 1, flexDirection: 'row-reverse' },
   modalBack: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   menu: { width: width * 0.8, height: '100%' },
 
   // Menu Header
-  menuHeader: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  menuHeader: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start' },
   closeBtn: { padding: 5 },
   menuTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
 
   // Menu Items
   menuList: { flex: 1, paddingTop: 15 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  menuItem: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
   menuItemText: { fontSize: 16 },
-  darkToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  darkToggle: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
   darkToggleText: { fontSize: 16 },
 
   // Footer
   menuFooter: { padding: 20, borderTopWidth: 1 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12, marginBottom: 10 },
+  logoutBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12, marginBottom: 10 },
   logoutText: { color: '#d32f2f', fontSize: 16, fontWeight: '600', marginLeft: 10 },
   version: { textAlign: 'center', fontSize: 12 },
 });
