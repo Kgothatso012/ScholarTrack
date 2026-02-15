@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Dimensions, Switch } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
-// Screens
 import ParentDashboard from './src/screens/parent/ParentDashboard';
 import LiveTrackScreen from './src/screens/safety/LiveTrackScreen';
 import PanicScreen from './src/screens/safety/PanicScreen';
@@ -24,222 +23,90 @@ import LoginScreen from './src/screens/auth/LoginScreen';
 
 const { width } = Dimensions.get('window');
 
-// Theme
 const themes = {
-  light: {
-    primary: '#000000',
-    accent: '#FFB81C',
-    background: '#F5F5F5',
-    surface: '#FFFFFF',
-    text: '#1A1A1A',
-    textSecondary: '#666666',
-    border: '#E0E0E0',
-  },
-  dark: {
-    primary: '#333333',
-    accent: '#FFB81C',
-    background: '#121212',
-    surface: '#1E1E1E',
-    text: '#FFFFFF',
-    textSecondary: '#AAAAAA',
-    border: '#333333',
-  },
+  light: { primary: '#000000', accent: '#FFB81C', background: '#F5F5F5', surface: '#FFFFFF', text: '#1A1A1A', textSecondary: '#666666', border: '#E0E0E0' },
+  dark: { primary: '#333333', accent: '#FFB81C', background: '#121212', surface: '#1E1E1E', text: '#FFFFFF', textSecondary: '#AAAAAA', border: '#333333' },
 };
 
-function App() {
+export default function App() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
   const [currentScreen, setCurrentScreen] = useState('Home');
   const [isDark, setIsDark] = useState(false);
-
   const colors = isDark ? themes.dark : themes.light;
 
-  useEffect(() => {
-    checkUserRole();
-  }, []);
-
+  useEffect(() => { checkUserRole(); }, []);
   const checkUserRole = async () => {
     try {
       const role = await AsyncStorage.getItem('userRole');
       const dark = await AsyncStorage.getItem('darkMode');
-      setUserRole(role);
-      setIsDark(dark === 'true');
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setIsLoading(false);
-    }
+      setUserRole(role); setIsDark(dark === 'true');
+    } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
+  const toggleDarkMode = async (v: boolean) => { setIsDark(v); await AsyncStorage.setItem('darkMode', v.toString()); };
 
-  const toggleDarkMode = async (value: boolean) => {
-    setIsDark(value);
-    await AsyncStorage.setItem('darkMode', value.toString());
-  };
-
-  // Screen components
   const screens: any = {
-    Home: ParentDashboard,
-    Live: LiveTrackScreen,
-    Safety: PanicScreen,
-    History: TripHistoryScreen,
-    Hire: HireDriverScreen,
-    Review: ReviewDriverScreen,
-    Payments: PaymentDetailsScreen,
-    Reports: IncidentReportScreen,
-    Settings: SettingsScreen,
-    DriverApp: DriverAppScreen,
-    Children: ChildrenScreen,
-    Emergency: EmergencyScreen,
-    Support: SupportScreen,
-    SafetyTips: SafetyTipsScreen,
+    Home: ParentDashboard, Live: LiveTrackScreen, Safety: PanicScreen, History: TripHistoryScreen,
+    Hire: HireDriverScreen, Review: ReviewDriverScreen, Payments: PaymentDetailsScreen,
+    Reports: IncidentReportScreen, Settings: SettingsScreen, DriverApp: DriverAppScreen,
+    Children: ChildrenScreen, Emergency: EmergencyScreen, Support: SupportScreen, SafetyTips: SafetyTipsScreen,
   };
-
   const CurrentScreen = screens[currentScreen] || ParentDashboard;
 
-  // Menu items
   const menuItems = [
-    { name: '🏠 Home', screen: 'Home' },
-    { name: '🚗 Driver App', screen: 'DriverApp' },
-    { name: '👶 My Children', screen: 'Children' },
-    { name: '🗺️ Live Tracking', screen: 'Live' },
-    { name: '🚨 Emergency SOS', screen: 'Emergency' },
-    { name: '📅 Trip History', screen: 'History' },
-    { name: '🚗 Hire Driver', screen: 'Hire' },
-    { name: '⭐ Reviews', screen: 'Review' },
-    { name: '💳 Payments', screen: 'Payments' },
-    { name: '📋 Reports', screen: 'Reports' },
-    { name: '⚙️ Settings', screen: 'Settings' },
-    { name: '🆘 Support', screen: 'Support' },
-    { name: '🛡️ Safety Tips', screen: 'SafetyTips' },
+    { name: '🏠 Home', s: 'Home' }, { name: '🚗 Driver App', s: 'DriverApp' }, { name: '👶 My Children', s: 'Children' },
+    { name: '🗺️ Live Tracking', s: 'Live' }, { name: '🚨 Emergency SOS', s: 'Emergency' }, { name: '📅 Trip History', s: 'History' },
+    { name: '🚗 Hire Driver', s: 'Hire' }, { name: '⭐ Reviews', s: 'Review' }, { name: '💳 Payments', s: 'Payments' },
+    { name: '📋 Reports', s: 'Reports' }, { name: '⚙️ Settings', s: 'Settings' }, { name: '🆘 Support', s: 'Support' },
+    { name: '🛡️ Safety Tips', s: 'SafetyTips' },
   ];
 
-  // Global functions
   useEffect(() => {
-    (window as any).logout = async () => {
-      await AsyncStorage.removeItem('userRole');
-      setUserRole(null);
-    };
-    (window as any).setRole = async (role: string) => {
-      await AsyncStorage.setItem('userRole', role);
-      setUserRole(role);
-    };
+    (window as any).logout = async () => { await AsyncStorage.removeItem('userRole'); setUserRole(null); };
+    (window as any).setRole = async (r: string) => { await AsyncStorage.setItem('userRole', r); setUserRole(r); };
   }, []);
 
-  // Loading screen
-  if (isLoading) {
-    return (
-      <View style={[styles.splash, { backgroundColor: themes.light.primary }]}>
-        <View style={[styles.splashLogo, { backgroundColor: themes.light.accent }]}>
-          <Text style={styles.splashEmoji}>🚗</Text>
-        </View>
-        <Text style={styles.splashText}>ScholarTrack</Text>
-        <Text style={[styles.splashSub, { color: themes.light.accent }]}></Text>
-      </View>
-    );
-  }
+  if (isLoading) return (
+    <View style={styles.splash}><View style={styles.splashLogo}><Text style={styles.splashEmoji}>🚗</Text></View><Text style={styles.splashText}>ScholarTrack</Text></View>
+  );
 
-  // Login screen
-  if (!userRole) {
-    return (
-      <SafeAreaProvider>
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <StatusBar style="light" />
-          <LoginScreen />
-        </View>
-      </SafeAreaProvider>
-    );
-  }
+  if (!userRole) return (
+    <SafeAreaProvider><View style={{ flex: 1, backgroundColor: colors.surface }}><StatusBar /><LoginScreen /></View></SafeAreaProvider>
+  );
 
-  // Main app with menu from RIGHT
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar style="light" />
-        
-        {/* Header with menu button RIGHT */}
-        <View style={[styles.header, { backgroundColor: 'transparent' }]}>
-          <Text style={styles.headerTitle}></Text>
-          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
-            <Ionicons name="menu" size={28} color="#fff" />
-          </TouchableOpacity>
+        <StatusBar />
+        {/* Header with Menu LEFT and Notifications RIGHT */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}><Ionicons name="menu" size={28} color="#fff" /></TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.notifBtn}><Ionicons name="notifications" size={24} color="#FFB81C" /></TouchableOpacity>
+          </View>
         </View>
+        <View style={{ flex: 1 }}><CurrentScreen /></View>
 
-        {/* Current Screen */}
-        <View style={{ flex: 1 }}>
-          <CurrentScreen />
-        </View>
-
-        {/* Menu Modal - slides from RIGHT */}
+        {/* Menu Modal - slides from LEFT */}
         <Modal visible={menuVisible} animationType="slide" transparent>
           <View style={styles.modalWrap}>
-            {/* Dark backdrop */}
             <TouchableOpacity style={styles.modalBack} onPress={() => setMenuVisible(false)} />
-            
-            {/* Menu panel from RIGHT */}
             <View style={[styles.menu, { backgroundColor: colors.surface }]}>
-              {/* Menu Header */}
-              <View style={[styles.menuHeader, { backgroundColor: 'transparent' }]}>
-                <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.closeBtn}>
-                  <Ionicons name="close" size={24} color="#fff" />
-                </TouchableOpacity>
+              <View style={[styles.menuHeader, { backgroundColor: colors.primary }]}>
                 <Text style={styles.menuTitle}>Menu</Text>
-                <View style={{ width: 30 }} />
+                <TouchableOpacity onPress={() => setMenuVisible(false)}><Ionicons name="close" size={24} color="#fff" /></TouchableOpacity>
               </View>
-
-              {/* Menu Items */}
               <ScrollView style={styles.menuList}>
-                {menuItems.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.menuItem,
-                      { borderBottomColor: colors.border },
-                      currentScreen === item.screen && { backgroundColor: 'transparent' + '15' }
-                    ]}
-                    onPress={() => {
-                      setCurrentScreen(item.screen);
-                      setMenuVisible(false);
-                    }}
-                  >
-                    <Text style={[
-                      styles.menuItemText,
-                      { color: colors.text },
-                      currentScreen === item.screen && { color: colors.primary, fontWeight: '600' }
-                    ]}>
-                      {item.name}
-                    </Text>
-                    {currentScreen === item.screen && (
-                      <Ionicons name="checkmark" size={22} color={colors.primary} />
-                    )}
+                {menuItems.map((item, i) => (
+                  <TouchableOpacity key={i} style={[styles.menuItem, { borderBottomColor: colors.border }]} onPress={() => { setCurrentScreen(item.s); setMenuVisible(false); }}>
+                    <Text style={styles.menuItemText}>{item.name}</Text>
                   </TouchableOpacity>
                 ))}
-
-                {/* Dark Mode Toggle */}
-                <View style={[styles.darkToggle, { borderBottomColor: colors.border }]}>
-                  <Text style={[styles.darkToggleText, { color: colors.text }]}>🌙 Dark Mode</Text>
-                  <Switch
-                    value={isDark}
-                    onValueChange={toggleDarkMode}
-                    trackColor={{ false: '#767577', true: colors.primary }}
-                    thumbColor="#f4f3f4"
-                  />
-                </View>
+                <View style={[styles.darkToggle, { borderColor: colors.border }]}><Text style={styles.darkToggleText}>🌙 Dark Mode</Text><Switch value={isDark} onValueChange={toggleDarkMode} trackColor={{ false: '#767577', true: colors.primary }} thumbColor="#f4f3f4" /></View>
               </ScrollView>
-
-              {/* Footer */}
-              <View style={[styles.menuFooter, { borderTopColor: colors.border }]}>
-                <TouchableOpacity
-                  style={styles.logoutBtn}
-                  onPress={async () => {
-                    await AsyncStorage.removeItem('userRole');
-                    setMenuVisible(false);
-                  }}
-                >
-                  <Ionicons name="log-out" size={20} color="#d32f2f" />
-                  <Text style={styles.logoutText}>Logout</Text>
-                </TouchableOpacity>
-                <Text style={[styles.version, { color: colors.textSecondary }]}>v1.0.0</Text>
+              <View style={[styles.menuFooter, { borderColor: colors.border }]}>
+                <TouchableOpacity style={styles.logoutBtn} onPress={() => { AsyncStorage.removeItem('userRole'); setMenuVisible(false); }}><Ionicons name="log-out" size={20} color="#d32f2f" /><Text style={styles.logoutText}>Logout</Text></TouchableOpacity>
               </View>
             </View>
           </View>
@@ -250,40 +117,25 @@ function App() {
 }
 
 const styles = StyleSheet.create({
-  // Splash
-  splash: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  splashLogo: { width: 120, height: 120, borderRadius: 60, justifyContent: 'center', alignItems: 'center', marginBottom: 20, elevation: 20 },
-  splashEmoji: { fontSize: 60 },
-  splashText: { fontSize: 32, fontWeight: 'bold', color: '#fff' },
-  splashSub: { fontSize: 16, marginTop: 5 },
-
-  // Header
-  header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start' },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
+  splash: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
+  splashLogo: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFB81C', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
+  splashEmoji: { fontSize: 50 },
+  splashText: { fontSize: 28, fontWeight: 'bold', color: '#FFB81C' },
+  header: { paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   menuBtn: { padding: 5 },
-
-  // Modal - RIGHT side
-  modalWrap: { flex: 1, flexDirection: 'row-reverse' },
+  headerRight: { flexDirection: 'row', alignItems: 'center' },
+  notifBtn: { marginLeft: 15, padding: 5 },
+  modalWrap: { flex: 1, flexDirection: 'row' },
   modalBack: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  menu: { width: width * 0.8, height: '100%' },
-
-  // Menu Header
-  menuHeader: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start' },
-  closeBtn: { padding: 5 },
+  menu: { width: width * 0.75, height: '100%' },
+  menuHeader: { paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   menuTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-
-  // Menu Items
   menuList: { flex: 1, paddingTop: 15 },
-  menuItem: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  menuItem: { paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
   menuItemText: { fontSize: 16 },
-  darkToggle: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
+  darkToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1 },
   darkToggleText: { fontSize: 16 },
-
-  // Footer
-  menuFooter: { padding: 20, borderTopWidth: 1 },
-  logoutBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12, marginBottom: 10 },
+  menuFooter: { padding: 20, borderTopWidth: 1, borderTopColor: '#eee' },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, backgroundColor: '#ffebee', borderRadius: 12 },
   logoutText: { color: '#d32f2f', fontSize: 16, fontWeight: '600', marginLeft: 10 },
-  version: { textAlign: 'center', fontSize: 12 },
 });
-
-export default App;
