@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const otpInputRefs = useRef<(TextInput | null)[]>([]);
   const [pendingPhone, setPendingPhone] = useState('');
-  const [usePhoneAuth, setUsePhoneAuth] = useState(false);
+  const [usePhoneAuth, setUsePhoneAuth] = useState(true); // Default to phone
 
   const roles = [
     { id: 'parent', name: 'Parent', icon: 'people', description: 'Hire drivers for your children' },
@@ -369,6 +369,24 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
 
           <Text style={styles.sectionTitle}>Personal Details</Text>
 
+          {/* Auth Method Toggle */}
+          <View style={styles.authToggle}>
+            <TouchableOpacity
+              style={[styles.authToggleBtn, usePhoneAuth && styles.authToggleActive]}
+              onPress={() => setUsePhoneAuth(true)}
+            >
+              <Ionicons name="call-outline" size={18} color={usePhoneAuth ? '#000' : '#666'} />
+              <Text style={[styles.authToggleText, usePhoneAuth && styles.authToggleTextActive]}>Phone</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.authToggleBtn, !usePhoneAuth && styles.authToggleActive]}
+              onPress={() => setUsePhoneAuth(false)}
+            >
+              <Ionicons name="mail-outline" size={18} color={!usePhoneAuth ? '#000' : '#666'} />
+              <Text style={[styles.authToggleText, !usePhoneAuth && styles.authToggleTextActive]}>Email</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.inputWrapper}>
             <Ionicons name="person-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
@@ -381,6 +399,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
             />
           </View>
 
+          {usePhoneAuth ? (
           <View style={styles.inputWrapper}>
             <Ionicons name="call-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
@@ -392,13 +411,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
               keyboardType="phone-pad"
             />
           </View>
-
-          <View style={styles.orContainer}>
-            <View style={styles.orLine} />
-            <Text style={styles.orText}>OR</Text>
-            <View style={styles.orLine} />
-          </View>
-
+          ) : (
           <View style={styles.inputWrapper}>
             <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
@@ -411,6 +424,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
               keyboardType="email-address"
             />
           </View>
+          )}
 
           <View style={styles.inputWrapper}>
             <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
@@ -676,5 +690,33 @@ const styles = StyleSheet.create({
     color: '#FFB81C',
     fontWeight: '600',
     fontSize: 14,
+  },
+  // Auth Toggle
+  authToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#0a0a0a',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 15,
+  },
+  authToggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  authToggleActive: {
+    backgroundColor: '#FFB81C',
+  },
+  authToggleText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  authToggleTextActive: {
+    color: '#000',
   },
 });

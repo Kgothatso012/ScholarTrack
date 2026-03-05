@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
@@ -9,6 +9,9 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -99,6 +102,30 @@ export default function LoginScreen({ navigation, onLogin }: any) {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      Alert.alert('Error', 'Please enter your email address');
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: 'scholartrack://reset-password',
+      });
+
+      if (error) throw error;
+
+      Alert.alert('Check Your Email', 'Password reset link has been sent to your email.');
+      setShowResetModal(false);
+      setResetEmail('');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to send reset email');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
@@ -145,7 +172,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          <TouchableOpacity style={styles.forgotPassword} onPress={() => setShowResetModal(true)}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -172,6 +199,42 @@ export default function LoginScreen({ navigation, onLogin }: any) {
           </View>
         </View>
       </ScrollView>
+
+      {/* Password Reset Modal */}
+      <Modal visible={showResetModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowResetModal(false)}>
+              <Ionicons name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Reset Password</Text>
+            <Text style={styles.modalSubtitle}>Enter your email to receive a password reset link</Text>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#666666"
+                value={resetEmail}
+                onChangeText={setResetEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.loginButton, resetLoading && styles.loginButtonDisabled]}
+              onPress={handlePasswordReset}
+              disabled={resetLoading}
+            >
+              <Text style={styles.loginButtonText}>
+                {resetLoading ? 'Sending...' : 'Send Reset Link'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -201,4 +264,9 @@ const styles = StyleSheet.create({
   demoBox: { backgroundColor: '#1a1a1a', borderRadius: 12, padding: 15, marginTop: 10, borderWidth: 1, borderColor: '#333333' },
   demoTitle: { fontSize: 12, fontWeight: 'bold', color: '#FFB81C', marginBottom: 8 },
   demoText: { fontSize: 12, color: '#888888', marginBottom: 3 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalContent: { backgroundColor: '#111111', borderRadius: 20, padding: 25, width: '100%', maxWidth: 400, alignItems: 'center' },
+  modalClose: { position: 'absolute', top: 15, right: 15, padding: 5 },
+  modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
+  modalSubtitle: { fontSize: 14, color: '#888888', textAlign: 'center', marginBottom: 25 },
 });
