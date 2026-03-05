@@ -323,17 +323,24 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   // ============ SHOW DOCUMENT OPTIONS ============
 
   const showDocumentOptions = (docId: string) => {
+    console.log('showDocumentOptions called for:', docId);
     Alert.alert(
       'Add Document',
       'Choose how to add the document',
       [
         {
           text: 'Take Photo',
-          onPress: () => takePhoto(docId),
+          onPress: () => {
+            console.log('Take Photo pressed for:', docId);
+            takePhoto(docId);
+          },
         },
         {
           text: 'Choose from Files',
-          onPress: () => pickDocument(docId),
+          onPress: () => {
+            console.log('Choose File pressed for:', docId);
+            pickDocument(docId);
+          },
         },
         {
           text: 'Cancel',
@@ -804,15 +811,33 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity
-                  style={styles.uploadButton}
-                  onPress={() => showDocumentOptions(doc.id)}
-                >
-                  <Ionicons name="cloud-upload-outline" size={24} color="#007749" />
-                  <Text style={styles.uploadButtonText}>
-                    Take Photo or Choose File
-                  </Text>
-                </TouchableOpacity>
+                <View>
+                  <TouchableOpacity
+                    style={styles.uploadButton}
+                    onPress={() => {
+                      console.log('Upload button pressed for:', doc.id);
+                      // Directly call takePhoto for test mode
+                      takePhoto(doc.id);
+                    }}
+                  >
+                    <Ionicons name="cloud-upload-outline" size={24} color="#007749" />
+                    <Text style={styles.uploadButtonText}>
+                      Take Photo or Choose File
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.uploadButton, { marginTop: 8, backgroundColor: '#E8F5E9' }]}
+                    onPress={() => {
+                      console.log('Pick button pressed for:', doc.id);
+                      pickDocument(doc.id);
+                    }}
+                  >
+                    <Ionicons name="folder-outline" size={24} color="#007749" />
+                    <Text style={styles.uploadButtonText}>
+                      Test: Add File
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               )}
 
               {uploadProgress[doc.id] !== undefined && (
