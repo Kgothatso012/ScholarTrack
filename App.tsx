@@ -1,48 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
-import { supabase, authService, profileService, Profile } from './src/lib/api';
+import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
 
-import ParentDashboard from './src/screens/parent/ParentDashboard';
-import LoginScreen from './src/screens/auth/LoginScreen';
-import RegisterScreen from './src/screens/auth/RegisterScreen';
-import DriverAppScreen from './src/screens/driver/DriverAppScreen';
-import AdminDashboardScreen from './src/screens/admin/AdminDashboardScreen';
-import ChildrenScreen from './src/screens/parent/ChildrenScreen';
-import HireDriverScreen from './src/screens/parent/HireDriverScreen';
-import PaymentDetailsScreen from './src/screens/payments/PaymentDetailsScreen';
-import EmergencyScreen from './src/screens/safety/EmergencyScreen';
-import SupportScreen from './src/screens/support/SupportScreen';
-import LiveTrackScreen from './src/screens/safety/LiveTrackScreen';
-import TripHistoryScreen from './src/screens/safety/TripHistoryScreen';
-import PanicScreen from './src/screens/safety/PanicScreen';
-import ReviewDriverScreen from './src/screens/parent/ReviewDriverScreen';
-import ComplianceScreen from './src/screens/driver/ComplianceScreen';
-import IncidentReportScreen from './src/screens/safety/IncidentReportScreen';
-import SettingsScreen from './src/screens/settings/SettingsScreen';
-import SafetyTipsScreen from './src/screens/support/SafetyTipsScreen';
-import DriverComplianceDocsScreen from './src/screens/driver/DriverComplianceDocsScreen';
-import VehicleSafetyChecklistScreen from './src/screens/driver/VehicleSafetyChecklistScreen';
-import TripManifestScreen from './src/screens/driver/TripManifestScreen';
-import RegulatoryDisplayScreen from './src/screens/driver/RegulatoryDisplayScreen';
-import LinkChildScreen from './src/screens/parent/LinkChildScreen';
-import RouteManagementScreen from './src/screens/admin/RouteManagementScreen';
-import EnhancedReportsScreen from './src/screens/admin/EnhancedReportsScreen';
-import DocumentManagementScreen from './src/screens/admin/DocumentManagementScreen';
-import ParentDocumentsScreen from './src/screens/parent/ParentDocumentsScreen';
-import EmergencyContactsScreen from './src/screens/parent/EmergencyContactsScreen';
-import DriverTripScreen from './src/screens/driver/DriverTripScreen';
-import FleetTrackingScreen from './src/screens/admin/FleetTrackingScreen';
-import VehicleManagementScreen from './src/screens/admin/VehicleManagementScreen';
-import ChatScreen from './src/screens/ChatScreen';
-import AttendanceReportsScreen from './src/screens/admin/AttendanceReportsScreen';
+// Lazy load all screens for performance
+const LoginScreen = lazy(() => import('./src/screens/auth/LoginScreen'));
+const RegisterScreen = lazy(() => import('./src/screens/auth/RegisterScreen'));
+const ParentDashboard = lazy(() => import('./src/screens/parent/ParentDashboard'));
+const DriverAppScreen = lazy(() => import('./src/screens/driver/DriverAppScreen'));
+const AdminDashboardScreen = lazy(() => import('./src/screens/admin/AdminDashboardScreen'));
+const ChildrenScreen = lazy(() => import('./src/screens/parent/ChildrenScreen'));
+const HireDriverScreen = lazy(() => import('./src/screens/parent/HireDriverScreen'));
+const PaymentDetailsScreen = lazy(() => import('./src/screens/payments/PaymentDetailsScreen'));
+const EmergencyScreen = lazy(() => import('./src/screens/safety/EmergencyScreen'));
+const SupportScreen = lazy(() => import('./src/screens/support/SupportScreen'));
+const LiveTrackScreen = lazy(() => import('./src/screens/safety/LiveTrackScreen'));
+const TripHistoryScreen = lazy(() => import('./src/screens/safety/TripHistoryScreen'));
+const PanicScreen = lazy(() => import('./src/screens/safety/PanicScreen'));
+const ReviewDriverScreen = lazy(() => import('./src/screens/parent/ReviewDriverScreen'));
+const ComplianceScreen = lazy(() => import('./src/screens/driver/ComplianceScreen'));
+const IncidentReportScreen = lazy(() => import('./src/screens/safety/IncidentReportScreen'));
+const SettingsScreen = lazy(() => import('./src/screens/settings/SettingsScreen'));
+const SafetyTipsScreen = lazy(() => import('./src/screens/support/SafetyTipsScreen'));
+const DriverComplianceDocsScreen = lazy(() => import('./src/screens/driver/DriverComplianceDocsScreen'));
+const VehicleSafetyChecklistScreen = lazy(() => import('./src/screens/driver/VehicleSafetyChecklistScreen'));
+const TripManifestScreen = lazy(() => import('./src/screens/driver/TripManifestScreen'));
+const RegulatoryDisplayScreen = lazy(() => import('./src/screens/driver/RegulatoryDisplayScreen'));
+const LinkChildScreen = lazy(() => import('./src/screens/parent/LinkChildScreen'));
+const RouteManagementScreen = lazy(() => import('./src/screens/admin/RouteManagementScreen'));
+const EnhancedReportsScreen = lazy(() => import('./src/screens/admin/EnhancedReportsScreen'));
+const DocumentManagementScreen = lazy(() => import('./src/screens/admin/DocumentManagementScreen'));
+const ParentDocumentsScreen = lazy(() => import('./src/screens/parent/ParentDocumentsScreen'));
+const EmergencyContactsScreen = lazy(() => import('./src/screens/parent/EmergencyContactsScreen'));
+const DriverTripScreen = lazy(() => import('./src/screens/driver/DriverTripScreen'));
+const FleetTrackingScreen = lazy(() => import('./src/screens/admin/FleetTrackingScreen'));
+const VehicleManagementScreen = lazy(() => import('./src/screens/admin/VehicleManagementScreen'));
+const ChatScreen = lazy(() => import('./src/screens/ChatScreen'));
+const AttendanceReportsScreen = lazy(() => import('./src/screens/admin/AttendanceReportsScreen'));
 
 type ScreenName = 'Login' | 'Register' | 'Home' | 'Live' | 'Safety' | 'History' | 'Hire' | 'Review' | 'Payments' | 'Settings' | 'DriverApp' | 'DriverTrips' | 'Children' | 'Emergency' | 'Support' | 'SafetyTips' | 'AdminDashboard' | 'Compliance' | 'VehicleChecklist' | 'TripManifest' | 'RegulatoryDisplay' | 'LinkChild' | 'RouteManage' | 'EnhancedReports' | 'Documents' | 'ParentDocs' | 'EmergencyContacts' | 'FleetTracking' | 'VehicleManage' | 'Chat' | 'AttendanceReports';
+
+// Loading fallback
+const ScreenLoader = () => (
+  <View style={styles.loader}>
+    <ActivityIndicator size="large" color="#FFB81C" />
+    <Text style={styles.loaderText}>Loading...</Text>
+  </View>
+);
 
 function ThemedApp() {
   const { colors } = useTheme();
@@ -67,7 +76,6 @@ function AppContentWithTheme() {
 
   useEffect(() => {
     init();
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         try {
@@ -75,7 +83,6 @@ function AppContentWithTheme() {
           setCurrentUser(profile);
           setUserRole(profile.role);
           await AsyncStorage.setItem('userRole', profile.role);
-          // Navigate based on role
           if (profile.role === 'driver') setScreen('DriverApp');
           else if (profile.role === 'admin') setScreen('AdminDashboard');
           else setScreen('Home');
@@ -89,16 +96,13 @@ function AppContentWithTheme() {
 
   const init = async () => {
     try {
-      // Check for existing Supabase session
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
-        // Get user profile from Supabase
         const profile = await profileService.getProfile(session.user.id);
         setCurrentUser(profile);
         setUserRole(profile.role);
 
-        // Initialize push notifications
         const pushToken = await notificationService.getPushToken();
         if (pushToken) {
           await notificationService.registerPushToken(session.user.id, pushToken);
@@ -108,23 +112,18 @@ function AppContentWithTheme() {
         else if (profile.role === 'admin') setScreen('AdminDashboard');
         else setScreen('Home');
       } else {
-        // No session - show login
         setUserRole(null);
         setScreen('Login');
       }
     } catch (error) {
       console.error('Init error:', error);
-      // Fallback to AsyncStorage role if available
       const role = await AsyncStorage.getItem('userRole');
       setUserRole(role);
       if (role === 'driver') setScreen('DriverApp');
       else if (role === 'admin') setScreen('AdminDashboard');
       else setScreen('Home');
     }
-    // Minimum 2 second splash screen
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    setTimeout(() => setLoading(false), 500);
   };
 
   const handleLogin = async (role: string) => {
@@ -137,7 +136,7 @@ function AppContentWithTheme() {
 
   const handleLogout = async () => {
     try {
-      await authService.signOut();
+      await supabase.auth.signOut();
     } catch (error) {
       console.log('Logout error:', error);
     }
@@ -149,7 +148,6 @@ function AppContentWithTheme() {
   };
 
   const navigate = (s: ScreenName) => setScreen(s);
-  const goBack = () => setScreen('Home');
 
   const menuItems = userRole === 'driver' ? [
     { name: 'Home', icon: 'home', to: 'DriverApp' },
@@ -192,10 +190,21 @@ function AppContentWithTheme() {
   const screens: Record<ScreenName, React.ComponentType<any>> = {
     Login: LoginScreen,
     Register: RegisterScreen,
-    Home: ParentDashboard, Live: LiveTrackScreen, Safety: PanicScreen, History: TripHistoryScreen,
-    Hire: HireDriverScreen, Review: ReviewDriverScreen, Payments: PaymentDetailsScreen,
-    Settings: SettingsScreen, DriverApp: DriverAppScreen, DriverTrips: DriverTripScreen, Compliance: ComplianceScreen,
-    Children: ChildrenScreen, Emergency: EmergencyScreen, Support: SupportScreen, SafetyTips: SafetyTipsScreen,
+    Home: ParentDashboard,
+    Live: LiveTrackScreen,
+    Safety: PanicScreen,
+    History: TripHistoryScreen,
+    Hire: HireDriverScreen,
+    Review: ReviewDriverScreen,
+    Payments: PaymentDetailsScreen,
+    Settings: SettingsScreen,
+    DriverApp: DriverAppScreen,
+    DriverTrips: DriverTripScreen,
+    Compliance: ComplianceScreen,
+    Children: ChildrenScreen,
+    Emergency: EmergencyScreen,
+    Support: SupportScreen,
+    SafetyTips: SafetyTipsScreen,
     AdminDashboard: AdminDashboardScreen,
     VehicleChecklist: VehicleSafetyChecklistScreen,
     TripManifest: TripManifestScreen,
@@ -212,17 +221,26 @@ function AppContentWithTheme() {
     AttendanceReports: AttendanceReportsScreen,
   };
 
-  if (loading) return <View style={[styles.splash, { backgroundColor: colors.primary }]}><Text style={styles.splashText}>ScholarTrack</Text></View>;
+  if (loading) {
+    return (
+      <View style={[styles.splash, { backgroundColor: '#002395' }]}>
+        <Text style={styles.splashText}>ScholarTrack</Text>
+        <ActivityIndicator size="small" color="#FFB81C" style={{ marginTop: 20 }} />
+      </View>
+    );
+  }
 
   // Register screen
   if (screen === 'Register') {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar style="dark" />
-        <RegisterScreen
-          navigation={{ goBack: () => setScreen('Login'), navigate: (s: string) => setScreen(s as ScreenName) }}
-          onLogin={handleLogin}
-        />
+        <Suspense fallback={<ScreenLoader />}>
+          <RegisterScreen
+            navigation={{ goBack: () => setScreen('Login'), navigate: (s: string) => setScreen(s as ScreenName) }}
+            onLogin={handleLogin}
+          />
+        </Suspense>
       </View>
     );
   }
@@ -232,10 +250,12 @@ function AppContentWithTheme() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar style="dark" />
-        <LoginScreen
-          onLogin={handleLogin}
-          navigation={{ navigate: (s: string) => setScreen(s as ScreenName), goBack: () => setScreen('Login'), onRegister: () => { console.log('onRegister: setting screen to Register'); setScreen('Register'); } }}
-        />
+        <Suspense fallback={<ScreenLoader />}>
+          <LoginScreen
+            onLogin={handleLogin}
+            navigation={{ navigate: (s: string) => setScreen(s as ScreenName), goBack: () => setScreen('Login'), onRegister: () => setScreen('Register') }}
+          />
+        </Suspense>
       </View>
     );
   }
@@ -248,7 +268,9 @@ function AppContentWithTheme() {
         <TouchableOpacity onPress={() => setMenuOpen(true)}><Ionicons name="menu" size={28} color={colors.textInverse} /></TouchableOpacity>
       </View>
       <View style={{ flex: 1 }}>
-        {CurrentScreen ? React.createElement(CurrentScreen, { navigation: { navigate, goBack }, setScreen: navigate }) : <ParentDashboard navigation={{ navigate, goBack }} setScreen={navigate} />}
+        <Suspense fallback={<ScreenLoader />}>
+          {CurrentScreen ? React.createElement(CurrentScreen, { navigation: { navigate, goBack: () => setScreen(userRole === 'driver' ? 'DriverApp' : userRole === 'admin' ? 'AdminDashboard' : 'Home'), setScreen: navigate } }) : <ParentDashboard navigation={{ navigate, goBack: () => {} }} />}
+        </Suspense>
       </View>
       <Modal visible={menuOpen} animationType="slide" transparent>
         <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -289,6 +311,8 @@ export default function App() {
 const styles = StyleSheet.create({
   splash: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   splashText: { fontSize: 28, fontWeight: 'bold', color: '#FFB81C' },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
+  loaderText: { color: '#FFB81C', marginTop: 10 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 50, paddingHorizontal: 15, paddingBottom: 10 },
   menu: { width: '75%', height: '100%' },
   menuHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 50, padding: 20 },
