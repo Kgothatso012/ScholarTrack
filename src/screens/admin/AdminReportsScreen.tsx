@@ -1,25 +1,80 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
 
 const AdminReportsScreen = ({ navigation }: any) => {
-  const [reportType, setReportType] = useState('overview');
+  const { colors } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeDrivers: 0,
+    schools: 0,
+    tripsToday: 0,
+    revenue: 0,
+  });
 
-  const stats = {
-    totalStudents: 156,
-    activeDrivers: 24,
-    schools: 12,
-    tripsToday: 45,
-    revenue: 'R124,500',
-    completionRate: '98%',
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+
+      // Get students count
+      const { count: studentsCount } = await supabase
+        .from('children')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get drivers count
+      const { count: driversCount } = await supabase
+        .from('drivers')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get schools count
+      const { count: schoolsCount } = await supabase
+        .from('schools')
+        .select('*', { count: 'exact', head: true });
+
+      // Get today's trips
+      const today = new Date().toISOString().split('T')[0];
+      const { count: tripsCount } = await supabase
+        .from('trips')
+        .select('*', { count: 'exact', head: true })
+        .gte('scheduled_time', today);
+
+      // Get total revenue
+      const { data: payments } = await supabase
+        .from('payments')
+        .select('amount')
+        .in('status', ['completed', 'paid']);
+
+      const revenue = (payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+
+      setStats({
+        totalStudents: studentsCount || 0,
+        activeDrivers: driversCount || 0,
+        schools: schoolsCount || 0,
+        tripsToday: tripsCount || 0,
+        revenue: revenue,
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
-  const reports = [
-    { id: 1, name: 'Daily Trip Report', icon: 'calendar', date: '15 Feb 2026' },
-    { id: 2, name: 'Revenue Report', icon: 'cash', date: 'Feb 2026' },
-    { id: 3, name: 'Driver Performance', icon: 'speedometer', date: 'Jan 2026' },
-    { id: 4, name: 'Student Attendance', icon: 'people', date: 'Feb 2026' },
-  ];
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadStats();
+  }, []);
 
   const generateReport = (reportName: string) => {
     Alert.alert('Generating Report', `Creating ${reportName}...`, [
@@ -27,11 +82,44 @@ const AdminReportsScreen = ({ navigation }: any) => {
     ]);
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 10 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
+    loadingText: { color: colors.textSecondary, marginTop: 10 },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: 15, borderRadius: 10, alignItems: 'center', elevation: 2 },
+    statNumber: { fontSize: 24, fontWeight: 'bold', color: colors.accent, marginTop: 8 },
+    statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
+    section: { padding: 15 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
+    reportCard: { backgroundColor: colors.card, padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    reportIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center' },
+    reportInfo: { flex: 1, marginLeft: 12 },
+    reportName: { fontSize: 15, fontWeight: 'bold', color: colors.text },
+    reportDate: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  });
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading reports...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+      }
+    >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>📊 Reports</Text>
-        <Text style={styles.headerSubtext}>Analytics and insights</Text>
+        <Text style={styles.headerTitle}>Reports</Text>
+        <Text style={{ color: colors.accent }}>Analytics and insights</Text>
       </View>
 
       <View style={styles.statsGrid}>
@@ -51,84 +139,60 @@ const AdminReportsScreen = ({ navigation }: any) => {
           <Text style={styles.statLabel}>Schools</Text>
         </View>
         <View style={styles.statCard}>
-          <Ionicons name="navigate" size={24} color="#666" />
+          <Ionicons name="bus" size={24} color="#E91E63" />
           <Text style={styles.statNumber}>{stats.tripsToday}</Text>
           <Text style={styles.statLabel}>Trips Today</Text>
         </View>
       </View>
 
-      <View style={styles.kpiSection}>
-        <Text style={styles.sectionTitle}>Key Performance</Text>
-        <View style={styles.kpiCard}>
-          <View style={styles.kpiRow}>
-            <Text style={styles.kpiLabel}>Monthly Revenue</Text>
-            <Text style={styles.kpiValue}>{stats.revenue}</Text>
-          </View>
-          <View style={styles.kpiRow}>
-            <Text style={styles.kpiLabel}>Trip Completion Rate</Text>
-            <Text style={[styles.kpiValue, { color: '#FFB81C' }]}>{stats.completionRate}</Text>
-          </View>
-        </View>
-      </View>
-
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Generate Reports</Text>
-        {reports.map((report) => (
-          <TouchableOpacity key={report.id} style={styles.reportCard} onPress={() => generateReport(report.name)}>
-            <View style={styles.reportIcon}>
-              <Ionicons name={report.icon as keyof typeof Ionicons.glyphMap} size={24} color="#002395" />
-            </View>
-            <View style={styles.reportInfo}>
-              <Text style={styles.reportName}>{report.name}</Text>
-              <Text style={styles.reportDate}>Last: {report.date}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-        ))}
-      </View>
+        <Text style={styles.sectionTitle}>Quick Reports</Text>
+        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Daily Trip Report')}>
+          <View style={styles.reportIcon}>
+            <Ionicons name="calendar" size={20} color={colors.primary} />
+          </View>
+          <View style={styles.reportInfo}>
+            <Text style={styles.reportName}>Daily Trip Report</Text>
+            <Text style={styles.reportDate}>View today's trips</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => Alert.alert('Export', 'Exporting data...')}>
-            <Ionicons name="download" size={20} color="#fff" />
-            <Text style={styles.actionBtnText}>Export All</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, styles.secondaryBtn]} onPress={() => Alert.alert('Schedule', 'Setting up scheduled reports...')}>
-            <Ionicons name="calendar" size={20} color="#002395" />
-            <Text style={[styles.actionBtnText, { color: '#FFB81C' }]}>Schedule</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Revenue Report')}>
+          <View style={styles.reportIcon}>
+            <Ionicons name="cash" size={20} color="#007749" />
+          </View>
+          <View style={styles.reportInfo}>
+            <Text style={styles.reportName}>Revenue Report</Text>
+            <Text style={styles.reportDate}>Total: R{(stats.revenue / 100).toLocaleString()}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Driver Performance')}>
+          <View style={styles.reportIcon}>
+            <Ionicons name="speedometer" size={20} color="#FFB81C" />
+          </View>
+          <View style={styles.reportInfo}>
+            <Text style={styles.reportName}>Driver Performance</Text>
+            <Text style={styles.reportDate}>View driver stats</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Student Attendance')}>
+          <View style={styles.reportIcon}>
+            <Ionicons name="people" size={20} color="#E91E63" />
+          </View>
+          <View style={styles.reportInfo}>
+            <Text style={styles.reportName}>Student Attendance</Text>
+            <Text style={styles.reportDate}>View attendance</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', padding: 15 },
-  statCard: { backgroundColor: '#fff', width: '45%', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10, elevation: 2 },
-  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#ffffff', marginTop: 8 },
-  statLabel: { fontSize: 12, color: '#888888' },
-  kpiSection: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 15 },
-  kpiCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
-  kpiRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  kpiLabel: { fontSize: 14, color: '#888888' },
-  kpiValue: { fontSize: 16, fontWeight: 'bold', color: '#FFB81C' },
-  section: { padding: 15 },
-  reportCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  reportIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#e3f2fd', justifyContent: 'center', alignItems: 'center' },
-  reportInfo: { flex: 1, marginLeft: 12 },
-  reportName: { fontSize: 15, fontWeight: 'bold', color: '#ffffff' },
-  reportDate: { fontSize: 12, color: '#888888', marginTop: 2 },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  actionBtn: { backgroundColor: '#007749', flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 8, width: '45%', justifyContent: 'center' },
-  actionBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold', marginLeft: 8 },
-  secondaryBtn: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#002395' },
-});
 
 export default AdminReportsScreen;
