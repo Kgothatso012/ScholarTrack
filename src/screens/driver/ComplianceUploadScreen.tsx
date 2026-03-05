@@ -443,7 +443,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
             );
 
             // Map doc.id to document_type
-            const docTypeMap: Record<string, string> = {
+            const docTypeMap: Record<string, any> = {
               'pdp': 'pdp_certificate',
               'roadworthy': 'roadworthy',
               'driversLicense': 'drivers_license',
@@ -454,7 +454,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
             // Save to database
             await documentService.saveDriverDocument(
               user.id,
-              docTypeMap[doc.id] || doc.id,
+              docTypeMap[doc.id] || 'pdp_certificate',
               fileUrl,
               doc.document.name
             );

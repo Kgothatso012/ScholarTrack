@@ -7,10 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
+import ErrorBoundary, { LoadingScreen } from './src/components/ErrorBoundary';
 
 // Lazy load all screens for performance
 const LoginScreen = lazy(() => import('./src/screens/auth/LoginScreen'));
 const RegisterScreen = lazy(() => import('./src/screens/auth/RegisterScreen'));
+const OnboardingScreen = lazy(() => import('./src/screens/auth/OnboardingScreen'));
 const ParentDashboard = lazy(() => import('./src/screens/parent/ParentDashboard'));
 const DriverAppScreen = lazy(() => import('./src/screens/driver/DriverAppScreen'));
 const AdminDashboardScreen = lazy(() => import('./src/screens/admin/AdminDashboardScreen'));
@@ -43,7 +45,7 @@ const VehicleManagementScreen = lazy(() => import('./src/screens/admin/VehicleMa
 const ChatScreen = lazy(() => import('./src/screens/ChatScreen'));
 const AttendanceReportsScreen = lazy(() => import('./src/screens/admin/AttendanceReportsScreen'));
 
-type ScreenName = 'Login' | 'Register' | 'Home' | 'Live' | 'Safety' | 'History' | 'Hire' | 'Review' | 'Payments' | 'Settings' | 'DriverApp' | 'DriverTrips' | 'Children' | 'Emergency' | 'Support' | 'SafetyTips' | 'AdminDashboard' | 'Compliance' | 'VehicleChecklist' | 'TripManifest' | 'RegulatoryDisplay' | 'LinkChild' | 'RouteManage' | 'EnhancedReports' | 'Documents' | 'ParentDocs' | 'EmergencyContacts' | 'FleetTracking' | 'VehicleManage' | 'Chat' | 'AttendanceReports';
+type ScreenName = 'Login' | 'Register' | 'Onboarding' | 'Home' | 'Live' | 'Safety' | 'History' | 'Hire' | 'Review' | 'Payments' | 'Settings' | 'DriverApp' | 'DriverTrips' | 'Children' | 'Emergency' | 'Support' | 'SafetyTips' | 'AdminDashboard' | 'Compliance' | 'VehicleChecklist' | 'TripManifest' | 'RegulatoryDisplay' | 'LinkChild' | 'RouteManage' | 'EnhancedReports' | 'Documents' | 'ParentDocs' | 'EmergencyContacts' | 'FleetTracking' | 'VehicleManage' | 'Chat' | 'AttendanceReports';
 
 // Loading fallback
 const ScreenLoader = () => (
@@ -57,12 +59,14 @@ function ThemedApp() {
   const { colors } = useTheme();
 
   return (
-    <SafeAreaProvider>
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar style={colors.background === '#000000' || colors.background === '#002395' ? 'light' : 'dark'} />
-        <AppContentWithTheme />
-      </View>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <StatusBar style={colors.background === '#000000' || colors.background === '#002395' ? 'light' : 'dark'} />
+          <AppContentWithTheme />
+        </View>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -70,6 +74,7 @@ function AppContentWithTheme() {
   const { colors } = useTheme();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [screen, setScreen] = useState<ScreenName>('Login');
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
@@ -96,6 +101,14 @@ function AppContentWithTheme() {
 
   const init = async () => {
     try {
+      // Check if onboarding is complete
+      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
+      if (onboardingComplete !== 'true') {
+        setShowOnboarding(true);
+        setLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
@@ -117,13 +130,20 @@ function AppContentWithTheme() {
       }
     } catch (error) {
       console.error('Init error:', error);
-      const role = await AsyncStorage.getItem('userRole');
-      setUserRole(role);
-      if (role === 'driver') setScreen('DriverApp');
-      else if (role === 'admin') setScreen('AdminDashboard');
-      else setScreen('Home');
+      // On error, still show onboarding if not seen
+      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
+      if (onboardingComplete !== 'true') {
+        setShowOnboarding(true);
+      } else {
+        setScreen('Login');
+      }
     }
-    setTimeout(() => setLoading(false), 500);
+    setLoading(false);
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    setScreen('Login');
   };
 
   const handleLogin = async (role: string) => {
@@ -190,6 +210,7 @@ function AppContentWithTheme() {
   const screens: Record<ScreenName, React.ComponentType<any>> = {
     Login: LoginScreen,
     Register: RegisterScreen,
+    Onboarding: OnboardingScreen,
     Home: ParentDashboard,
     Live: LiveTrackScreen,
     Safety: PanicScreen,
@@ -220,6 +241,17 @@ function AppContentWithTheme() {
     Chat: ChatScreen,
     AttendanceReports: AttendanceReportsScreen,
   };
+
+  // Show onboarding first time users
+  if (showOnboarding === true) {
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen />}>
+          <OnboardingScreen onComplete={handleOnboardingComplete} />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
 
   if (loading) {
     return (
