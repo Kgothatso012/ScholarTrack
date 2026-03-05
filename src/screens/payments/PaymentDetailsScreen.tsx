@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
+import { paymentHelper } from '../../lib/paystack';
+import PaymentModal from '../../components/PaymentModal';
 
 interface PaymentMethod {
   id: string;
@@ -22,13 +26,143 @@ interface Payment {
 }
 
 export default function PaymentScreen() {
+  const { colors } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('card');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [currentAmount, setCurrentAmount] = useState(800);
+  const [userEmail, setUserEmail] = useState('');
+  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPaymentHistory();
+    loadUserInfo();
+  }, []);
+
+  const loadUserInfo = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || '');
+      }
+    } catch (error) {
+      console.error('Error loading user:', error);
+    }
+  };
+
+  const loadPaymentHistory = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: payments } = await supabase
+        .from('payments')
+        .select('*, driver:drivers(full_name)')
+        .eq('parent_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      setPaymentHistory(payments || []);
+    } catch (error) {
+      console.error('Error loading payments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (reference: string) => {
+    try {
+      // Save payment record
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await paymentHelper.savePaymentRecord(
+          user.id,
+          currentAmount,
+          reference,
+          'success',
+          'monthly'
+        );
+        Alert.alert('Success', 'Payment processed successfully!');
+        loadPaymentHistory();
+      }
+    } catch (error) {
+      console.error('Error saving payment:', error);
+    }
+  };
+
+  const handlePaymentFailure = (error: string) => {
+    Alert.alert('Payment Failed', error);
+  };
 
   const [paymentMethods] = useState<PaymentMethod[]>([
     { id: '1', type: 'card', name: 'Visa', last4: '4242', expiry: '12/27', isDefault: true },
     { id: '2', type: 'zapper', name: 'Zapper', isDefault: false },
   ]);
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
+    headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
+    headerSub: { fontSize: 13, color: colors.accent, marginTop: 5 },
+    balanceCard: { backgroundColor: colors.card, margin: 15, padding: 20, borderRadius: 15, elevation: 5 },
+    balanceLabel: { fontSize: 14, color: colors.textSecondary },
+    balanceAmount: { fontSize: 36, fontWeight: 'bold', color: colors.text, marginVertical: 10 },
+    payButton: { backgroundColor: colors.success, padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 20 },
+    payButtonText: { color: colors.textInverse, fontSize: 16, fontWeight: 'bold' },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.card, marginHorizontal: 15, borderRadius: 12, elevation: 3, marginTop: -10 },
+    statsLabel: { fontSize: 12, color: colors.textSecondary },
+    statsValue: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+    section: { padding: 15 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
+    methodCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2, borderWidth: 1, borderColor: colors.border },
+    methodCardDefault: { borderColor: colors.success, backgroundColor: colors.selected },
+    methodIcon: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.selected, justifyContent: 'center', alignItems: 'center' },
+    methodInfo: { flex: 1, marginLeft: 15 },
+    methodName: { fontSize: 16, fontWeight: 'bold', color: colors.text },
+    methodDetail: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    defaultBadge: { backgroundColor: colors.success, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    defaultText: { color: colors.textInverse, fontSize: 10, fontWeight: 'bold' },
+    addCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderStyle: 'dashed', borderColor: colors.border },
+    addCardText: { color: colors.accent, fontWeight: 'bold', marginLeft: 8 },
+    paymentCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', elevation: 2 },
+    paymentIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+    paymentInfo: { flex: 1, marginLeft: 12 },
+    paymentTitle: { fontSize: 14, fontWeight: 'bold', color: colors.text },
+    paymentDate: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    paymentAmount: { fontSize: 16, fontWeight: 'bold', color: colors.text },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    statusText: { color: colors.textInverse, fontSize: 10, fontWeight: 'bold' },
+    receiptCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    receiptIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.selected, justifyContent: 'center', alignItems: 'center' },
+    receiptInfo: { flex: 1, marginLeft: 12 },
+    receiptTitle: { fontSize: 14, fontWeight: 'bold', color: colors.text },
+    receiptDate: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    saGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    saIcon: { width: '48%', borderRadius: 12, padding: 15, marginBottom: 10, alignItems: 'center' },
+    saText: { color: colors.textInverse, fontWeight: 'bold', marginTop: 5 },
+    // Additional missing styles
+    headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
+    balanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    dueDateBox: { alignItems: 'flex-end' },
+    dueDateLabel: { fontSize: 12, color: colors.textSecondary },
+    dueDate: { fontSize: 16, fontWeight: 'bold', color: '#d32f2f' },
+    statCard: { alignItems: 'center' },
+    statNumber: { fontSize: 24, fontWeight: 'bold', color: colors.primary },
+    statLabel: { fontSize: 12, color: colors.textSecondary },
+    // More missing styles
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+    methodExpiry: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    saTitle: { fontSize: 14, fontWeight: 'bold', color: colors.textSecondary, marginTop: 20, marginBottom: 10 },
+    saOptions: { flexDirection: 'row', justifyContent: 'space-between' },
+    saOption: { alignItems: 'center', width: '23%' },
+    paymentLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+    paymentRight: { alignItems: 'flex-end' },
+    paymentDesc: { fontSize: 14, fontWeight: 'bold', color: colors.text },
+    paymentMeta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    receiptMeta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  });
 
   const [payments] = useState<Payment[]>([
     { id: '1', date: '2026-02-15', amount: 'R800', status: 'pending', method: 'Visa ****4242', driver: 'Mr. John Molaba', description: 'February Transport' },
@@ -61,14 +195,12 @@ export default function PaymentScreen() {
   };
 
   const payNow = () => {
-    Alert.alert(
-      '💳 Make Payment',
-      `Pay R${currentBalance} using default card?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Pay Now', onPress: () => Alert.alert('Success', 'Payment processed successfully!') },
-      ]
-    );
+    if (!userEmail) {
+      Alert.alert('Error', 'Please log in to make payments');
+      return;
+    }
+    setCurrentAmount(parseInt(currentBalance.replace('R', '').replace(',', '')));
+    setShowPaymentModal(true);
   };
 
   const payWithMethod = (method: PaymentMethod) => {
@@ -253,6 +385,16 @@ export default function PaymentScreen() {
           </TouchableOpacity>
         ))}
       </View>
+
+      <PaymentModal
+        visible={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={currentAmount}
+        description="Monthly Transport Fee"
+        paymentType="monthly"
+        onSuccess={handlePaymentSuccess}
+        onFailure={handlePaymentFailure}
+      />
     </ScrollView>
   );
 }

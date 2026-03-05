@@ -5,12 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AdminDashboard = ({ navigation }: any) => {
   const adminTools = [
-    { name: 'Drivers', icon: 'car', count: 24, color: '#007749' },
-    { name: 'Parents', icon: 'people', count: 156, color: '#002395' },
+    { name: 'Drivers', icon: 'car', count: 24, color: '#FFB81C' },
+    { name: 'Parents', icon: 'people', count: 156, color: '#FFB81C' },
     { name: 'Schools', icon: 'school', count: 12, color: '#FFB81C' },
-    { name: 'Trips', icon: 'navigate', count: 89, color: '#666' },
-    { name: 'Payments', icon: 'card', color: '#007749' },
-    { name: 'Reports', icon: 'document-text', color: '#002395' },
+    { name: 'Trips', icon: 'navigate', count: 89, color: '#888888' },
+    { name: 'Payments', icon: 'card', color: '#FFB81C' },
+    { name: 'Reports', icon: 'document-text', color: '#FFB81C' },
   ];
 
   const handleLogout = async () => {
@@ -102,7 +102,7 @@ const AdminDashboard = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: '#000000' },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   logoutBtn: { padding: 5 },
@@ -110,23 +110,23 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
   statsContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 20, backgroundColor: '#fff', marginTop: -20, marginHorizontal: 20, borderRadius: 10, elevation: 4 },
   statCard: { alignItems: 'center' },
-  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#002395' },
-  statLabel: { fontSize: 12, color: '#666', marginTop: 5 },
+  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#FFB81C' },
+  statLabel: { fontSize: 12, color: '#888888', marginTop: 5 },
   section: { padding: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 15 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   card: { width: '48%', backgroundColor: '#fff', borderRadius: 10, padding: 15, marginBottom: 15, alignItems: 'center', elevation: 2 },
   iconContainer: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
-  cardText: { fontSize: 14, fontWeight: '600', color: '#333' },
-  cardCount: { fontSize: 12, color: '#666', marginTop: 5 },
+  cardText: { fontSize: 14, fontWeight: '600', color: '#ffffff' },
+  cardCount: { fontSize: 12, color: '#888888', marginTop: 5 },
   activityCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
   activityRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  activityText: { flex: 1, fontSize: 14, color: '#333', marginLeft: 10 },
+  activityText: { flex: 1, fontSize: 14, color: '#ffffff', marginLeft: 10 },
   activityTime: { fontSize: 12, color: '#999' },
   actionButton: { backgroundColor: '#007749', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginBottom: 10 },
   actionButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 10 },
   secondaryButton: { backgroundColor: '#fff', borderWidth: 2, borderColor: '#002395' },
-  secondaryButtonText: { color: '#002395' },
+  secondaryButtonText: { color: '#FFB81C' },
 });
 
 export default AdminDashboard;

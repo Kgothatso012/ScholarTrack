@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
   locationInfo: { flex: 1, marginLeft: 12 },
   locationText: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   locationSubtext: { fontSize: 12, color: '#666', marginTop: 2 },
+  locationToggle: { padding: 5 },
   safeWordCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
   safeWordText: { fontSize: 14, color: '#666', lineHeight: 20 },
   setSafeWordBtn: { backgroundColor: '#007749', padding: 12, borderRadius: 8, marginTop: 15, alignItems: 'center' },

@@ -1,17 +1,8 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-  TextInput,
-  Image,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, TextInput, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useForm, Controller } from 'react-hook-form';
@@ -131,6 +122,27 @@ interface ComplianceDocument {
 // ============ MAIN COMPONENT ============
 
 export default function ComplianceUploadScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [existingCompliance, setExistingCompliance] = useState<any>(null);
+
+  useEffect(() => {
+    checkExistingCompliance();
+  }, []);
+
+  const checkExistingCompliance = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('driverCompliance');
+      if (stored) {
+        setExistingCompliance(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Error checking compliance:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [documents, setDocuments] = useState<ComplianceDocument[]>([
     {
       id: 'pdp',
@@ -409,8 +421,52 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   // ============ RENDER ============
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color="#FFB81C" />
+        <Text style={styles.loadingText}>Loading compliance status...</Text>
+      </View>
+    );
+  }
+
+  // Show existing compliance status if already submitted
+  if (existingCompliance && existingCompliance.status === 'pending_review') {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+          <Text style={styles.headerTitle}>Driver Compliance</Text>
+          <Text style={styles.headerSubtitle}>Submitted for review</Text>
+        </View>
+        <View style={styles.section}>
+          <View style={[styles.successCard, { backgroundColor: colors.card }]}>
+            <Ionicons name="checkmark-circle" size={80} color="#007749" />
+            <Text style={[styles.successTitle, { color: colors.text }]}>Submitted Successfully!</Text>
+            <Text style={[styles.successText, { color: colors.textSecondary }]}>
+              Your compliance documents have been submitted for review. This typically takes 1-2 business days.
+            </Text>
+            <Text style={[styles.submittedDate, { color: colors.textSecondary }]}>
+              Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={() => {
+              Alert.alert('View Documents', 'This would open the submitted documents.', [
+                { text: 'OK' }
+              ]);
+            }}
+          >
+            <Ionicons name="document-text" size={20} color="#fff" />
+            <Text style={styles.submitButtonText}>View Submitted Documents</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -723,7 +779,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#000000',
   },
   header: {
     flexDirection: 'row',
@@ -771,7 +827,7 @@ const styles = StyleSheet.create({
   progressText: {
     marginTop: 10,
     fontSize: 14,
-    color: '#666',
+    color: '#888888',
     textAlign: 'center',
   },
   section: {
@@ -794,7 +850,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#888888',
     marginTop: -8,
     marginBottom: 16,
   },
@@ -856,7 +912,7 @@ const styles = StyleSheet.create({
   },
   documentDescription: {
     fontSize: 13,
-    color: '#666',
+    color: '#888888',
     marginTop: 2,
   },
   uploadedBadge: {
@@ -879,7 +935,7 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     marginLeft: 10,
-    color: '#007749',
+    color: '#FFB81C',
     fontWeight: '500',
   },
   uploadedPreview: {
@@ -938,7 +994,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     fontSize: 12,
-    color: '#666',
+    color: '#888888',
     lineHeight: 18,
   },
   submitButton: {
@@ -962,5 +1018,38 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#888888',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  successCard: {
+    margin: 16,
+    padding: 30,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  successTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  successText: {
+    fontSize: 14,
+    color: '#888888',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 15,
+  },
+  submittedDate: {
+    fontSize: 12,
+    color: '#888888',
   },
 });

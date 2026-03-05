@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 
-const { width } = Dimensions.get('window');
-
-export default function LoginScreen({ navigation }: any) {
+export default function LoginScreen({ navigation, onLogin }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,12 +17,17 @@ export default function LoginScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    
-    // Check demo accounts first
+
+    // Check for test account
     const emailLower = email.toLowerCase();
-    if (emailLower.includes('admin') || emailLower.includes('dev') || 
-        emailLower.includes('driver') || emailLower.includes('parent')) {
-      await handleDemoLogin(emailLower);
+    if (emailLower === 'test@scholartrack.com' && password === 'test123') {
+      await AsyncStorage.setItem('userRole', 'parent');
+      await AsyncStorage.setItem('userEmail', email);
+      await AsyncStorage.setItem('userName', 'Test Parent');
+      if (onLogin) {
+        onLogin('parent');
+      }
+      setLoading(false);
       return;
     }
 
@@ -37,42 +40,63 @@ export default function LoginScreen({ navigation }: any) {
 
       if (error) throw error;
 
-      // Get user role from users table
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role, name')
+      // Get user role from profiles table
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role, full_name')
         .eq('id', data.user?.id)
         .single();
 
-      if (userData?.role) {
-        await AsyncStorage.setItem('userRole', userData.role);
+      // Use profile data if available, otherwise get from user metadata
+      const userRole = profileData?.role || data.user?.user_metadata?.role || 'parent';
+      const userName = profileData?.full_name || data.user?.user_metadata?.full_name || '';
+
+      if (userRole) {
+        await AsyncStorage.setItem('userRole', userRole);
         await AsyncStorage.setItem('userEmail', data.user?.email || '');
-        (window as any).setRole(userData.role);
+        await AsyncStorage.setItem('userName', userName);
+        await AsyncStorage.setItem('userId', data.user?.id || '');
+
+        // Create profile if it doesn't exist
+        if (!profileData && data.user) {
+          try {
+            await supabase.from('profiles').insert({
+              id: data.user.id,
+              email: data.user.email,
+              role: userRole,
+              full_name: userName,
+              phone: data.user?.user_metadata?.phone || ''
+            });
+          } catch (err) {
+            console.log('Profile creation error:', err);
+          }
+        }
+
+        if (onLogin) {
+          onLogin(userRole);
+        }
       } else {
-        Alert.alert('Error', 'User role not found. Please contact admin.');
+        Alert.alert('Error', 'User profile not found.');
       }
     } catch (error: any) {
-      Alert.alert('Login Failed', 'Invalid credentials. Try demo accounts.');
+      // Check for specific error messages
+      const errorMessage = error?.message?.toLowerCase() || '';
+      if (errorMessage.includes('email not confirmed') || errorMessage.includes('invalid email')) {
+        Alert.alert('Email Not Confirmed', 'Please check your email and click the confirmation link to activate your account.');
+      } else {
+        Alert.alert('Login Failed', 'Invalid email or password.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = async (emailLower: string) => {
-    let role = 'parent';
-    if (emailLower.includes('admin')) role = 'admin';
-    else if (emailLower.includes('dev')) role = 'dev';
-    else if (emailLower.includes('driver')) role = 'driver';
-    
-    await AsyncStorage.setItem('userRole', role);
-    await AsyncStorage.setItem('userEmail', email);
-    
-    // Navigate to correct screen based on role
-    (window as any).navigateToRole?.(role);
-  };
-
-  const handleRegister = async () => {
-    Alert.alert('Register', 'Registration coming soon!');
+  const handleRegister = () => {
+    if (navigation?.onRegister) {
+      navigation.onRegister();
+    } else if (navigation?.navigate) {
+      navigation.navigate('Register');
+    }
   };
 
   return (
@@ -81,27 +105,24 @@ export default function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
-        {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>🚗</Text>
+            <Ionicons name="school" size={40} color="#000000" />
           </View>
           <Text style={styles.appTitle}>ScholarTrack</Text>
           <Text style={styles.appSubtitle}>Safe Student Transport</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.subtitleText}>Login to your account</Text>
 
-          {/* Email */}
           <View style={styles.inputWrapper}>
             <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666666"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -109,13 +130,12 @@ export default function LoginScreen({ navigation }: any) {
             />
           </View>
 
-          {/* Password */}
           <View style={styles.inputWrapper}>
             <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666666"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -125,12 +145,10 @@ export default function LoginScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
 
-          {/* Forgot Password */}
           <TouchableOpacity style={styles.forgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          {/* Login Button */}
           <TouchableOpacity 
             style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
             onPress={handleLogin}
@@ -141,21 +159,16 @@ export default function LoginScreen({ navigation }: any) {
             </Text>
           </TouchableOpacity>
 
-          {/* Register Link */}
           <TouchableOpacity onPress={handleRegister} style={styles.signupContainer}>
             <Text style={styles.signupText}>
               Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
             </Text>
           </TouchableOpacity>
 
-          {/* Demo Credentials */}
           <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Demo Accounts:</Text>
-            <Text style={styles.demoText}>parent@test.com</Text>
-            <Text style={styles.demoText}>driver@test.com</Text>
-            <Text style={styles.demoText}>admin@test.com</Text>
-            <Text style={styles.demoText}>dev@test.com</Text>
-            <Text style={styles.demoText}>Password: any</Text>
+            <Text style={styles.demoTitle}>Test Account:</Text>
+            <Text style={styles.demoText}>Email: test@scholartrack.com</Text>
+            <Text style={styles.demoText}>Password: test123</Text>
           </View>
         </View>
       </ScrollView>
@@ -164,131 +177,28 @@ export default function LoginScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  scrollView: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FFB81C',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  logoText: {
-    fontSize: 40,
-  },
-  appTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFB81C',
-  },
-  appSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
-  },
-  formContainer: {
-    backgroundColor: '#1a1a1a',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 24,
-    paddingTop: 30,
-    paddingBottom: 40,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  subtitleText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 25,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    backgroundColor: '#0a0a0a',
-    height: 50,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#fff',
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#FFB81C',
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#FFB81C',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  loginButtonDisabled: {
-    opacity: 0.6,
-  },
-  loginButtonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  signupContainer: {
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  signupText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  signupLink: {
-    color: '#FFB81C',
-    fontWeight: 'bold',
-  },
-  demoBox: {
-    backgroundColor: '#222',
-    borderRadius: 12,
-    padding: 15,
-  },
-  demoTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#FFB81C',
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 3,
-  },
+  container: { flex: 1, backgroundColor: '#000000' },
+  scrollView: { flexGrow: 1, justifyContent: 'center' },
+  logoContainer: { alignItems: 'center', marginBottom: 30 },
+  logoCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFB81C', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
+  appTitle: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
+  appSubtitle: { fontSize: 14, color: '#888888', marginTop: 5 },
+  formContainer: { backgroundColor: '#111111', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 },
+  welcomeText: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF', marginBottom: 5 },
+  subtitleText: { fontSize: 14, color: '#888888', marginBottom: 25 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#333333', borderRadius: 12, paddingHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', height: 50 },
+  inputIcon: { marginRight: 10 },
+  input: { flex: 1, fontSize: 16, color: '#FFFFFF' },
+  eyeIcon: { padding: 8 },
+  forgotPassword: { alignSelf: 'flex-end', marginBottom: 20 },
+  forgotPasswordText: { color: '#FFB81C', fontSize: 14 },
+  loginButton: { backgroundColor: '#FFB81C', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  loginButtonDisabled: { opacity: 0.6 },
+  loginButtonText: { color: '#000000', fontSize: 16, fontWeight: 'bold' },
+  signupContainer: { alignItems: 'center', marginBottom: 25 },
+  signupText: { color: '#888888', fontSize: 14 },
+  signupLink: { color: '#FFB81C', fontWeight: 'bold' },
+  demoBox: { backgroundColor: '#1a1a1a', borderRadius: 12, padding: 15, marginTop: 10, borderWidth: 1, borderColor: '#333333' },
+  demoTitle: { fontSize: 12, fontWeight: 'bold', color: '#FFB81C', marginBottom: 8 },
+  demoText: { fontSize: 12, color: '#888888', marginBottom: 3 },
 });

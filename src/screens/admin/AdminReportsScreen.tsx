@@ -66,7 +66,7 @@ const AdminReportsScreen = ({ navigation }: any) => {
           </View>
           <View style={styles.kpiRow}>
             <Text style={styles.kpiLabel}>Trip Completion Rate</Text>
-            <Text style={[styles.kpiValue, { color: '#007749' }]}>{stats.completionRate}</Text>
+            <Text style={[styles.kpiValue, { color: '#FFB81C' }]}>{stats.completionRate}</Text>
           </View>
         </View>
       </View>
@@ -96,7 +96,7 @@ const AdminReportsScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, styles.secondaryBtn]} onPress={() => Alert.alert('Schedule', 'Setting up scheduled reports...')}>
             <Ionicons name="calendar" size={20} color="#002395" />
-            <Text style={[styles.actionBtnText, { color: '#002395' }]}>Schedule</Text>
+            <Text style={[styles.actionBtnText, { color: '#FFB81C' }]}>Schedule</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -105,26 +105,26 @@ const AdminReportsScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: '#000000' },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
   headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', padding: 15 },
   statCard: { backgroundColor: '#fff', width: '45%', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10, elevation: 2 },
-  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 8 },
-  statLabel: { fontSize: 12, color: '#666' },
+  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#ffffff', marginTop: 8 },
+  statLabel: { fontSize: 12, color: '#888888' },
   kpiSection: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 15 },
   kpiCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
   kpiRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  kpiLabel: { fontSize: 14, color: '#666' },
-  kpiValue: { fontSize: 16, fontWeight: 'bold', color: '#002395' },
+  kpiLabel: { fontSize: 14, color: '#888888' },
+  kpiValue: { fontSize: 16, fontWeight: 'bold', color: '#FFB81C' },
   section: { padding: 15 },
   reportCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   reportIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#e3f2fd', justifyContent: 'center', alignItems: 'center' },
   reportInfo: { flex: 1, marginLeft: 12 },
-  reportName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
-  reportDate: { fontSize: 12, color: '#666', marginTop: 2 },
+  reportName: { fontSize: 15, fontWeight: 'bold', color: '#ffffff' },
+  reportDate: { fontSize: 12, color: '#888888', marginTop: 2 },
   actionsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   actionBtn: { backgroundColor: '#007749', flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 8, width: '45%', justifyContent: 'center' },
   actionBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold', marginLeft: 8 },

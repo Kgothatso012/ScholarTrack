@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 
-export default function RegisterScreen({ navigation }: any) {
+export default function RegisterScreen({ navigation, onLogin }: any) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -23,14 +23,113 @@ export default function RegisterScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'parent' | 'driver'>('parent');
+  const [step, setStep] = useState<'register' | 'otp'>('register');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const otpInputRefs = useRef<(TextInput | null)[]>([]);
+  const [pendingPhone, setPendingPhone] = useState('');
+  const [usePhoneAuth, setUsePhoneAuth] = useState(false);
 
   const roles = [
     { id: 'parent', name: 'Parent', icon: 'people', description: 'Hire drivers for your children' },
     { id: 'driver', name: 'Driver', icon: 'car', description: 'Provide transport services' },
   ];
 
-  const handleRegister = async () => {
-    if (!name || !email || !phone || !password || !confirmPassword) {
+  const handleSendOTP = async () => {
+    if (!name || !phone || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
+    // Validate phone number (South African format)
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 10) {
+      Alert.alert('Error', 'Please enter a valid phone number');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Format phone for South Africa
+      let formattedPhone = cleanPhone;
+      if (cleanPhone.startsWith('0')) {
+        formattedPhone = '+27' + cleanPhone.substring(1);
+      } else if (!cleanPhone.startsWith('+')) {
+        formattedPhone = '+27' + cleanPhone;
+      }
+
+      // Sign up with phone - Supabase will send OTP
+      const { data, error } = await supabase.auth.signUp({
+        phone: formattedPhone,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            role: selectedRole
+          }
+        }
+      });
+
+      if (error) {
+        // If phone auth fails (no SMS provider), fall back to email
+        if (error.message.includes('phone') || error.message.includes('SMS')) {
+          Alert.alert(
+            'SMS Not Available',
+            'Phone verification requires SMS provider setup. Would you like to register with email instead?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Use Email', onPress: () => {
+                setUsePhoneAuth(false);
+                handleEmailRegister();
+              }}
+            ]
+          );
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
+
+      if (data.session) {
+        // No OTP needed, auto-confirmed
+        await AsyncStorage.setItem('userRole', selectedRole);
+        await AsyncStorage.setItem('userName', name);
+        await AsyncStorage.setItem('userEmail', formattedPhone);
+        if (data.user) {
+          await AsyncStorage.setItem('userId', data.user.id);
+        }
+
+        Alert.alert('Success', 'You have successfully registered!', [
+          { text: 'OK', onPress: () => {
+            if (onLogin) {
+              onLogin(selectedRole);
+            }
+          }}
+        ]);
+      } else {
+        // OTP required - show OTP screen
+        setPendingPhone(formattedPhone);
+        setStep('otp');
+      }
+    } catch (error: any) {
+      console.error('OTP send error:', error);
+      Alert.alert('Error', error.message || 'Failed to send verification code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -47,46 +146,180 @@ export default function RegisterScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      // Try Supabase auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name,
+            phone: phone || '',
+            role: selectedRole
+          }
+        }
       });
 
       if (error) throw error;
 
-      // Save role locally for demo
+      // Check if email confirmation required
+      if (!data.session) {
+        Alert.alert('Registration Successful', 'Please check your email to confirm your account, then login.', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // Auto login
       await AsyncStorage.setItem('userRole', selectedRole);
-      
-      Alert.alert(
-        'Success!', 
-        'Account created successfully!',
-        [{ text: 'OK', onPress: () => { (window as any).setRole(selectedRole); } }]
-      );
+      await AsyncStorage.setItem('userName', name);
+      await AsyncStorage.setItem('userEmail', email);
+      if (data.user) {
+        await AsyncStorage.setItem('userId', data.user.id);
+      }
+
+      Alert.alert('Success', 'You have successfully registered!', [
+        { text: 'OK', onPress: () => {
+          if (onLogin) {
+            onLogin(selectedRole);
+          }
+        }}
+      ]);
     } catch (error: any) {
-      // Fallback to demo registration
-      await AsyncStorage.setItem('userRole', selectedRole);
-      Alert.alert(
-        'Success!', 
-        'Demo account created!',
-        [{ text: 'OK', onPress: () => { (window as any).setRole(selectedRole); } }]
-      );
+      Alert.alert('Error', error.message || 'Failed to create account.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getRouteName = (role: string) => {
-    switch (role) {
-      case 'parent': return 'ParentApp';
-      case 'driver': return 'DriverApp';
-      default: return 'RoleSelection';
+  const handleVerifyOTP = async () => {
+    const otpCode = otp.join('');
+    if (otpCode.length !== 6) {
+      Alert.alert('Error', 'Please enter the 6-digit code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: pendingPhone,
+        token: otpCode,
+        type: 'sms'
+      });
+
+      if (error) throw error;
+
+      await AsyncStorage.setItem('userRole', selectedRole);
+      await AsyncStorage.setItem('userName', name);
+      await AsyncStorage.setItem('userEmail', pendingPhone);
+      if (data.user) {
+        await AsyncStorage.setItem('userId', data.user.id);
+      }
+
+      Alert.alert('Success', 'Phone verified! Welcome to ScholarTrack.', [
+        { text: 'OK', onPress: () => {
+          if (onLogin) {
+            onLogin(selectedRole);
+          }
+        }}
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', 'Invalid verification code. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleResendOTP = async () => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        phone: pendingPhone,
+        password,
+      });
+
+      if (error) throw error;
+      Alert.alert('OTP Resent', 'A new verification code has been sent');
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to resend code.');
+    }
+  };
+
+  // OTP Verification Screen
+  if (step === 'otp') {
+    return (
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setStep('register')} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Verify Phone</Text>
+            <Text style={styles.headerSubtitle}>Enter the code sent to {pendingPhone}</Text>
+          </View>
+
+          <View style={styles.formContainer}>
+            <View style={styles.otpContainer}>
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(el: any) => otpInputRefs.current[index] = el}
+                  style={styles.otpInput}
+                  value={digit}
+                  onChangeText={(value) => {
+                    const newOtp = [...otp];
+                    newOtp[index] = value.replace(/[^0-9]/g, '');
+                    setOtp(newOtp);
+                    if (value && index < 5) {
+                      otpInputRefs.current[index + 1]?.focus();
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
+                      otpInputRefs.current[index - 1]?.focus();
+                    }
+                  }}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  placeholder="0"
+                  placeholderTextColor="#666"
+                />
+              ))}
+            </View>
+
+            <TouchableOpacity
+              style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+              onPress={handleVerifyOTP}
+              disabled={loading}
+            >
+              <Text style={styles.registerButtonText}>
+                {loading ? 'Verifying...' : 'Verify Code'}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.resendContainer}>
+              <Text style={styles.resendText}>Didn't receive the code?</Text>
+              <TouchableOpacity onPress={handleResendOTP}>
+                <Text style={styles.resendLink}> Resend</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity onPress={() => setStep('register')} style={styles.loginContainer}>
+              <Text style={styles.loginText}>
+                Wrong number? <Text style={styles.loginLink}>Go Back</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // Registration Screen
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
@@ -114,10 +347,10 @@ export default function RegisterScreen({ navigation }: any) {
                   styles.roleIcon,
                   selectedRole === role.id && styles.roleIconSelected
                 ]}>
-                  <Ionicons 
-                    name={role.icon as any} 
-                    size={24} 
-                    color={selectedRole === role.id ? '#fff' : '#002395'} 
+                  <Ionicons
+                    name={role.icon as any}
+                    size={24}
+                    color={selectedRole === role.id ? '#fff' : '#002395'}
                   />
                 </View>
                 <View style={styles.roleInfo}>
@@ -128,7 +361,7 @@ export default function RegisterScreen({ navigation }: any) {
                   <Text style={styles.roleDesc}>{role.description}</Text>
                 </View>
                 {selectedRole === role.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#007749" />
+                  <Ionicons name="checkmark-circle" size={24} color="#FFB81C" />
                 )}
               </TouchableOpacity>
             ))}
@@ -137,11 +370,11 @@ export default function RegisterScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>Personal Details</Text>
 
           <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#007749" style={styles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Full Name"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666666"
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
@@ -149,37 +382,42 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#007749" style={styles.inputIcon} />
+            <Ionicons name="call-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Email Address"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-            />
-          </View>
-
-          <View style={styles.inputWrapper}>
-            <Ionicons name="call-outline" size={20} color="#007749" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              placeholderTextColor="#999"
+              placeholder="Phone Number (e.g., 0821234567)"
+              placeholderTextColor="#666666"
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
             />
           </View>
 
+          <View style={styles.orContainer}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>OR</Text>
+            <View style={styles.orLine} />
+          </View>
+
           <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#007749" style={styles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              placeholderTextColor="#666666"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666666"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -190,20 +428,20 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#007749" style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
-              placeholderTextColor="#999"
+              placeholderTextColor="#666666"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
             />
           </View>
 
-          <TouchableOpacity 
-            style={[styles.registerButton, loading && styles.registerButtonDisabled]} 
-            onPress={handleRegister}
+          <TouchableOpacity
+            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+            onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()}
             disabled={loading}
           >
             <Text style={styles.registerButtonText}>
@@ -233,7 +471,7 @@ export default function RegisterScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#002395',
+    backgroundColor: '#000000',
   },
   scrollView: {
     flexGrow: 1,
@@ -262,7 +500,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   formContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1a1a1a',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 24,
@@ -272,7 +510,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFB81C',
     marginBottom: 12,
     marginTop: 10,
   },
@@ -285,24 +523,24 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: '#333333',
     marginBottom: 10,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#0a0a0a',
   },
   roleCardSelected: {
-    borderColor: '#007749',
-    backgroundColor: '#F0FFF4',
+    borderColor: '#FFB81C',
+    backgroundColor: '#1a1a1a',
   },
   roleIcon: {
     width: 45,
     height: 45,
     borderRadius: 22.5,
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#333333',
     justifyContent: 'center',
     alignItems: 'center',
   },
   roleIconSelected: {
-    backgroundColor: '#007749',
+    backgroundColor: '#FFB81C',
   },
   roleInfo: {
     flex: 1,
@@ -311,25 +549,25 @@ const styles = StyleSheet.create({
   roleName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFFFFF',
   },
   roleNameSelected: {
-    color: '#007749',
+    color: '#FFB81C',
   },
   roleDesc: {
     fontSize: 12,
-    color: '#666',
+    color: '#999999',
     marginTop: 2,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#333333',
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 12,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#0a0a0a',
     height: 50,
   },
   inputIcon: {
@@ -338,29 +576,44 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333333',
+    color: '#FFFFFF',
   },
   eyeIcon: {
     padding: 8,
   },
+  orContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#333',
+  },
+  orText: {
+    color: '#666',
+    marginHorizontal: 15,
+    fontSize: 12,
+  },
   registerButton: {
-    backgroundColor: '#007749',
+    backgroundColor: '#FFB81C',
     borderRadius: 12,
     height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
-    shadowColor: '#007749',
+    shadowColor: '#FFB81C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   registerButtonDisabled: {
-    backgroundColor: '#A3D0B0',
+    backgroundColor: '#666666',
   },
   registerButtonText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 17,
     fontWeight: '600',
   },
@@ -370,12 +623,12 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 12,
-    color: '#666',
+    color: '#999999',
     textAlign: 'center',
     lineHeight: 18,
   },
   termsLink: {
-    color: '#007749',
+    color: '#FFB81C',
     fontWeight: '600',
   },
   loginContainer: {
@@ -385,10 +638,43 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: '#666666',
+    color: '#999999',
   },
   loginLink: {
-    color: '#007749',
+    color: '#FFB81C',
     fontWeight: '700',
+  },
+  // OTP Styles
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 30,
+  },
+  otpInput: {
+    width: 50,
+    height: 55,
+    borderWidth: 2,
+    borderColor: '#FFB81C',
+    borderRadius: 12,
+    marginHorizontal: 4,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    backgroundColor: '#0a0a0a',
+  },
+  resendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  resendText: {
+    color: '#999999',
+    fontSize: 14,
+  },
+  resendLink: {
+    color: '#FFB81C',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

@@ -1,67 +1,85 @@
 import { createClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 
-const supabaseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_URL || 'https://zjcribmwgavpzycgpwva.supabase.co';
+const supabaseAnonKey = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'REDACTED_SUPABASE_JWT_2';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database types for ScholarTrack
 export type UserRole = 'parent' | 'driver' | 'admin';
 
-export interface User {
+export interface Profile {
   id: string;
   email: string;
   role: UserRole;
+  full_name: string;
+  phone: string;
   created_at: string;
 }
 
 export interface Driver {
   id: string;
   user_id: string;
-  name: string;
+  full_name: string;
   phone: string;
-  school_id: string;
   vehicle_type: string;
   license_number: string;
+  permit_number: string;
   is_verified: boolean;
+  is_available: boolean;
   rating: number;
   created_at: string;
 }
 
-export interface Parent {
+export interface School {
   id: string;
-  user_id: string;
   name: string;
-  phone: string;
-  children: Child[];
-  created_at: string;
+  address: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface Child {
   id: string;
   parent_id: string;
-  name: string;
+  full_name: string;
   school_id: string;
+  school?: School;
   grade: string;
+  pickup_address: string;
+  dropoff_address: string;
+  status: 'active' | 'inactive';
 }
 
 export interface Trip {
   id: string;
   driver_id: string;
-  route_name: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  start_time: string;
-  end_time: string;
-  students_onboard: number;
+  child_id: string;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  scheduled_time: string;
+  pickup_time: string;
+  dropoff_time: string;
+  pickup_location: string;
+  dropoff_location: string;
 }
 
 export interface Payment {
   id: string;
   parent_id: string;
   driver_id: string;
+  child_id: string;
   amount: number;
   status: 'pending' | 'paid' | 'failed';
   month: string;
-  created_at: string;
+  paid_at: string;
+}
+
+export interface DriverAssignment {
+  id: string;
+  driver_id: string;
+  child_id: string;
+  driver?: Driver;
+  status: 'pending' | 'active' | 'cancelled';
+  monthly_rate: number;
 }

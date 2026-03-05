@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DashboardStat {
   label: string;
@@ -17,7 +18,7 @@ interface Driver {
   rating: number;
 }
 
-interface Alert {
+interface AlertItem {
   id: number;
   type: 'info' | 'warning' | 'success';
   message: string;
@@ -25,6 +26,7 @@ interface Alert {
 }
 
 export default function AdminDashboardScreen() {
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
 
   const stats: DashboardStat[] = [
@@ -43,7 +45,7 @@ export default function AdminDashboardScreen() {
     { id: 4, name: 'David Mokoena', status: 'pending', trips: 12, rating: 3.8 },
   ];
 
-  const alerts: Alert[] = [
+  const alerts: AlertItem[] = [
     { id: 1, type: 'warning', message: '4 driver documents pending verification', time: '10 min ago' },
     { id: 2, type: 'success', message: 'Payment processed - R45,000 collected', time: '1 hour ago' },
     { id: 3, type: 'info', message: 'New school registered - Pretoria East Primary', time: '2 hours ago' },
@@ -58,45 +60,90 @@ export default function AdminDashboardScreen() {
   ];
 
   const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
       onPress={() => setActiveTab(tab)}
     >
-      <Ionicons name={icon as any} size={18} color={activeTab === tab ? '#fff' : '#666'} />
+      <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
       <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
 
   const getAlertColor = (type: string) => {
     switch (type) {
-      case 'success': return '#007749';
-      case 'warning': return '#FFB81C';
-      default: return '#002395';
+      case 'success': return colors.success;
+      case 'warning': return colors.warning;
+      default: return colors.primary;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return '#007749';
-      case 'pending': return '#FFB81C';
-      default: return '#d32f2f';
+      case 'active': return colors.success;
+      case 'pending': return colors.warning;
+      default: return colors.error;
     }
   };
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
+    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
+    headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
+    refreshBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: 10, marginHorizontal: 15, marginTop: -10, borderRadius: 10, elevation: 3 },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8 },
+    tabButtonActive: { backgroundColor: colors.primary },
+    tabText: { fontSize: 12, color: colors.textSecondary, marginLeft: 5 },
+    tabTextActive: { color: colors.textInverse },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: 15, borderRadius: 10, elevation: 2 },
+    statLabel: { fontSize: 12, color: colors.textSecondary },
+    statValue: { fontSize: 28, fontWeight: 'bold', color: colors.accent, marginVertical: 5 },
+    statChange: { fontSize: 12, fontWeight: 'bold' },
+    section: { padding: 15 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
+    alertCard: { backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 4, elevation: 2 },
+    alertIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+    alertInfo: { flex: 1, marginLeft: 12 },
+    alertMessage: { fontSize: 14, color: colors.text },
+    alertTime: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    actionBtn: { width: '48%', backgroundColor: colors.card, padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10, elevation: 2 },
+    actionText: { fontSize: 13, color: colors.text, marginTop: 8 },
+    listItem: { backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    avatarText: { color: colors.textInverse, fontWeight: 'bold', fontSize: 14 },
+    listInfo: { flex: 1, marginLeft: 12 },
+    listName: { fontSize: 15, fontWeight: 'bold', color: colors.text },
+    listMeta: { fontSize: 12, color: colors.textSecondary },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    statusText: { color: colors.textInverse, fontSize: 11, fontWeight: 'bold', textTransform: 'capitalize' },
+    amount: { fontSize: 16, fontWeight: 'bold', color: colors.accent },
+    financeCard: { backgroundColor: colors.card, borderRadius: 10, padding: 15, elevation: 2 },
+    financeRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+    financeLabel: { fontSize: 14, color: colors.textSecondary },
+    financeValue: { fontSize: 14, fontWeight: 'bold', color: colors.text },
+    financeTotal: { borderBottomWidth: 0, paddingTop: 15 },
+    financeLabelTotal: { fontSize: 16, fontWeight: 'bold', color: colors.text },
+    financeValueTotal: { fontSize: 18, fontWeight: 'bold', color: colors.accent },
+    exportBtn: { backgroundColor: colors.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginTop: 15, elevation: 2 },
+    exportText: { color: colors.accent, fontWeight: 'bold', marginLeft: 8 },
+  });
+
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>🎛️ Admin Dashboard</Text>
+          <Text style={styles.headerTitle}>Admin Dashboard</Text>
           <TouchableOpacity style={styles.refreshBtn} onPress={() => Alert.alert('Refresh', 'Data refreshed!')}>
-            <Ionicons name="refresh" size={20} color="#fff" />
+            <Ionicons name="refresh" size={20} color={colors.textInverse} />
           </TouchableOpacity>
         </View>
         <Text style={styles.headerSubtext}>Web-style management panel</Text>
       </View>
 
-      {/* Tabs */}
       <View style={styles.tabs}>
         <TabButton tab="overview" label="Overview" icon="grid" />
         <TabButton tab="drivers" label="Drivers" icon="car" />
@@ -104,32 +151,29 @@ export default function AdminDashboardScreen() {
         <TabButton tab="finance" label="Finance" icon="card" />
       </View>
 
-      {/* Overview Content */}
       {activeTab === 'overview' && (
         <>
-          {/* Stats Grid */}
           <View style={styles.statsGrid}>
             {stats.map((stat, index) => (
               <View key={index} style={styles.statCard}>
                 <Text style={styles.statLabel}>{stat.label}</Text>
                 <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={[styles.statChange, { color: stat.positive ? '#007749' : '#d32f2f' }]}>
+                <Text style={[styles.statChange, { color: stat.positive ? colors.success : colors.error }]}>
                   {stat.change}
                 </Text>
               </View>
             ))}
           </View>
 
-          {/* Alerts */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📢 Recent Alerts</Text>
+            <Text style={styles.sectionTitle}>Recent Alerts</Text>
             {alerts.map((alert) => (
               <View key={alert.id} style={[styles.alertCard, { borderLeftColor: getAlertColor(alert.type) }]}>
                 <View style={[styles.alertIcon, { backgroundColor: getAlertColor(alert.type) + '20' }]}>
-                  <Ionicons 
-                    name={alert.type === 'success' ? 'checkmark-circle' : alert.type === 'warning' ? 'warning' : 'information-circle'} 
-                    size={18} 
-                    color={getAlertColor(alert.type)} 
+                  <Ionicons
+                    name={alert.type === 'success' ? 'checkmark-circle' : alert.type === 'warning' ? 'warning' : 'information-circle'}
+                    size={18}
+                    color={getAlertColor(alert.type)}
                   />
                 </View>
                 <View style={styles.alertInfo}>
@@ -140,24 +184,23 @@ export default function AdminDashboardScreen() {
             ))}
           </View>
 
-          {/* Quick Actions */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
             <View style={styles.actionsGrid}>
               <TouchableOpacity style={styles.actionBtn}>
-                <Ionicons name="person-add" size={24} color="#007749" />
+                <Ionicons name="person-add" size={24} color={colors.success} />
                 <Text style={styles.actionText}>Add Driver</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn}>
-                <Ionicons name="school" size={24} color="#002395" />
+                <Ionicons name="school" size={24} color={colors.primary} />
                 <Text style={styles.actionText}>Add School</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn}>
-                <Ionicons name="document-text" size={24} color="#FFB81C" />
+                <Ionicons name="document-text" size={24} color={colors.accent} />
                 <Text style={styles.actionText}>Reports</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn}>
-                <Ionicons name="settings" size={24} color="#666" />
+                <Ionicons name="settings" size={24} color={colors.textSecondary} />
                 <Text style={styles.actionText}>Settings</Text>
               </TouchableOpacity>
             </View>
@@ -165,10 +208,9 @@ export default function AdminDashboardScreen() {
         </>
       )}
 
-      {/* Drivers Content */}
       {activeTab === 'drivers' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🚗 All Drivers ({drivers.length})</Text>
+          <Text style={styles.sectionTitle}>All Drivers ({drivers.length})</Text>
           {drivers.map((driver) => (
             <View key={driver.id} style={styles.listItem}>
               <View style={styles.listAvatar}>
@@ -176,7 +218,7 @@ export default function AdminDashboardScreen() {
               </View>
               <View style={styles.listInfo}>
                 <Text style={styles.listName}>{driver.name}</Text>
-                <Text style={styles.listMeta}>{driver.trips} trips • {driver.rating} ★</Text>
+                <Text style={styles.listMeta}>{driver.trips} trips - {driver.rating} stars</Text>
               </View>
               <View style={[styles.statusBadge, { backgroundColor: getStatusColor(driver.status) }]}>
                 <Text style={styles.statusText}>{driver.status}</Text>
@@ -186,14 +228,13 @@ export default function AdminDashboardScreen() {
         </View>
       )}
 
-      {/* Parents Content */}
       {activeTab === 'parents' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👨‍👩‍👧 Recent Payments</Text>
+          <Text style={styles.sectionTitle}>Recent Payments</Text>
           {recentPayments.map((payment) => (
             <View key={payment.id} style={styles.listItem}>
               <View style={styles.listAvatar}>
-                <Ionicons name="person" size={20} color="#fff" />
+                <Ionicons name="person" size={20} color={colors.textInverse} />
               </View>
               <View style={styles.listInfo}>
                 <Text style={styles.listName}>{payment.parent}</Text>
@@ -205,11 +246,10 @@ export default function AdminDashboardScreen() {
         </View>
       )}
 
-      {/* Finance Content */}
       {activeTab === 'finance' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>💰 Financial Overview</Text>
-          
+          <Text style={styles.sectionTitle}>Financial Overview</Text>
+
           <View style={styles.financeCard}>
             <View style={styles.financeRow}>
               <Text style={styles.financeLabel}>Total Revenue (MTD)</Text>
@@ -217,11 +257,11 @@ export default function AdminDashboardScreen() {
             </View>
             <View style={styles.financeRow}>
               <Text style={styles.financeLabel}>Collected</Text>
-              <Text style={[styles.financeValue, { color: '#007749' }]}>R109,300</Text>
+              <Text style={[styles.financeValue, { color: colors.accent }]}>R109,300</Text>
             </View>
             <View style={styles.financeRow}>
               <Text style={styles.financeLabel}>Pending</Text>
-              <Text style={[styles.financeValue, { color: '#FFB81C' }]}>R15,200</Text>
+              <Text style={[styles.financeValue, { color: colors.accent }]}>R15,200</Text>
             </View>
             <View style={styles.financeRow}>
               <Text style={styles.financeLabel}>Driver Payouts</Text>
@@ -234,7 +274,7 @@ export default function AdminDashboardScreen() {
           </View>
 
           <TouchableOpacity style={styles.exportBtn}>
-            <Ionicons name="download" size={20} color="#002395" />
+            <Ionicons name="download" size={20} color={colors.accent} />
             <Text style={styles.exportText}>Export Financial Report</Text>
           </TouchableOpacity>
         </View>
@@ -242,50 +282,3 @@ export default function AdminDashboardScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 13, color: '#FFB81C', marginTop: 5 },
-  refreshBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
-  tabs: { flexDirection: 'row', backgroundColor: '#fff', padding: 10, marginHorizontal: 15, marginTop: -10, borderRadius: 10, elevation: 3 },
-  tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8 },
-  tabButtonActive: { backgroundColor: '#002395' },
-  tabText: { fontSize: 12, color: '#666', marginLeft: 5 },
-  tabTextActive: { color: '#fff' },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
-  statCard: { width: '48%', backgroundColor: '#fff', margin: '1%', padding: 15, borderRadius: 10, elevation: 2 },
-  statLabel: { fontSize: 12, color: '#666' },
-  statValue: { fontSize: 28, fontWeight: 'bold', color: '#002395', marginVertical: 5 },
-  statChange: { fontSize: 12, fontWeight: 'bold' },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-  alertCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 4, elevation: 2 },
-  alertIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
-  alertInfo: { flex: 1, marginLeft: 12 },
-  alertMessage: { fontSize: 14, color: '#333' },
-  alertTime: { fontSize: 11, color: '#999', marginTop: 2 },
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  actionBtn: { width: '48%', backgroundColor: '#fff', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10, elevation: 2 },
-  actionText: { fontSize: 13, color: '#333', marginTop: 8 },
-  listItem: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#002395', justifyContent: 'center', alignItems: 'center' },
-  avatarText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
-  listInfo: { flex: 1, marginLeft: 12 },
-  listName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
-  listMeta: { fontSize: 12, color: '#666' },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  statusText: { color: '#fff', fontSize: 11, fontWeight: 'bold', textTransform: 'capitalize' },
-  amount: { fontSize: 16, fontWeight: 'bold', color: '#007749' },
-  financeCard: { backgroundColor: '#fff', borderRadius: 10, padding: 15, elevation: 2 },
-  financeRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  financeLabel: { fontSize: 14, color: '#666' },
-  financeValue: { fontSize: 14, fontWeight: 'bold', color: '#333' },
-  financeTotal: { borderBottomWidth: 0, paddingTop: 15 },
-  financeLabelTotal: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  financeValueTotal: { fontSize: 18, fontWeight: 'bold', color: '#007749' },
-  exportBtn: { backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginTop: 15, elevation: 2 },
-  exportText: { color: '#002395', fontWeight: 'bold', marginLeft: 8 },
-});
