@@ -202,6 +202,29 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   const pickDocument = async (docId: string) => {
     try {
+      // For testing without actual file picker - create a dummy document
+      const isTestMode = true; // Set to false for production
+
+      if (isTestMode) {
+        // Create a test document for demo purposes
+        const testDoc = {
+          uri: 'https://via.placeholder.com/300x400.png?text=Test+Document',
+          name: `test_${docId}_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+          uploadedAt: new Date(),
+        };
+
+        setDocuments((prev) =>
+          prev.map((doc) =>
+            doc.id === docId ? { ...doc, document: testDoc } : doc
+          )
+        );
+        updateComplianceStatus();
+        Alert.alert('Test Mode', 'Test document added. In production, this would open file picker.');
+        return;
+      }
+
+      // Actual document picker (works on mobile)
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'image/*'],
         copyToCacheDirectory: true,
@@ -209,7 +232,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
-        
+
         setDocuments((prev) =>
           prev.map((doc) =>
             doc.id === docId
@@ -225,10 +248,11 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               : doc
           )
         );
-        
+
         updateComplianceStatus();
       }
     } catch (error) {
+      console.error('Document pick error:', error);
       Alert.alert('Error', 'Failed to pick document. Please try again.');
     }
   };
@@ -236,6 +260,27 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   // ============ TAKE PHOTO ============
 
   const takePhoto = async (docId: string) => {
+    // Test mode - use placeholder
+    const isTestMode = true;
+
+    if (isTestMode) {
+      const testDoc = {
+        uri: 'https://via.placeholder.com/300x400.png?text=Test+Photo',
+        name: `test_photo_${docId}_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+        uploadedAt: new Date(),
+      };
+
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          doc.id === docId ? { ...doc, document: testDoc } : doc
+        )
+      );
+      updateComplianceStatus();
+      Alert.alert('Test Mode', 'Test photo added. In production, this would open camera.');
+      return;
+    }
+
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     
     if (status !== 'granted') {
