@@ -203,7 +203,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   const pickDocument = async (docId: string) => {
     try {
       // For testing without actual file picker - create a dummy document
-      const isTestMode = true; // Set to false for production
+      const isTestMode = false; // Set to false for production
 
       if (isTestMode) {
         // Create a test document for demo purposes
@@ -261,7 +261,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   const takePhoto = async (docId: string) => {
     // Test mode - use placeholder
-    const isTestMode = true;
+    const isTestMode = false;
 
     if (isTestMode) {
       const testDoc = {

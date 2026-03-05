@@ -1,179 +1,265 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
+
+interface Trip {
+  id: string;
+  scheduled_time: string;
+  status: string;
+  route_name: string;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+}
 
 export default function DriverAppScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [tripActive, setTripActive] = useState(false);
-  const [earnings] = useState({
-    today: 1400,
-    week: 8400,
-    pending: 2400,
-  });
+  const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [recentPayments, setRecentPayments] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-  const trips = [
-    { id: 1, time: '06:30 AM', status: 'completed', students: 8 },
-    { id: 2, time: '02:00 PM', status: 'in_progress', students: 8 },
-  ];
+  const loadDriverData = async () => {
+    try {
+      setLoading(true);
 
-  const payments = [
-    { parent: 'Mrs. Dlamini', student: 'Thato', status: 'paid', amount: 'R800' },
-    { parent: 'Mr. Molefe', student: 'Lesego', status: 'paid', amount: 'R800' },
-    { parent: 'Mrs. Khumalo', student: 'Kabo', status: 'pending', amount: 'R800' },
-  ];
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert('Error', 'Please login first');
+        return;
+      }
+
+      // Get driver profile
+      const { data: driverData } = await supabase
+        .from('drivers')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      setCurrentUser(driverData);
+
+      if (driverData) {
+        // Get today's trips
+        const today = new Date().toISOString().split('T')[0];
+        const { data: tripsData } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('driver_id', driverData.id)
+          .gte('scheduled_time', today)
+          .order('scheduled_time', { ascending: true })
+          .limit(5);
+
+        setTrips(tripsData || []);
+
+        // Check if there's an active trip
+        const activeTrip = tripsData?.find((t: Trip) => t.status === 'in_progress' || t.status === 'active');
+        setTripActive(!!activeTrip);
+
+        // Get payments for this driver
+        const { data: paymentsData } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('driver_id', driverData.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        // Calculate earnings
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        const weekStart = new Date(now.setDate(now.getDate() - 7)).toISOString();
+
+        const todayEarnings = (paymentsData || [])
+          .filter((p: any) => p.status === 'completed' && p.created_at >= todayStart)
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+        const weekEarnings = (paymentsData || [])
+          .filter((p: any) => p.status === 'completed' && p.created_at >= weekStart)
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+        const pendingEarnings = (paymentsData || [])
+          .filter((p: any) => p.status === 'pending')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+        setEarnings({
+          today: todayEarnings,
+          week: weekEarnings,
+          pending: pendingEarnings,
+        });
+
+        // Get recent payments for display
+        const { data: parentPayments } = await supabase
+          .from('payments')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        setRecentPayments(parentPayments || []);
+      }
+    } catch (error) {
+      console.error('Error loading driver data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDriverData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDriverData();
+  }, []);
 
   const startTrip = () => setTripActive(true);
   const endTrip = () => setTripActive(false);
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 10 },
+    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
-    statusBadge: { backgroundColor: colors.success, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-    statusText: { color: colors.textInverse, fontSize: 12, fontWeight: 'bold' },
-    headerSub: { color: colors.accent, fontSize: 14, marginTop: 5 },
-    actionsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.primary, marginTop: -1 },
-    actionBtn: { backgroundColor: colors.card, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 12, alignItems: 'center' },
-    actionText: { color: colors.text, fontSize: 12, marginTop: 5 },
-    earningsCard: { backgroundColor: colors.card, margin: 15, padding: 20, borderRadius: 15, elevation: 3 },
-    cardTitle: { fontSize: 14, color: colors.textSecondary },
-    earningsAmount: { fontSize: 36, fontWeight: 'bold', color: colors.text, marginVertical: 10 },
-    earningsRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    earningsItem: {},
-    earningsLabel: { fontSize: 12, color: colors.textSecondary },
-    earningsValue: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+    headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
+    headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
+    loadingText: { color: colors.textSecondary, marginTop: 10 },
     section: { padding: 15 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    tripCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    tripTime: { backgroundColor: colors.selected, padding: 10, borderRadius: 8 },
-    tripTimeText: { fontWeight: 'bold', color: colors.text },
-    tripInfo: { flex: 1, marginLeft: 15 },
-    tripLabel: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    tripStudents: { fontSize: 12, color: colors.textSecondary },
-    tripStatus: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
-    completed: { backgroundColor: colors.success },
-    inProgress: { backgroundColor: colors.accent },
-    tripStatusText: { color: colors.textInverse, fontSize: 11, fontWeight: 'bold' },
-    paymentCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', elevation: 2 },
-    paymentPending: { borderLeftWidth: 3, borderLeftColor: colors.accent },
-    paymentLeft: {},
-    paymentParent: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    paymentStudent: { fontSize: 12, color: colors.textSecondary },
-    paymentRight: { alignItems: 'flex-end' },
-    paymentAmount: { fontSize: 16, fontWeight: 'bold', color: colors.text },
-    paymentStatus: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, marginTop: 4 },
-    paid: { backgroundColor: colors.success },
-    pending: { backgroundColor: colors.accent },
-    paymentStatusText: { color: colors.textInverse, fontSize: 10, fontWeight: 'bold' },
-    linksGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    linkBtn: { width: '48%', backgroundColor: colors.card, padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 10, elevation: 2 },
-    linkText: { fontSize: 12, color: colors.text, marginTop: 8 },
+    earningsGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+    earningCard: { width: '31%', backgroundColor: colors.card, padding: 15, borderRadius: 10, alignItems: 'center' },
+    earningLabel: { fontSize: 12, color: colors.textSecondary },
+    earningValue: { fontSize: 18, fontWeight: 'bold', color: colors.accent, marginTop: 5 },
+    tripButton: { padding: 20, borderRadius: 15, alignItems: 'center', marginVertical: 20 },
+    tripButtonActive: { backgroundColor: '#E91E63' },
+    tripButtonInactive: { backgroundColor: colors.success },
+    tripButtonText: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
+    tripStatus: { fontSize: 14, color: colors.textInverse, marginTop: 5 },
+    tripCard: { backgroundColor: colors.card, padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    tripTime: { fontSize: 16, fontWeight: 'bold', color: colors.text },
+    tripRoute: { fontSize: 14, color: colors.textSecondary },
+    tripStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    tripStatusText: { color: colors.textInverse, fontSize: 12, fontWeight: 'bold' },
+    paymentCard: { backgroundColor: colors.card, padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    paymentInfo: { flex: 1 },
+    paymentParent: { fontSize: 15, fontWeight: 'bold', color: colors.text },
+    paymentStudent: { fontSize: 13, color: colors.textSecondary },
+    paymentAmount: { fontSize: 16, fontWeight: 'bold', color: colors.accent },
+    emptyText: { textAlign: 'center', color: colors.textSecondary, padding: 20 },
   });
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading your dashboard...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Driver Dashboard</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Online</Text>
+          <TouchableOpacity onPress={onRefresh}>
+            <Ionicons name="refresh" size={24} color={colors.textInverse} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.headerSubtext}>Welcome back, {currentUser?.full_name || 'Driver'}!</Text>
+      </View>
+
+      {/* Trip Control */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={[styles.tripButton, tripActive ? styles.tripButtonActive : styles.tripButtonInactive]}
+          onPress={tripActive ? endTrip : startTrip}
+        >
+          <Text style={styles.tripButtonText}>
+            {tripActive ? 'END TRIP' : 'START TRIP'}
+          </Text>
+          <Text style={styles.tripStatus}>
+            {tripActive ? 'Currently on a trip' : 'Tap to start your day'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Earnings */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Earnings</Text>
+        <View style={styles.earningsGrid}>
+          <View style={styles.earningCard}>
+            <Text style={styles.earningLabel}>Today</Text>
+            <Text style={styles.earningValue}>R{(earnings.today / 100).toFixed(0)}</Text>
+          </View>
+          <View style={styles.earningCard}>
+            <Text style={styles.earningLabel}>This Week</Text>
+            <Text style={styles.earningValue}>R{(earnings.week / 100).toFixed(0)}</Text>
+          </View>
+          <View style={styles.earningCard}>
+            <Text style={styles.earningLabel}>Pending</Text>
+            <Text style={styles.earningValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
           </View>
         </View>
-        <Text style={styles.headerSub}>Mamelodi Morning Route</Text>
       </View>
 
-      <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => Alert.alert('Map', 'Opening navigation...')}>
-          <Ionicons name="navigate" size={24} color={colors.text} />
-          <Text style={styles.actionText}>Navigate</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success }]} onPress={tripActive ? endTrip : startTrip}>
-          <Ionicons name={tripActive ? 'stop' : 'play'} size={24} color={colors.text} />
-          <Text style={styles.actionText}>{tripActive ? 'End Trip' : 'Start Trip'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => Alert.alert('Call', 'Opening dialer...')}>
-          <Ionicons name="call" size={24} color={colors.text} />
-          <Text style={styles.actionText}>Call</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.earningsCard}>
-        <Text style={styles.cardTitle}>Today's Earnings</Text>
-        <Text style={styles.earningsAmount}>R{earnings.today}</Text>
-        <View style={styles.earningsRow}>
-          <View style={styles.earningsItem}>
-            <Text style={styles.earningsLabel}>This Week</Text>
-            <Text style={styles.earningsValue}>R{earnings.week}</Text>
-          </View>
-          <View style={styles.earningsItem}>
-            <Text style={styles.earningsLabel}>Pending</Text>
-            <Text style={[styles.earningsValue, { color: colors.accent }]}>R{earnings.pending}</Text>
-          </View>
-        </View>
-      </View>
-
+      {/* Today's Trips */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Today's Trips</Text>
-        {trips.map((trip) => (
-          <View key={trip.id} style={styles.tripCard}>
-            <View style={styles.tripTime}>
-              <Text style={styles.tripTimeText}>{trip.time}</Text>
-            </View>
-            <View style={styles.tripInfo}>
-              <Text style={styles.tripLabel}>Mamelodi Morning</Text>
-              <Text style={styles.tripStudents}>{trip.students} students</Text>
-            </View>
-            <View style={[styles.tripStatus, trip.status === 'completed' ? styles.completed : styles.inProgress]}>
-              <Text style={styles.tripStatusText}>
-                {trip.status === 'completed' ? 'Done' : 'In Progress'}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Collect Payments</Text>
-        {payments.map((payment, index) => (
-          <View key={index} style={[styles.paymentCard, payment.status === 'pending' && styles.paymentPending]}>
-            <View style={styles.paymentLeft}>
-              <Text style={styles.paymentParent}>{payment.parent}</Text>
-              <Text style={styles.paymentStudent}>{payment.student}</Text>
-            </View>
-            <View style={styles.paymentRight}>
-              <Text style={styles.paymentAmount}>{payment.amount}</Text>
-              <View style={[styles.paymentStatus, payment.status === 'paid' ? styles.paid : styles.pending]}>
-                <Text style={styles.paymentStatusText}>
-                  {payment.status === 'paid' ? 'Paid' : 'Collect'}
+        {trips.length === 0 ? (
+          <Text style={styles.emptyText}>No trips scheduled for today</Text>
+        ) : (
+          trips.map((trip) => (
+            <View key={trip.id} style={styles.tripCard}>
+              <View>
+                <Text style={styles.tripTime}>
+                  {new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Text>
+                <Text style={styles.tripRoute}>{trip.route_name || 'Route'}</Text>
+              </View>
+              <View style={[styles.tripStatusBadge, { backgroundColor: trip.status === 'completed' ? colors.success : colors.warning }]}>
+                <Text style={styles.tripStatusText}>{trip.status}</Text>
               </View>
             </View>
-          </View>
-        ))}
+          ))
+        )}
       </View>
 
+      {/* Recent Payments */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Links</Text>
-        <View style={styles.linksGrid}>
-          <TouchableOpacity style={styles.linkBtn} onPress={() => setScreen ? setScreen('Compliance') : navigation?.navigate?.('Compliance')}>
-            <Ionicons name="document-text" size={24} color={colors.accent} />
-            <Text style={styles.linkText}>Compliance</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.linkBtn} onPress={() => Alert.alert('Vehicle', 'Vehicle info...')}>
-            <Ionicons name="car" size={24} color={colors.accent} />
-            <Text style={styles.linkText}>Vehicle</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.linkBtn} onPress={() => Alert.alert('Profile', 'Your profile...')}>
-            <Ionicons name="person" size={24} color={colors.accent} />
-            <Text style={styles.linkText}>Profile</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.linkBtn} onPress={() => Alert.alert('Support', 'Contact support...')}>
-            <Ionicons name="help-circle" size={24} color={colors.accent} />
-            <Text style={styles.linkText}>Support</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.sectionTitle}>Recent Payments</Text>
+        {recentPayments.length === 0 ? (
+          <Text style={styles.emptyText}>No recent payments</Text>
+        ) : (
+          recentPayments.map((payment) => (
+            <View key={payment.id} style={styles.paymentCard}>
+              <View style={styles.paymentInfo}>
+                <Text style={styles.paymentParent}>Payment</Text>
+                <Text style={styles.paymentStudent}>{payment.status}</Text>
+              </View>
+              <Text style={styles.paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
