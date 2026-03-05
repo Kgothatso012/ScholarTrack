@@ -1,63 +1,131 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
 
 interface DashboardStat {
   label: string;
-  value: string;
-  change: string;
-  positive: boolean;
+  value: string | number;
+  change?: string;
+  positive?: boolean;
 }
 
 interface Driver {
-  id: number;
-  name: string;
-  status: 'active' | 'pending' | 'inactive';
-  trips: number;
-  rating: number;
+  id: string;
+  full_name: string;
+  phone: string;
+  status: string;
+  is_verified: boolean;
+  created_at: string;
 }
 
-interface AlertItem {
-  id: number;
-  type: 'info' | 'warning' | 'success';
-  message: string;
-  time: string;
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  parent_id: string;
+  created_at: string;
 }
 
 export default function AdminDashboardScreen() {
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
-  const stats: DashboardStat[] = [
-    { label: 'Active Drivers', value: '24', change: '+2', positive: true },
-    { label: 'Total Students', value: '156', change: '+12', positive: true },
-    { label: 'Schools', value: '12', change: '+1', positive: true },
-    { label: 'Revenue', value: 'R124K', change: '+8%', positive: true },
-    { label: 'Trips Today', value: '45', change: '-3', positive: false },
-    { label: 'Pending Docs', value: '4', change: '0', positive: true },
-  ];
+  // Stats state
+  const [stats, setStats] = useState<DashboardStat[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
-  const drivers: Driver[] = [
-    { id: 1, name: 'John Molaba', status: 'active', trips: 245, rating: 4.8 },
-    { id: 2, name: 'Sarah Nkosi', status: 'active', trips: 189, rating: 4.9 },
-    { id: 3, name: 'Mike Sithole', status: 'pending', trips: 56, rating: 4.2 },
-    { id: 4, name: 'David Mokoena', status: 'pending', trips: 12, rating: 3.8 },
-  ];
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
 
-  const alerts: AlertItem[] = [
-    { id: 1, type: 'warning', message: '4 driver documents pending verification', time: '10 min ago' },
-    { id: 2, type: 'success', message: 'Payment processed - R45,000 collected', time: '1 hour ago' },
-    { id: 3, type: 'info', message: 'New school registered - Pretoria East Primary', time: '2 hours ago' },
-    { id: 4, type: 'warning', message: 'Trip delay reported on Route 7', time: '3 hours ago' },
-  ];
+      // Query 1: Active drivers count
+      const { count: activeDrivers, error: driversError } = await supabase
+        .from('drivers')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
 
-  const recentPayments = [
-    { id: 1, parent: 'Mrs. Dlamini', amount: 'R800', status: 'paid' },
-    { id: 2, parent: 'Mr. Molefe', amount: 'R750', status: 'paid' },
-    { id: 3, parent: 'Mrs. Khumalo', amount: 'R800', status: 'pending' },
-    { id: 4, parent: 'Ms. Ndlovu', amount: 'R700', status: 'paid' },
-  ];
+      // Query 2: Total children/students count
+      const { count: totalStudents, error: childrenError } = await supabase
+        .from('children')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Query 3: Get drivers list
+      const { data: driversData, error: driversListError } = await supabase
+        .from('drivers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      // Query 4: Get payments for revenue
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // Calculate revenue from payments
+      const revenue = paymentsData
+        ?.filter(p => p.status === 'completed' || p.status === 'paid')
+        .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+      // Query 5: Get schools count
+      const { count: schoolsCount, error: schoolsError } = await supabase
+        .from('schools')
+        .select('*', { count: 'exact', head: true });
+
+      // Set stats
+      setStats([
+        { label: 'Active Drivers', value: activeDrivers || 0, positive: true },
+        { label: 'Total Students', value: totalStudents || 0, positive: true },
+        { label: 'Schools', value: schoolsCount || 0, positive: true },
+        { label: 'Revenue', value: `R${(revenue / 100).toLocaleString()}`, positive: true },
+      ]);
+
+      // Set drivers
+      if (driversData) {
+        setDrivers(driversData.map(d => ({
+          ...d,
+          full_name: d.full_name || 'Unknown Driver',
+        })));
+      }
+
+      // Set payments
+      if (paymentsData) {
+        setPayments(paymentsData);
+      }
+
+      setTotalRevenue(revenue);
+
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      // Set empty stats on error
+      setStats([
+        { label: 'Active Drivers', value: 0 },
+        { label: 'Total Students', value: 0 },
+        { label: 'Schools', value: 0 },
+        { label: 'Revenue', value: 'R0' },
+      ]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDashboardData();
+  }, []);
 
   const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
     <TouchableOpacity
@@ -69,20 +137,18 @@ export default function AdminDashboardScreen() {
     </TouchableOpacity>
   );
 
-  const getAlertColor = (type: string) => {
-    switch (type) {
-      case 'success': return colors.success;
-      case 'warning': return colors.warning;
-      default: return colors.primary;
+  const getStatusColor = (status: string, verified: boolean) => {
+    if (!verified) return colors.warning;
+    switch (status) {
+      case 'active': return colors.success;
+      case 'inactive': return colors.error;
+      default: return colors.warning;
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return colors.success;
-      case 'pending': return colors.warning;
-      default: return colors.error;
-    }
+  const getStatusText = (status: string, verified: boolean) => {
+    if (!verified) return 'Pending';
+    return status || 'active';
   };
 
   const styles = StyleSheet.create({
@@ -92,6 +158,8 @@ export default function AdminDashboardScreen() {
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
     headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
     refreshBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
+    loadingText: { color: colors.textSecondary, marginTop: 10 },
     tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: 10, marginHorizontal: 15, marginTop: -10, borderRadius: 10, elevation: 3 },
     tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8 },
     tabButtonActive: { backgroundColor: colors.primary },
@@ -101,17 +169,8 @@ export default function AdminDashboardScreen() {
     statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: 15, borderRadius: 10, elevation: 2 },
     statLabel: { fontSize: 12, color: colors.textSecondary },
     statValue: { fontSize: 28, fontWeight: 'bold', color: colors.accent, marginVertical: 5 },
-    statChange: { fontSize: 12, fontWeight: 'bold' },
     section: { padding: 15 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    alertCard: { backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 4, elevation: 2 },
-    alertIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
-    alertInfo: { flex: 1, marginLeft: 12 },
-    alertMessage: { fontSize: 14, color: colors.text },
-    alertTime: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
-    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    actionBtn: { width: '48%', backgroundColor: colors.card, padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10, elevation: 2 },
-    actionText: { fontSize: 13, color: colors.text, marginTop: 8 },
     listItem: { backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
     listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
     avatarText: { color: colors.textInverse, fontWeight: 'bold', fontSize: 14 },
@@ -130,25 +189,44 @@ export default function AdminDashboardScreen() {
     financeValueTotal: { fontSize: 18, fontWeight: 'bold', color: colors.accent },
     exportBtn: { backgroundColor: colors.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginTop: 15, elevation: 2 },
     exportText: { color: colors.accent, fontWeight: 'bold', marginLeft: 8 },
+    emptyText: { textAlign: 'center', color: colors.textSecondary, padding: 20 },
   });
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading dashboard...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Admin Dashboard</Text>
-          <TouchableOpacity style={styles.refreshBtn} onPress={() => Alert.alert('Refresh', 'Data refreshed!')}>
+          <TouchableOpacity style={styles.refreshBtn} onPress={onRefresh}>
             <Ionicons name="refresh" size={20} color={colors.textInverse} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerSubtext}>Web-style management panel</Text>
+        <Text style={styles.headerSubtext}>Real-time data from database</Text>
       </View>
 
       <View style={styles.tabs}>
         <TabButton tab="overview" label="Overview" icon="grid" />
         <TabButton tab="drivers" label="Drivers" icon="car" />
-        <TabButton tab="parents" label="Parents" icon="people" />
-        <TabButton tab="finance" label="Finance" icon="card" />
+        <TabButton tab="parents" label="Payments" icon="card" />
       </View>
 
       {activeTab === 'overview' && (
@@ -158,50 +236,28 @@ export default function AdminDashboardScreen() {
               <View key={index} style={styles.statCard}>
                 <Text style={styles.statLabel}>{stat.label}</Text>
                 <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={[styles.statChange, { color: stat.positive ? colors.success : colors.error }]}>
-                  {stat.change}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Alerts</Text>
-            {alerts.map((alert) => (
-              <View key={alert.id} style={[styles.alertCard, { borderLeftColor: getAlertColor(alert.type) }]}>
-                <View style={[styles.alertIcon, { backgroundColor: getAlertColor(alert.type) + '20' }]}>
-                  <Ionicons
-                    name={alert.type === 'success' ? 'checkmark-circle' : alert.type === 'warning' ? 'warning' : 'information-circle'}
-                    size={18}
-                    color={getAlertColor(alert.type)}
-                  />
-                </View>
-                <View style={styles.alertInfo}>
-                  <Text style={styles.alertMessage}>{alert.message}</Text>
-                  <Text style={styles.alertTime}>{alert.time}</Text>
-                </View>
               </View>
             ))}
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={styles.actionsGrid}>
-              <TouchableOpacity style={styles.actionBtn}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
                 <Ionicons name="person-add" size={24} color={colors.success} />
-                <Text style={styles.actionText}>Add Driver</Text>
+                <Text style={[styles.listName, { marginTop: 8 }]}>Add Driver</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
+              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
                 <Ionicons name="school" size={24} color={colors.primary} />
-                <Text style={styles.actionText}>Add School</Text>
+                <Text style={[styles.listName, { marginTop: 8 }]}>Add School</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
+              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
                 <Ionicons name="document-text" size={24} color={colors.accent} />
-                <Text style={styles.actionText}>Reports</Text>
+                <Text style={[styles.listName, { marginTop: 8 }]}>Reports</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
+              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
                 <Ionicons name="settings" size={24} color={colors.textSecondary} />
-                <Text style={styles.actionText}>Settings</Text>
+                <Text style={[styles.listName, { marginTop: 8 }]}>Settings</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -211,72 +267,48 @@ export default function AdminDashboardScreen() {
       {activeTab === 'drivers' && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>All Drivers ({drivers.length})</Text>
-          {drivers.map((driver) => (
-            <View key={driver.id} style={styles.listItem}>
-              <View style={styles.listAvatar}>
-                <Text style={styles.avatarText}>{driver.name.split(' ').map(n => n[0]).join('')}</Text>
+          {drivers.length === 0 ? (
+            <Text style={styles.emptyText}>No drivers found</Text>
+          ) : (
+            drivers.map((driver) => (
+              <View key={driver.id} style={styles.listItem}>
+                <View style={styles.listAvatar}>
+                  <Text style={styles.avatarText}>
+                    {(driver.full_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.listInfo}>
+                  <Text style={styles.listName}>{driver.full_name}</Text>
+                  <Text style={styles.listMeta}>{driver.phone || 'No phone'}</Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(driver.status, driver.is_verified) }]}>
+                  <Text style={styles.statusText}>{getStatusText(driver.status, driver.is_verified)}</Text>
+                </View>
               </View>
-              <View style={styles.listInfo}>
-                <Text style={styles.listName}>{driver.name}</Text>
-                <Text style={styles.listMeta}>{driver.trips} trips - {driver.rating} stars</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(driver.status) }]}>
-                <Text style={styles.statusText}>{driver.status}</Text>
-              </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       )}
 
       {activeTab === 'parents' && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Payments</Text>
-          {recentPayments.map((payment) => (
-            <View key={payment.id} style={styles.listItem}>
-              <View style={styles.listAvatar}>
-                <Ionicons name="person" size={20} color={colors.textInverse} />
+          {payments.length === 0 ? (
+            <Text style={styles.emptyText}>No payments found</Text>
+          ) : (
+            payments.map((payment) => (
+              <View key={payment.id} style={styles.listItem}>
+                <View style={styles.listAvatar}>
+                  <Ionicons name="card" size={20} color={colors.textInverse} />
+                </View>
+                <View style={styles.listInfo}>
+                  <Text style={styles.listName}>Payment #{payment.id.substring(0, 8)}</Text>
+                  <Text style={styles.listMeta}>{payment.status}</Text>
+                </View>
+                <Text style={styles.amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
               </View>
-              <View style={styles.listInfo}>
-                <Text style={styles.listName}>{payment.parent}</Text>
-                <Text style={styles.listMeta}>{payment.status}</Text>
-              </View>
-              <Text style={styles.amount}>{payment.amount}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {activeTab === 'finance' && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Financial Overview</Text>
-
-          <View style={styles.financeCard}>
-            <View style={styles.financeRow}>
-              <Text style={styles.financeLabel}>Total Revenue (MTD)</Text>
-              <Text style={styles.financeValue}>R124,500</Text>
-            </View>
-            <View style={styles.financeRow}>
-              <Text style={styles.financeLabel}>Collected</Text>
-              <Text style={[styles.financeValue, { color: colors.accent }]}>R109,300</Text>
-            </View>
-            <View style={styles.financeRow}>
-              <Text style={styles.financeLabel}>Pending</Text>
-              <Text style={[styles.financeValue, { color: colors.accent }]}>R15,200</Text>
-            </View>
-            <View style={styles.financeRow}>
-              <Text style={styles.financeLabel}>Driver Payouts</Text>
-              <Text style={styles.financeValue}>-R89,300</Text>
-            </View>
-            <View style={[styles.financeRow, styles.financeTotal]}>
-              <Text style={styles.financeLabelTotal}>Net Revenue</Text>
-              <Text style={styles.financeValueTotal}>R35,200</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.exportBtn}>
-            <Ionicons name="download" size={20} color={colors.accent} />
-            <Text style={styles.exportText}>Export Financial Report</Text>
-          </TouchableOpacity>
+            ))
+          )}
         </View>
       )}
     </ScrollView>
