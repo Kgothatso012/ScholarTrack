@@ -21,19 +21,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
     setLoading(true);
 
-    // Check for test account
-    const emailLower = email.toLowerCase();
-    if (emailLower === 'test@scholartrack.com' && password === 'test123') {
-      await AsyncStorage.setItem('userRole', 'parent');
-      await AsyncStorage.setItem('userEmail', email);
-      await AsyncStorage.setItem('userName', 'Test Parent');
-      if (onLogin) {
-        onLogin('parent');
-      }
-      setLoading(false);
-      return;
-    }
-
     // Try Supabase auth
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -191,12 +178,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
             </Text>
           </TouchableOpacity>
-
-          <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Test Account:</Text>
-            <Text style={styles.demoText}>Email: test@scholartrack.com</Text>
-            <Text style={styles.demoText}>Password: test123</Text>
-          </View>
         </View>
       </ScrollView>
 
@@ -261,9 +242,6 @@ const styles = StyleSheet.create({
   signupContainer: { alignItems: 'center', marginBottom: 25 },
   signupText: { color: '#888888', fontSize: 14 },
   signupLink: { color: '#FFB81C', fontWeight: 'bold' },
-  demoBox: { backgroundColor: '#1a1a1a', borderRadius: 12, padding: 15, marginTop: 10, borderWidth: 1, borderColor: '#333333' },
-  demoTitle: { fontSize: 12, fontWeight: 'bold', color: '#FFB81C', marginBottom: 8 },
-  demoText: { fontSize: 12, color: '#888888', marginBottom: 3 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { backgroundColor: '#111111', borderRadius: 20, padding: 25, width: '100%', maxWidth: 400, alignItems: 'center' },
   modalClose: { position: 'absolute', top: 15, right: 15, padding: 5 },
