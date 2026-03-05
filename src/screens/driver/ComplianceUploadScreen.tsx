@@ -7,6 +7,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
+import { supabase } from '../../lib/supabase';
+import { documentService } from '../../lib/api';
 
 // ============ RSA VALIDATION UTILITIES ============
 
@@ -355,8 +357,15 @@ export default function ComplianceUploadScreen({ navigation }: any) {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call - replace with actual backend
-      // In production, this would upload files to your server/S3
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        Alert.alert('Error', 'Please login to submit compliance');
+        setIsSubmitting(false);
+        return;
+      }
+
       console.log('Submitting compliance data:', {
         ...data,
         documents: documents.map((d) => ({
@@ -366,8 +375,45 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         })),
       });
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Upload each document to Supabase Storage and save record
+      for (const doc of documents) {
+        if (doc.document) {
+          try {
+            // Upload to Supabase Storage
+            const fileUrl = await documentService.uploadDocument(
+              'documents',  // bucket name
+              `driver/${user.id}`,  // folder
+              {
+                uri: doc.document.uri,
+                name: doc.document.name,
+                type: doc.document.type
+              }
+            );
+
+            // Map doc.id to document_type
+            const docTypeMap: Record<string, string> = {
+              'pdp': 'pdp_certificate',
+              'roadworthy': 'roadworthy',
+              'driversLicense': 'drivers_license',
+              'insurance': 'insurance',
+              'vehiclePermit': 'permit'
+            };
+
+            // Save to database
+            await documentService.saveDriverDocument(
+              user.id,
+              docTypeMap[doc.id] || doc.id,
+              fileUrl,
+              doc.document.name
+            );
+
+            console.log(`Uploaded ${doc.label}: ${fileUrl}`);
+          } catch (uploadError) {
+            console.error(`Failed to upload ${doc.label}:`, uploadError);
+            // Continue with other documents
+          }
+        }
+      }
 
       // Save compliance status to AsyncStorage
       await AsyncStorage.setItem('driverCompliance', JSON.stringify({
@@ -383,18 +429,17 @@ export default function ComplianceUploadScreen({ navigation }: any) {
       }));
 
       Alert.alert(
-        'Success! 🎉',
+        'Success!',
         'Your compliance documents have been submitted for review. This typically takes 1-2 business days.',
         [
           {
             text: 'OK',
-            onPress: () => {
-              (window as any).setRole('driver');
-            },
+            onPress: () => navigation.goBack(),
           },
         ]
       );
     } catch (error) {
+      console.error('Submit error:', error);
       Alert.alert('Error', 'Failed to submit compliance. Please try again.');
     } finally {
       setIsSubmitting(false);
