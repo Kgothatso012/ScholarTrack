@@ -46,6 +46,14 @@ A complete **student transport safety app** for South Africa, inspired by inDriv
 - Support (chat, call, WhatsApp)
 - Safety Tips
 
+### 7. Fleet & Vehicle Management (Latest)
+- Fleet Tracking Dashboard (real-time driver GPS)
+- Vehicle Management (registration, document expiry tracking)
+- Parent-Driver Chat (in-app messaging)
+- Student Attendance & Reports (daily/weekly/monthly)
+- Geofencing & Alerts
+- Route Management
+
 ## App Structure
 - Hamburger menu (inDrive floating style)
 - Dark/Light theme
@@ -86,4 +94,4 @@ A complete **student transport safety app** for South Africa, inspired by inDriv
 4. Continue building!
 
 ---
-Last updated: 2026-02-15
+Last updated: 2026-03-05
