@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, Child, Trip } from '../../lib/supabase';
@@ -8,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 const ParentDashboard = ({ navigation }: any) => {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [userEmail, setUserEmail] = useState('');
