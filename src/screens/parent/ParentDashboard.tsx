@@ -62,6 +62,12 @@ const ParentDashboard = ({ navigation }: any) => {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  }, []);
+
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -152,7 +158,17 @@ const ParentDashboard = ({ navigation }: any) => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#FFB81C']}
+          tintColor="#FFB81C"
+        />
+      }
+    >
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
