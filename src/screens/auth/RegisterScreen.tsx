@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const otpInputRefs = useRef<(TextInput | null)[]>([]);
   const [pendingPhone, setPendingPhone] = useState('');
-  const [usePhoneAuth, setUsePhoneAuth] = useState(true); // Default to phone
+  const [usePhoneAuth, setUsePhoneAuth] = useState(true);
 
   const roles = [
     { id: 'parent', name: 'Parent', icon: 'people', description: 'Hire drivers for your children' },

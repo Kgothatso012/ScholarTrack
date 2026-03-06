@@ -127,7 +127,7 @@ const ParentDashboard = ({ navigation }: any) => {
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
     headerSubtext: { fontSize: 14, color: colors.accent, marginTop: 5 },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.card, marginTop: -20, marginHorizontal: 20, borderRadius: 10, elevation: 3 },
-    actionCard: { alignItems: 'center', padding: 12 },
+    actionCard: { alignItems: 'center', padding: 12, minWidth: 70, minHeight: 70 },
     actionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
     actionText: { fontSize: 12, color: colors.text, fontWeight: '600', textAlign: 'center' },
     actionDesc: { fontSize: 10, color: colors.textSecondary, textAlign: 'center', marginTop: 2 },
@@ -182,10 +182,22 @@ const ParentDashboard = ({ navigation }: any) => {
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
           <View style={styles.headerActions}>
-            <TouchableOpacity onPress={handleHelpPress} style={styles.helpBtn}>
+            <TouchableOpacity 
+              onPress={handleHelpPress} 
+              style={styles.helpBtn}
+              accessibilityLabel="Help"
+              accessibilityHint="Show or hide help information"
+              accessibilityRole="button"
+            >
               <Ionicons name="help-circle-outline" size={22} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <TouchableOpacity 
+              onPress={handleLogout} 
+              style={styles.logoutBtn}
+              accessibilityLabel="Logout"
+              accessibilityHint="Sign out of your account"
+              accessibilityRole="button"
+            >
               <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
             </TouchableOpacity>
           </View>
@@ -205,21 +217,39 @@ const ParentDashboard = ({ navigation }: any) => {
       </View>
 
       <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Live')}>
+        <TouchableOpacity 
+          style={styles.actionCard} 
+          onPress={() => navigation.navigate('Live')}
+          accessibilityLabel="Track Bus"
+          accessibilityHint="View real-time bus location"
+          accessibilityRole="button"
+        >
           <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
             <Ionicons name="map" size={22} color={colors.success} />
           </View>
           <Text style={styles.actionText}>Track</Text>
           <Text style={styles.actionDesc}>View bus location</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Hire')}>
+        <TouchableOpacity 
+          style={styles.actionCard} 
+          onPress={() => navigation.navigate('Hire')}
+          accessibilityLabel="Hire Driver"
+          accessibilityHint="Find and hire a trusted driver"
+          accessibilityRole="button"
+        >
           <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="person-add" size={22} color={colors.primary} />
           </View>
           <Text style={styles.actionText}>Hire</Text>
           <Text style={styles.actionDesc}>Find a driver</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Emergency')}>
+        <TouchableOpacity 
+          style={styles.actionCard} 
+          onPress={() => navigation.navigate('Emergency')}
+          accessibilityLabel="Emergency SOS"
+          accessibilityHint="Request emergency assistance"
+          accessibilityRole="button"
+        >
           <View style={[styles.actionIcon, { backgroundColor: colors.error + '20' }]}>
             <Ionicons name="warning" size={22} color={colors.error} />
           </View>
@@ -231,7 +261,12 @@ const ParentDashboard = ({ navigation }: any) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>My Children</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Children')}>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Children')}
+            accessibilityLabel="Add Child"
+            accessibilityHint="Add a child to your account"
+            accessibilityRole="button"
+          >
             <Text style={styles.seeAll}>Add Child +</Text>
           </TouchableOpacity>
         </View>
@@ -240,7 +275,13 @@ const ParentDashboard = ({ navigation }: any) => {
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
             <Text style={styles.emptyText}>No children added yet</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Children')}>
+            <TouchableOpacity 
+              style={styles.addButton} 
+              onPress={() => navigation.navigate('Children')}
+              accessibilityLabel="Add Your First Child"
+              accessibilityHint="Navigate to add a child to your account"
+              accessibilityRole="button"
+            >
               <Text style={styles.addButtonText}>Add Your First Child</Text>
             </TouchableOpacity>
           </View>
@@ -298,12 +339,24 @@ const ParentDashboard = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Links</Text>
-        <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('Payments')}>
+        <TouchableOpacity 
+          style={styles.linkCard} 
+          onPress={() => navigation.navigate('Payments')}
+          accessibilityLabel="View Payments"
+          accessibilityHint="Navigate to view payment history"
+          accessibilityRole="link"
+        >
           <Ionicons name="card" size={24} color={colors.primary} />
           <Text style={styles.linkText}>View Payments</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('Support')}>
+        <TouchableOpacity 
+          style={styles.linkCard} 
+          onPress={() => navigation.navigate('Support')}
+          accessibilityLabel="Get Support"
+          accessibilityHint="Navigate to support options"
+          accessibilityRole="link"
+        >
           <Ionicons name="help-circle" size={24} color={colors.primary} />
           <Text style={styles.linkText}>Get Support</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />

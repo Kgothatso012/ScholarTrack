@@ -1,0 +1,64 @@
+// Navigation type definitions
+export type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+};
+
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  Onboarding: { onComplete?: () => void };
+};
+
+export type ParentStackParamList = {
+  Home: undefined;
+  Children: undefined;
+  LinkChild: undefined;
+  ParentDocs: undefined;
+  EmergencyContacts: undefined;
+  LiveTrack: undefined;
+  Emergency: undefined;
+  Chat: undefined;
+  HireDriver: undefined;
+  Payments: undefined;
+  Support: undefined;
+  ReviewDriver: { driverId?: string };
+};
+
+export type DriverStackParamList = {
+  DriverApp: undefined;
+  DriverTrips: undefined;
+  TripManifest: undefined;
+  VehicleChecklist: undefined;
+  Compliance: undefined;
+  RegulatoryDisplay: undefined;
+  Chat: undefined;
+  History: undefined;
+  Payments: undefined;
+  Support: undefined;
+};
+
+export type AdminStackParamList = {
+  AdminDashboard: undefined;
+  FleetTracking: undefined;
+  VehicleManage: undefined;
+  AttendanceReports: undefined;
+  RouteManage: undefined;
+  EnhancedReports: undefined;
+  Documents: undefined;
+  Drivers: undefined;
+  Chat: undefined;
+  History: undefined;
+  Payments: undefined;
+  Settings: undefined;
+};
+
+// Common stack for all roles
+export type CommonStackParamList = {
+  Chat: undefined;
+  History: undefined;
+  Payments: undefined;
+  Support: undefined;
+  SafetyTips: undefined;
+  IncidentReport: undefined;
+};

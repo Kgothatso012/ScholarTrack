@@ -153,7 +153,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setThemeModeState('dark'); // Default to dark
         }
       } catch (error) {
-        console.log('Error loading theme:', error);
+        console.debug('Error loading theme:', error);
       } finally {
         setIsLoading(false);
       }
@@ -166,7 +166,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setThemeModeState(mode);
       await AsyncStorage.setItem('themeMode', mode);
     } catch (error) {
-      console.log('Error saving theme:', error);
+      console.debug('Error saving theme:', error);
     }
   };
 

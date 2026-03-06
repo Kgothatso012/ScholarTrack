@@ -134,7 +134,7 @@ export function useOfflineRetry<T>(
 
   const retryFn = useCallback(async (): Promise<T | null> => {
     if (isOffline) {
-      console.log('Skipping request - offline');
+      console.debug('Skipping request - offline');
       return null;
     }
 

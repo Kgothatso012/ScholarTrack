@@ -323,7 +323,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   // ============ SHOW DOCUMENT OPTIONS ============
 
   const showDocumentOptions = (docId: string) => {
-    console.log('showDocumentOptions called for:', docId);
+    // DEBUG: console.log('showDocumentOptions called for:', docId);
     Alert.alert(
       'Add Document',
       'Choose how to add the document',
@@ -331,14 +331,14 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         {
           text: 'Take Photo',
           onPress: () => {
-            console.log('Take Photo pressed for:', docId);
+            // DEBUG: console.log('Take Photo pressed for:', docId);
             takePhoto(docId);
           },
         },
         {
           text: 'Choose from Files',
           onPress: () => {
-            console.log('Choose File pressed for:', docId);
+            // DEBUG: console.log('Choose File pressed for:', docId);
             pickDocument(docId);
           },
         },
@@ -418,7 +418,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         return;
       }
 
-      console.log('Submitting compliance data:', {
+      // DEBUG: console.log('Submitting compliance data:', {
         ...data,
         documents: documents.map((d) => ({
           id: d.id,
@@ -459,7 +459,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               doc.document.name
             );
 
-            console.log(`Uploaded ${doc.label}: ${fileUrl}`);
+            // DEBUG: console.log(`Uploaded ${doc.label}: ${fileUrl}`);
           } catch (uploadError) {
             console.error(`Failed to upload ${doc.label}:`, uploadError);
             // Continue with other documents
@@ -815,7 +815,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                   <TouchableOpacity
                     style={styles.uploadButton}
                     onPress={() => {
-                      console.log('Upload button pressed for:', doc.id);
+                      // DEBUG: console.log('Upload button pressed for:', doc.id);
                       // Directly call takePhoto for test mode
                       takePhoto(doc.id);
                     }}
@@ -828,7 +828,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                   <TouchableOpacity
                     style={[styles.uploadButton, { marginTop: 8, backgroundColor: '#E8F5E9' }]}
                     onPress={() => {
-                      console.log('Pick button pressed for:', doc.id);
+                      // DEBUG: console.log('Pick button pressed for:', doc.id);
                       pickDocument(doc.id);
                     }}
                   >

@@ -63,7 +63,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
     try {
       await AsyncStorage.setItem('onboardingComplete', 'true');
     } catch (e) {
-      console.log('Error saving onboarding state:', e);
+      // DEBUG: console.log('Error saving onboarding state:', e);
     }
     onComplete();
   };

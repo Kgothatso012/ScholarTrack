@@ -131,11 +131,23 @@ const DriverDashboard = ({ navigation }: any) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Compliance')}>
+            <TouchableOpacity 
+              style={styles.actionBtn} 
+              onPress={() => navigation.navigate('Compliance')}
+              accessibilityLabel="Compliance"
+              accessibilityHint="View your compliance documents and status"
+              accessibilityRole="button"
+            >
               <Ionicons name="document-text" size={24} color="#007749" />
               <Text style={styles.actionText}>Compliance</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Earnings')}>
+            <TouchableOpacity 
+              style={styles.actionBtn} 
+              onPress={() => navigation.navigate('Earnings')}
+              accessibilityLabel="Earnings"
+              accessibilityHint="View your earnings and payment history"
+              accessibilityRole="button"
+            >
               <Ionicons name="cash" size={24} color="#FFB81C" />
               <Text style={styles.actionText}>Earnings</Text>
             </TouchableOpacity>
@@ -166,7 +178,13 @@ const DriverDashboard = ({ navigation }: any) => {
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Driver Dashboard</Text>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+          <TouchableOpacity 
+            onPress={handleLogout} 
+            style={styles.logoutBtn}
+            accessibilityLabel="Logout"
+            accessibilityHint="Sign out of your account"
+            accessibilityRole="button"
+          >
             <Ionicons name="log-out-outline" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -310,19 +328,43 @@ const DriverDashboard = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsGrid}>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Compliance')}>
+          <TouchableOpacity 
+            style={[styles.actionBtn, { backgroundColor: colors.card }]} 
+            onPress={() => navigation.navigate('Compliance')}
+            accessibilityLabel="Compliance"
+            accessibilityHint="View your compliance documents and status"
+            accessibilityRole="button"
+          >
             <Ionicons name="document-text" size={24} color="#007749" />
             <Text style={[styles.actionText, { color: colors.text }]}>Compliance</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Trip')}>
+          <TouchableOpacity 
+            style={[styles.actionBtn, { backgroundColor: colors.card }]} 
+            onPress={() => navigation.navigate('Trip')}
+            accessibilityLabel="Start Trip"
+            accessibilityHint="Start or manage your current trip"
+            accessibilityRole="button"
+          >
             <Ionicons name="navigate" size={24} color="#002395" />
             <Text style={[styles.actionText, { color: colors.text }]}>Start Trip</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Earnings')}>
+          <TouchableOpacity 
+            style={[styles.actionBtn, { backgroundColor: colors.card }]} 
+            onPress={() => navigation.navigate('Earnings')}
+            accessibilityLabel="Earnings"
+            accessibilityHint="View your earnings and payment history"
+            accessibilityRole="button"
+          >
             <Ionicons name="cash" size={24} color="#FFB81C" />
             <Text style={[styles.actionText, { color: colors.text }]}>Earnings</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Help', 'Contact support: 0800 123 456')}>
+          <TouchableOpacity 
+            style={[styles.actionBtn, { backgroundColor: colors.card }]} 
+            onPress={() => Alert.alert('Help', 'Contact support: 0800 123 456')}
+            accessibilityLabel="Emergency Support"
+            accessibilityHint="Contact emergency support"
+            accessibilityRole="button"
+          >
             <Ionicons name="call" size={24} color="#d32f2f" />
             <Text style={[styles.actionText, { color: colors.text }]}>Emergency</Text>
           </TouchableOpacity>
@@ -335,7 +377,7 @@ const DriverDashboard = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000000' },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: '#888888', marginTop: 10, fontSize: 16 },
+  loadingText: { color: '#AAAAAA', marginTop: 10, fontSize: 16 },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   logoutBtn: { padding: 5 },
@@ -344,7 +386,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, marginTop: -15, marginHorizontal: 15, borderRadius: 12, elevation: 3 },
   statCard: { alignItems: 'center' },
   statNumber: { fontSize: 24, fontWeight: 'bold', color: '#FFB81C' },
-  statLabel: { fontSize: 12, color: '#888888', marginTop: 3 },
+  statLabel: { fontSize: 12, color: '#AAAAAA', marginTop: 3 },
   section: { padding: 15 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 12 },
@@ -353,7 +395,7 @@ const styles = StyleSheet.create({
   paymentSummary: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
   paymentStat: { padding: 12, borderRadius: 10, alignItems: 'center', flex: 1, marginHorizontal: 4 },
   paymentStatNum: { fontSize: 20, fontWeight: 'bold' },
-  paymentStatLabel: { fontSize: 11, color: '#888888', marginTop: 3 },
+  paymentStatLabel: { fontSize: 11, color: '#AAAAAA', marginTop: 3 },
   paymentCard: { borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', elevation: 2 },
   paymentPending: { borderLeftWidth: 3, borderLeftColor: '#FFB81C' },
   paymentLeft: { flexDirection: 'row', alignItems: 'center' },
@@ -361,7 +403,7 @@ const styles = StyleSheet.create({
   avatarPaid: { backgroundColor: '#007749' },
   avatarPending: { backgroundColor: '#FFB81C' },
   paymentParent: { fontSize: 14, fontWeight: 'bold', color: '#ffffff' },
-  paymentStudent: { fontSize: 12, color: '#888888' },
+  paymentStudent: { fontSize: 12, color: '#AAAAAA' },
   paymentRight: { alignItems: 'flex-end' },
   paymentAmount: { fontSize: 14, fontWeight: 'bold', color: '#FFB81C' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 4 },
@@ -372,25 +414,25 @@ const styles = StyleSheet.create({
   routeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   routeInfo: { marginLeft: 12 },
   routeName: { fontSize: 14, fontWeight: 'bold', color: '#ffffff' },
-  routeTime: { fontSize: 12, color: '#888888' },
+  routeTime: { fontSize: 12, color: '#AAAAAA' },
   tripCard: { borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   tripTimeBox: { alignItems: 'center', marginRight: 12 },
   tripTime: { fontSize: 14, fontWeight: 'bold', color: '#FFB81C' },
-  tripType: { fontSize: 11, color: '#888888' },
+  tripType: { fontSize: 11, color: '#AAAAAA' },
   tripInfo: { flex: 1 },
   tripName: { fontSize: 14, fontWeight: 'bold', color: '#ffffff' },
-  tripStudents: { fontSize: 12, color: '#888888' },
+  tripStudents: { fontSize: 12, color: '#AAAAAA' },
   tripStatus: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   tripCompleted: { backgroundColor: '#007749' },
   tripActive: { backgroundColor: '#002395' },
   tripPending: { backgroundColor: '#FFB81C' },
   tripStatusText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
   actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  actionBtn: { width: '48%', borderRadius: 10, padding: 15, alignItems: 'center', marginBottom: 10, elevation: 2 },
+  actionBtn: { width: '48%', minHeight: 80, borderRadius: 10, padding: 15, alignItems: 'center', marginBottom: 10, elevation: 2 },
   actionText: { fontSize: 13, color: '#ffffff', marginTop: 5, fontWeight: '600' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
   emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#ffffff', marginTop: 20, marginBottom: 10 },
-  emptyText: { fontSize: 14, color: '#888888', textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: 14, color: '#AAAAAA', textAlign: 'center', lineHeight: 20 },
   emptyCard: { borderRadius: 10, padding: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   emptyCardText: { fontSize: 14, marginTop: 10 },
 });

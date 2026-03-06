@@ -59,7 +59,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               phone: data.user?.user_metadata?.phone || ''
             });
           } catch (err) {
-            console.log('Profile creation error:', err);
+            // DEBUG: console.log('Profile creation error:', err);
           }
         }
 
@@ -137,7 +137,13 @@ export default function LoginScreen({ navigation, onLogin }: any) {
           <Text style={styles.subtitleText}>Login to your account</Text>
 
           {/* What is ScholarTrack? Toggle */}
-          <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(!showInfo)}>
+          <TouchableOpacity 
+            style={styles.infoButton} 
+            onPress={() => setShowInfo(!showInfo)}
+            accessibilityLabel="What is ScholarTrack"
+            accessibilityHint="Shows information about ScholarTrack app"
+            accessibilityRole="button"
+          >
             <Ionicons name="information-circle-outline" size={18} color="#FFB81C" />
             <Text style={styles.infoButtonText}>{showInfo ? 'Hide Info' : 'What is ScholarTrack?'}</Text>
           </TouchableOpacity>
@@ -160,6 +166,9 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               setEmail('parent@test.com');
               setPassword('password123');
             }}
+            accessibilityLabel="Try Demo Account"
+            accessibilityHint="Fills in demo credentials for testing"
+            accessibilityRole="button"
           >
             <Ionicons name="play-circle-outline" size={20} color="#FFB81C" />
             <Text style={styles.demoButtonText}>Try Demo Account</Text>
@@ -188,12 +197,24 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            <TouchableOpacity 
+              onPress={() => setShowPassword(!showPassword)} 
+              style={styles.eyeIcon}
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              accessibilityHint="Toggle password visibility"
+              accessibilityRole="button"
+            >
               <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => setShowResetModal(true)}>
+          <TouchableOpacity 
+            style={styles.forgotPassword} 
+            onPress={() => setShowResetModal(true)}
+            accessibilityLabel="Forgot Password"
+            accessibilityHint="Opens dialog to reset your password"
+            accessibilityRole="button"
+          >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -201,13 +222,22 @@ export default function LoginScreen({ navigation, onLogin }: any) {
             style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
             onPress={handleLogin}
             disabled={loading}
+            accessibilityLabel={loading ? "Logging in" : "Login"}
+            accessibilityHint="Sign in to your account"
+            accessibilityRole="button"
           >
             <Text style={styles.loginButtonText}>
               {loading ? 'Logging in...' : 'Login'}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleRegister} style={styles.signupContainer}>
+          <TouchableOpacity 
+            onPress={handleRegister} 
+            style={styles.signupContainer}
+            accessibilityLabel="Sign up"
+            accessibilityHint="Navigate to registration page"
+            accessibilityRole="link"
+          >
             <Text style={styles.signupText}>
               Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
             </Text>
@@ -219,7 +249,13 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       <Modal visible={showResetModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowResetModal(false)}>
+            <TouchableOpacity 
+              style={styles.modalClose} 
+              onPress={() => setShowResetModal(false)}
+              accessibilityLabel="Close"
+              accessibilityHint="Closes the password reset dialog"
+              accessibilityRole="button"
+            >
               <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Reset Password</Text>
@@ -242,6 +278,9 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               style={[styles.loginButton, resetLoading && styles.loginButtonDisabled]}
               onPress={handlePasswordReset}
               disabled={resetLoading}
+              accessibilityLabel={resetLoading ? "Sending reset link" : "Send Reset Link"}
+              accessibilityHint="Sends password reset email to your inbox"
+              accessibilityRole="button"
             >
               <Text style={styles.loginButtonText}>
                 {resetLoading ? 'Sending...' : 'Send Reset Link'}
@@ -260,10 +299,10 @@ const styles = StyleSheet.create({
   logoContainer: { alignItems: 'center', marginBottom: 30 },
   logoCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFB81C', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
   appTitle: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
-  appSubtitle: { fontSize: 14, color: '#888888', marginTop: 5 },
+  appSubtitle: { fontSize: 14, color: '#AAAAAA', marginTop: 5 },
   formContainer: { backgroundColor: '#111111', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 },
   welcomeText: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF', marginBottom: 5 },
-  subtitleText: { fontSize: 14, color: '#888888', marginBottom: 25 },
+  subtitleText: { fontSize: 14, color: '#AAAAAA', marginBottom: 25 },
   infoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 15 },
   infoButtonText: { color: '#FFB81C', fontSize: 14, marginLeft: 5 },
   infoBox: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 15, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#FFB81C' },
@@ -274,18 +313,18 @@ const styles = StyleSheet.create({
   inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#333333', borderRadius: 12, paddingHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', height: 50 },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, fontSize: 16, color: '#FFFFFF' },
-  eyeIcon: { padding: 8 },
+  eyeIcon: { padding: 8, minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
   forgotPassword: { alignSelf: 'flex-end', marginBottom: 20 },
   forgotPasswordText: { color: '#FFB81C', fontSize: 14 },
   loginButton: { backgroundColor: '#FFB81C', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   loginButtonDisabled: { opacity: 0.6 },
   loginButtonText: { color: '#000000', fontSize: 16, fontWeight: 'bold' },
   signupContainer: { alignItems: 'center', marginBottom: 25 },
-  signupText: { color: '#888888', fontSize: 14 },
+  signupText: { color: '#AAAAAA', fontSize: 14 },
   signupLink: { color: '#FFB81C', fontWeight: 'bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { backgroundColor: '#111111', borderRadius: 20, padding: 25, width: '100%', maxWidth: 400, alignItems: 'center' },
   modalClose: { position: 'absolute', top: 15, right: 15, padding: 5 },
   modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
-  modalSubtitle: { fontSize: 14, color: '#888888', textAlign: 'center', marginBottom: 25 },
+  modalSubtitle: { fontSize: 14, color: '#AAAAAA', textAlign: 'center', marginBottom: 25 },
 });
