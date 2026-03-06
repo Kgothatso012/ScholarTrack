@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, Child, Trip } from '../../lib/supabase';
@@ -7,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 const ParentDashboard = ({ navigation }: any) => {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
@@ -119,7 +121,7 @@ const ParentDashboard = ({ navigation }: any) => {
     container: { flex: 1, backgroundColor: colors.background },
     centered: { justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 10, color: colors.textSecondary },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
+    header: { backgroundColor: colors.primary, padding: 20, paddingTop: insets.top + 20, paddingBottom: 20 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerActions: { flexDirection: 'row', alignItems: 'center' },
     helpBtn: { padding: 5, marginRight: 10 },

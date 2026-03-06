@@ -23,7 +23,7 @@ export const locationService = {
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        console.log('Location permission denied');
+        // DEBUG: console.log('Location permission denied');
         return null;
       }
 
@@ -43,7 +43,7 @@ export const locationService = {
     try {
       const hasPermission = await Location.requestBackgroundPermissionsAsync();
       if (!hasPermission) {
-        console.log('Background location permission denied');
+        // DEBUG: console.log('Background location permission denied');
         return false;
       }
 

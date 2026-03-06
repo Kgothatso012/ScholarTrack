@@ -19,7 +19,7 @@ export const notificationService = {
   // Request permissions
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.log('Push notifications require a physical device');
+      // DEBUG: console.log('Push notifications require a physical device');
       return false;
     }
 
@@ -32,7 +32,7 @@ export const notificationService = {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Push notification permission not granted');
+      // DEBUG: console.log('Push notification permission not granted');
       return false;
     }
 

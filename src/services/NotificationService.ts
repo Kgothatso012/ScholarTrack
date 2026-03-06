@@ -23,7 +23,7 @@ export const notificationService = {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Notification permissions not granted');
+      // DEBUG: console.log('Notification permissions not granted');
       return false;
     }
 
