@@ -419,13 +419,13 @@ export default function ComplianceUploadScreen({ navigation }: any) {
       }
 
       // DEBUG: console.log('Submitting compliance data:', {
-        ...data,
-        documents: documents.map((d) => ({
-          id: d.id,
-          name: d.document?.name,
-          type: d.document?.type,
-        })),
-      });
+      //   ...data,
+      //   documents: documents.map((d) => ({
+      //     id: d.id,
+      //     name: d.document?.name,
+      //     type: d.document?.type,
+      //   })),
+      // });
 
       // Upload each document to Supabase Storage and save record
       for (const doc of documents) {

@@ -121,7 +121,7 @@ const ParentDashboard = ({ navigation }: any) => {
     container: { flex: 1, backgroundColor: colors.background },
     centered: { justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 10, color: colors.textSecondary },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: insets.top + 20, paddingBottom: 20 },
+    header: { backgroundColor: colors.primary, padding: 20 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerActions: { flexDirection: 'row', alignItems: 'center' },
     helpBtn: { padding: 5, marginRight: 10 },
@@ -180,7 +180,7 @@ const ParentDashboard = ({ navigation }: any) => {
         />
       }
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
           <View style={styles.headerActions}>
