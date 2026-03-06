@@ -1,0 +1,31 @@
+// User role constants
+// Use these instead of hardcoded strings throughout the app
+
+export const USER_ROLES = {
+  PARENT: 'parent',
+  DRIVER: 'driver',
+  ADMIN: 'admin',
+} as const;
+
+export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
+
+// Screen names for navigation
+export const SCREENS = {
+  LOGIN: 'Login',
+  REGISTER: 'Register',
+  PARENT_DASHBOARD: 'ParentDashboard',
+  DRIVER_DASHBOARD: 'DriverDashboard',
+  ADMIN_DASHBOARD: 'AdminDashboard',
+  CHILDREN: 'Children',
+  TRACK_CHILD: 'TrackChild',
+  EMERGENCY: 'Emergency',
+  TRIP_HISTORY: 'TripHistory',
+  PAYMENTS: 'Payments',
+  SETTINGS: 'Settings',
+} as const;
+
+// API endpoints
+export const API = {
+  SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL || '',
+  SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '',
+} as const;

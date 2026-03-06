@@ -3,8 +3,8 @@
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://zjcribmwgavpzycgpwva.supabase.co';
-const supabaseAnonKey = 'REDACTED_SUPABASE_JWT_2';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://zjcribmwgavpzycgpwva.supabase.co';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'REDACTED_SUPABASE_JWT_2';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

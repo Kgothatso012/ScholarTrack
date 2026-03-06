@@ -14,8 +14,8 @@
       "eas": {
         "projectId": "3b702f34-db44-4b73-9ff5-2fde0fd52d2f"
       },
-      "EXPO_PUBLIC_SUPABASE_URL": "https://zjcribmwgavpzycgpwva.supabase.co",
-      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "REDACTED_SUPABASE_JWT_2"
+      "EXPO_PUBLIC_SUPABASE_URL": "${EXPO_PUBLIC_SUPABASE_URL}",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "${EXPO_PUBLIC_SUPABASE_ANON_KEY}"
     },
     "assetBundlePatterns": [
       "**/*"

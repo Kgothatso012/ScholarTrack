@@ -12,6 +12,7 @@ const ParentDashboard = ({ navigation }: any) => {
   const [children, setChildren] = useState<Child[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [userEmail, setUserEmail] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -110,18 +111,26 @@ const ParentDashboard = ({ navigation }: any) => {
     return date.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const handleHelpPress = () => {
+    setShowHelp(!showHelp);
+  };
+
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     centered: { justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 10, color: colors.textSecondary },
     header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerActions: { flexDirection: 'row', alignItems: 'center' },
+    helpBtn: { padding: 5, marginRight: 10 },
     logoutBtn: { padding: 5 },
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
     headerSubtext: { fontSize: 14, color: colors.accent, marginTop: 5 },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.card, marginTop: -20, marginHorizontal: 20, borderRadius: 10, elevation: 3 },
-    actionCard: { alignItems: 'center', padding: 15 },
-    actionText: { marginTop: 5, fontSize: 12, color: colors.text, fontWeight: '600' },
+    actionCard: { alignItems: 'center', padding: 12 },
+    actionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+    actionText: { fontSize: 12, color: colors.text, fontWeight: '600', textAlign: 'center' },
+    actionDesc: { fontSize: 10, color: colors.textSecondary, textAlign: 'center', marginTop: 2 },
     section: { padding: 20 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
@@ -172,25 +181,50 @@ const ParentDashboard = ({ navigation }: any) => {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-            <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={handleHelpPress} style={styles.helpBtn}>
+              <Ionicons name="help-circle-outline" size={22} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+              <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerSubtext}>{userEmail || 'Welcome back!'}</Text>
+
+        {/* Help/Info Panel */}
+        {showHelp && (
+          <View style={{ marginTop: 15, backgroundColor: 'rgba(255,255,255,0.15)', padding: 12, borderRadius: 8 }}>
+            <Text style={{ color: colors.accent, fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>What can you do here?</Text>
+            <Text style={{ color: colors.textInverse, fontSize: 12, marginBottom: 4 }}>• Track your child's bus in real-time</Text>
+            <Text style={{ color: colors.textInverse, fontSize: 12, marginBottom: 4 }}>• Hire a trusted driver for school transport</Text>
+            <Text style={{ color: colors.textInverse, fontSize: 12, marginBottom: 4 }}>• Add your children to monitor their trips</Text>
+            <Text style={{ color: colors.textInverse, fontSize: 12 }}>• Make payments and view trip history</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Live')}>
-          <Ionicons name="map" size={24} color={colors.success} />
-          <Text style={styles.actionText}>Track Child</Text>
+          <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
+            <Ionicons name="map" size={22} color={colors.success} />
+          </View>
+          <Text style={styles.actionText}>Track</Text>
+          <Text style={styles.actionDesc}>View bus location</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Hire')}>
-          <Ionicons name="person-add" size={24} color={colors.primary} />
-          <Text style={styles.actionText}>Hire Driver</Text>
+          <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="person-add" size={22} color={colors.primary} />
+          </View>
+          <Text style={styles.actionText}>Hire</Text>
+          <Text style={styles.actionDesc}>Find a driver</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionCard} onPress={() => navigation.navigate('Emergency')}>
-          <Ionicons name="warning" size={24} color={colors.error} />
-          <Text style={styles.actionText}>Emergency</Text>
+          <View style={[styles.actionIcon, { backgroundColor: colors.error + '20' }]}>
+            <Ionicons name="warning" size={22} color={colors.error} />
+          </View>
+          <Text style={styles.actionText}>SOS</Text>
+          <Text style={styles.actionDesc}>Emergency help</Text>
         </TouchableOpacity>
       </View>
 

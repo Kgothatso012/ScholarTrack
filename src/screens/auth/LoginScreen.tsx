@@ -12,6 +12,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -73,8 +74,12 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       const errorMessage = error?.message?.toLowerCase() || '';
       if (errorMessage.includes('email not confirmed') || errorMessage.includes('invalid email')) {
         Alert.alert('Email Not Confirmed', 'Please check your email and click the confirmation link to activate your account.');
+      } else if (errorMessage.includes('invalid login credentials') || errorMessage.includes('invalid email') || errorMessage.includes('wrong password')) {
+        Alert.alert('Email or Password Incorrect', 'Please check your credentials and try again. If you forgot your password, use the "Forgot Password" link below.');
+      } else if (errorMessage.includes('network')) {
+        Alert.alert('Connection Error', 'Please check your internet connection and try again.');
       } else {
-        Alert.alert('Login Failed', 'Invalid email or password.');
+        Alert.alert('Login Failed', 'Something went wrong. Please try again or contact support.');
       }
     } finally {
       setLoading(false);
@@ -130,6 +135,35 @@ export default function LoginScreen({ navigation, onLogin }: any) {
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.subtitleText}>Login to your account</Text>
+
+          {/* What is ScholarTrack? Toggle */}
+          <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(!showInfo)}>
+            <Ionicons name="information-circle-outline" size={18} color="#FFB81C" />
+            <Text style={styles.infoButtonText}>{showInfo ? 'Hide Info' : 'What is ScholarTrack?'}</Text>
+          </TouchableOpacity>
+
+          {showInfo && (
+            <View style={styles.infoBox}>
+              <Text style={styles.infoTitle}>Safe Student Transport</Text>
+              <Text style={styles.infoText}>• Track your child's school bus in real-time</Text>
+              <Text style={styles.infoText}>• Hire trusted, verified drivers</Text>
+              <Text style={styles.infoText}>• Get instant alerts when your child arrives</Text>
+              <Text style={styles.infoText}>• Emergency SOS button for instant help</Text>
+              <Text style={styles.infoText}>• View payments and trip history</Text>
+            </View>
+          )}
+
+          {/* Demo Login Button */}
+          <TouchableOpacity
+            style={styles.demoButton}
+            onPress={() => {
+              setEmail('parent@test.com');
+              setPassword('password123');
+            }}
+          >
+            <Ionicons name="play-circle-outline" size={20} color="#FFB81C" />
+            <Text style={styles.demoButtonText}>Try Demo Account</Text>
+          </TouchableOpacity>
 
           <View style={styles.inputWrapper}>
             <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
@@ -230,6 +264,13 @@ const styles = StyleSheet.create({
   formContainer: { backgroundColor: '#111111', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 },
   welcomeText: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF', marginBottom: 5 },
   subtitleText: { fontSize: 14, color: '#888888', marginBottom: 25 },
+  infoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 15 },
+  infoButtonText: { color: '#FFB81C', fontSize: 14, marginLeft: 5 },
+  infoBox: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 15, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#FFB81C' },
+  infoTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
+  infoText: { fontSize: 13, color: '#aaa', marginBottom: 5 },
+  demoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#FFB81C', borderRadius: 12, paddingVertical: 12, marginBottom: 20 },
+  demoButtonText: { color: '#FFB81C', fontSize: 14, fontWeight: '600', marginLeft: 8 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#333333', borderRadius: 12, paddingHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', height: 50 },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, fontSize: 16, color: '#FFFFFF' },
