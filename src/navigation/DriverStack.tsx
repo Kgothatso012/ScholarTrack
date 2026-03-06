@@ -10,29 +10,27 @@ const DriverTripScreen = React.lazy(() => import('../screens/driver/DriverTripSc
 const TripManifestScreen = React.lazy(() => import('../screens/driver/TripManifestScreen'));
 const VehicleSafetyChecklistScreen = React.lazy(() => import('../screens/driver/VehicleSafetyChecklistScreen'));
 const ComplianceScreen = React.lazy(() => import('../screens/driver/ComplianceScreen'));
-const RegulatoryDisplayScreen = React.lazy(() => import('../screens/driver/RegulatoryDisplayScreen'));
 const ChatScreen = React.lazy(() => import('../screens/ChatScreen'));
 const TripHistoryScreen = React.lazy(() => import('../screens/safety/TripHistoryScreen'));
-const PaymentDetailsScreen = React.lazy(() => import('../screens/payments/PaymentDetailsScreen'));
 const SupportScreen = React.lazy(() => import('../screens/support/SupportScreen'));
+const SettingsScreen = React.lazy(() => import('../screens/settings/SettingsScreen'));
 
 const screenOptions = {
-  headerShown: false,
+  headerShown: true,
+  headerBackTitleVisible: false,
+  headerTintColor: '#FFB81C',
+  headerStyle: { backgroundColor: '#000000' },
+  headerTitleStyle: { color: '#FFFFFF' },
 };
 
 export function DriverStack() {
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen name="DriverApp" component={DriverAppScreen} />
-      <Stack.Screen name="DriverTrips" component={DriverTripScreen} />
-      <Stack.Screen name="TripManifest" component={TripManifestScreen} />
-      <Stack.Screen name="VehicleChecklist" component={VehicleSafetyChecklistScreen} />
-      <Stack.Screen name="Compliance" component={ComplianceScreen} />
-      <Stack.Screen name="RegulatoryDisplay" component={RegulatoryDisplayScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="History" component={TripHistoryScreen} />
-      <Stack.Screen name="Payments" component={PaymentDetailsScreen} />
-      <Stack.Screen name="Support" component={SupportScreen} />
+    <Stack.Navigator>
+      <Stack.Screen
+        name="DriverApp"
+        component={DriverAppScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }

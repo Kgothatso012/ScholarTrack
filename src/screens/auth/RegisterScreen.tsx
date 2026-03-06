@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const otpInputRefs = useRef<(TextInput | null)[]>([]);
   const [pendingPhone, setPendingPhone] = useState('');
-  const [usePhoneAuth, setUsePhoneAuth] = useState(true);
+  const [usePhoneAuth, setUsePhoneAuth] = useState(false);
 
   const roles = [
     { id: 'parent', name: 'Parent', icon: 'people', description: 'Hire drivers for your children' },
@@ -81,7 +81,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
 
       if (error) {
         // If phone auth fails (no SMS provider), fall back to email
-        if (error.message.includes('phone') || error.message.includes('SMS')) {
+        if (error.message.includes('phone') || error.message.includes('SMS') || error.message.includes('disabled')) {
           Alert.alert(
             'SMS Not Available',
             'Phone verification requires SMS provider setup. Would you like to register with email instead?',
@@ -185,7 +185,19 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
         }}
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create account.');
+      console.error('Registration error:', error);
+      const errorMsg = error?.message || error?.error_description || '';
+
+      // Check for specific error cases
+      if (errorMsg.toLowerCase().includes('already registered') ||
+          errorMsg.toLowerCase().includes('already exists') ||
+          errorMsg.toLowerCase().includes('user already')) {
+        Alert.alert('Email Already Registered', 'This email is already in use. Please login instead or use a different email.');
+      } else if (errorMsg.toLowerCase().includes('invalid email')) {
+        Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      } else {
+        Alert.alert('Registration Error', errorMsg || 'Failed to create account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

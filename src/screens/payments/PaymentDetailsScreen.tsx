@@ -25,7 +25,7 @@ interface Payment {
   description: string;
 }
 
-export default function PaymentScreen() {
+export default function PaymentDetailsScreen() {
   const { colors } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('card');

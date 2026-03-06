@@ -132,6 +132,8 @@ export default function DriverAppScreen({ navigation, setScreen }: any) {
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerActions: { flexDirection: 'row', alignItems: 'center' },
+    headerActionBtn: { padding: 5, marginLeft: 10 },
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
     headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
@@ -158,6 +160,11 @@ export default function DriverAppScreen({ navigation, setScreen }: any) {
     paymentStudent: { fontSize: 13, color: colors.textSecondary },
     paymentAmount: { fontSize: 16, fontWeight: 'bold', color: colors.accent },
     emptyText: { textAlign: 'center', color: colors.textSecondary, padding: 20 },
+    menuGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    menuCard: { width: '31%', backgroundColor: colors.card, padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
+    menuIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+    menuText: { fontSize: 12, color: colors.text, fontWeight: '600', textAlign: 'center' },
+    menuTextYellow: { fontSize: 12, color: colors.accent || '#FFB81C', fontWeight: '600', textAlign: 'center' },
   });
 
   if (loading) {
@@ -180,14 +187,118 @@ export default function DriverAppScreen({ navigation, setScreen }: any) {
         />
       }
     >
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Driver Dashboard</Text>
-          <TouchableOpacity onPress={onRefresh}>
-            <Ionicons name="refresh" size={24} color={colors.textInverse} />
+      <View style={[styles.header, { paddingTop: insets.top + 20, paddingBottom: 20, paddingHorizontal: 20 }]}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => Alert.alert('Menu', 'Menu options')}>
+            <Ionicons name="menu" size={28} color={colors.textInverse} />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>Driver Dashboard</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity onPress={onRefresh} style={{ padding: 5 }}>
+              <Ionicons name="refresh" size={22} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Alert.alert('Logout', 'Are you sure?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Logout', style: 'destructive', onPress: async () => {
+                await supabase.auth.signOut();
+                (window as any).logout?.();
+              }}
+            ])} style={{ padding: 5, marginLeft: 10 }}>
+              <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerSubtext}>Welcome back, {currentUser?.full_name || 'Driver'}!</Text>
+      </View>
+
+      {/* Quick Actions Menu */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Menu</Text>
+        <View style={styles.menuGrid}>
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('DriverTrips')}
+            accessibilityLabel="My Trips"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="bus" size={22} color={colors.primary} />
+            </View>
+            <Text style={styles.menuText}>My Trips</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('Compliance')}
+            accessibilityLabel="Compliance"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.success + '20' }]}>
+              <Ionicons name="document-text" size={22} color={colors.success} />
+            </View>
+            <Text style={styles.menuText}>Compliance</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('VehicleChecklist')}
+            accessibilityLabel="Vehicle Check"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.warning + '20' }]}>
+              <Ionicons name="car-sport" size={22} color={colors.warning} />
+            </View>
+            <Text style={styles.menuText}>Vehicle Check</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('Chat')}
+            accessibilityLabel="Messages"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.accent + '20' }]}>
+              <Ionicons name="chatbubbles" size={22} color={colors.accent} />
+            </View>
+            <Text style={styles.menuText}>Messages</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('Support')}
+            accessibilityLabel="Support"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.error + '20' }]}>
+              <Ionicons name="help-circle" size={22} color={colors.error} />
+            </View>
+            <Text style={styles.menuText}>Support</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('History')}
+            accessibilityLabel="Trip History"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: '#9C27B0' + '20' }]}>
+              <Ionicons name="time" size={22} color="#9C27B0" />
+            </View>
+            <Text style={styles.menuText}>History</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuCard}
+            onPress={() => navigation?.navigate?.('Settings')}
+            accessibilityLabel="Settings"
+            accessibilityRole="button"
+          >
+            <View style={[styles.menuIcon, { backgroundColor: '#607D8B' + '20' }]}>
+              <Ionicons name="settings" size={22} color="#607D8B" />
+            </View>
+            <Text style={styles.menuText}>Settings</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Trip Control */}

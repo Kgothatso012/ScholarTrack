@@ -36,6 +36,7 @@ export type DriverStackParamList = {
   History: undefined;
   Payments: undefined;
   Support: undefined;
+  Settings: undefined;
 };
 
 export type AdminStackParamList = {
