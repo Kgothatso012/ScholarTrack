@@ -1,5 +1,5 @@
 import React from 'react';
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationProp, useNavigation } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -15,21 +15,21 @@ interface AuthStackProps {
 
 const LoadingFallback = () => <React.Fragment />;
 
-// Screen components with proper navigation
+// Screen components with proper navigation using useNavigation hook
 function LoginScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
-  const navigation = React.useRef<NativeStackNavigationProp<AuthStackParamList>>(null);
-  
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+
   return (
     <LoginScreen
       onLogin={onLogin}
       navigation={{
         navigate: (screen: string) => {
           if (screen === 'Register') {
-            navigation.current?.navigate('Register');
+            navigation.navigate('Register');
           }
         },
         goBack: () => {
-          navigation.current?.goBack();
+          navigation.goBack();
         }
       }}
     />
@@ -37,18 +37,18 @@ function LoginScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
 }
 
 function RegisterScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
-  const navigation = React.useRef<NativeStackNavigationProp<AuthStackParamList>>(null);
-  
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+
   return (
     <RegisterScreen
       onLogin={onLogin}
       navigation={{
         goBack: () => {
-          navigation.current?.goBack();
+          navigation.goBack();
         },
         navigate: (screen: string) => {
           if (screen === 'Login') {
-            navigation.current?.navigate('Login');
+            navigation.navigate('Login');
           }
         }
       }}
