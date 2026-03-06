@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   // Enable UUID extension
@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "postgis"');
 
   // ============ USERS TABLE ============
-  await knex.schema.createTable('users', (table) => {
+  await knex.schema.createTable('users', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.string('email').unique().notNullable();
     table.string('password_hash').notNullable();
@@ -19,7 +19,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ DRIVERS TABLE ============
-  await knex.schema.createTable('drivers', (table) => {
+  await knex.schema.createTable('drivers', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
     table.string('id_number', 13).unique();
@@ -38,7 +38,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ PARENTS TABLE ============
-  await knex.schema.createTable('parents', (table) => {
+  await knex.schema.createTable('parents', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
     table.string('address');
@@ -51,7 +51,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ CHILDREN TABLE ============
-  await knex.schema.createTable('children', (table) => {
+  await knex.schema.createTable('children', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('parent_id').references('id').inTable('parents').onDelete('CASCADE');
     table.string('full_name').notNullable();
@@ -64,7 +64,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ SCHOOLS TABLE ============
-  await knex.schema.createTable('schools', (table) => {
+  await knex.schema.createTable('schools', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.string('name').notNullable();
     table.string('address');
@@ -78,7 +78,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ DRIVER_SCHOOLS (Many-to-Many) ============
-  await knex.schema.createTable('driver_schools', (table) => {
+  await knex.schema.createTable('driver_schools', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('CASCADE');
     table.uuid('school_id').references('id').inTable('schools').onDelete('CASCADE');
@@ -89,7 +89,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ TRIPS TABLE ============
-  await knex.schema.createTable('trips', (table) => {
+  await knex.schema.createTable('trips', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('SET NULL');
     table.uuid('child_id').references('id').inTable('children').onDelete('CASCADE');
@@ -111,7 +111,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ COMPLIANCE DOCUMENTS TABLE ============
-  await knex.schema.createTable('compliance_documents', (table) => {
+  await knex.schema.createTable('compliance_documents', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('CASCADE');
     table.enum('document_type', ['pdp', 'roadworthy', 'drivers_license', 'insurance', 'vehicle_permit', 'id_copy']).notNullable();
@@ -126,7 +126,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ PAYMENTS TABLE ============
-  await knex.schema.createTable('payments', (table) => {
+  await knex.schema.createTable('payments', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('parent_id').references('id').inTable('parents').onDelete('CASCADE');
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('SET NULL');
@@ -143,7 +143,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ REVIEWS TABLE ============
-  await knex.schema.createTable('reviews', (table) => {
+  await knex.schema.createTable('reviews', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('parent_id').references('id').inTable('parents').onDelete('CASCADE');
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('CASCADE');
@@ -156,7 +156,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ DRIVER LOCATIONS (Real-time) ============
-  await knex.schema.createTable('driver_locations', (table) => {
+  await knex.schema.createTable('driver_locations', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('driver_id').references('id').inTable('drivers').onDelete('CASCADE');
     table.decimal('latitude', 10, 8).notNullable();
