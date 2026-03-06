@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, Child, Trip } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 const ParentDashboard = ({ navigation }: any) => {
   const { colors } = useTheme();
@@ -161,9 +162,8 @@ const ParentDashboard = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={colors.accent} />
-        <Text style={styles.loadingText}>Loading your data...</Text>
+      <View style={styles.container}>
+        <SkeletonDashboard />
       </View>
     );
   }

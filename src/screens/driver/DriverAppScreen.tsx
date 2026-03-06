@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 interface Trip {
   id: string;
@@ -161,9 +162,8 @@ export default function DriverAppScreen({ navigation, setScreen }: any) {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading your dashboard...</Text>
+      <View style={styles.container}>
+        <SkeletonDashboard />
       </View>
     );
   }
