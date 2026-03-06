@@ -1,5 +1,5 @@
 import React from 'react';
-import { createNativeStackNavigator, NativeStackNavigationProp, useNavigation } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -15,75 +15,77 @@ interface AuthStackProps {
 
 const LoadingFallback = () => <React.Fragment />;
 
-// Screen components with proper navigation using useNavigation hook
-function LoginScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+// Use a simple state-based approach for navigation
+export function AuthStack({ onLogin }: AuthStackProps) {
+  const [showRegister, setShowRegister] = React.useState(false);
 
+  // Custom navigation handler
+  const navigateToRegister = () => setShowRegister(true);
+  const navigateToLogin = () => setShowRegister(false);
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {showRegister ? (
+        <Stack.Screen name="Register">
+          {() => (
+            <React.Suspense fallback={<LoadingFallback />}>
+              <RegisterScreenWrapper onLogin={onLogin} onNavigateToLogin={navigateToLogin} />
+            </React.Suspense>
+          )}
+        </Stack.Screen>
+      ) : (
+        <>
+          <Stack.Screen name="Login">
+            {() => (
+              <React.Suspense fallback={<LoadingFallback />}>
+                <LoginScreenWrapper onLogin={onLogin} onNavigateToRegister={navigateToRegister} />
+              </React.Suspense>
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Onboarding">
+            {() => (
+              <React.Suspense fallback={<LoadingFallback />}>
+                <OnboardingScreenWrapper onLogin={onLogin} />
+              </React.Suspense>
+            )}
+          </Stack.Screen>
+        </>
+      )}
+    </Stack.Navigator>
+  );
+}
+
+// Wrapper components
+function LoginScreenWrapper({ onLogin, onNavigateToRegister }: { onLogin: (role: string) => void; onNavigateToRegister: () => void }) {
   return (
     <LoginScreen
       onLogin={onLogin}
       navigation={{
-        navigate: (screen: string) => {
-          if (screen === 'Register') {
-            navigation.navigate('Register');
-          }
-        },
-        goBack: () => {
-          navigation.goBack();
-        }
+        onRegister: onNavigateToRegister,
+        navigate: () => {},
+        goBack: () => {}
       }}
     />
   );
 }
 
-function RegisterScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-
+function RegisterScreenWrapper({ onLogin, onNavigateToLogin }: { onLogin: (role: string) => void; onNavigateToLogin: () => void }) {
   return (
     <RegisterScreen
       onLogin={onLogin}
       navigation={{
-        goBack: () => {
-          navigation.goBack();
-        },
+        onRegister: () => {},
         navigate: (screen: string) => {
           if (screen === 'Login') {
-            navigation.navigate('Login');
+            onNavigateToLogin();
           }
-        }
+        },
+        goBack: () => onNavigateToLogin()
       }}
     />
   );
 }
 
-function OnboardingScreenWithNav({ onLogin }: { onLogin: (role: string) => void }) {
+function OnboardingScreenWrapper({ onLogin }: { onLogin: (role: string) => void }) {
   return <OnboardingScreen onComplete={() => onLogin('')} />;
-}
-
-export function AuthStack({ onLogin }: AuthStackProps) {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login">
-        {() => (
-          <React.Suspense fallback={<LoadingFallback />}>
-            <LoginScreenWithNav onLogin={onLogin} />
-          </React.Suspense>
-        )}
-      </Stack.Screen>
-      <Stack.Screen name="Register">
-        {() => (
-          <React.Suspense fallback={<LoadingFallback />}>
-            <RegisterScreenWithNav onLogin={onLogin} />
-          </React.Suspense>
-        )}
-      </Stack.Screen>
-      <Stack.Screen name="Onboarding">
-        {() => (
-          <React.Suspense fallback={<LoadingFallback />}>
-            <OnboardingScreenWithNav onLogin={onLogin} />
-          </React.Suspense>
-        )}
-      </Stack.Screen>
-    </Stack.Navigator>
-  );
 }
