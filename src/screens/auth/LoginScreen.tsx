@@ -16,7 +16,64 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const [resetLoading, setResetLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
+  // Demo login - bypass Supabase
+  const handleDemoLogin = async (role: string) => {
+    console.log('Demo login clicked, role:', role);
+    setLoading(true);
+    try {
+      // Determine role and name based on demo selection
+      let userRole = role;
+      let userName = '';
+      let userEmail = '';
+
+      switch (role) {
+        case 'parent':
+          userName = 'Demo Parent';
+          userEmail = 'parent@demo.com';
+          break;
+        case 'driver':
+          userName = 'Demo Driver';
+          userEmail = 'driver@demo.com';
+          break;
+        case 'admin':
+          userName = 'Demo Admin';
+          userEmail = 'admin@demo.com';
+          break;
+        default:
+          userName = 'Demo User';
+          userEmail = 'demo@test.com';
+      }
+
+      // Store user data directly (bypass Supabase)
+      await AsyncStorage.setItem('userRole', userRole);
+      await AsyncStorage.setItem('userEmail', userEmail);
+      await AsyncStorage.setItem('userName', userName);
+      await AsyncStorage.setItem('userId', `demo-${role}-${Date.now()}`);
+
+      console.log('Demo login success, calling onLogin with:', userRole);
+      // Fallback: if onLogin not provided, try window method (web)
+      if (onLogin) {
+        onLogin(userRole);
+      } else if (typeof window !== 'undefined' && (window as any).__handleLogin) {
+        (window as any).__handleLogin(userRole);
+      } else {
+        console.error('onLogin is undefined');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Demo login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async () => {
+    // Check for demo credentials
+    if (email === 'parent@demo.com' || email === 'driver@demo.com' || email === 'admin@demo.com') {
+      const role = email.split('@')[0];
+      await handleDemoLogin(role);
+      return;
+    }
+
     if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password');
       return;
@@ -161,13 +218,36 @@ export default function LoginScreen({ navigation, onLogin }: any) {
             </View>
           )}
 
-          {/* Demo Login Button */}
+          {/* Demo Login Buttons */}
+          <Text style={styles.demoTitle}>Quick Demo Login</Text>
+          <View style={styles.demoButtons}>
+            <TouchableOpacity
+              style={[styles.demoRoleBtn, { backgroundColor: '#007749' }]}
+              onPress={() => handleDemoLogin('parent')}
+              accessibilityLabel="Login as Parent"
+            >
+              <Text style={styles.demoRoleText}>Parent</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.demoRoleBtn, { backgroundColor: '#002395' }]}
+              onPress={() => handleDemoLogin('driver')}
+              accessibilityLabel="Login as Driver"
+            >
+              <Text style={styles.demoRoleText}>Driver</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.demoRoleBtn, { backgroundColor: '#FFB81C' }]}
+              onPress={() => handleDemoLogin('admin')}
+              accessibilityLabel="Login as Admin"
+            >
+              <Text style={styles.demoRoleText}>Admin</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Old demo button - kept for compatibility */}
           <TouchableOpacity
             style={styles.demoButton}
-            onPress={() => {
-              setEmail('parent@test.com');
-              setPassword('password123');
-            }}
+            onPress={() => handleDemoLogin('parent')}
             accessibilityLabel="Try Demo Account"
             accessibilityHint="Fills in demo credentials for testing"
             accessibilityRole="button"
@@ -312,6 +392,10 @@ const styles = StyleSheet.create({
   infoText: { fontSize: 13, color: '#aaa', marginBottom: 5 },
   demoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#FFB81C', borderRadius: 12, paddingVertical: 12, marginBottom: 20 },
   demoButtonText: { color: '#FFB81C', fontSize: 14, fontWeight: '600', marginLeft: 8 },
+  demoTitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 12 },
+  demoButtons: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginBottom: 20 },
+  demoRoleBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
+  demoRoleText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#333333', borderRadius: 12, paddingHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', height: 50 },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, fontSize: 16, color: '#FFFFFF' },

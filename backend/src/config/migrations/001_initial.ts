@@ -72,7 +72,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('city').defaultTo('Johannesburg');
     table.decimal('latitude', 10, 8);
     table.decimal('longitude', 11, 8);
-    table.geography('location', 'POINT', 4326);
+    await knex.raw('ALTER TABLE schools ADD COLUMN location geography(POINT, 4326)');
     table.integer('radius_meters').defaultTo(500);
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
@@ -167,13 +167,13 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   // ============ GEOFENCES ============
-  await knex.schema.createTable('geofences', (table) => {
+  await knex.schema.createTable('geofences', (table: Knex.TableBuilder) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.string('name').notNullable();
     table.enum('zone_type', ['school', 'home', 'pickup', 'dropoff']).notNullable();
     table.uuid('school_id').references('id').inTable('schools').onDelete('SET NULL');
     table.uuid('parent_id').references('id').inTable('parents').onDelete('SET NULL');
-    table.geography('location', 'POINT', 4326);
+    await knex.raw('ALTER TABLE geofences ADD COLUMN location geography(POINT, 4326)');
     table.integer('radius_meters').defaultTo(200);
     table.boolean('is_active').defaultTo(true);
     table.timestamp('created_at').defaultTo(knex.fn.now());

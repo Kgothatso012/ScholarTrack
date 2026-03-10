@@ -1,0 +1,15 @@
+#!/bin/bash
+# Pre-commit hook example
+# Run TypeScript check before committing
+
+echo "Running TypeScript check..."
+cd /home/kgothatso012/ScholarTrack-Expo54
+npx tsc --noEmit
+
+if [ $? -eq 0 ]; then
+  echo "TypeScript check passed!"
+  exit 0
+else
+  echo "TypeScript errors found. Fix before committing."
+  exit 1
+fi

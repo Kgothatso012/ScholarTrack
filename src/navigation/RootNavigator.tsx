@@ -16,49 +16,40 @@ export type RootNavigatorProps = {
   onOnboardingComplete: () => void;
 };
 
-export function RootNavigator({ 
-  userRole, 
-  isAuthenticated, 
+export function RootNavigator({
+  userRole,
+  isAuthenticated,
   showOnboarding,
   onLogin,
   onOnboardingComplete
 }: RootNavigatorProps) {
-  // Show onboarding first
-  if (showOnboarding) {
+  console.log('RootNavigator props:', { userRole, isAuthenticated, showOnboarding });
+
+  // Show role-based main app when authenticated
+  if (isAuthenticated && userRole) {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Auth">
-          {() => <AuthStack onLogin={onLogin} />}
+        <Stack.Screen name="Main">
+          {() => {
+            switch (userRole) {
+              case 'driver':
+                return <DriverStack />;
+              case 'admin':
+                return <AdminStack />;
+              default:
+                return <ParentStack />;
+            }
+          }}
         </Stack.Screen>
       </Stack.Navigator>
     );
   }
 
   // Not authenticated - show auth stack
-  if (!isAuthenticated) {
-    return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Auth">
-          {() => <AuthStack onLogin={onLogin} />}
-        </Stack.Screen>
-      </Stack.Navigator>
-    );
-  }
-
-  // Authenticated - show appropriate stack based on role
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main">
-        {() => {
-          switch (userRole) {
-            case 'driver':
-              return <DriverStack />;
-            case 'admin':
-              return <AdminStack />;
-            default:
-              return <ParentStack />;
-          }
-        }}
+      <Stack.Screen name="Auth">
+        {() => <AuthStack onLogin={onLogin} />}
       </Stack.Screen>
     </Stack.Navigator>
   );
