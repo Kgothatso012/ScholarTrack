@@ -72,10 +72,12 @@ export async function up(knex: Knex): Promise<void> {
     table.string('city').defaultTo('Johannesburg');
     table.decimal('latitude', 10, 8);
     table.decimal('longitude', 11, 8);
-    await knex.raw('ALTER TABLE schools ADD COLUMN location geography(POINT, 4326)');
     table.integer('radius_meters').defaultTo(500);
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
+
+  // Add geography column after table creation
+  await knex.raw('ALTER TABLE schools ADD COLUMN IF NOT EXISTS location geography(POINT, 4326)');
 
   // ============ DRIVER_SCHOOLS (Many-to-Many) ============
   await knex.schema.createTable('driver_schools', (table: Knex.TableBuilder) => {
@@ -173,11 +175,13 @@ export async function up(knex: Knex): Promise<void> {
     table.enum('zone_type', ['school', 'home', 'pickup', 'dropoff']).notNullable();
     table.uuid('school_id').references('id').inTable('schools').onDelete('SET NULL');
     table.uuid('parent_id').references('id').inTable('parents').onDelete('SET NULL');
-    await knex.raw('ALTER TABLE geofences ADD COLUMN location geography(POINT, 4326)');
     table.integer('radius_meters').defaultTo(200);
     table.boolean('is_active').defaultTo(true);
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
+
+  // Add geography column after table creation
+  await knex.raw('ALTER TABLE geofences ADD COLUMN IF NOT EXISTS location geography(POINT, 4326)');
 
   // ============ INDEXES ============
   await knex.schema.raw('CREATE INDEX IF NOT EXISTS idx_trips_date ON trips(trip_date)');
