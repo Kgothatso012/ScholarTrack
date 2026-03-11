@@ -18,7 +18,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
   // Demo login - bypass Supabase
   const handleDemoLogin = async (role: string) => {
-    console.log('Demo login clicked, role:', role);
     setLoading(true);
     try {
       // Determine role and name based on demo selection
@@ -50,7 +49,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       await AsyncStorage.setItem('userName', userName);
       await AsyncStorage.setItem('userId', `demo-${role}-${Date.now()}`);
 
-      console.log('Demo login success, calling onLogin with:', userRole);
       // Fallback: if onLogin not provided, try window method (web)
       if (onLogin) {
         onLogin(userRole);

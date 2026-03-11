@@ -3,7 +3,7 @@
 
 import { supabase } from './supabase';
 
-const PAYSTACK_SECRET_KEY = 'sk_live_your_secret_key_here'; // Replace with env variable in production
+const PAYSTACK_SECRET_KEY = process.env.EXPO_PUBLIC_PAYSTACK_SECRET_KEY || '';
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
 
 export interface PayStackTransaction {

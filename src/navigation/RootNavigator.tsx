@@ -23,8 +23,6 @@ export function RootNavigator({
   onLogin,
   onOnboardingComplete
 }: RootNavigatorProps) {
-  console.log('RootNavigator props:', { userRole, isAuthenticated, showOnboarding });
-
   // Show role-based main app when authenticated
   if (isAuthenticated && userRole) {
     return (
