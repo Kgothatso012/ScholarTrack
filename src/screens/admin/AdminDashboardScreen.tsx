@@ -28,7 +28,7 @@ interface Payment {
   created_at: string;
 }
 
-export default function AdminDashboardScreen() {
+export default function AdminDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -216,9 +216,17 @@ export default function AdminDashboardScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Admin Dashboard</Text>
-          <TouchableOpacity style={styles.refreshBtn} onPress={onRefresh}>
-            <Ionicons name="refresh" size={20} color={colors.textInverse} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity style={styles.refreshBtn} onPress={() => navigation?.navigate?.('FleetTracking')}>
+              <Ionicons name="location" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.refreshBtn} onPress={() => navigation?.navigate?.('Settings')}>
+              <Ionicons name="settings-outline" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.refreshBtn} onPress={onRefresh}>
+              <Ionicons name="refresh" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerSubtext}>Real-time data from database</Text>
       </View>

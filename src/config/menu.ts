@@ -19,6 +19,7 @@ export const MENU_ITEMS: Record<string, MenuItem[]> = {
     { name: 'Messages', icon: 'chatbubbles', to: 'Chat' },
     { name: 'Hire Driver', icon: 'person-add', to: 'Hire' },
     { name: 'Payments', icon: 'card', to: 'Payments' },
+    { name: 'Settings', icon: 'settings', to: 'Settings' },
     { name: 'Support', icon: 'help-circle', to: 'Support' },
   ],
   driver: [
@@ -30,7 +31,8 @@ export const MENU_ITEMS: Record<string, MenuItem[]> = {
     { name: 'Regulatory', icon: 'information-circle', to: 'RegulatoryDisplay' },
     { name: 'Messages', icon: 'chatbubbles', to: 'Chat' },
     { name: 'Trips', icon: 'bus', to: 'History' },
-    { name: 'Earnings', icon: 'cash', to: 'Payments' },
+    { name: 'Earnings', icon: 'cash', to: 'Earnings' },
+    { name: 'Settings', icon: 'settings', to: 'Settings' },
     { name: 'Support', icon: 'help-circle', to: 'Support' },
   ],
   admin: [
@@ -41,7 +43,7 @@ export const MENU_ITEMS: Record<string, MenuItem[]> = {
     { name: 'Routes', icon: 'map', to: 'RouteManage' },
     { name: 'Reports', icon: 'analytics', to: 'EnhancedReports' },
     { name: 'Documents', icon: 'folder', to: 'Documents' },
-    { name: 'Drivers', icon: 'people', to: 'Children' },
+    { name: 'Drivers', icon: 'people', to: 'Drivers' },
     { name: 'Messages', icon: 'chatbubbles', to: 'Chat' },
     { name: 'Trips', icon: 'bus', to: 'History' },
     { name: 'Payments', icon: 'card', to: 'Payments' },

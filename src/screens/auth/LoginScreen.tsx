@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal } from 'react-native';
+import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+
+// UI Plugin components - Soft & Friendly theme
+import { Button } from '../../ui-plugin/components/Button';
+import { Input } from '../../ui-plugin/components/Input';
+import { Card } from '../../ui-plugin/components/Card';
+import { Spacer } from '../../ui-plugin/components/Spacer';
+import { colors, spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export default function LoginScreen({ navigation, onLogin }: any) {
   const insets = useSafeAreaInsets();
@@ -20,7 +27,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const handleDemoLogin = async (role: string) => {
     setLoading(true);
     try {
-      // Determine role and name based on demo selection
       let userRole = role;
       let userName = '';
       let userEmail = '';
@@ -43,19 +49,15 @@ export default function LoginScreen({ navigation, onLogin }: any) {
           userEmail = 'demo@test.com';
       }
 
-      // Store user data directly (bypass Supabase)
       await AsyncStorage.setItem('userRole', userRole);
       await AsyncStorage.setItem('userEmail', userEmail);
       await AsyncStorage.setItem('userName', userName);
       await AsyncStorage.setItem('userId', `demo-${role}-${Date.now()}`);
 
-      // Fallback: if onLogin not provided, try window method (web)
       if (onLogin) {
         onLogin(userRole);
       } else if (typeof window !== 'undefined' && (window as any).__handleLogin) {
         (window as any).__handleLogin(userRole);
-      } else {
-        console.error('onLogin is undefined');
       }
     } catch (error) {
       Alert.alert('Error', 'Demo login failed');
@@ -65,7 +67,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   };
 
   const handleLogin = async () => {
-    // Check for demo credentials
     if (email === 'parent@demo.com' || email === 'driver@demo.com' || email === 'admin@demo.com') {
       const role = email.split('@')[0];
       await handleDemoLogin(role);
@@ -78,24 +79,16 @@ export default function LoginScreen({ navigation, onLogin }: any) {
     }
 
     setLoading(true);
-
-    // Try Supabase auth
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // Get user role from profiles table
       const { data: profileData } = await supabase
         .from('profiles')
         .select('role, full_name')
         .eq('id', data.user?.id)
         .single();
 
-      // Use profile data if available, otherwise get from user metadata
       const userRole = profileData?.role || data.user?.user_metadata?.role || 'parent';
       const userName = profileData?.full_name || data.user?.user_metadata?.full_name || '';
 
@@ -105,7 +98,6 @@ export default function LoginScreen({ navigation, onLogin }: any) {
         await AsyncStorage.setItem('userName', userName);
         await AsyncStorage.setItem('userId', data.user?.id || '');
 
-        // Create profile if it doesn't exist
         if (!profileData && data.user) {
           try {
             await supabase.from('profiles').insert({
@@ -115,28 +107,23 @@ export default function LoginScreen({ navigation, onLogin }: any) {
               full_name: userName,
               phone: data.user?.user_metadata?.phone || ''
             });
-          } catch (err) {
-            // DEBUG: console.log('Profile creation error:', err);
-          }
+          } catch (err) {}
         }
 
-        if (onLogin) {
-          onLogin(userRole);
-        }
+        if (onLogin) onLogin(userRole);
       } else {
         Alert.alert('Error', 'User profile not found.');
       }
     } catch (error: any) {
-      // Check for specific error messages
       const errorMessage = error?.message?.toLowerCase() || '';
-      if (errorMessage.includes('email not confirmed') || errorMessage.includes('invalid email')) {
-        Alert.alert('Email Not Confirmed', 'Please check your email and click the confirmation link to activate your account.');
-      } else if (errorMessage.includes('invalid login credentials') || errorMessage.includes('invalid email') || errorMessage.includes('wrong password')) {
-        Alert.alert('Email or Password Incorrect', 'Please check your credentials and try again. If you forgot your password, use the "Forgot Password" link below.');
+      if (errorMessage.includes('email not confirmed')) {
+        Alert.alert('Email Not Confirmed', 'Please check your email and click the confirmation link.');
+      } else if (errorMessage.includes('invalid login credentials')) {
+        Alert.alert('Incorrect Credentials', 'Please check your credentials and try again.');
       } else if (errorMessage.includes('network')) {
-        Alert.alert('Connection Error', 'Please check your internet connection and try again.');
+        Alert.alert('Connection Error', 'Please check your internet connection.');
       } else {
-        Alert.alert('Login Failed', 'Something went wrong. Please try again or contact support.');
+        Alert.alert('Login Failed', 'Something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -162,10 +149,8 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: 'scholartrack://reset-password',
       });
-
       if (error) throw error;
-
-      Alert.alert('Check Your Email', 'Password reset link has been sent to your email.');
+      Alert.alert('Check Your Email', 'Password reset link has been sent.');
       setShowResetModal(false);
       setResetEmail('');
     } catch (error: any) {
@@ -181,234 +166,285 @@ export default function LoginScreen({ navigation, onLogin }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
+        {/* Logo Section */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Ionicons name="school" size={40} color="#000000" />
+            <Ionicons name="school" size={40} color={colors.textInverse} />
           </View>
           <Text style={styles.appTitle}>ScholarTrack</Text>
           <Text style={styles.appSubtitle}>Safe Student Transport</Text>
         </View>
 
-        <View style={styles.formContainer}>
+        {/* Form Card */}
+        <Card style={styles.formCard}>
           <Text style={styles.welcomeText}>Welcome Back</Text>
           <Text style={styles.subtitleText}>Login to your account</Text>
 
-          {/* What is ScholarTrack? Toggle */}
-          <TouchableOpacity 
-            style={styles.infoButton} 
+          {/* Info Toggle */}
+          <Button
+            title={showInfo ? 'Hide Info' : 'What is ScholarTrack?'}
+            variant="ghost"
             onPress={() => setShowInfo(!showInfo)}
-            accessibilityLabel="What is ScholarTrack"
-            accessibilityHint="Shows information about ScholarTrack app"
-            accessibilityRole="button"
-          >
-            <Ionicons name="information-circle-outline" size={18} color="#FFB81C" />
-            <Text style={styles.infoButtonText}>{showInfo ? 'Hide Info' : 'What is ScholarTrack?'}</Text>
-          </TouchableOpacity>
+            icon={<Ionicons name="information-circle-outline" size={18} color={colors.primary} />}
+            iconPosition="left"
+          />
 
           {showInfo && (
             <View style={styles.infoBox}>
               <Text style={styles.infoTitle}>Safe Student Transport</Text>
-              <Text style={styles.infoText}>• Track your child's school bus in real-time</Text>
+              <Text style={styles.infoText}>• Track your child's bus in real-time</Text>
               <Text style={styles.infoText}>• Hire trusted, verified drivers</Text>
-              <Text style={styles.infoText}>• Get instant alerts when your child arrives</Text>
-              <Text style={styles.infoText}>• Emergency SOS button for instant help</Text>
-              <Text style={styles.infoText}>• View payments and trip history</Text>
+              <Text style={styles.infoText}>• Get instant arrival alerts</Text>
+              <Text style={styles.infoText}>• Emergency SOS button</Text>
+              <Text style={styles.infoText}>• View payments & history</Text>
             </View>
           )}
 
-          {/* Demo Login Buttons */}
+          <Spacer size="md" />
+
+          {/* Demo Login */}
           <Text style={styles.demoTitle}>Quick Demo Login</Text>
           <View style={styles.demoButtons}>
-            <TouchableOpacity
-              style={[styles.demoRoleBtn, { backgroundColor: '#007749' }]}
+            <Button
+              title="Parent"
+              variant="primary"
+              size="small"
               onPress={() => handleDemoLogin('parent')}
-              accessibilityLabel="Login as Parent"
-            >
-              <Text style={styles.demoRoleText}>Parent</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.demoRoleBtn, { backgroundColor: '#002395' }]}
+              style={{ backgroundColor: '#007749', flex: 1 }}
+            />
+            <Button
+              title="Driver"
+              variant="primary"
+              size="small"
               onPress={() => handleDemoLogin('driver')}
-              accessibilityLabel="Login as Driver"
-            >
-              <Text style={styles.demoRoleText}>Driver</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.demoRoleBtn, { backgroundColor: '#FFB81C' }]}
+              style={{ backgroundColor: '#002395', flex: 1 }}
+            />
+            <Button
+              title="Admin"
+              variant="primary"
+              size="small"
               onPress={() => handleDemoLogin('admin')}
-              accessibilityLabel="Login as Admin"
-            >
-              <Text style={styles.demoRoleText}>Admin</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Old demo button - kept for compatibility */}
-          <TouchableOpacity
-            style={styles.demoButton}
-            onPress={() => handleDemoLogin('parent')}
-            accessibilityLabel="Try Demo Account"
-            accessibilityHint="Fills in demo credentials for testing"
-            accessibilityRole="button"
-          >
-            <Ionicons name="play-circle-outline" size={20} color="#FFB81C" />
-            <Text style={styles.demoButtonText}>Try Demo Account</Text>
-          </TouchableOpacity>
-
-          <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#666666"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
+              style={{ backgroundColor: colors.accent, flex: 1 }}
+              textStyle={{ color: colors.text }}
             />
           </View>
 
-          <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#666666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowPassword(!showPassword)} 
-              style={styles.eyeIcon}
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-              accessibilityHint="Toggle password visibility"
-              accessibilityRole="button"
-            >
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
+          <Spacer size="lg" />
 
-          <TouchableOpacity 
-            style={styles.forgotPassword} 
+          {/* Email Input */}
+          <Input
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            leftIcon={<Ionicons name="mail-outline" size={20} color={colors.primary} />}
+          />
+
+          {/* Password Input */}
+          <Input
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry={!showPassword}
+            rightIcon={
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={colors.textMuted}
+              />
+            }
+            onRightIconPress={() => setShowPassword(!showPassword)}
+          />
+
+          {/* Forgot Password */}
+          <Button
+            title="Forgot Password?"
+            variant="ghost"
+            size="small"
             onPress={() => setShowResetModal(true)}
-            accessibilityLabel="Forgot Password"
-            accessibilityHint="Opens dialog to reset your password"
-            accessibilityRole="button"
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            textStyle={{ color: colors.primary }}
+          />
 
-          <TouchableOpacity 
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+          <Spacer size="md" />
+
+          {/* Login Button */}
+          <Button
+            title={loading ? 'Logging in...' : 'Login'}
+            variant="primary"
+            size="large"
             onPress={handleLogin}
-            disabled={loading}
-            accessibilityLabel={loading ? "Logging in" : "Login"}
-            accessibilityHint="Sign in to your account"
-            accessibilityRole="button"
-          >
-            <Text style={styles.loginButtonText}>
-              {loading ? 'Logging in...' : 'Login'}
-            </Text>
-          </TouchableOpacity>
+            loading={loading}
+            fullWidth
+          />
 
-          <TouchableOpacity 
-            onPress={handleRegister} 
-            style={styles.signupContainer}
-            accessibilityLabel="Sign up"
-            accessibilityHint="Navigate to registration page"
-            accessibilityRole="link"
-          >
-            <Text style={styles.signupText}>
-              Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <Spacer size="md" />
+
+          {/* Register Link */}
+          <Button
+            title="Don't have an account? Sign Up"
+            variant="ghost"
+            onPress={handleRegister}
+            textStyle={{ color: colors.textSecondary }}
+          />
+        </Card>
       </ScrollView>
 
       {/* Password Reset Modal */}
       <Modal visible={showResetModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity 
-              style={styles.modalClose} 
+          <Card style={styles.modalContent}>
+            <Button
+              title=""
+              variant="ghost"
               onPress={() => setShowResetModal(false)}
-              accessibilityLabel="Close"
-              accessibilityHint="Closes the password reset dialog"
-              accessibilityRole="button"
-            >
-              <Ionicons name="close" size={24} color="#fff" />
-            </TouchableOpacity>
+              icon={<Ionicons name="close" size={24} color={colors.text} />}
+              style={styles.modalClose}
+            />
             <Text style={styles.modalTitle}>Reset Password</Text>
-            <Text style={styles.modalSubtitle}>Enter your email to receive a password reset link</Text>
+            <Text style={styles.modalSubtitle}>Enter your email to receive a reset link</Text>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#666666"
-                value={resetEmail}
-                onChangeText={setResetEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-            </View>
+            <Input
+              label="Email"
+              value={resetEmail}
+              onChangeText={setResetEmail}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              leftIcon={<Ionicons name="mail-outline" size={20} color={colors.primary} />}
+            />
 
-            <TouchableOpacity
-              style={[styles.loginButton, resetLoading && styles.loginButtonDisabled]}
+            <Spacer size="md" />
+
+            <Button
+              title={resetLoading ? 'Sending...' : 'Send Reset Link'}
+              variant="primary"
+              size="large"
               onPress={handlePasswordReset}
-              disabled={resetLoading}
-              accessibilityLabel={resetLoading ? "Sending reset link" : "Send Reset Link"}
-              accessibilityHint="Sends password reset email to your inbox"
-              accessibilityRole="button"
-            >
-              <Text style={styles.loginButtonText}>
-                {resetLoading ? 'Sending...' : 'Send Reset Link'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              loading={resetLoading}
+              fullWidth
+            />
+          </Card>
         </View>
       </Modal>
     </KeyboardAvoidingView>
   );
 }
 
+// Styles using Soft & Friendly theme
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
-  scrollView: { flexGrow: 1, justifyContent: 'center' },
-  logoContainer: { alignItems: 'center', marginBottom: 30 },
-  logoCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFB81C', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  appTitle: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
-  appSubtitle: { fontSize: 14, color: '#AAAAAA', marginTop: 5 },
-  formContainer: { backgroundColor: '#111111', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40 },
-  welcomeText: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF', marginBottom: 5 },
-  subtitleText: { fontSize: 14, color: '#AAAAAA', marginBottom: 25 },
-  infoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 15 },
-  infoButtonText: { color: '#FFB81C', fontSize: 14, marginLeft: 5 },
-  infoBox: { backgroundColor: '#1a1a1a', borderRadius: 10, padding: 15, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#FFB81C' },
-  infoTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
-  infoText: { fontSize: 13, color: '#aaa', marginBottom: 5 },
-  demoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', borderWidth: 1, borderColor: '#FFB81C', borderRadius: 12, paddingVertical: 12, marginBottom: 20 },
-  demoButtonText: { color: '#FFB81C', fontSize: 14, fontWeight: '600', marginLeft: 8 },
-  demoTitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 12 },
-  demoButtons: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginBottom: 20 },
-  demoRoleBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  demoRoleText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#333333', borderRadius: 12, paddingHorizontal: 16, marginBottom: 12, backgroundColor: '#1a1a1a', height: 50 },
-  inputIcon: { marginRight: 10 },
-  input: { flex: 1, fontSize: 16, color: '#FFFFFF' },
-  eyeIcon: { padding: 8, minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
-  forgotPassword: { alignSelf: 'flex-end', marginBottom: 20 },
-  forgotPasswordText: { color: '#FFB81C', fontSize: 14 },
-  loginButton: { backgroundColor: '#FFB81C', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
-  loginButtonDisabled: { opacity: 0.6 },
-  loginButtonText: { color: '#000000', fontSize: 16, fontWeight: 'bold' },
-  signupContainer: { alignItems: 'center', marginBottom: 25 },
-  signupText: { color: '#AAAAAA', fontSize: 14 },
-  signupLink: { color: '#FFB81C', fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalContent: { backgroundColor: '#111111', borderRadius: 20, padding: 25, width: '100%', maxWidth: 400, alignItems: 'center' },
-  modalClose: { position: 'absolute', top: 15, right: 15, padding: 5 },
-  modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
-  modalSubtitle: { fontSize: 14, color: '#AAAAAA', textAlign: 'center', marginBottom: 25 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  appTitle: {
+    ...typography.displayMedium,
+    color: colors.text,
+  },
+  appSubtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  formCard: {
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+  },
+  welcomeText: {
+    ...typography.h1,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  subtitleText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+  },
+  demoTitle: {
+    ...typography.label,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  demoButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  infoBox: {
+    backgroundColor: colors.primaryMuted,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+  },
+  infoTitle: {
+    ...typography.h4,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  infoText: {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    width: '100%',
+    maxWidth: 400,
+    position: 'relative',
+  },
+  modalClose: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    minWidth: 44,
+    minHeight: 44,
+  },
+  modalTitle: {
+    ...typography.h2,
+    color: colors.text,
+    marginBottom: spacing.xs,
+    marginTop: spacing.lg,
+  },
+  modalSubtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
 });

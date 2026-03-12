@@ -4,6 +4,10 @@ export type RootStackParamList = {
   Main: undefined;
 };
 
+export type DrawerParamList = {
+  HomeDrawer: undefined;
+};
+
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -14,6 +18,7 @@ export type ParentStackParamList = {
   Home: undefined;
   Children: undefined;
   LinkChild: undefined;
+  TrackChild: { childId?: string };
   ParentDocs: undefined;
   EmergencyContacts: undefined;
   LiveTrack: undefined;
@@ -22,6 +27,7 @@ export type ParentStackParamList = {
   HireDriver: undefined;
   Payments: undefined;
   Support: undefined;
+  Settings: undefined;
   ReviewDriver: { driverId?: string };
 };
 
@@ -35,6 +41,7 @@ export type DriverStackParamList = {
   Chat: undefined;
   History: undefined;
   Payments: undefined;
+  Earnings: undefined;
   Support: undefined;
   Settings: undefined;
 };
@@ -52,6 +59,7 @@ export type AdminStackParamList = {
   History: undefined;
   Payments: undefined;
   Settings: undefined;
+  Support: undefined;
 };
 
 // Common stack for all roles

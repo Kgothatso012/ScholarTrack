@@ -108,11 +108,6 @@ function AppContentWithTheme() {
     console.log('State updated - role:', role, 'isAuthenticated:', true);
   };
 
-  // Expose for web fallback
-  if (typeof window !== 'undefined') {
-    (window as any).__handleLogin = handleLogin;
-  }
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -123,6 +118,12 @@ function AppContentWithTheme() {
     setUserRole(null);
     setIsAuthenticated(false);
   };
+
+  // Expose for web fallback
+  if (typeof window !== 'undefined') {
+    (window as any).__handleLogin = handleLogin;
+    (window as any).logout = handleLogout;
+  }
 
   if (loading) {
     return (

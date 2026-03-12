@@ -189,7 +189,7 @@ export default function DriverAppScreen({ navigation, setScreen }: any) {
     >
       <View style={[styles.header, { paddingTop: insets.top + 20, paddingBottom: 20, paddingHorizontal: 20 }]}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => Alert.alert('Menu', 'Menu options')}>
+          <TouchableOpacity onPress={() => navigation?.navigate?.('Settings')}>
             <Ionicons name="menu" size={28} color={colors.textInverse} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Driver Dashboard</Text>

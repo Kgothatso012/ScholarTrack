@@ -1,8 +1,14 @@
+// Parent Stack with Drawer Menu
 import React from 'react';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ParentStackParamList } from './types';
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity, ActivityIndicator, View } from 'react-native';
 
-// Direct imports
+import { ParentStackParamList, DrawerParamList } from './types';
+import { DrawerContent } from './DrawerContent';
+
+// Direct imports to avoid lazy loading issues
 import ParentDashboard from '../screens/parent/ParentDashboard';
 import ChildrenScreen from '../screens/parent/ChildrenScreen';
 import LinkChildScreen from '../screens/parent/LinkChildScreen';
@@ -19,15 +25,26 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 import ParentDocumentUpload from '../screens/parent/ParentDocumentsScreen';
 
 const Stack = createNativeStackNavigator<ParentStackParamList>();
+const Drawer = createDrawerNavigator<DrawerParamList>();
 
 const screenOptions = {
   headerShown: false,
 };
 
-export function ParentStack() {
+// Stack navigator for each drawer screen
+const ParentStackNavigator = ({ navigation }: any) => {
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen name="Home" component={ParentDashboard} />
+      <Stack.Screen name="Home">
+        {({ navigation: nav }) => (
+          <ParentDashboard
+            navigation={{
+              ...nav,
+              openDrawer: () => nav.getParent()?.openDrawer(),
+            }}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="Children" component={ChildrenScreen} />
       <Stack.Screen name="LinkChild" component={LinkChildScreen} />
       <Stack.Screen name="TrackChild" component={TrackChildScreen} />
@@ -42,5 +59,34 @@ export function ParentStack() {
       <Stack.Screen name="ReviewDriver" component={ReviewDriverScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
+  );
+};
+
+export function ParentDrawerStack() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <DrawerContent {...props} />}
+      screenOptions={{
+        headerShown: true,
+        headerTransparent: true,
+        headerTitle: '',
+        headerLeft: () => null,
+        drawerType: 'slide',
+        drawerStyle: {
+          width: 280,
+        },
+      }}
+    >
+      <Drawer.Screen
+        name="HomeDrawer"
+        component={ParentStackNavigator}
+        options={{
+          title: 'ScholarTrack',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="menu" size={size} color={color} />
+          ),
+        }}
+      />
+    </Drawer.Navigator>
   );
 }

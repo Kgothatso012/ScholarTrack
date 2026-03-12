@@ -6,6 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, Child, Trip } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
+import { cacheService, fetchWithOfflineFallback } from '../../lib/cache';
+
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutes cache
 
 const ParentDashboard = ({ navigation }: any) => {
   const { colors } = useTheme();
@@ -16,12 +19,13 @@ const ParentDashboard = ({ navigation }: any) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [userEmail, setUserEmail] = useState('');
   const [showHelp, setShowHelp] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     try {
       setLoading(true);
 
@@ -35,13 +39,58 @@ const ParentDashboard = ({ navigation }: any) => {
         return;
       }
 
+      // Try to get cached data first (unless force refresh)
+      if (!forceRefresh) {
+        const cachedChildren = await cacheService.get<Child[]>('parent_children_' + user.id);
+        const cachedTrips = await cacheService.get<Trip[]>('parent_trips_' + user.id);
+
+        if (cachedChildren) {
+          setChildren(cachedChildren);
+          setTrips(cachedTrips || []);
+          setLoading(false);
+          // Still fetch fresh data in background
+          fetchFreshData(user.id);
+          return;
+        }
+      }
+
+      // Fetch fresh data
+      await fetchFreshData(user.id, true);
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+
+      // Try to get stale data for offline support
+      const email = await AsyncStorage.getItem('userEmail');
+      const userId = await AsyncStorage.getItem('userId');
+
+      if (userId) {
+        const staleChildren = await cacheService.getStale<Child[]>('parent_children_' + userId);
+        const staleTrips = await cacheService.getStale<Trip[]>('parent_trips_' + userId);
+
+        if (staleChildren) {
+          setChildren(staleChildren);
+          setTrips(staleTrips || []);
+          setIsOffline(true);
+        }
+      }
+      setChildren([]);
+      setTrips([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFreshData = async (userId: string, updateOfflineStatus = false) => {
+    try {
       const { data: childrenData, error: childrenError } = await supabase
         .from('children')
         .select('*')
-        .eq('parent_id', user.id);
+        .eq('parent_id', userId);
 
-      if (childrenError) throw childrenError;
-      setChildren(childrenData || []);
+      if (!childrenError && childrenData) {
+        setChildren(childrenData);
+        await cacheService.set('parent_children_' + userId, childrenData, CACHE_TTL);
+      }
 
       if (childrenData && childrenData.length > 0) {
         const childIds = childrenData.map((c: Child) => c.id);
@@ -55,14 +104,13 @@ const ParentDashboard = ({ navigation }: any) => {
 
         if (!tripsError) {
           setTrips(tripsData || []);
+          await cacheService.set('parent_trips_' + userId, tripsData || [], CACHE_TTL);
         }
       }
-    } catch (error: any) {
-      console.error('Error loading data:', error);
-      setChildren([]);
-      setTrips([]);
-    } finally {
-      setLoading(false);
+
+      if (updateOfflineStatus) setIsOffline(false);
+    } catch (error) {
+      console.error('Error fetching fresh data:', error);
     }
   };
 
@@ -128,6 +176,7 @@ const ParentDashboard = ({ navigation }: any) => {
     helpBtn: { padding: 5, marginRight: 10 },
     logoutBtn: { padding: 5 },
     headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
+    navButton: { marginLeft: 15, padding: 8 },
     headerSubtext: { fontSize: 14, color: colors.accent, marginTop: 5 },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.card, marginTop: -20, marginHorizontal: 20, borderRadius: 10, elevation: 3 },
     actionCard: { alignItems: 'center', padding: 12, minWidth: 70, minHeight: 70 },
@@ -184,20 +233,42 @@ const ParentDashboard = ({ navigation }: any) => {
         <View style={styles.headerTop}>
           <Text style={styles.headerTitle}>Parent Dashboard</Text>
           <View style={styles.headerActions}>
-            <TouchableOpacity 
-              onPress={handleHelpPress} 
+            <TouchableOpacity
+              onPress={() => navigation?.navigate?.('Children')}
+              style={styles.navButton}
+              accessibilityLabel="Children"
+              accessibilityRole="button"
+            >
+              <Ionicons name="people" size={24} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation?.navigate?.('HireDriver')}
+              style={styles.navButton}
+              accessibilityLabel="Hire Driver"
+              accessibilityRole="button"
+            >
+              <Ionicons name="person-add" size={24} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation?.navigate?.('Settings')}
+              style={styles.navButton}
+              accessibilityLabel="Settings"
+              accessibilityRole="button"
+            >
+              <Ionicons name="settings-outline" size={24} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleHelpPress}
               style={styles.helpBtn}
               accessibilityLabel="Help"
-              accessibilityHint="Show or hide help information"
               accessibilityRole="button"
             >
               <Ionicons name="help-circle-outline" size={22} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleLogout} 
+            <TouchableOpacity
+              onPress={handleLogout}
               style={styles.logoutBtn}
               accessibilityLabel="Logout"
-              accessibilityHint="Sign out of your account"
               accessibilityRole="button"
             >
               <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />

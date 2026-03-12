@@ -2,18 +2,21 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DriverStackParamList } from './types';
 
-const Stack = createNativeStackNavigator<DriverStackParamList>();
+// Direct imports
+import DriverAppScreen from '../screens/driver/DriverAppScreen';
+import DriverTripScreen from '../screens/driver/DriverTripScreen';
+import TripManifestScreen from '../screens/driver/TripManifestScreen';
+import VehicleSafetyChecklistScreen from '../screens/driver/VehicleSafetyChecklistScreen';
+import ComplianceScreen from '../screens/driver/ComplianceScreen';
+import RegulatoryDisplayScreen from '../screens/driver/RegulatoryDisplayScreen';
+import ChatScreen from '../screens/ChatScreen';
+import TripHistoryScreen from '../screens/safety/TripHistoryScreen';
+import SupportScreen from '../screens/support/SupportScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
+import PaymentDetailsScreen from '../screens/payments/PaymentDetailsScreen';
+import EarningsScreen from '../screens/driver/EarningsScreen';
 
-// Lazy load screens
-const DriverAppScreen = React.lazy(() => import('../screens/driver/DriverAppScreen'));
-const DriverTripScreen = React.lazy(() => import('../screens/driver/DriverTripScreen'));
-const TripManifestScreen = React.lazy(() => import('../screens/driver/TripManifestScreen'));
-const VehicleSafetyChecklistScreen = React.lazy(() => import('../screens/driver/VehicleSafetyChecklistScreen'));
-const ComplianceScreen = React.lazy(() => import('../screens/driver/ComplianceScreen'));
-const ChatScreen = React.lazy(() => import('../screens/ChatScreen'));
-const TripHistoryScreen = React.lazy(() => import('../screens/safety/TripHistoryScreen'));
-const SupportScreen = React.lazy(() => import('../screens/support/SupportScreen'));
-const SettingsScreen = React.lazy(() => import('../screens/settings/SettingsScreen'));
+const Stack = createNativeStackNavigator<DriverStackParamList>();
 
 const screenOptions = {
   headerBackTitleVisible: false,
@@ -45,12 +48,27 @@ export function DriverStack() {
         component={VehicleSafetyChecklistScreen}
         options={{ title: 'Safety Checklist' }}
       />
-      <Stack.Screen 
-        name="Compliance" 
+      <Stack.Screen
+        name="Compliance"
         component={ComplianceScreen}
         options={{ title: 'Compliance' }}
       />
-      <Stack.Screen 
+      <Stack.Screen
+        name="RegulatoryDisplay"
+        component={RegulatoryDisplayScreen}
+        options={{ title: 'Regulatory Display' }}
+      />
+      <Stack.Screen
+        name="Payments"
+        component={PaymentDetailsScreen}
+        options={{ title: 'Payments' }}
+      />
+      <Stack.Screen
+        name="Earnings"
+        component={EarningsScreen}
+        options={{ title: 'Earnings' }}
+      />
+      <Stack.Screen
         name="Chat" 
         component={ChatScreen}
         options={{ title: 'Chat' }}

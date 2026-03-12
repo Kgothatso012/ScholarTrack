@@ -2,20 +2,22 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminStackParamList } from './types';
 
-const Stack = createNativeStackNavigator<AdminStackParamList>();
+// Direct imports
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import FleetTrackingScreen from '../screens/admin/FleetTrackingScreen';
+import VehicleManagementScreen from '../screens/admin/VehicleManagementScreen';
+import AttendanceReportsScreen from '../screens/admin/AttendanceReportsScreen';
+import RouteManagementScreen from '../screens/admin/RouteManagementScreen';
+import EnhancedReportsScreen from '../screens/admin/EnhancedReportsScreen';
+import DocumentManagementScreen from '../screens/admin/DocumentManagementScreen';
+import ManageDriversScreen from '../screens/admin/ManageDriversScreen';
+import ChatScreen from '../screens/ChatScreen';
+import TripHistoryScreen from '../screens/safety/TripHistoryScreen';
+import PaymentDetailsScreen from '../screens/payments/PaymentDetailsScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
+import SupportScreen from '../screens/support/SupportScreen';
 
-// Lazy load screens
-const AdminDashboardScreen = React.lazy(() => import('../screens/admin/AdminDashboardScreen'));
-const FleetTrackingScreen = React.lazy(() => import('../screens/admin/FleetTrackingScreen'));
-const VehicleManagementScreen = React.lazy(() => import('../screens/admin/VehicleManagementScreen'));
-const AttendanceReportsScreen = React.lazy(() => import('../screens/admin/AttendanceReportsScreen'));
-const RouteManagementScreen = React.lazy(() => import('../screens/admin/RouteManagementScreen'));
-const EnhancedReportsScreen = React.lazy(() => import('../screens/admin/EnhancedReportsScreen'));
-const DocumentManagementScreen = React.lazy(() => import('../screens/admin/DocumentManagementScreen'));
-const ChatScreen = React.lazy(() => import('../screens/ChatScreen'));
-const TripHistoryScreen = React.lazy(() => import('../screens/safety/TripHistoryScreen'));
-const PaymentDetailsScreen = React.lazy(() => import('../screens/payments/PaymentDetailsScreen'));
-const SettingsScreen = React.lazy(() => import('../screens/settings/SettingsScreen'));
+const Stack = createNativeStackNavigator<AdminStackParamList>();
 
 const screenOptions = {
   headerShown: false,
@@ -31,11 +33,12 @@ export function AdminStack() {
       <Stack.Screen name="RouteManage" component={RouteManagementScreen} />
       <Stack.Screen name="EnhancedReports" component={EnhancedReportsScreen} />
       <Stack.Screen name="Documents" component={DocumentManagementScreen} />
-      <Stack.Screen name="Drivers" component={AdminDashboardScreen} />
+      <Stack.Screen name="Drivers" component={ManageDriversScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="History" component={TripHistoryScreen} />
       <Stack.Screen name="Payments" component={PaymentDetailsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Support" component={SupportScreen} />
     </Stack.Navigator>
   );
 }
