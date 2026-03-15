@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, TextInput, Image, Platform, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -119,6 +119,7 @@ interface ComplianceDocument {
   description: string;
   required: boolean;
   document?: UploadedDocument;
+  expiryDate?: Date;
 }
 
 // ============ MAIN COMPONENT ============
@@ -177,6 +178,77 @@ export default function ComplianceUploadScreen({ navigation }: any) {
       required: true,
     },
   ]);
+
+  // Date picker state
+  const [showDatePicker, setShowDatePicker] = useState<string | null>(null);
+  const [tempDocId, setTempDocId] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+
+  // Simple date picker using Modal
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  // Handle date selection
+  const handleDateConfirm = () => {
+    if (tempDocId) {
+      const newDate = new Date(selectedYear, selectedMonth, selectedDay);
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          doc.id === tempDocId ? { ...doc, expiryDate: newDate } : doc
+        )
+      );
+      updateComplianceStatus();
+    }
+    setShowDatePicker(null);
+    setTempDocId(null);
+  };
+
+  // Open date picker for a document
+  const openDatePicker = (docId: string) => {
+    setTempDocId(docId);
+    const doc = documents.find(d => d.id === docId);
+    if (doc?.expiryDate) {
+      setSelectedYear(doc.expiryDate.getFullYear());
+      setSelectedMonth(doc.expiryDate.getMonth());
+      setSelectedDay(doc.expiryDate.getDate());
+    } else {
+      setSelectedYear(new Date().getFullYear() + 1);
+      setSelectedMonth(0);
+      setSelectedDay(1);
+    }
+    setShowDatePicker(docId);
+  };
+
+  // Format date for display
+  const formatDate = (date?: Date) => {
+    if (!date) return null;
+    return date.toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  // Calculate days until expiry
+  const getDaysUntilExpiry = (date?: Date) => {
+    if (!date) return null;
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Get expiry status color
+  const getExpiryStatusColor = (date?: Date) => {
+    const days = getDaysUntilExpiry(date);
+    if (days === null) return '#999';
+    if (days < 0) return '#E03C31'; // Red - expired
+    if (days <= 30) return '#FFB81C'; // Yellow - expiring soon
+    return '#007749'; // Green - valid
+  };
 
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -428,6 +500,9 @@ export default function ComplianceUploadScreen({ navigation }: any) {
       // });
 
       // Upload each document to Supabase Storage and save record
+      const uploadedDocs: { id: string; label: string; name: string; uploadedAt: Date }[] = [];
+      const failedDocs: string[] = [];
+
       for (const doc of documents) {
         if (doc.document) {
           try {
@@ -451,31 +526,42 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               'vehiclePermit': 'permit'
             };
 
-            // Save to database
+            // Save to database with expiry date
             await documentService.saveDriverDocument(
               user.id,
               docTypeMap[doc.id] || 'pdp_certificate',
               fileUrl,
-              doc.document.name
+              doc.document.name,
+              doc.expiryDate?.toISOString()
             );
 
-            // DEBUG: console.log(`Uploaded ${doc.label}: ${fileUrl}`);
+            uploadedDocs.push({
+              id: doc.id,
+              label: doc.label,
+              name: doc.document.name,
+              uploadedAt: doc.document.uploadedAt,
+            });
           } catch (uploadError) {
-            console.error(`Failed to upload ${doc.label}:`, uploadError);
-            // Continue with other documents
+            failedDocs.push(doc.label);
           }
         }
       }
 
-      // Save compliance status to AsyncStorage
+      // Check if any uploads failed
+      if (failedDocs.length > 0) {
+        Alert.alert(
+          'Partial Upload',
+          `Some documents failed to upload: ${failedDocs.join(', ')}. Please try uploading these again.`,
+          [{ text: 'OK' }]
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Save compliance status to AsyncStorage only if all uploads succeeded
       await AsyncStorage.setItem('driverCompliance', JSON.stringify({
         ...data,
-        documents: documents.map((d) => ({
-          id: d.id,
-          label: d.label,
-          name: d.document?.name,
-          uploadedAt: d.document?.uploadedAt,
-        })),
+        documents: uploadedDocs,
         submittedAt: new Date().toISOString(),
         status: 'pending_review',
       }));
@@ -491,7 +577,6 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         ]
       );
     } catch (error) {
-      console.error('Submit error:', error);
       Alert.alert('Error', 'Failed to submit compliance. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -850,6 +935,99 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                   />
                 </View>
               )}
+
+              {/* Expiry Date Picker */}
+              <View style={styles.expiryContainer}>
+                <Text style={styles.expiryLabel}>Expiry Date:</Text>
+                <TouchableOpacity
+                  style={[styles.expiryButton, { borderColor: getExpiryStatusColor(doc.expiryDate) }]}
+                  onPress={() => openDatePicker(doc.id)}
+                >
+                  <Ionicons name="calendar-outline" size={20} color={getExpiryStatusColor(doc.expiryDate)} />
+                  <Text style={[styles.expiryButtonText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
+                    {formatDate(doc.expiryDate) || 'Select expiry date'}
+                  </Text>
+                </TouchableOpacity>
+                {doc.expiryDate && (
+                  <View style={styles.expiryStatus}>
+                    <Text style={[styles.expiryStatusText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
+                      {getDaysUntilExpiry(doc.expiryDate)! < 0
+                        ? 'EXPIRED'
+                        : `${getDaysUntilExpiry(doc.expiryDate)} days remaining`}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Custom Date Picker Modal */}
+              <Modal
+                visible={showDatePicker === doc.id}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setShowDatePicker(null)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Select Expiry Date</Text>
+
+                    <View style={styles.pickerRow}>
+                      <View style={styles.pickerColumn}>
+                        <Text style={styles.pickerLabel}>Day</Text>
+                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                          {days.map((day) => (
+                            <TouchableOpacity
+                              key={day}
+                              style={[styles.pickerItem, selectedDay === day && styles.pickerItemSelected]}
+                              onPress={() => setSelectedDay(day)}
+                            >
+                              <Text style={[styles.pickerItemText, selectedDay === day && styles.pickerItemTextSelected]}>{day}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+
+                      <View style={styles.pickerColumn}>
+                        <Text style={styles.pickerLabel}>Month</Text>
+                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                          {months.map((month, idx) => (
+                            <TouchableOpacity
+                              key={month}
+                              style={[styles.pickerItem, selectedMonth === idx && styles.pickerItemSelected]}
+                              onPress={() => setSelectedMonth(idx)}
+                            >
+                              <Text style={[styles.pickerItemText, selectedMonth === idx && styles.pickerItemTextSelected]}>{month}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+
+                      <View style={styles.pickerColumn}>
+                        <Text style={styles.pickerLabel}>Year</Text>
+                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                          {years.map((year) => (
+                            <TouchableOpacity
+                              key={year}
+                              style={[styles.pickerItem, selectedYear === year && styles.pickerItemSelected]}
+                              onPress={() => setSelectedYear(year)}
+                            >
+                              <Text style={[styles.pickerItemText, selectedYear === year && styles.pickerItemTextSelected]}>{year}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    </View>
+
+                    <View style={styles.modalButtons}>
+                      <TouchableOpacity style={styles.modalButtonCancel} onPress={() => setShowDatePicker(null)}>
+                        <Text style={styles.modalButtonCancelText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleDateConfirm}>
+                        <Text style={styles.modalButtonConfirmText}>Confirm</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
             </View>
           ))}
         </View>
@@ -1094,6 +1272,125 @@ const styles = StyleSheet.create({
   uploadProgressBar: {
     height: '100%',
     backgroundColor: '#007749',
+  },
+  expiryContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5EA',
+  },
+  expiryLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  expiryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+  },
+  expiryButtonText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  expiryStatus: {
+    marginTop: 8,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: '85%',
+    maxHeight: '60%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 200,
+  },
+  pickerColumn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  pickerScroll: {
+    height: 160,
+  },
+  pickerItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  pickerItemSelected: {
+    backgroundColor: '#007749',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  pickerItemTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  modalButtonCancel: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#F5F5F5',
+    marginRight: 8,
+  },
+  modalButtonCancelText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  modalButtonConfirm: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#007749',
+    marginLeft: 8,
+  },
+  modalButtonConfirmText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  expiryStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   disclaimer: {
     flexDirection: 'row',

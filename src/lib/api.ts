@@ -575,7 +575,7 @@ export const documentService = {
   },
 
   // Save driver document record
-  async saveDriverDocument(driverId: string, docType: DriverDocument['document_type'], fileUrl: string, fileName: string) {
+  async saveDriverDocument(driverId: string, docType: DriverDocument['document_type'], fileUrl: string, fileName: string, expiryDate?: string) {
     const { data, error } = await supabase
       .from('driver_documents')
       .insert({
@@ -583,6 +583,7 @@ export const documentService = {
         document_type: docType,
         file_url: fileUrl,
         file_name: fileName,
+        expiry_date: expiryDate,
         status: 'pending'
       })
       .select()
@@ -671,13 +672,14 @@ export const documentService = {
   },
 
   // Review parent document
-  async reviewParentDocument(documentId: string, status: 'approved' | 'rejected', reviewedBy: string) {
+  async reviewParentDocument(documentId: string, status: 'approved' | 'rejected', reviewedBy: string, notes?: string) {
     const { data, error } = await supabase
       .from('parent_documents')
       .update({
         status,
         reviewed_by: reviewedBy,
-        reviewed_at: new Date().toISOString()
+        reviewed_at: new Date().toISOString(),
+        notes
       })
       .eq('id', documentId)
       .select()
