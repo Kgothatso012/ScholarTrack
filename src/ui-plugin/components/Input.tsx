@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -49,6 +49,9 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
+  // Memoize styles to prevent recreation on every render
+  const styleSheet = useMemo(() => styles(colors), [colors]);
+
   const getBorderColor = () => {
     if (error) return colors.error;
     if (isFocused) return colors.primary;
@@ -94,25 +97,25 @@ export const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[styleSheet.container, containerStyle]}>
       {label && (
-        <View style={styles.labelRow}>
-          <Text style={styles.label}>{label}</Text>
-          {required && <Text style={styles.required}>*</Text>}
+        <View style={styleSheet.labelRow}>
+          <Text style={styleSheet.label}>{label}</Text>
+          {required && <Text style={styleSheet.required}>*</Text>}
         </View>
       )}
 
       <View
         style={[
-          styles.inputContainer,
+          styleSheet.inputContainer,
           getSizeStyles(),
           {
             borderColor: getBorderColor(),
             backgroundColor: getBackgroundColor(),
             borderRadius: borderRadius.lg,
           },
-          variant === 'outline' && styles.outline,
-          disabled && styles.disabled,
+          variant === 'outline' && styleSheet.outline,
+          disabled && styleSheet.disabled,
         ]}
       >
         {leftIcon && typeof leftIcon === 'string' ? (
@@ -120,19 +123,19 @@ export const Input: React.FC<InputProps> = ({
             name={leftIcon as keyof typeof Ionicons.glyphMap}
             size={getIconSize()}
             color={isFocused ? colors.primary : colors.textSecondary}
-            style={styles.leftIcon}
+            style={styleSheet.leftIcon}
           />
         ) : (
-          <View style={styles.leftIcon}>{leftIcon}</View>
+          <View style={styleSheet.leftIcon}>{leftIcon}</View>
         )}
 
         <TextInput
           {...textInputProps}
           style={[
-            styles.input,
+            styleSheet.input,
             getTextSize(),
-            leftIcon ? styles.inputWithLeftIcon : undefined,
-            rightIcon ? styles.inputWithRightIcon : undefined,
+            leftIcon ? styleSheet.inputWithLeftIcon : undefined,
+            rightIcon ? styleSheet.inputWithRightIcon : undefined,
             inputStyle,
           ]}
           placeholderTextColor={colors.textMuted}
@@ -152,7 +155,7 @@ export const Input: React.FC<InputProps> = ({
           <TouchableOpacity
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
-            style={styles.rightIcon}
+            style={styleSheet.rightIcon}
           >
             {typeof rightIcon === 'string' ? (
               <Ionicons
@@ -170,8 +173,8 @@ export const Input: React.FC<InputProps> = ({
       {(error || hint) && (
         <Text
           style={[
-            styles.helperText,
-            error ? styles.errorText : styles.hintText,
+            styleSheet.helperText,
+            error ? styleSheet.errorText : styleSheet.hintText,
           ]}
         >
           {error || hint}
@@ -181,7 +184,7 @@ export const Input: React.FC<InputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     marginBottom: spacing.md,
   },
