@@ -798,17 +798,35 @@ export const driverTrackingService = {
     return data as DriverLocation;
   },
 
-  // Get driver's current location
+  // Get driver's current location (filters out invalid 0,0 coordinates)
   async getDriverLocation(driverId: string) {
+    // First try to get a valid location (not 0,0 or null)
     const { data, error } = await supabase
       .from('driver_tracking')
       .select('*')
       .eq('driver_id', driverId)
+      .neq('latitude', 0)
+      .neq('longitude', 0)
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
       .order('last_updated', { ascending: false })
       .limit(1)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // If no valid location found, try getting any record as fallback
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('driver_tracking')
+        .select('*')
+        .eq('driver_id', driverId)
+        .order('last_updated', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (fallbackError) throw fallbackError;
+      return fallbackData as DriverLocation;
+    }
+
     return data as DriverLocation;
   },
 
@@ -827,22 +845,49 @@ export const driverTrackingService = {
     return data;
   },
 
-  // Update driver status
+  // Update driver status (upsert to avoid creating 0,0 entries)
   async updateStatus(driverId: string, status: 'active' | 'idle' | 'offline') {
-    const { data, error } = await supabase
+    // First check if a tracking record exists
+    const { data: existing } = await supabase
       .from('driver_tracking')
-      .insert({
-        driver_id: driverId,
-        latitude: 0,
-        longitude: 0,
-        status,
-        last_updated: new Date().toISOString()
-      })
-      .select()
+      .select('id, latitude, longitude')
+      .eq('driver_id', driverId)
+      .order('last_updated', { ascending: false })
+      .limit(1)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (existing && existing.latitude !== 0 && existing.longitude !== 0) {
+      // Update existing record with status only (keep current location)
+      const { data, error } = await supabase
+        .from('driver_tracking')
+        .update({
+          status,
+          last_updated: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } else {
+      // No valid location exists, don't create a 0,0 record
+      // Instead just update any existing record or create new one with null coords
+      const { data, error } = await supabase
+        .from('driver_tracking')
+        .insert({
+          driver_id: driverId,
+          latitude: null,
+          longitude: null,
+          status,
+          last_updated: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
   }
 };
 
