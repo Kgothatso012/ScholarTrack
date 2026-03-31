@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export default function LiveTrackScreen() {
   const { colors } = useTheme();
   const [trackingEnabled, setTrackingEnabled] = useState(true);
   const [tripActive, setTripActive] = useState(false);
 
-  const driverLocation = {
-    status: 'moving',
-    speed: 45,
-  };
+  const driverLocation = { status: 'moving', speed: 45 };
 
   const tripInfo = {
     route: 'Mamelodi Morning Route',
@@ -45,200 +46,134 @@ export default function LiveTrackScreen() {
     ]);
   };
 
-  const styles = StyleSheet.create({
+  const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
-    headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
-    trackingToggle: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 15 },
-    toggleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.textSecondary, marginRight: 6 },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    trackingToggle: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full },
+    toggleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.textSecondary, marginRight: spacing.xs },
     toggleOn: { backgroundColor: colors.success },
-    toggleText: { color: colors.textInverse, fontSize: 12, fontWeight: 'bold' },
-    mapContainer: { padding: 15 },
-    mapPlaceholder: { height: 200, backgroundColor: colors.card, borderRadius: 15, justifyContent: 'center', alignItems: 'center', position: 'relative' },
-    mapText: { fontSize: 18, fontWeight: 'bold', color: colors.primary, marginTop: 10 },
-    mapSubtext: { fontSize: 14, color: colors.textSecondary, marginTop: 5 },
-    routeVisual: { flexDirection: 'row', alignItems: 'center', marginTop: 20, paddingHorizontal: 30 },
-    routePoint: { flexDirection: 'row', alignItems: 'center' },
-    routeDot: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.textSecondary, justifyContent: 'center', alignItems: 'center' },
-    routeDotCompleted: { backgroundColor: colors.success },
-    routeDotCurrent: { backgroundColor: colors.accent },
-    routeDotPending: { backgroundColor: colors.textSecondary },
-    routeLine: { width: 40, height: 2, backgroundColor: colors.border, marginHorizontal: 5 },
-    tripCard: { backgroundColor: colors.card, margin: 15, marginTop: 0, padding: 15, borderRadius: 12, elevation: 3 },
-    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    tripTitle: { fontSize: 16, fontWeight: 'bold', color: colors.text, flex: 1 },
-    tripBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-    tripActive: { backgroundColor: colors.success },
-    tripPending: { backgroundColor: colors.accent },
-    tripBadgeText: { color: colors.textInverse, fontSize: 10, fontWeight: 'bold' },
-    tripDetails: {},
-    tripRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-    tripLabel: { marginLeft: 8, fontSize: 14, color: colors.textSecondary, width: 70 },
-    tripValue: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    quickActions: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: colors.card, marginHorizontal: 15, borderRadius: 12, elevation: 2 },
-    quickAction: { alignItems: 'center', padding: 10 },
-    quickText: { fontSize: 12, color: colors.text, marginTop: 5 },
-    emergencyAction: {},
-    emergencyText: { color: colors.error },
-    section: { padding: 15 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    stopCard: { backgroundColor: colors.card, borderRadius: 12, padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    stopCurrent: { borderLeftWidth: 3, borderLeftColor: colors.accent },
-    stopIcon: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    stopInfo: { flex: 1, marginLeft: 10 },
-    stopName: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    stopNameCurrent: { color: colors.accent },
-    stopTime: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-    stopStatus: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-    stopDone: { backgroundColor: colors.success },
-    stopNow: { backgroundColor: colors.accent },
-    stopStatusText: { color: colors.textInverse, fontSize: 10, fontWeight: 'bold' },
-    geofenceCard: { backgroundColor: colors.card, borderRadius: 12, padding: 12, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    geofenceIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.selected, justifyContent: 'center', alignItems: 'center' },
-    geofenceInfo: { flex: 1, marginLeft: 12 },
-    geofenceName: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    geofenceAddress: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-    geofenceToggle: { padding: 8 },
+    toggleText: { ...typography.labelSmall, color: colors.textInverse },
+    mapContainer: { padding: spacing.lg },
+    mapPlaceholder: { height: 200, backgroundColor: colors.card, borderRadius: borderRadius.lg, justifyContent: 'center', alignItems: 'center' },
+    mapText: { ...typography.h4, color: colors.primary, marginTop: spacing.sm },
+    mapSubtext: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
+    tripCard: { backgroundColor: colors.card, margin: spacing.lg, marginTop: 0, padding: spacing.lg, borderRadius: borderRadius.lg, elevation: 3 },
+    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+    tripTitle: { ...typography.h4, color: colors.text, flex: 1 },
+    tripRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+    tripLabel: { ...typography.body, color: colors.textSecondary, width: 70, marginLeft: spacing.sm },
+    tripValue: { ...typography.label, color: colors.text },
+    quickActions: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: colors.card, marginHorizontal: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, elevation: 2 },
+    actionBtn: { alignItems: 'center', padding: spacing.sm },
+    actionIcon: { marginBottom: spacing.xs },
+    actionText: { ...typography.labelSmall, color: colors.text },
+    stopsList: { marginTop: spacing.md },
+    stopItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+    stopDot: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    stopInfo: { flex: 1, marginLeft: spacing.md },
+    stopName: { ...typography.label, color: colors.text },
+    stopTime: { ...typography.bodySmall, color: colors.textSecondary },
+    stopStatus: { ...typography.labelSmall, color: colors.textSecondary },
   });
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Live Tracking</Text>
-          <TouchableOpacity onPress={toggleTracking} style={styles.trackingToggle}>
-            <View style={[styles.toggleDot, trackingEnabled && styles.toggleOn]} />
-            <Text style={styles.toggleText}>{trackingEnabled ? 'ON' : 'OFF'}</Text>
+    <View style={styles(colors).container}>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <View style={styles(colors).headerTop}>
+          <View>
+            <Text style={styles(colors).headerTitle}>Live Tracking</Text>
+            <Text style={styles(colors).headerSubtext}>Real-time bus location</Text>
+          </View>
+          <TouchableOpacity style={styles(colors).trackingToggle} onPress={toggleTracking}>
+            <View style={[styles(colors).toggleDot, trackingEnabled && styles(colors).toggleOn]} />
+            <Text style={styles(colors).toggleText}>{trackingEnabled ? 'ON' : 'OFF'}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerSubtext}>Real-time location of your child</Text>
       </View>
 
-      <View style={styles.mapContainer}>
-        <View style={styles.mapPlaceholder}>
-          <Ionicons name="map" size={60} color={colors.primary} />
-          <Text style={styles.mapText}>Live Map View</Text>
-          <Text style={styles.mapSubtext}>
-            {driverLocation.status === 'moving' ? `Moving at ${driverLocation.speed} km/h` : 'Stopped'}
-          </Text>
-          <View style={styles.routeVisual}>
-            {stops.map((stop, index) => (
-              <View key={stop.id} style={styles.routePoint}>
-                <View style={[
-                  styles.routeDot,
-                  stop.status === 'completed' && styles.routeDotCompleted,
-                  stop.status === 'current' && styles.routeDotCurrent,
-                  stop.status === 'pending' && styles.routeDotPending,
-                ]}>
-                  {stop.status === 'completed' && <Ionicons name="checkmark" size={12} color={colors.textInverse} />}
-                </View>
-                {index < stops.length - 1 && <View style={styles.routeLine} />}
+      {/* Map Placeholder */}
+      <View style={styles(colors).mapContainer}>
+        <Card variant="elevated" padding="large">
+          <View style={styles(colors).mapPlaceholder}>
+            <Ionicons name="map" size={48} color={colors.primary} />
+            <Text style={styles(colors).mapText}>Map View</Text>
+            <Text style={styles(colors).mapSubtext}>Real-time tracking enabled</Text>
+          </View>
+        </Card>
+      </View>
+
+      {/* Trip Info Card */}
+      <Card variant="elevated" padding="large" style={styles(colors).tripCard}>
+        <View style={styles(colors).tripHeader}>
+          <Text style={styles(colors).tripTitle}>{tripInfo.route}</Text>
+          <Badge label={tripActive ? 'Active' : 'Pending'} variant={tripActive ? 'success' : 'warning'} size="small" />
+        </View>
+
+        <View style={styles(colors).tripRow}>
+          <Ionicons name="school" size={18} color={colors.primary} />
+          <Text style={styles(colors).tripLabel}>School:</Text>
+          <Text style={styles(colors).tripValue}>{tripInfo.school}</Text>
+        </View>
+
+        <View style={styles(colors).tripRow}>
+          <Ionicons name="time" size={18} color={colors.primary} />
+          <Text style={styles(colors).tripLabel}>ETA:</Text>
+          <Text style={styles(colors).tripValue}>{tripInfo.eta}</Text>
+        </View>
+
+        <View style={styles(colors).tripRow}>
+          <Ionicons name="people" size={18} color={colors.primary} />
+          <Text style={styles(colors).tripLabel}>Students:</Text>
+          <Text style={styles(colors).tripValue}>{tripInfo.studentsOnboard} onboard</Text>
+        </View>
+      </Card>
+
+      {/* Quick Actions */}
+      <View style={styles(colors).quickActions}>
+        <TouchableOpacity style={styles(colors).actionBtn} onPress={shareLocation}>
+          <View style={styles(colors).actionIcon}>
+            <Ionicons name="share-social" size={24} color={colors.primary} />
+          </View>
+          <Text style={styles(colors).actionText}>Share</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('History', 'Opening trip history...')}>
+          <View style={styles(colors).actionIcon}>
+            <Ionicons name="time" size={24} color={colors.accent} />
+          </View>
+          <Text style={styles(colors).actionText}>History</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('Alert', 'Sending alert...')}>
+          <View style={styles(colors).actionIcon}>
+            <Ionicons name="warning" size={24} color={colors.error} />
+          </View>
+          <Text style={styles(colors).actionText}>Alert</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Stops */}
+      <View style={styles(colors).mapContainer}>
+        <Text style={styles(colors).tripTitle}>Stops ({tripInfo.stopsCompleted}/{tripInfo.stops})</Text>
+        <View style={styles(colors).stopsList}>
+          {stops.map((stop, index) => (
+            <View key={stop.id} style={styles(colors).stopItem}>
+              <View style={[styles(colors).stopDot, { backgroundColor: stop.status === 'completed' ? colors.success : stop.status === 'current' ? colors.accent : colors.textSecondary }]}>
+                <Ionicons name={stop.status === 'completed' ? 'checkmark' : stop.status === 'current' ? 'person' : 'ellipse'} size={12} color={colors.textInverse} />
               </View>
-            ))}
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.tripCard}>
-        <View style={styles.tripHeader}>
-          <Text style={styles.tripTitle}>{tripInfo.route}</Text>
-          <View style={[styles.tripBadge, tripActive ? styles.tripActive : styles.tripPending]}>
-            <Text style={styles.tripBadgeText}>{tripActive ? 'IN PROGRESS' : 'UPCOMING'}</Text>
-          </View>
-        </View>
-        <View style={styles.tripDetails}>
-          <View style={styles.tripRow}>
-            <Ionicons name="school" size={18} color={colors.primary} />
-            <Text style={styles.tripLabel}>School:</Text>
-            <Text style={styles.tripValue}>{tripInfo.school}</Text>
-          </View>
-          <View style={styles.tripRow}>
-            <Ionicons name="time" size={18} color={colors.accent} />
-            <Text style={styles.tripLabel}>ETA:</Text>
-            <Text style={styles.tripValue}>{tripInfo.eta}</Text>
-          </View>
-          <View style={styles.tripRow}>
-            <Ionicons name="people" size={18} color={colors.success} />
-            <Text style={styles.tripLabel}>Students:</Text>
-            <Text style={styles.tripValue}>{tripInfo.studentsOnboard}</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.quickAction} onPress={shareLocation}>
-          <Ionicons name="share-social" size={24} color={colors.success} />
-          <Text style={styles.quickText}>Share</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.quickAction} onPress={() => Alert.alert('Calling', 'Calling driver...')}>
-          <Ionicons name="call" size={24} color={colors.primary} />
-          <Text style={styles.quickText}>Call</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.quickAction} onPress={() => Alert.alert('Message', 'Opening chat...')}>
-          <Ionicons name="chatbubbles" size={24} color={colors.accent} />
-          <Text style={styles.quickText}>Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.quickAction, styles.emergencyAction]} onPress={() => Alert.alert('Emergency', 'Opening emergency options...')}>
-          <Ionicons name="warning" size={24} color={colors.error} />
-          <Text style={[styles.quickText, styles.emergencyText]}>Emergency</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Route Stops ({tripInfo.stopsCompleted}/{tripInfo.stops})</Text>
-        {stops.map((stop) => (
-          <View key={stop.id} style={[styles.stopCard, stop.status === 'current' && styles.stopCurrent]}>
-            <View style={styles.stopIcon}>
-              {stop.status === 'completed' ? (
-                <Ionicons name="checkmark-circle" size={24} color={colors.success} />
-              ) : stop.status === 'current' ? (
-                <Ionicons name="locate" size={24} color={colors.accent} />
-              ) : (
-                <Ionicons name="radio-button-off" size={24} color={colors.textSecondary} />
-              )}
+              <View style={styles(colors).stopInfo}>
+                <Text style={styles(colors).stopName}>{stop.name}</Text>
+                <Text style={styles(colors).stopTime}>{stop.time} • {stop.students} students</Text>
+              </View>
+              <Text style={styles(colors).stopStatus}>{stop.status}</Text>
             </View>
-            <View style={styles.stopInfo}>
-              <Text style={[styles.stopName, stop.status === 'current' && styles.stopNameCurrent]}>{stop.name}</Text>
-              <Text style={styles.stopTime}>{stop.time} - {stop.students} students</Text>
-            </View>
-            <View style={[styles.stopStatus, stop.status === 'completed' && styles.stopDone, stop.status === 'current' && styles.stopNow]}>
-              <Text style={styles.stopStatusText}>
-                {stop.status === 'completed' ? 'Done' : stop.status === 'current' ? 'Now' : 'Next'}
-              </Text>
-            </View>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Geofence Alerts</Text>
-        <View style={styles.geofenceCard}>
-          <View style={styles.geofenceIcon}>
-            <Ionicons name="home" size={24} color={colors.success} />
-          </View>
-          <View style={styles.geofenceInfo}>
-            <Text style={styles.geofenceName}>Home</Text>
-            <Text style={styles.geofenceAddress}>123 Home Street, Mamelodi</Text>
-          </View>
-          <View style={styles.geofenceToggle}>
-            <Ionicons name="notifications" size={20} color={colors.success} />
-          </View>
-        </View>
-        <View style={styles.geofenceCard}>
-          <View style={styles.geofenceIcon}>
-            <Ionicons name="school" size={24} color={colors.primary} />
-          </View>
-          <View style={styles.geofenceInfo}>
-            <Text style={styles.geofenceName}>School</Text>
-            <Text style={styles.geofenceAddress}>Mamelodi High School</Text>
-          </View>
-          <View style={styles.geofenceToggle}>
-            <Ionicons name="notifications" size={20} color={colors.success} />
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+      <Spacer size="xl" />
+    </View>
   );
 }

@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
+// UI Plugin components
+import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface EmergencyContact {
   id: number;
   name: string;
@@ -35,128 +39,123 @@ export default function EmergencyScreen() {
     );
   };
 
-  const styles = StyleSheet.create({
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+  const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
-    headerSub: { fontSize: 14, color: colors.accent, marginTop: 5 },
-    sosButton: { backgroundColor: colors.error, margin: 20, padding: 30, borderRadius: 20, alignItems: 'center', elevation: 10 },
-    sosText: { color: colors.textInverse, fontSize: 20, fontWeight: 'bold', marginTop: 10 },
-    sosSub: { color: colors.textInverse, opacity: 0.8, fontSize: 12, marginTop: 5 },
-    section: { padding: 15 },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    quickDial: { backgroundColor: colors.card, borderRadius: 15, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    sosButton: { backgroundColor: colors.error, margin: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.xl, alignItems: 'center', elevation: 10 },
+    sosIcon: { marginBottom: spacing.sm },
+    sosText: { ...typography.h3, color: colors.textInverse },
+    sosSub: { ...typography.bodySmall, color: colors.textInverse, opacity: 0.8, marginTop: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    quickDialCard: { backgroundColor: colors.surface, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
     dialIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
     dialEmoji: { fontSize: 24 },
-    dialInfo: { flex: 1, marginLeft: 15 },
-    dialName: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    dialNumber: { fontSize: 16, fontWeight: 'bold', color: colors.success },
-    contactCard: { backgroundColor: colors.card, borderRadius: 15, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    dialInfo: { flex: 1, marginLeft: spacing.md },
+    dialName: { ...typography.label, color: colors.text },
+    dialNumber: { ...typography.h4, color: colors.success },
+    contactCard: { backgroundColor: colors.surface, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
     contactAvatar: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    contactInitial: { fontSize: 18, fontWeight: 'bold', color: colors.accent },
-    contactInfo: { flex: 1, marginLeft: 12 },
-    contactName: { fontSize: 15, fontWeight: 'bold', color: colors.text },
-    contactPhone: { fontSize: 14, color: colors.textSecondary },
-    contactRelation: { fontSize: 11, color: colors.textSecondary },
-    callBtn: { backgroundColor: colors.selected, padding: 12, borderRadius: 25 },
-    tipCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    tipText: { flex: 1, marginLeft: 12, fontSize: 14, color: colors.text },
+    contactInitial: { ...typography.h4, color: colors.accent },
+    contactInfo: { flex: 1, marginLeft: spacing.md },
+    contactName: { ...typography.label, color: colors.text },
+    contactPhone: { ...typography.bodySmall, color: colors.textSecondary },
+    contactRelation: { ...typography.caption, color: colors.textSecondary },
+    callBtn: { padding: spacing.md, borderRadius: borderRadius.full },
+    tipCard: { backgroundColor: colors.surface, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    tipText: { flex: 1, marginLeft: spacing.md, ...typography.body, color: colors.text },
   });
 
+  const quickDials = [
+    { name: 'Police', phone: '10111', emoji: '🚔', color: colors.primary },
+    { name: 'Ambulance', phone: '10177', emoji: '🚑', color: colors.error },
+    { name: 'Fire', phone: '10177', emoji: '🚒', color: colors.warning },
+  ];
+
+  const tips = [
+    { icon: 'location', text: 'Your location is automatically shared with emergency contacts' },
+    { icon: 'time', text: 'SOS alerts include timestamp for emergency services' },
+    { icon: 'shield-checkmark', text: 'All contacts verified through ScholarTrack' },
+  ];
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Emergency Services</Text>
-        <Text style={styles.headerSub}>Quick access to emergency help</Text>
+    <ScrollView style={styles(colors).container}>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Emergency Services</Text>
+        <Text style={styles(colors).headerSub}>Quick access to emergency help</Text>
       </View>
 
-      <TouchableOpacity style={styles.sosButton} onPress={sosAlert}>
-        <Ionicons name="warning" size={40} color={colors.textInverse} />
-        <Text style={styles.sosText}>HOLD FOR SOS</Text>
-        <Text style={styles.sosSub}>Sends location to all contacts</Text>
+      {/* SOS Button */}
+      <TouchableOpacity style={styles(colors).sosButton} onPress={sosAlert}>
+        <View style={styles(colors).sosIcon}>
+          <Ionicons name="warning" size={40} color={colors.textInverse} />
+        </View>
+        <Text style={styles(colors).sosText}>HOLD FOR SOS</Text>
+        <Text style={styles(colors).sosSub}>Sends location to all contacts</Text>
       </TouchableOpacity>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Dial</Text>
-
-        <TouchableOpacity style={styles.quickDial} onPress={() => callEmergency('Police', '10111')}>
-          <View style={[styles.dialIcon, { backgroundColor: '#1565C0' }]}>
-            <Text style={styles.dialEmoji}>P</Text>
-          </View>
-          <View style={styles.dialInfo}>
-            <Text style={styles.dialName}>South African Police</Text>
-            <Text style={styles.dialNumber}>10111</Text>
-          </View>
-          <Ionicons name="call" size={24} color={colors.success} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.quickDial} onPress={() => callEmergency('Ambulance', '10177')}>
-          <View style={[styles.dialIcon, { backgroundColor: colors.error }]}>
-            <Text style={styles.dialEmoji}>A</Text>
-          </View>
-          <View style={styles.dialInfo}>
-            <Text style={styles.dialName}>Ambulance</Text>
-            <Text style={styles.dialNumber}>10177</Text>
-          </View>
-          <Ionicons name="call" size={24} color={colors.success} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.quickDial} onPress={() => callEmergency('Fire', '10177')}>
-          <View style={[styles.dialIcon, { backgroundColor: '#FF6F00' }]}>
-            <Text style={styles.dialEmoji}>F</Text>
-          </View>
-          <View style={styles.dialInfo}>
-            <Text style={styles.dialName}>Fire Department</Text>
-            <Text style={styles.dialNumber}>10177</Text>
-          </View>
-          <Ionicons name="call" size={24} color={colors.success} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Emergency Contacts</Text>
-          <TouchableOpacity onPress={() => Alert.alert('Add', 'Add contact...')}>
-            <Ionicons name="add-circle" size={28} color={colors.accent} />
-          </TouchableOpacity>
-        </View>
-
-        {contacts.map((contact) => (
-          <View key={contact.id} style={styles.contactCard}>
-            <View style={styles.contactAvatar}>
-              <Text style={styles.contactInitial}>{contact.name[0]}</Text>
-            </View>
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactName}>{contact.name}</Text>
-              <Text style={styles.contactPhone}>{contact.phone}</Text>
-              <Text style={styles.contactRelation}>{contact.relation}</Text>
-            </View>
-            <TouchableOpacity style={styles.callBtn} onPress={() => callEmergency(contact.name, contact.phone)}>
-              <Ionicons name="call" size={20} color={colors.success} />
+      {/* Quick Dial */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Quick Dial</Text>
+        {quickDials.map((item, index) => (
+          <Card key={index} variant="elevated" padding="medium">
+            <TouchableOpacity style={styles(colors).quickDialCard} onPress={() => callEmergency(item.name, item.phone)}>
+              <View style={[styles(colors).dialIcon, { backgroundColor: item.color + '20' }]}>
+                <Text style={styles(colors).dialEmoji}>{item.emoji}</Text>
+              </View>
+              <View style={styles(colors).dialInfo}>
+                <Text style={styles(colors).dialName}>{item.name}</Text>
+                <Text style={styles(colors).dialNumber}>{item.phone}</Text>
+              </View>
+              <View style={styles(colors).callBtn}>
+                <Ionicons name="call" size={20} color={colors.success} />
+              </View>
             </TouchableOpacity>
-          </View>
+          </Card>
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Safety Tips</Text>
-
-        <View style={styles.tipCard}>
-          <Ionicons name="shield-checkmark" size={24} color={colors.success} />
-          <Text style={styles.tipText}>Always share your trip with a family member</Text>
-        </View>
-
-        <View style={styles.tipCard}>
-          <Ionicons name="document-text" size={24} color={colors.accent} />
-          <Text style={styles.tipText}>Verify your driver's details before starting</Text>
-        </View>
-
-        <View style={styles.tipCard}>
-          <Ionicons name="warning" size={24} color={colors.error} />
-          <Text style={styles.tipText}>Trust your instincts - report anything suspicious</Text>
-        </View>
+      {/* Emergency Contacts */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Emergency Contacts</Text>
+        {contacts.map((contact) => (
+          <Card key={contact.id} variant="elevated" padding="medium">
+            <TouchableOpacity style={styles(colors).contactCard} onPress={() => callEmergency(contact.name, contact.phone)}>
+              <View style={styles(colors).contactAvatar}>
+                <Text style={styles(colors).contactInitial}>{getInitials(contact.name)}</Text>
+              </View>
+              <View style={styles(colors).contactInfo}>
+                <Text style={styles(colors).contactName}>{contact.name}</Text>
+                <Text style={styles(colors).contactPhone}>{contact.phone}</Text>
+                <Badge label={contact.relation} variant="neutral" size="small" />
+              </View>
+              <View style={styles(colors).callBtn}>
+                <Ionicons name="call" size={20} color={colors.success} />
+              </View>
+            </TouchableOpacity>
+          </Card>
+        ))}
       </View>
+
+      {/* Safety Tips */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Safety Tips</Text>
+        {tips.map((tip, index) => (
+          <Card key={index} variant="outlined" padding="medium">
+            <View style={styles(colors).tipCard}>
+              <Ionicons name={tip.icon as any} size={20} color={colors.primary} />
+              <Text style={styles(colors).tipText}>{tip.text}</Text>
+            </View>
+          </Card>
+        ))}
+      </View>
+
+      <Spacer size="xl" />
     </ScrollView>
   );
 }

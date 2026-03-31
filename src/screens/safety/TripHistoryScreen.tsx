@@ -4,6 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface Trip {
   id: string;
   scheduled_time: string;
@@ -22,24 +26,20 @@ export default function TripHistoryScreen() {
   const loadTrips = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get children for this parent
       const { data: children } = await supabase
         .from('children')
         .select('id')
         .eq('parent_id', user.id);
 
       const childIds = children?.map((c: any) => c.id) || [];
-
       if (childIds.length === 0) {
         setTrips([]);
         return;
       }
 
-      // Get trips for these children
       const { data: tripsData } = await supabase
         .from('trips')
         .select('*')
@@ -65,120 +65,132 @@ export default function TripHistoryScreen() {
     await loadTrips();
   }, []);
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): 'success' | 'error' | 'warning' | 'neutral' | 'info' => {
     switch (status) {
-      case 'completed': return colors.success;
-      case 'cancelled': return colors.error;
-      case 'delayed': return colors.warning;
-      case 'in_progress': return colors.primary;
-      default: return colors.textSecondary;
+      case 'completed': return 'success';
+      case 'cancelled': return 'error';
+      case 'delayed': return 'warning';
+      case 'in_progress': return 'info';
+      default: return 'neutral';
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'completed': return 'checkmark-circle';
-      case 'cancelled': return 'close-circle';
-      case 'delayed': return 'time';
-      case 'in_progress': return 'bus';
-      default: return 'help-circle';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      case 'delayed': return 'Delayed';
+      case 'in_progress': return 'In Progress';
+      default: return status;
     }
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' });
+  };
+
+  const formatTime = (dateStr: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
   };
 
   const filteredTrips = filter === 'all' ? trips : trips.filter((t: any) => t.status === filter);
 
-  const styles = StyleSheet.create({
+  const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
-    loadingText: { color: colors.textSecondary, marginTop: 10 },
-    filters: { flexDirection: 'row', padding: 15, backgroundColor: colors.card, marginHorizontal: 15, marginTop: -10, borderRadius: 10, elevation: 3 },
-    filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8, marginHorizontal: 3 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
+    loadingText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
+    filters: { flexDirection: 'row', backgroundColor: colors.card, marginHorizontal: spacing.lg, marginTop: -spacing.md, padding: spacing.sm, borderRadius: borderRadius.lg, elevation: 3 },
+    filterBtn: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: borderRadius.md, marginHorizontal: spacing.xs },
     filterActive: { backgroundColor: colors.primary },
-    filterText: { color: colors.textSecondary, fontWeight: '600' },
+    filterText: { ...typography.labelSmall, color: colors.textSecondary },
     filterTextActive: { color: colors.textInverse },
-    section: { padding: 15 },
-    tripCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, elevation: 2 },
-    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-    tripDate: { fontSize: 12, color: colors.textSecondary },
-    tripStatus: { flexDirection: 'row', alignItems: 'center' },
-    tripStatusIcon: { marginRight: 4 },
-    tripRoute: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 4 },
+    section: { padding: spacing.lg },
+    tripCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, elevation: 2 },
+    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+    tripDate: { ...typography.caption, color: colors.textSecondary },
+    tripRoute: { ...typography.label, color: colors.text, marginBottom: spacing.xs },
     tripDetails: { flexDirection: 'row', justifyContent: 'space-between' },
     tripDetail: { flexDirection: 'row', alignItems: 'center' },
-    tripDetailText: { fontSize: 12, color: colors.textSecondary, marginLeft: 4 },
-    emptyState: { alignItems: 'center', padding: 40 },
-    emptyText: { color: colors.textSecondary, marginTop: 10 },
+    tripDetailText: { ...typography.caption, color: colors.textSecondary, marginLeft: spacing.xs },
+    emptyState: { alignItems: 'center', padding: spacing.xxl },
+    emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
   });
+
+  const FilterButton = ({ label, value }: { label: string; value: typeof filter }) => (
+    <TouchableOpacity
+      style={[styles(colors).filterBtn, filter === value && styles(colors).filterActive]}
+      onPress={() => setFilter(value)}
+    >
+      <Text style={[styles(colors).filterText, filter === value && styles(colors).filterTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading trips...</Text>
+      <View style={[styles(colors).container, styles(colors).loadingContainer]}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).loadingText}>Loading trips...</Text>
+        </Card>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
+      style={styles(colors).container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
     >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Trip History</Text>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Trip History</Text>
       </View>
 
-      <View style={styles.filters}>
-        {(['all', 'completed', 'cancelled'] as const).map((f) => (
-          <TouchableOpacity key={f} style={[styles.filterBtn, filter === f && styles.filterActive]} onPress={() => setFilter(f)}>
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Filters */}
+      <View style={styles(colors).filters}>
+        <FilterButton label="All" value="all" />
+        <FilterButton label="Completed" value="completed" />
+        <FilterButton label="Cancelled" value="cancelled" />
       </View>
 
-      <View style={styles.section}>
+      {/* Trips List */}
+      <View style={styles(colors).section}>
         {filteredTrips.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
-            <Text style={styles.emptyText}>No trips found</Text>
-          </View>
-        ) : (
-          filteredTrips.map((trip: any) => (
-            <View key={trip.id} style={styles.tripCard}>
-              <View style={styles.tripHeader}>
-                <Text style={styles.tripDate}>
-                  {new Date(trip.scheduled_time).toLocaleDateString()}
-                </Text>
-                <View style={styles.tripStatus}>
-                  <Ionicons name={getStatusIcon(trip.status) as any} size={16} color={getStatusColor(trip.status)} style={styles.tripStatusIcon} />
-                  <Text style={{ color: getStatusColor(trip.status), fontWeight: '600', fontSize: 12 }}>
-                    {(trip.status || 'unknown').toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-              <Text style={styles.tripRoute}>{trip.route_name || 'Route'}</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 10 }}>
-                {new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-              <View style={styles.tripDetails}>
-                <View style={styles.tripDetail}>
-                  <Ionicons name="location" size={14} color={colors.textSecondary} />
-                  <Text style={styles.tripDetailText}>{trip.pickup_location || 'Pickup point'}</Text>
-                </View>
-              </View>
+          <Card variant="outlined" padding="large">
+            <View style={styles(colors).emptyState}>
+              <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
+              <Text style={styles(colors).emptyText}>No trips found</Text>
             </View>
+          </Card>
+        ) : (
+          filteredTrips.map((trip) => (
+            <Card key={trip.id} variant="elevated" padding="medium">
+              <View style={styles(colors).tripCard}>
+                <View style={styles(colors).tripHeader}>
+                  <Text style={styles(colors).tripDate}>{formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}</Text>
+                  <Badge label={getStatusLabel(trip.status)} variant={getStatusVariant(trip.status)} size="small" />
+                </View>
+                <Text style={styles(colors).tripRoute}>{trip.route_name || 'Route Trip'}</Text>
+                <View style={styles(colors).tripDetails}>
+                  <View style={styles(colors).tripDetail}>
+                    <Ionicons name="person" size={14} color={colors.textSecondary} />
+                    <Text style={styles(colors).tripDetailText}>Child ID: {trip.child_id?.substring(0, 8)}</Text>
+                  </View>
+                  <View style={styles(colors).tripDetail}>
+                    <Ionicons name="location" size={14} color={colors.textSecondary} />
+                    <Text style={styles(colors).tripDetailText}>{trip.status}</Text>
+                  </View>
+                </View>
+              </View>
+            </Card>
           ))
         )}
       </View>
+
+      <Spacer size="xl" />
     </ScrollView>
   );
 }

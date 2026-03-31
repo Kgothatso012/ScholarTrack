@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface DashboardStat {
   label: string;
@@ -34,7 +38,6 @@ export default function AdminDashboardScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Stats state
   const [stats, setStats] = useState<DashboardStat[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -44,43 +47,36 @@ export default function AdminDashboardScreen({ navigation }: any) {
     try {
       setLoading(true);
 
-      // Query 1: Active drivers count
-      const { count: activeDrivers, error: driversError } = await supabase
+      const { count: activeDrivers } = await supabase
         .from('drivers')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Query 2: Total children/students count
-      const { count: totalStudents, error: childrenError } = await supabase
+      const { count: totalStudents } = await supabase
         .from('children')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Query 3: Get drivers list
-      const { data: driversData, error: driversListError } = await supabase
+      const { data: driversData } = await supabase
         .from('drivers')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
 
-      // Query 4: Get payments for revenue
-      const { data: paymentsData, error: paymentsError } = await supabase
+      const { data: paymentsData } = await supabase
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Calculate revenue from payments
       const revenue = paymentsData
         ?.filter(p => p.status === 'completed' || p.status === 'paid')
         .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 
-      // Query 5: Get schools count
-      const { count: schoolsCount, error: schoolsError } = await supabase
+      const { count: schoolsCount } = await supabase
         .from('schools')
         .select('*', { count: 'exact', head: true });
 
-      // Set stats
       setStats([
         { label: 'Active Drivers', value: activeDrivers || 0, positive: true },
         { label: 'Total Students', value: totalStudents || 0, positive: true },
@@ -88,7 +84,6 @@ export default function AdminDashboardScreen({ navigation }: any) {
         { label: 'Revenue', value: `R${(revenue / 100).toLocaleString()}`, positive: true },
       ]);
 
-      // Set drivers
       if (driversData) {
         setDrivers(driversData.map(d => ({
           ...d,
@@ -96,7 +91,6 @@ export default function AdminDashboardScreen({ navigation }: any) {
         })));
       }
 
-      // Set payments
       if (paymentsData) {
         setPayments(paymentsData);
       }
@@ -105,7 +99,6 @@ export default function AdminDashboardScreen({ navigation }: any) {
 
     } catch (error) {
       console.error('Error loading dashboard:', error);
-      // Set empty stats on error
       setStats([
         { label: 'Active Drivers', value: 0 },
         { label: 'Total Students', value: 0 },
@@ -127,22 +120,12 @@ export default function AdminDashboardScreen({ navigation }: any) {
     await loadDashboardData();
   }, []);
 
-  const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
-    <TouchableOpacity
-      style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
-      onPress={() => setActiveTab(tab)}
-    >
-      <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
-      <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{label}</Text>
-    </TouchableOpacity>
-  );
-
-  const getStatusColor = (status: string, verified: boolean) => {
-    if (!verified) return colors.warning;
+  const getStatusVariant = (status: string, verified: boolean): 'success' | 'warning' | 'error' | 'neutral' => {
+    if (!verified) return 'warning';
     switch (status) {
-      case 'active': return colors.success;
-      case 'inactive': return colors.error;
-      default: return colors.warning;
+      case 'active': return 'success';
+      case 'inactive': return 'error';
+      default: return 'neutral';
     }
   };
 
@@ -151,174 +134,213 @@ export default function AdminDashboardScreen({ navigation }: any) {
     return status || 'active';
   };
 
-  const styles = StyleSheet.create({
+  const getPaymentVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
+    switch (status) {
+      case 'completed': case 'paid': return 'success';
+      case 'pending': return 'warning';
+      case 'failed': return 'error';
+      default: return 'neutral';
+    }
+  };
+
+  const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 40 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.textInverse },
-    headerSubtext: { fontSize: 13, color: colors.accent, marginTop: 5 },
-    refreshBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
-    loadingText: { color: colors.textSecondary, marginTop: 10 },
-    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: 10, marginHorizontal: 15, marginTop: -10, borderRadius: 10, elevation: 3 },
-    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8 },
+    headerTitle: { ...typography.h1, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    headerActions: { flexDirection: 'row' },
+    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: borderRadius.md, marginLeft: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    tabs: { flexDirection: 'row', backgroundColor: colors.surface, padding: spacing.sm, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
     tabButtonActive: { backgroundColor: colors.primary },
-    tabText: { fontSize: 12, color: colors.textSecondary, marginLeft: 5 },
+    tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
     tabTextActive: { color: colors.textInverse },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: 15, borderRadius: 10, elevation: 2 },
-    statLabel: { fontSize: 12, color: colors.textSecondary },
-    statValue: { fontSize: 28, fontWeight: 'bold', color: colors.accent, marginVertical: 5 },
-    section: { padding: 15 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    listItem: { backgroundColor: colors.card, borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.sm },
+    statCard: { width: '48%', backgroundColor: colors.surface, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
+    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+    statValue: { ...typography.displayMedium, color: colors.accent, marginVertical: spacing.xs },
+    quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    quickActionCard: { width: '48%', backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md, elevation: 2 },
+    quickActionIcon: { marginBottom: spacing.xs },
+    quickActionText: { ...typography.label, color: colors.text },
+    listItem: { backgroundColor: colors.surface, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
     listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    avatarText: { color: colors.textInverse, fontWeight: 'bold', fontSize: 14 },
-    listInfo: { flex: 1, marginLeft: 12 },
-    listName: { fontSize: 15, fontWeight: 'bold', color: colors.text },
-    listMeta: { fontSize: 12, color: colors.textSecondary },
-    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-    statusText: { color: colors.textInverse, fontSize: 11, fontWeight: 'bold', textTransform: 'capitalize' },
-    amount: { fontSize: 16, fontWeight: 'bold', color: colors.accent },
-    financeCard: { backgroundColor: colors.card, borderRadius: 10, padding: 15, elevation: 2 },
-    financeRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
-    financeLabel: { fontSize: 14, color: colors.textSecondary },
-    financeValue: { fontSize: 14, fontWeight: 'bold', color: colors.text },
-    financeTotal: { borderBottomWidth: 0, paddingTop: 15 },
-    financeLabelTotal: { fontSize: 16, fontWeight: 'bold', color: colors.text },
-    financeValueTotal: { fontSize: 18, fontWeight: 'bold', color: colors.accent },
-    exportBtn: { backgroundColor: colors.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10, marginTop: 15, elevation: 2 },
-    exportText: { color: colors.accent, fontWeight: 'bold', marginLeft: 8 },
-    emptyText: { textAlign: 'center', color: colors.textSecondary, padding: 20 },
+    listInfo: { flex: 1, marginLeft: spacing.md },
+    listName: { ...typography.label, color: colors.text },
+    listMeta: { ...typography.bodySmall, color: colors.textSecondary },
+    amount: { ...typography.h4, color: colors.accent },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
   });
+
+  const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
+    <TouchableOpacity
+      style={[styles(colors).tabButton, activeTab === tab && styles(colors).tabButtonActive]}
+      onPress={() => setActiveTab(tab)}
+    >
+      <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
+      <Text style={[styles(colors).tabText, activeTab === tab && styles(colors).tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  const quickActions = [
+    { name: 'Add Driver', icon: 'person-add', color: colors.success, route: 'ManageDrivers' },
+    { name: 'Add School', icon: 'school', color: colors.primary, route: 'FleetTracking' },
+    { name: 'Reports', icon: 'document-text', color: colors.accent, route: 'AdminReports' },
+    { name: 'Settings', icon: 'settings', color: colors.textSecondary, route: 'Settings' },
+  ];
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading dashboard...</Text>
+      <View style={[styles(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Loading dashboard...</Text>
+        </Card>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
+      style={styles(colors).container}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
+          colors={[colors.accent]}
+          tintColor={colors.accent}
         />
       }
     >
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Admin Dashboard</Text>
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity style={styles.refreshBtn} onPress={() => navigation?.navigate?.('FleetTracking')}>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <View style={styles(colors).headerTop}>
+          <Text style={styles(colors).headerTitle}>Admin Dashboard</Text>
+          <View style={styles(colors).headerActions}>
+            <TouchableOpacity style={styles(colors).headerBtn} onPress={() => navigation?.navigate?.('FleetTracking')}>
               <Ionicons name="location" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.refreshBtn} onPress={() => navigation?.navigate?.('Settings')}>
+            <TouchableOpacity style={styles(colors).headerBtn} onPress={() => navigation?.navigate?.('Settings')}>
               <Ionicons name="settings-outline" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.refreshBtn} onPress={onRefresh}>
+            <TouchableOpacity style={styles(colors).headerBtn} onPress={onRefresh}>
               <Ionicons name="refresh" size={20} color={colors.textInverse} />
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.headerSubtext}>Real-time data from database</Text>
+        <Text style={styles(colors).headerSubtext}>Real-time data from database</Text>
       </View>
 
-      <View style={styles.tabs}>
+      {/* Tabs */}
+      <View style={styles(colors).tabs}>
         <TabButton tab="overview" label="Overview" icon="grid" />
         <TabButton tab="drivers" label="Drivers" icon="car" />
         <TabButton tab="parents" label="Payments" icon="card" />
       </View>
 
+      {/* Overview Tab */}
       {activeTab === 'overview' && (
         <>
-          <View style={styles.statsGrid}>
+          {/* Stats Grid */}
+          <View style={styles(colors).statsGrid}>
             {stats.map((stat, index) => (
-              <View key={index} style={styles.statCard}>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-                <Text style={styles.statValue}>{stat.value}</Text>
-              </View>
+              <Card key={index} variant="elevated" padding="medium">
+                <View style={styles(colors).statCard}>
+                  <Text style={styles(colors).statLabel}>{stat.label}</Text>
+                  <Text style={styles(colors).statValue}>{stat.value}</Text>
+                </View>
+              </Card>
             ))}
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
-                <Ionicons name="person-add" size={24} color={colors.success} />
-                <Text style={[styles.listName, { marginTop: 8 }]}>Add Driver</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
-                <Ionicons name="school" size={24} color={colors.primary} />
-                <Text style={[styles.listName, { marginTop: 8 }]}>Add School</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
-                <Ionicons name="document-text" size={24} color={colors.accent} />
-                <Text style={[styles.listName, { marginTop: 8 }]}>Reports</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.listItem, { width: '48%', flexDirection: 'column', alignItems: 'flex-start' }]}>
-                <Ionicons name="settings" size={24} color={colors.textSecondary} />
-                <Text style={[styles.listName, { marginTop: 8 }]}>Settings</Text>
-              </TouchableOpacity>
+          {/* Quick Actions */}
+          <View style={styles(colors).section}>
+            <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
+            <View style={styles(colors).quickActionsGrid}>
+              {quickActions.map((action, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles(colors).quickActionCard}
+                  onPress={() => navigation?.navigate?.(action.route)}
+                >
+                  <View style={styles(colors).quickActionIcon}>
+                    <Ionicons name={action.icon as any} size={24} color={action.color} />
+                  </View>
+                  <Text style={styles(colors).quickActionText}>{action.name}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </>
       )}
 
+      {/* Drivers Tab */}
       {activeTab === 'drivers' && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>All Drivers ({drivers.length})</Text>
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>All Drivers ({drivers.length})</Text>
           {drivers.length === 0 ? (
-            <Text style={styles.emptyText}>No drivers found</Text>
+            <Card variant="outlined" padding="large">
+              <Text style={styles(colors).emptyText}>No drivers found</Text>
+            </Card>
           ) : (
             drivers.map((driver) => (
-              <View key={driver.id} style={styles.listItem}>
-                <View style={styles.listAvatar}>
-                  <Text style={styles.avatarText}>
-                    {(driver.full_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                  </Text>
+              <Card key={driver.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Text style={{ color: colors.textInverse, fontWeight: 'bold', fontSize: 14 }}>
+                      {(driver.full_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>{driver.full_name}</Text>
+                    <Text style={styles(colors).listMeta}>{driver.phone || 'No phone'}</Text>
+                  </View>
+                  <Badge
+                    label={getStatusText(driver.status, driver.is_verified)}
+                    variant={getStatusVariant(driver.status, driver.is_verified)}
+                    size="small"
+                  />
                 </View>
-                <View style={styles.listInfo}>
-                  <Text style={styles.listName}>{driver.full_name}</Text>
-                  <Text style={styles.listMeta}>{driver.phone || 'No phone'}</Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(driver.status, driver.is_verified) }]}>
-                  <Text style={styles.statusText}>{getStatusText(driver.status, driver.is_verified)}</Text>
-                </View>
-              </View>
+              </Card>
             ))
           )}
         </View>
       )}
 
+      {/* Payments Tab */}
       {activeTab === 'parents' && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Payments</Text>
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
           {payments.length === 0 ? (
-            <Text style={styles.emptyText}>No payments found</Text>
+            <Card variant="outlined" padding="large">
+              <Text style={styles(colors).emptyText}>No payments found</Text>
+            </Card>
           ) : (
             payments.map((payment) => (
-              <View key={payment.id} style={styles.listItem}>
-                <View style={styles.listAvatar}>
-                  <Ionicons name="card" size={20} color={colors.textInverse} />
+              <Card key={payment.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Ionicons name="card" size={20} color={colors.textInverse} />
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
+                    <Badge
+                      label={payment.status}
+                      variant={getPaymentVariant(payment.status)}
+                      size="small"
+                    />
+                  </View>
+                  <Text style={styles(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
                 </View>
-                <View style={styles.listInfo}>
-                  <Text style={styles.listName}>Payment #{payment.id.substring(0, 8)}</Text>
-                  <Text style={styles.listMeta}>{payment.status}</Text>
-                </View>
-                <Text style={styles.amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-              </View>
+              </Card>
             ))
           )}
         </View>
       )}
+
+      <Spacer size="xl" />
     </ScrollView>
   );
 }

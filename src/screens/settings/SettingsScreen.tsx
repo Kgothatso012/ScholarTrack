@@ -1,10 +1,14 @@
 // Comprehensive Settings Screen for All User Roles
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, TextInput, Modal, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, ThemeMode } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface UserProfile {
   name: string;
@@ -78,413 +82,249 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleThemeChange = async (mode: ThemeMode) => {
-    await setThemeMode(mode);
+    try {
+      await setThemeMode(mode);
+      setAppSettings(prev => ({ ...prev, darkMode: mode === 'dark' }));
+    } catch (error) {
+      console.error('Error changing theme:', error);
+    }
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await supabase.auth.signOut();
-            await AsyncStorage.clear();
-            (window as any).logout?.();
-          },
-        },
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await supabase.auth.signOut();
+          await AsyncStorage.clear();
+          (window as any).logout?.();
+        }
+      }
+    ]);
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Contact Support', 'Please contact support to delete your account.');
-          },
-        },
-      ]
-    );
+  const handleLink = (url: string) => {
+    Linking.openURL(url).catch(() => Alert.alert('Error', 'Cannot open link'));
   };
 
-  const handleContactSupport = () => {
-    Linking.openURL('mailto:support@scholartrack.co.za');
-  };
+  const styles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
+    headerTitle: { ...typography.h1, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    profileCard: { backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center', elevation: 3 },
+    profileAvatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    profileInitial: { ...typography.h2, color: colors.accent },
+    profileInfo: { flex: 1, marginLeft: spacing.md },
+    profileName: { ...typography.h4, color: colors.text },
+    profileEmail: { ...typography.bodySmall, color: colors.textSecondary },
+    profileRole: { marginTop: spacing.xs },
+    settingRow: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 1 },
+    settingInfo: { flex: 1 },
+    settingLabel: { ...typography.label, color: colors.text },
+    settingDesc: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
+    settingAction: { marginLeft: spacing.md },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
+    dangerBtn: { backgroundColor: colors.error, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginTop: spacing.lg },
+    dangerBtnText: { ...typography.button, color: colors.textInverse },
+    modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center' },
+    modalContent: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, width: '85%' },
+    modalTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.lg },
+    input: { backgroundColor: colors.backgroundAlt, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text },
+  });
 
-  const themeOptions: { value: ThemeMode; label: string; icon: string; color: string }[] = [
-    { value: 'light', label: 'Light', icon: 'sunny', color: '#ffffff' },
-    { value: 'dark', label: 'Dark', icon: 'moon', color: '#1a1a1a' },
-    { value: 'blue', label: 'Blue', icon: 'color-palette', color: '#002395' },
-  ];
-
-  const SettingSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{title}</Text>
-      <View style={[styles.sectionContent, { backgroundColor: colors.card }]}>
-        {children}
+  const SettingRow = ({ label, description, value, onValueChange, icon }: any) => (
+    <View style={styles(colors).settingRow}>
+      <View style={styles(colors).settingInfo}>
+        <Text style={styles(colors).settingLabel}>{label}</Text>
+        {description && <Text style={styles(colors).settingDesc}>{description}</Text>}
+      </View>
+      <View style={styles(colors).settingAction}>
+        <Switch
+          value={value}
+          onValueChange={onValueChange}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor={colors.card}
+        />
       </View>
     </View>
   );
-
-  const SettingItem = ({ icon, title, subtitle, onPress, right, color = colors.accent }: any) => (
-    <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]} onPress={onPress} disabled={!onPress}>
-      <View style={[styles.settingIcon, { backgroundColor: color + '20' }]}>
-        <Ionicons name={icon} size={20} color={color} />
-      </View>
-      <View style={styles.settingInfo}>
-        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
-        {subtitle && <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>}
-      </View>
-      {right || (onPress && <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />)}
-    </TouchableOpacity>
-  );
-
-  const ToggleItem = ({ icon, title, subtitle, value, onValueChange, color = colors.accent }: any) => (
-    <View style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
-      <View style={[styles.settingIcon, { backgroundColor: color + '20' }]}>
-        <Ionicons name={icon} size={20} color={color} />
-      </View>
-      <View style={styles.settingInfo}>
-        <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
-        {subtitle && <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ true: colors.primary, false: colors.border }}
-        thumbColor={value ? '#fff' : '#f4f3f4'}
-      />
-    </View>
-  );
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'parent': return 'Parent';
-      case 'driver': return 'Driver';
-      case 'admin': return 'Admin';
-      default: return 'User';
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'parent': return 'people';
-      case 'driver': return 'car';
-      case 'admin': return 'shield';
-      default: return 'person';
-    }
-  };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView style={styles(colors).container}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary, paddingTop: 50 }]}>
-        <Text style={styles.headerTitle}>Settings</Text>
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Settings</Text>
+        <Text style={styles(colors).headerSubtext}>Manage your account and preferences</Text>
       </View>
 
-      {/* Profile Card */}
-      <TouchableOpacity style={[styles.profileCard, { backgroundColor: colors.card }]} onPress={() => setShowProfileModal(true)}>
-        <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-          <Ionicons name="person" size={30} color="#fff" />
-        </View>
-        <View style={styles.profileInfo}>
-          <Text style={[styles.profileName, { color: colors.text }]}>{userProfile.name}</Text>
-          <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{userProfile.email}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: colors.primary + '20' }]}>
-            <Ionicons name={getRoleIcon(userProfile.role) as any} size={12} color={colors.primary} />
-            <Text style={[styles.roleText, { color: colors.primary }]}>{getRoleLabel(userProfile.role)}</Text>
-          </View>
-        </View>
-        <Ionicons name="create-outline" size={24} color={colors.textSecondary} />
-      </TouchableOpacity>
-
-      {/* Account Settings */}
-      <SettingSection title="ACCOUNT">
-        <SettingItem
-          icon="person-outline"
-          title="Edit Profile"
-          subtitle="Name, phone, photo"
-          onPress={() => setShowProfileModal(true)}
-        />
-        <SettingItem
-          icon="lock-closed-outline"
-          title="Change Password"
-          subtitle="Update your password"
-          onPress={() => Alert.alert('Change Password', 'This would open password change screen')}
-        />
-        <SettingItem
-          icon="mail-outline"
-          title="Email Preferences"
-          subtitle="Manage email notifications"
-          onPress={() => Alert.alert('Email Settings', 'This would open email settings')}
-        />
-      </SettingSection>
+      {/* Profile Section */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Profile</Text>
+        <TouchableOpacity onPress={() => setShowProfileModal(true)}>
+          <Card variant="elevated" padding="large">
+            <View style={styles(colors).profileCard}>
+              <View style={styles(colors).profileAvatar}>
+                <Text style={styles(colors).profileInitial}>
+                  {(userProfile.name || 'U').substring(0, 1).toUpperCase()}
+                </Text>
+              </View>
+              <View style={styles(colors).profileInfo}>
+                <Text style={styles(colors).profileName}>{userProfile.name || 'User'}</Text>
+                <Text style={styles(colors).profileEmail}>{userProfile.email || 'No email'}</Text>
+                <Badge label={userProfile.role} variant="primary" size="small" />
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </View>
+          </Card>
+        </TouchableOpacity>
+      </View>
 
       {/* Notifications */}
-      <SettingSection title="NOTIFICATIONS">
-        <ToggleItem
-          icon="bus-outline"
-          title="Trip Updates"
-          subtitle="Get notified about trips"
-          value={notifications.trips}
-          onValueChange={(v: boolean) => setNotifications(n => ({ ...n, trips: v }))}
-        />
-        <ToggleItem
-          icon="card-outline"
-          title="Payment Alerts"
-          subtitle="Payment confirmations"
-          value={notifications.payments}
-          onValueChange={(v: boolean) => setNotifications(n => ({ ...n, payments: v }))}
-        />
-        <ToggleItem
-          icon="shield-checkmark-outline"
-          title="Safety Alerts"
-          subtitle="Emergency notifications"
-          value={notifications.safety}
-          onValueChange={(v: boolean) => setNotifications(n => ({ ...n, safety: v }))}
-        />
-        <ToggleItem
-          icon="newspaper-outline"
-          title="App Updates"
-          subtitle="New features & updates"
-          value={notifications.updates}
-          onValueChange={(v: boolean) => setNotifications(n => ({ ...n, updates: v }))}
-        />
-      </SettingSection>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Notifications</Text>
+        <Card variant="elevated" padding="none">
+          <SettingRow
+            label="Trip Updates"
+            description="Get notified about trip status changes"
+            value={notifications.trips}
+            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, trips: v }))}
+          />
+          <SettingRow
+            label="Payment Alerts"
+            description="Payment confirmations and reminders"
+            value={notifications.payments}
+            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, payments: v }))}
+          />
+          <SettingRow
+            label="Safety Alerts"
+            description="Emergency and safety notifications"
+            value={notifications.safety}
+            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, safety: v }))}
+          />
+          <SettingRow
+            label="Email Notifications"
+            description="Receive updates via email"
+            value={notifications.email}
+            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, email: v }))}
+          />
+        </Card>
+      </View>
 
       {/* Privacy */}
-      <SettingSection title="PRIVACY">
-        <ToggleItem
-          icon="location-outline"
-          title="Share Location"
-          subtitle="Allow location tracking"
-          value={privacy.shareLocation}
-          onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, shareLocation: v }))}
-        />
-        <ToggleItem
-          icon="eye-outline"
-          title="Profile Visibility"
-          subtitle="Others can see your profile"
-          value={privacy.showProfile}
-          onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, showProfile: v }))}
-        />
-        <ToggleItem
-          icon="call-outline"
-          title="Show Phone Number"
-          subtitle="Drivers can see your phone"
-          value={privacy.showPhone}
-          onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, showPhone: v }))}
-        />
-      </SettingSection>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Privacy</Text>
+        <Card variant="elevated" padding="none">
+          <SettingRow
+            label="Share Location"
+            description="Allow tracking for safety features"
+            value={privacy.shareLocation}
+            onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, shareLocation: v }))}
+          />
+          <SettingRow
+            label="Show Profile"
+            description="Allow others to see your profile"
+            value={privacy.showProfile}
+            onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, showProfile: v }))}
+          />
+        </Card>
+      </View>
 
-      {/* Appearance */}
-      <SettingSection title="APPEARANCE">
-        <View style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
-          <View style={[styles.settingIcon, { backgroundColor: '#FFB81C' + '20' }]}>
-            <Ionicons name="color-palette" size={20} color="#FFB81C" />
-          </View>
-          <View style={styles.settingInfo}>
-            <Text style={[styles.settingTitle, { color: colors.text }]}>Theme</Text>
-          </View>
-        </View>
-        <View style={styles.themeSelector}>
-          {themeOptions.map((option) => (
+      {/* App Settings */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>App</Text>
+        <Card variant="elevated" padding="none">
+          <SettingRow
+            label="Emergency Alert"
+            description="Enable SOS button"
+            value={appSettings.emergencyAlert}
+            onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, emergencyAlert: v }))}
+          />
+          <SettingRow
+            label="Auto Refresh"
+            description="Automatically refresh data"
+            value={appSettings.autoRefresh}
+            onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, autoRefresh: v }))}
+          />
+        </Card>
+      </View>
+
+      {/* Theme */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Appearance</Text>
+        <Card variant="elevated" padding="medium">
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.themeOption,
-                { borderColor: colors.border },
-                themeMode === option.value && [styles.themeOptionSelected, { borderColor: colors.primary }],
-              ]}
-              onPress={() => handleThemeChange(option.value)}
+              onPress={() => handleThemeChange('light')}
+              style={{ alignItems: 'center', padding: spacing.md }}
             >
-              <View style={[styles.themeIcon, { backgroundColor: option.color }]}>
-                <Ionicons name={option.icon as any} size={18} color={option.value === 'light' ? '#333' : '#FFB81C'} />
-              </View>
-              <Text style={[styles.themeLabel, { color: themeMode === option.value ? colors.primary : colors.text }]}>
-                {option.label}
-              </Text>
+              <Ionicons name="sunny" size={24} color={themeMode === 'light' ? colors.primary : colors.textSecondary} />
+              <Text style={{ ...typography.labelSmall, color: themeMode === 'light' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Light</Text>
             </TouchableOpacity>
-          ))}
-        </View>
-      </SettingSection>
-
-      {/* Language */}
-      <SettingSection title="LANGUAGE">
-        <SettingItem
-          icon="language-outline"
-          title="App Language"
-          subtitle={appSettings.language}
-          onPress={() => Alert.alert('Language', 'Currently only English is available')}
-        />
-      </SettingSection>
-
-      {/* Safety */}
-      <SettingSection title="SAFETY">
-        <ToggleItem
-          icon="warning-outline"
-          title="Emergency SOS"
-          subtitle="Quick emergency button"
-          value={appSettings.emergencyAlert}
-          onValueChange={(v: boolean) => setAppSettings(a => ({ ...a, emergencyAlert: v }))}
-          color="#E03C31"
-        />
-        <SettingItem
-          icon="shield-outline"
-          title="Child Safety Mode"
-          subtitle="Extra safety features"
-          onPress={() => Alert.alert('Safety Mode', 'This would toggle additional safety features')}
-          color="#E03C31"
-        />
-      </SettingSection>
-
-      {/* Support */}
-      <SettingSection title="SUPPORT">
-        <SettingItem
-          icon="help-circle-outline"
-          title="Help Center"
-          subtitle="FAQs and guides"
-          onPress={() => Alert.alert('Help', 'This would open the help center')}
-        />
-        <SettingItem
-          icon="chatbubbles-outline"
-          title="Contact Support"
-          subtitle="Email or chat with us"
-          onPress={handleContactSupport}
-        />
-        <SettingItem
-          icon="document-text-outline"
-          title="Terms of Service"
-          subtitle="Read our terms"
-          onPress={() => Alert.alert('Terms', 'https://scholartrack.co.za/terms')}
-        />
-        <SettingItem
-          icon="shield-checkmark-outline"
-          title="Privacy Policy"
-          subtitle="How we handle your data"
-          onPress={() => Alert.alert('Privacy', 'https://scholartrack.co.za/privacy')}
-        />
-      </SettingSection>
-
-      {/* About */}
-      <SettingSection title="ABOUT">
-        <SettingItem
-          icon="information-circle-outline"
-          title="App Version"
-          subtitle="1.0.0"
-        />
-        <SettingItem
-          icon="build-outline"
-          title="Check for Updates"
-          subtitle="You're up to date"
-          onPress={() => Alert.alert('Updates', 'No updates available')}
-        />
-      </SettingSection>
-
-      {/* Danger Zone */}
-      <SettingSection title="DANGER ZONE">
-        <SettingItem
-          icon="log-out-outline"
-          title="Logout"
-          subtitle="Sign out of your account"
-          onPress={handleLogout}
-          color="#E03C31"
-        />
-        <SettingItem
-          icon="trash-outline"
-          title="Delete Account"
-          subtitle="Permanently delete your account"
-          onPress={handleDeleteAccount}
-          color="#E03C31"
-        />
-      </SettingSection>
-
-      <View style={styles.bottomPadding} />
-
-      {/* Edit Profile Modal */}
-      <Modal visible={showProfileModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Full Name</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-                value={editProfile.name}
-                onChangeText={(t) => setEditProfile(p => ({ ...p, name: t }))}
-                placeholder="Enter your name"
-                placeholderTextColor={colors.textSecondary}
-              />
-
-              <Text style={[styles.inputLabel, { color: colors.text, marginTop: 16 }]}>Phone Number</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-                value={editProfile.phone}
-                onChangeText={(t) => setEditProfile(p => ({ ...p, phone: t }))}
-                placeholder="Enter phone number"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="phone-pad"
-              />
-
-              <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={handleSaveProfile}>
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              onPress={() => handleThemeChange('dark')}
+              style={{ alignItems: 'center', padding: spacing.md }}
+            >
+              <Ionicons name="moon" size={24} color={themeMode === 'dark' ? colors.primary : colors.textSecondary} />
+              <Text style={{ ...typography.labelSmall, color: themeMode === 'dark' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Dark</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleThemeChange('blue')}
+              style={{ alignItems: 'center', padding: spacing.md }}
+            >
+              <Ionicons name="settings" size={24} color={themeMode === 'blue' ? colors.primary : colors.textSecondary} />
+              <Text style={{ ...typography.labelSmall, color: themeMode === 'blue' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Blue</Text>
+            </TouchableOpacity>
           </View>
+        </Card>
+      </View>
+
+      {/* About & Support */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>About</Text>
+        <Card variant="elevated" padding="none">
+          <TouchableOpacity style={styles(colors).settingRow} onPress={() => handleLink('https://scholartrack.co.za/privacy')}>
+            <Text style={styles(colors).settingLabel}>Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles(colors).settingRow} onPress={() => handleLink('https://scholartrack.co.za/terms')}>
+            <Text style={styles(colors).settingLabel}>Terms of Service</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Support')}>
+            <Text style={styles(colors).settingLabel}>Contact Support</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </Card>
+      </View>
+
+      {/* Logout */}
+      <View style={styles(colors).section}>
+        <TouchableOpacity style={styles(colors).dangerBtn} onPress={handleLogout}>
+          <Text style={styles(colors).dangerBtnText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Spacer size="xl" />
+
+      {/* Profile Edit Modal */}
+      <Modal visible={showProfileModal} transparent animationType="fade">
+        <View style={styles(colors).modalOverlay}>
+          <Card variant="elevated" padding="large">
+            <View style={styles(colors).modalContent}>
+              <Text style={styles(colors).modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ position: 'absolute', top: spacing.md, right: spacing.md }}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+              <Button title="Save" onPress={handleSaveProfile} variant="primary" fullWidth />
+            </View>
+          </Card>
         </View>
       </Modal>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { padding: 20, paddingBottom: 15 },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  profileCard: { flexDirection: 'row', alignItems: 'center', margin: 16, marginTop: -30, padding: 16, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
-  profileAvatar: { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' },
-  profileInfo: { flex: 1, marginLeft: 12 },
-  profileName: { fontSize: 18, fontWeight: '600' },
-  profileEmail: { fontSize: 14, marginTop: 2 },
-  roleBadge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginTop: 6 },
-  roleText: { fontSize: 11, fontWeight: '600', marginLeft: 4 },
-  section: { marginTop: 20, paddingHorizontal: 16 },
-  sectionTitle: { fontSize: 13, fontWeight: '600', marginBottom: 8, marginLeft: 4, letterSpacing: 0.5 },
-  sectionContent: { borderRadius: 12, overflow: 'hidden' },
-  settingItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 14, borderBottomWidth: 1 },
-  settingIcon: { width: 36, height: 36, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
-  settingInfo: { flex: 1, marginLeft: 12 },
-  settingTitle: { fontSize: 15, fontWeight: '500' },
-  settingSubtitle: { fontSize: 13, marginTop: 2 },
-  themeSelector: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 16, paddingHorizontal: 10 },
-  themeOption: { alignItems: 'center', padding: 10, borderRadius: 10, borderWidth: 2, width: 90 },
-  themeOptionSelected: { borderWidth: 2 },
-  themeIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginBottom: 6 },
-  themeLabel: { fontSize: 12, fontWeight: '600' },
-  bottomPadding: { height: 40 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '80%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: '600' },
-  modalBody: {},
-  inputLabel: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 14, fontSize: 16 },
-  saveButton: { marginTop: 24, padding: 16, borderRadius: 10, alignItems: 'center' },
-  saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-});

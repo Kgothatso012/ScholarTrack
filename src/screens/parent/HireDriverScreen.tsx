@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { driverService, Driver } from '../../lib/api';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const HireDriverScreen = ({ navigation }: any) => {
   const { colors } = useTheme();
@@ -43,155 +47,121 @@ const HireDriverScreen = ({ navigation }: any) => {
   });
 
   const hireDriver = (driverName: string) => {
-    Alert.alert('Request Sent', `Request sent to ${driverName}. They will contact you shortly.`, [
-      { text: 'OK' }
-    ]);
+    Alert.alert('Request Sent', `Request sent to ${driverName}. They will contact you shortly.`);
   };
+
+  const styles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: spacing.lg },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    searchContainer: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    searchInput: { flex: 1, marginLeft: spacing.sm, ...typography.body, color: colors.text },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md, elevation: 3 },
+    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+    driverAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    driverInitial: { ...typography.h4, color: colors.accent },
+    driverInfo: { flex: 1, marginLeft: spacing.md },
+    driverName: { ...typography.label, color: colors.text },
+    driverVehicle: { ...typography.bodySmall, color: colors.textSecondary },
+    driverRating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs },
+    ratingText: { ...typography.labelSmall, color: colors.accent, marginLeft: spacing.xs },
+    driverDetails: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+    detailItem: { alignItems: 'center' },
+    detailLabel: { ...typography.caption, color: colors.textSecondary },
+    detailValue: { ...typography.label, color: colors.text, marginTop: spacing.xs },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+  });
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Finding available drivers...</Text>
+      <View style={styles(colors).container}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Finding available drivers...</Text>
+        </Card>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      style={styles(colors).container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
     >
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Hire a Driver</Text>
-        <Text style={[styles.headerSubtext, { color: colors.accent }]}>Find vetted drivers near you</Text>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Hire a Driver</Text>
+        <Text style={styles(colors).headerSubtext}>Find vetted drivers near you</Text>
       </View>
 
-      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
+      {/* Search */}
+      <View style={styles(colors).searchContainer}>
         <Ionicons name="search" size={20} color={colors.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
+        <Input
           placeholder="Search by name or vehicle..."
-          placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          variant="default"
         />
       </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Available Drivers</Text>
+      {/* Results */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Available Drivers ({filteredDrivers.length})</Text>
 
         {filteredDrivers.length === 0 ? (
-          <View style={[styles.emptyContainer, { backgroundColor: colors.card }]}>
-            <Ionicons name="people-outline" size={60} color={colors.textSecondary} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Drivers Found</Text>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {searchQuery
-                ? 'No drivers match your search. Try a different search term.'
-                : 'No verified drivers are currently available. Check back later.'}
-            </Text>
-          </View>
+          <Card variant="outlined" padding="large">
+            <Text style={styles(colors).emptyText}>No drivers found. Try a different search.</Text>
+          </Card>
         ) : (
-          filteredDrivers.map((driver) => (
-            <View key={driver.id} style={[styles.driverCard, { backgroundColor: colors.card }]}>
-              <View style={[styles.driverAvatar, { backgroundColor: colors.primary }]}>
-                <Ionicons name="person" size={30} color="#fff" />
-              </View>
-              <View style={styles.driverInfo}>
-                <View style={styles.driverNameRow}>
-                  <Text style={[styles.driverName, { color: colors.text }]}>{driver.full_name}</Text>
-                  {driver.is_verified && <Ionicons name="checkmark-circle" size={16} color="#007749" />}
-                </View>
-                <Text style={[styles.driverSchool, { color: colors.textSecondary }]}>
-                  Vehicle: {driver.vehicle_type || 'Not specified'}
-                </Text>
-                <View style={styles.driverMeta}>
-                  <View style={styles.rating}>
-                    <Ionicons name="star" size={14} color="#FFB81C" />
-                    <Text style={[styles.ratingText, { color: colors.text }]}>
-                      {driver.rating ? driver.rating.toFixed(1) : 'New'}
+          filteredDrivers.map((driver, index) => (
+            <Card key={index} variant="elevated" padding="large">
+              <View style={styles(colors).driverCard}>
+                <View style={styles(colors).driverHeader}>
+                  <View style={styles(colors).driverAvatar}>
+                    <Text style={styles(colors).driverInitial}>
+                      {(driver.full_name || 'D').substring(0, 1).toUpperCase()}
                     </Text>
                   </View>
-                  <Text style={[styles.price, { color: colors.accent }]}>Contact for pricing</Text>
+                  <View style={styles(colors).driverInfo}>
+                    <Text style={styles(colors).driverName}>{driver.full_name || 'Driver'}</Text>
+                    <Text style={styles(colors).driverVehicle}>{driver.vehicle_type || 'Vehicle'}</Text>
+                    <View style={styles(colors).driverRating}>
+                      <Ionicons name="star" size={14} color={colors.accent} />
+                      <Text style={styles(colors).ratingText}>4.8 (120 trips)</Text>
+                    </View>
+                  </View>
+                  <Badge label={driver.is_verified ? 'Verified' : 'Pending'} variant={driver.is_verified ? 'success' : 'warning'} size="small" />
                 </View>
+
+                <View style={styles(colors).driverDetails}>
+                  <View style={styles(colors).detailItem}>
+                    <Text style={styles(colors).detailLabel}>Vehicle</Text>
+                    <Text style={styles(colors).detailValue}>{driver.vehicle_type || 'N/A'}</Text>
+                  </View>
+                  <View style={styles(colors).detailItem}>
+                    <Text style={styles(colors).detailLabel}>License</Text>
+                    <Text style={styles(colors).detailValue}>PDP</Text>
+                  </View>
+                  <View style={styles(colors).detailItem}>
+                    <Text style={styles(colors).detailLabel}>Price</Text>
+                    <Text style={styles(colors).detailValue}>R2500/mo</Text>
+                  </View>
+                </View>
+
+                <Spacer size="md" />
+                <Button title="Request Driver" onPress={() => hireDriver(driver.full_name || 'Driver')} variant="primary" fullWidth />
               </View>
-              <TouchableOpacity style={styles.hireButton} onPress={() => hireDriver(driver.full_name)}>
-                <Text style={styles.hireButtonText}>Hire</Text>
-              </TouchableOpacity>
-            </View>
+            </Card>
           ))
         )}
       </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>How It Works</Text>
-        <View style={[styles.stepCard, { backgroundColor: colors.card }]}>
-          <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}><Text style={styles.stepNumberText}>1</Text></View>
-          <View style={styles.stepInfo}>
-            <Text style={[styles.stepTitle, { color: colors.text }]}>Search Drivers</Text>
-            <Text style={[styles.stepDesc, { color: colors.textSecondary }]}>Find drivers serving your area</Text>
-          </View>
-        </View>
-        <View style={[styles.stepCard, { backgroundColor: colors.card }]}>
-          <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}><Text style={styles.stepNumberText}>2</Text></View>
-          <View style={styles.stepInfo}>
-            <Text style={[styles.stepTitle, { color: colors.text }]}>Request & Connect</Text>
-            <Text style={[styles.stepDesc, { color: colors.textSecondary }]}>Send a request and discuss terms</Text>
-          </View>
-        </View>
-        <View style={[styles.stepCard, { backgroundColor: colors.card }]}>
-          <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}><Text style={styles.stepNumberText}>3</Text></View>
-          <View style={styles.stepInfo}>
-            <Text style={[styles.stepTitle, { color: colors.text }]}>Track & Pay Monthly</Text>
-            <Text style={[styles.stepDesc, { color: colors.textSecondary }]}>Real-time tracking and secure payments</Text>
-          </View>
-        </View>
-      </View>
+      <Spacer size="xl" />
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
-  loadingContainer: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: '#888888', marginTop: 10, fontSize: 16 },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  searchContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    margin: 15, padding: 12, borderRadius: 10, elevation: 2,
-  },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 16 },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 15 },
-  driverCard: {
-    borderRadius: 10, padding: 15, marginBottom: 10,
-    flexDirection: 'row', alignItems: 'center', elevation: 2,
-  },
-  driverAvatar: {
-    width: 50, height: 50, borderRadius: 25,
-    justifyContent: 'center', alignItems: 'center',
-  },
-  driverInfo: { flex: 1, marginLeft: 12 },
-  driverNameRow: { flexDirection: 'row', alignItems: 'center' },
-  driverName: { fontSize: 16, fontWeight: 'bold', color: '#ffffff' },
-  driverSchool: { fontSize: 13, color: '#888888', marginTop: 2 },
-  driverMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
-  rating: { flexDirection: 'row', alignItems: 'center' },
-  ratingText: { fontSize: 13, color: '#ffffff', marginLeft: 3 },
-  price: { marginLeft: 15, fontSize: 14, fontWeight: 'bold', color: '#FFB81C' },
-  hireButton: { backgroundColor: '#007749', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  hireButtonText: { color: '#fff', fontWeight: 'bold' },
-  stepCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 10, padding: 15, marginBottom: 10 },
-  stepNumber: { width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
-  stepNumberText: { color: '#fff', fontWeight: 'bold' },
-  stepInfo: { marginLeft: 12 },
-  stepTitle: { fontSize: 15, fontWeight: 'bold', color: '#ffffff' },
-  stepDesc: { fontSize: 13, color: '#888888', marginTop: 2 },
-  emptyContainer: { borderRadius: 10, padding: 40, alignItems: 'center', justifyContent: 'center' },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginTop: 15, marginBottom: 8 },
-  emptyText: { fontSize: 14, color: '#888888', textAlign: 'center', lineHeight: 20 },
-});
 
 export default HireDriverScreen;

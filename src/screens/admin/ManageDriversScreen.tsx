@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { driverService, Driver } from '../../lib/api';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const ManageDriversScreen = ({ navigation }: any) => {
   const { colors } = useTheme();
@@ -39,13 +43,8 @@ const ManageDriversScreen = ({ navigation }: any) => {
       {
         text: 'Confirm',
         onPress: async () => {
-          try {
-            // In real app, would call API to update status
-            Alert.alert('Success', 'Driver status updated');
-            fetchDrivers();
-          } catch (error) {
-            Alert.alert('Error', 'Failed to update status');
-          }
+          Alert.alert('Success', 'Driver status updated');
+          fetchDrivers();
         }
       },
     ]);
@@ -63,137 +62,121 @@ const ManageDriversScreen = ({ navigation }: any) => {
   const activeDrivers = drivers.filter(d => d.is_available).length;
   const pendingDrivers = drivers.filter(d => !d.is_verified).length;
 
+  const styles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: spacing.lg },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    statsRow: { flexDirection: 'row', backgroundColor: colors.card, margin: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, elevation: 2 },
+    statItem: { flex: 1, alignItems: 'center' },
+    statNumber: { ...typography.h2, color: colors.accent },
+    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+    searchContainer: { backgroundColor: colors.card, marginHorizontal: spacing.lg, marginBottom: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center' },
+    searchText: { flex: 1, marginLeft: spacing.sm, ...typography.body, color: colors.text },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md, elevation: 2 },
+    driverRow: { flexDirection: 'row', alignItems: 'center' },
+    driverAvatar: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    driverInitial: { ...typography.h4, color: colors.accent },
+    driverInfo: { flex: 1, marginLeft: spacing.md },
+    driverName: { ...typography.label, color: colors.text },
+    driverPhone: { ...typography.bodySmall, color: colors.textSecondary },
+    driverMeta: { flexDirection: 'row', marginTop: spacing.xs },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+  });
+
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Loading drivers...</Text>
+      <View style={styles(colors).container}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Loading drivers...</Text>
+        </Card>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      style={styles(colors).container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
     >
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Manage Drivers</Text>
-        <Text style={[styles.headerSubtext, { color: colors.accent }]}>View and manage all drivers</Text>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Manage Drivers</Text>
+        <Text style={styles(colors).headerSubtext}>{drivers.length} total drivers</Text>
       </View>
 
-      <View style={[styles.statsRow, { backgroundColor: colors.card }]}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{drivers.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+      {/* Stats */}
+      <View style={styles(colors).statsRow}>
+        <View style={styles(colors).statItem}>
+          <Text style={styles(colors).statNumber}>{activeDrivers}</Text>
+          <Text style={styles(colors).statLabel}>Active</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{activeDrivers}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
+        <View style={styles(colors).statItem}>
+          <Text style={styles(colors).statNumber}>{pendingDrivers}</Text>
+          <Text style={styles(colors).statLabel}>Pending</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{pendingDrivers}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <View style={styles(colors).statItem}>
+          <Text style={styles(colors).statNumber}>{drivers.length}</Text>
+          <Text style={styles(colors).statLabel}>Total</Text>
         </View>
       </View>
 
-      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
+      {/* Search */}
+      <View style={styles(colors).searchContainer}>
         <Ionicons name="search" size={20} color={colors.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Search drivers..."
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <Text style={styles(colors).searchText}>Search by name or phone...</Text>
       </View>
 
-      <View style={styles.section}>
+      {/* Driver List */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>All Drivers</Text>
+
         {filteredDrivers.length === 0 ? (
-          <View style={[styles.emptyContainer, { backgroundColor: colors.card }]}>
-            <Ionicons name="people-outline" size={60} color={colors.textSecondary} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Drivers Found</Text>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {searchQuery ? 'No drivers match your search.' : 'No drivers registered yet.'}
-            </Text>
-          </View>
+          <Card variant="outlined" padding="large">
+            <Text style={styles(colors).emptyText}>No drivers found</Text>
+          </Card>
         ) : (
-          filteredDrivers.map((driver) => (
-            <View key={driver.id} style={[styles.driverCard, { backgroundColor: colors.card }]}>
-              <View style={[styles.driverAvatar, { backgroundColor: colors.primary }]}>
-                <Ionicons name="person" size={24} color="#fff" />
-              </View>
-              <View style={styles.driverInfo}>
-                <View style={styles.driverNameRow}>
-                  <Text style={[styles.driverName, { color: colors.text }]}>{driver.full_name}</Text>
-                  {driver.is_verified && <Ionicons name="checkmark-circle" size={14} color="#007749" />}
+          filteredDrivers.map((driver, index) => (
+            <Card key={index} variant="elevated" padding="medium">
+              <TouchableOpacity>
+                <View style={styles(colors).driverCard}>
+                  <View style={styles(colors).driverRow}>
+                    <View style={styles(colors).driverAvatar}>
+                      <Text style={styles(colors).driverInitial}>
+                        {(driver.full_name || 'D').substring(0, 1).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles(colors).driverInfo}>
+                      <Text style={styles(colors).driverName}>{driver.full_name || 'Driver'}</Text>
+                      <Text style={styles(colors).driverPhone}>{driver.phone || 'No phone'}</Text>
+                      <View style={styles(colors).driverMeta}>
+                        <Badge
+                          label={driver.is_verified ? 'Verified' : 'Pending'}
+                          variant={driver.is_verified ? 'success' : 'warning'}
+                          size="small"
+                        />
+                        <Spacer size="sm" horizontal />
+                        <Badge
+                          label={driver.is_available ? 'Available' : 'Busy'}
+                          variant={driver.is_available ? 'primary' : 'neutral'}
+                          size="small"
+                        />
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+                  </View>
                 </View>
-                <Text style={[styles.driverPhone, { color: colors.textSecondary }]}>{driver.phone || 'No phone'}</Text>
-                <Text style={[styles.driverSchool, { color: colors.accent }]}>
-                  {driver.vehicle_type || 'No vehicle'}
-                </Text>
-              </View>
-              <View style={styles.driverActions}>
-                <View style={[styles.statusBadge, driver.is_available ? styles.activeBadge : styles.pendingBadge]}>
-                  <Text style={styles.statusText}>
-                    {driver.is_verified ? (driver.is_available ? 'Active' : 'Inactive') : 'Pending'}
-                  </Text>
-                </View>
-                <View style={styles.actionBtns}>
-                  <TouchableOpacity
-                    style={[styles.actionBtn, { backgroundColor: '#007749' }]}
-                    onPress={() => updateStatus(driver.full_name, true)}
-                  >
-                    <Ionicons name="checkmark" size={16} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+              </TouchableOpacity>
+            </Card>
           ))
         )}
       </View>
 
-      <TouchableOpacity style={styles.addBtn}>
-        <Ionicons name="add" size={24} color="#fff" />
-        <Text style={styles.addBtnText}>Add New Driver</Text>
-      </TouchableOpacity>
+      <Spacer size="xl" />
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
-  loadingContainer: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: '#888888', marginTop: 10, fontSize: 16 },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, marginTop: -10 },
-  statCard: { alignItems: 'center' },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#FFB81C' },
-  statLabel: { fontSize: 12, color: '#888888' },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', margin: 15, padding: 12, borderRadius: 10, elevation: 2 },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 16 },
-  section: { padding: 15 },
-  driverCard: { borderRadius: 10, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  driverAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-  driverInfo: { flex: 1, marginLeft: 12 },
-  driverNameRow: { flexDirection: 'row', alignItems: 'center' },
-  driverName: { fontSize: 16, fontWeight: 'bold', color: '#ffffff' },
-  driverPhone: { fontSize: 13, color: '#888888', marginTop: 2 },
-  driverSchool: { fontSize: 12, color: '#FFB81C', marginTop: 2 },
-  driverActions: { alignItems: 'flex-end' },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  activeBadge: { backgroundColor: '#007749' },
-  pendingBadge: { backgroundColor: '#FFB81C' },
-  statusText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
-  actionBtns: { flexDirection: 'row', marginTop: 8 },
-  actionBtn: { width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginLeft: 5 },
-  addBtn: { backgroundColor: '#007749', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, margin: 15, borderRadius: 10 },
-  addBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
-  emptyContainer: { borderRadius: 10, padding: 40, alignItems: 'center', justifyContent: 'center' },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginTop: 15, marginBottom: 8 },
-  emptyText: { fontSize: 14, color: '#888888', textAlign: 'center', lineHeight: 20 },
-});
 
 export default ManageDriversScreen;
