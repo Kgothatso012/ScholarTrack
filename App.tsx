@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
-import ErrorBoundary, { LoadingScreen } from './src/components/ErrorBoundary';
+import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 
 function ThemedApp() {

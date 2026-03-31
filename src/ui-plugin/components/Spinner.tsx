@@ -43,13 +43,13 @@ export const Spinner: React.FC<SpinnerProps> = ({
   };
 
   const content = (
-    <View style={[styles.container, fullScreen && styles.fullScreen, style]}>
+    <View style={[styles(colors).container, fullScreen && styles(colors).fullScreen, style]}>
       <ActivityIndicator size={getSize(size)} color={getColor()} />
       {label && (
         <Text
           style={[
-            styles.label,
-            variant === 'inverse' && styles.labelInverse,
+            styles(colors).label,
+            variant === 'inverse' && styles(colors).labelInverse,
           ]}
         >
           {label}
@@ -59,13 +59,13 @@ export const Spinner: React.FC<SpinnerProps> = ({
   );
 
   if (fullScreen) {
-    return <View style={styles.overlay}>{content}</View>;
+    return <View style={styles(colors).overlay}>{content}</View>;
   }
 
   return content;
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',

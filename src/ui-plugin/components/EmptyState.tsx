@@ -22,9 +22,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   style,
 }) => {
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles(colors).container, style]}>
       {icon && (
-        <View style={styles.iconContainer}>
+        <View style={styles(colors).iconContainer}>
           <Ionicons
             name={icon}
             size={64}
@@ -32,9 +32,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           />
         </View>
       )}
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles(colors).title}>{title}</Text>
       {description && (
-        <Text style={styles.description}>{description}</Text>
+        <Text style={styles(colors).description}>{description}</Text>
       )}
       {actionLabel && onAction && (
         <Button
@@ -42,14 +42,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           onPress={onAction}
           variant="primary"
           size="medium"
-          style={styles.button}
+          style={styles(colors).button}
         />
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

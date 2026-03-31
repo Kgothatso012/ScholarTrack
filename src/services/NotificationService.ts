@@ -151,47 +151,47 @@ export const sendAppNotification = async (
 ): Promise<void> => {
   const messages: Record<NotificationType, { title: string; body: string }> = {
     TRIP_STARTED: {
-      title: '🚐 Trip Started',
+      title: 'Bus Trip Started',
       body: `Trip to ${data.schoolName || 'school'} has started`,
     },
     TRIP_COMPLETED: {
-      title: '✅ Trip Completed',
+      title: 'Trip Completed',
       body: `Your child has arrived at ${data.destination || 'home'}`,
     },
     TRIP_DELAYED: {
-      title: '⏰ Trip Delayed',
+      title: 'Trip Delayed',
       body: `Trip is delayed by ${data.delayMinutes || '15'} minutes`,
     },
     PANIC_TRIGGERED: {
-      title: '🆘 PANIC ALERT',
+      title: 'PANIC ALERT',
       body: 'Emergency! Panic button activated on route',
     },
     EMERGENCY: {
-      title: '⚠️ Emergency Alert',
+      title: 'Emergency Alert',
       body: data.message || 'Emergency alert triggered',
     },
     CHILD_PICKED_UP: {
-      title: '👋 Child Picked Up',
+      title: 'Child Picked Up',
       body: `${data.childName} has been picked up by driver`,
     },
     CHILD_DROPPED_OFF: {
-      title: '🏠 Child Dropped Off',
+      title: 'Child Dropped Off',
       body: `${data.childName} has arrived at destination`,
     },
     PAYMENT_RECEIVED: {
-      title: '💳 Payment Received',
+      title: 'Payment Received',
       body: `Payment of R${data.amount} received successfully`,
     },
     PAYMENT_DUE: {
-      title: '💰 Payment Due',
+      title: 'Payment Due',
       body: `Payment of R${data.amount} is due for ${data.childName}`,
     },
     ROUTE_UPDATE: {
-      title: '🛣️ Route Update',
+      title: 'Route Update',
       body: data.message || 'Route has been updated',
     },
     DRIVER_ASSIGNED: {
-      title: '🚐 Driver Assigned',
+      title: 'Driver Assigned',
       body: `${data.driverName} will be your driver`,
     },
   };

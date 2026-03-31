@@ -49,20 +49,20 @@ export const Divider: React.FC<DividerProps> = ({
 
   if (label) {
     return (
-      <View style={[styles.labeledContainer, style]}>
+      <View style={[styles(colors).labeledContainer, style]}>
         <View
           style={[
-            styles.line,
-            !isHorizontal && styles.verticalLine,
+            styles(colors).line,
+            !isHorizontal && styles(colors).verticalLine,
             getBorderStyle(),
             { flex: 1 },
           ]}
         />
-        <Text style={[styles.label, { color }]}>{label}</Text>
+        <Text style={[styles(colors).label, { color }]}>{label}</Text>
         <View
           style={[
-            styles.line,
-            !isHorizontal && styles.verticalLine,
+            styles(colors).line,
+            !isHorizontal && styles(colors).verticalLine,
             getBorderStyle(),
             { flex: 1 },
           ]}
@@ -74,7 +74,7 @@ export const Divider: React.FC<DividerProps> = ({
   return (
     <View
       style={[
-        isHorizontal ? styles.horizontal : styles.vertical,
+        isHorizontal ? styles(colors).horizontal : styles(colors).vertical,
         getBorderStyle(),
         isHorizontal
           ? { marginVertical: spacingValue }
@@ -85,7 +85,7 @@ export const Divider: React.FC<DividerProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   horizontal: {
     width: '100%',
   },

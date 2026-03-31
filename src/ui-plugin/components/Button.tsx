@@ -142,11 +142,11 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       activeOpacity={0.7}
       style={[
-        styles.base,
+        styles(colors).base,
         getSizeStyles(),
         getVariantStyles(),
         { borderRadius: getShape() },
-        fullWidth && styles.fullWidth,
+        fullWidth && styles(colors).fullWidth,
         style,
       ]}
       accessibilityLabel={accessibilityLabel || title}
@@ -157,16 +157,16 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator color={getLoadingColor()} size="small" />
       ) : (
-        <View style={styles.content}>
+        <View style={styles(colors).content}>
           {icon && iconPosition === 'left' && (
-            <View style={styles.iconLeft}>{icon}</View>
+            <View style={styles(colors).iconLeft}>{icon}</View>
           )}
           {title && (
             <Text
               style={[
                 getTextSize(),
                 { color: getTextColor() },
-                icon ? styles.textWithIcon : undefined,
+                icon ? styles(colors).textWithIcon : undefined,
                 textStyle,
               ]}
             >
@@ -174,7 +174,7 @@ export const Button: React.FC<ButtonProps> = ({
             </Text>
           )}
           {icon && iconPosition === 'right' && (
-            <View style={styles.iconRight}>{icon}</View>
+            <View style={styles(colors).iconRight}>{icon}</View>
           )}
         </View>
       )}
@@ -182,7 +182,7 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',

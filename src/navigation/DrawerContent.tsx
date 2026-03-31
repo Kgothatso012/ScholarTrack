@@ -18,7 +18,7 @@ interface DrawerItemProps {
 const DrawerItem: React.FC<DrawerItemProps> = ({ item, isActive, onPress, colors }) => (
   <TouchableOpacity
     style={[
-      styles.drawerItem,
+      styles(colors).drawerItem,
       isActive && { backgroundColor: colors.primary + '20' }
     ]}
     onPress={onPress}
@@ -31,15 +31,15 @@ const DrawerItem: React.FC<DrawerItemProps> = ({ item, isActive, onPress, colors
     />
     <Text
       style={[
-        styles.drawerItemText,
+        styles(colors).drawerItemText,
         { color: isActive ? colors.primary : colors.text },
-        isActive && styles.drawerItemTextActive
+        isActive && styles(colors).drawerItemTextActive
       ]}
     >
       {item.name}
     </Text>
     {isActive && (
-      <View style={[styles.activeIndicator, { backgroundColor: colors.primary }]} />
+      <View style={[styles(colors).activeIndicator, { backgroundColor: colors.primary }]} />
     )}
   </TouchableOpacity>
 );
@@ -156,22 +156,22 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+      <View style={[styles(colors).header, { paddingTop: insets.top + 20 }]}>
+        <View style={[styles(colors).avatar, { backgroundColor: colors.primary }]}>
           <Ionicons name="person" size={30} color="#fff" />
         </View>
-        <Text style={styles.userName}>{userName}</Text>
-        <View style={[styles.roleBadge, { backgroundColor: getRoleColor(userRole) + '20' }]}>
-          <Text style={[styles.roleText, { color: getRoleColor(userRole) }]}>
+        <Text style={styles(colors).userName}>{userName}</Text>
+        <View style={[styles(colors).roleBadge, { backgroundColor: getRoleColor(userRole) + '20' }]}>
+          <Text style={[styles(colors).roleText, { color: getRoleColor(userRole) }]}>
             {getRoleLabel(userRole)}
           </Text>
         </View>
       </View>
 
       {/* Menu Items */}
-      <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles(colors).menuContainer} showsVerticalScrollIndicator={false}>
         {menuItems.map((item) => (
           <DrawerItem
             key={item.to}
@@ -187,24 +187,24 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
-        <TouchableOpacity style={styles.footerItem} onPress={() => {
+      <View style={[styles(colors).footer, { paddingBottom: insets.bottom + 10 }]}>
+        <TouchableOpacity style={styles(colors).footerItem} onPress={() => {
           navigation.closeDrawer();
         }}>
           <Ionicons name="close" size={20} color={colors.textSecondary} />
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>Close Menu</Text>
+          <Text style={[styles(colors).footerText, { color: colors.textSecondary }]}>Close Menu</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.footerItem} onPress={handleLogout}>
+        <TouchableOpacity style={styles(colors).footerItem} onPress={handleLogout}>
           <Ionicons name="log-out" size={20} color={colors.error} />
-          <Text style={[styles.footerText, { color: colors.error }]}>Logout</Text>
+          <Text style={[styles(colors).footerText, { color: colors.error }]}>Logout</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },

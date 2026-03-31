@@ -78,27 +78,27 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
-        <View style={[styles.modal, { backgroundColor: colors.card }]}>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>Make Payment</Text>
+      <View style={styles(colors).overlay}>
+        <View style={[styles(colors).modal, { backgroundColor: colors.card }]}>
+          <View style={styles(colors).header}>
+            <Text style={[styles(colors).title, { color: colors.text }]}>Make Payment</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
 
           {step === 'email' ? (
-            <View style={styles.content}>
-              <View style={[styles.amountCard, { backgroundColor: colors.primary + '15' }]}>
-                <Text style={[styles.amountLabel, { color: colors.textSecondary }]}>Amount Due</Text>
-                <Text style={[styles.amount, { color: colors.primary }]}>{paymentHelper.formatRand(amount)}</Text>
-                <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
+            <View style={styles(colors).content}>
+              <View style={[styles(colors).amountCard, { backgroundColor: colors.primary + '15' }]}>
+                <Text style={[styles(colors).amountLabel, { color: colors.textSecondary }]}>Amount Due</Text>
+                <Text style={[styles(colors).amount, { color: colors.primary }]}>{paymentHelper.formatRand(amount)}</Text>
+                <Text style={[styles(colors).description, { color: colors.textSecondary }]}>{description}</Text>
               </View>
 
-              <View style={styles.form}>
-                <Text style={[styles.label, { color: colors.text }]}>Email Address</Text>
+              <View style={styles(colors).form}>
+                <Text style={[styles(colors).label, { color: colors.text }]}>Email Address</Text>
                 <TextInput
-                  style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                  style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                   placeholder="your@email.com"
                   placeholderTextColor={colors.textSecondary}
                   value={email}
@@ -106,20 +106,20 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-                <Text style={[styles.note, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).note, { color: colors.textSecondary }]}>
                   Receipt will be sent to this email
                 </Text>
               </View>
 
-              <View style={[styles.secureBadge, { backgroundColor: colors.background }]}>
+              <View style={[styles(colors).secureBadge, { backgroundColor: colors.background }]}>
                 <Ionicons name="lock-closed" size={16} color="#007749" />
-                <Text style={[styles.secureText, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).secureText, { color: colors.textSecondary }]}>
                   Secured by PayStack
                 </Text>
               </View>
 
               <TouchableOpacity
-                style={[styles.payButton, { backgroundColor: colors.primary }]}
+                style={[styles(colors).payButton, { backgroundColor: colors.primary }]}
                 onPress={handlePayment}
                 disabled={loading}
               >
@@ -128,18 +128,18 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
                 ) : (
                   <>
                     <Ionicons name="card" size={20} color="#fff" />
-                    <Text style={styles.payButtonText}>Pay {paymentHelper.formatRand(amount)}</Text>
+                    <Text style={styles(colors).payButtonText}>Pay {paymentHelper.formatRand(amount)}</Text>
                   </>
                 )}
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.processing}>
+            <View style={styles(colors).processing}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.processingText, { color: colors.text }]}>
+              <Text style={[styles(colors).processingText, { color: colors.text }]}>
                 Processing Payment...
               </Text>
-              <Text style={[styles.processingSubtext, { color: colors.textSecondary }]}>
+              <Text style={[styles(colors).processingSubtext, { color: colors.textSecondary }]}>
                 Please wait while we connect to PayStack
               </Text>
             </View>
@@ -150,7 +150,7 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

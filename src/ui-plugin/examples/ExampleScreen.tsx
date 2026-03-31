@@ -32,7 +32,7 @@ const ExampleScreen = () => {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles(colors).container} edges={['top']}>
         <Header
           title="ScholarTrack"
           subtitle="UI Plugin Demo"
@@ -43,13 +43,13 @@ const ExampleScreen = () => {
         />
 
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
+          style={styles(colors).scrollView}
+          contentContainerStyle={styles(colors).content}
           showsVerticalScrollIndicator={false}
         >
           {/* Avatar Section */}
-          <Text style={styles.sectionTitle}>Avatars</Text>
-          <View style={styles.row}>
+          <Text style={styles(colors).sectionTitle}>Avatars</Text>
+          <View style={styles(colors).row}>
             <Avatar name="John Doe" size="small" />
             <Avatar name="Sarah Smith" size="medium" />
             <Avatar name="Mike Johnson" size="large" />
@@ -59,8 +59,8 @@ const ExampleScreen = () => {
           <Divider spacing={spacing.lg} />
 
           {/* Buttons Section */}
-          <Text style={styles.sectionTitle}>Buttons</Text>
-          <View style={styles.section}>
+          <Text style={styles(colors).sectionTitle}>Buttons</Text>
+          <View style={styles(colors).section}>
             <Button
               title="Primary"
               onPress={() => handleButtonPress('primary')}
@@ -96,8 +96,8 @@ const ExampleScreen = () => {
           <Divider spacing={spacing.lg} />
 
           {/* Badges Section */}
-          <Text style={styles.sectionTitle}>Badges</Text>
-          <View style={styles.row}>
+          <Text style={styles(colors).sectionTitle}>Badges</Text>
+          <View style={styles(colors).row}>
             <Badge label="Active" variant="success" />
             <Badge label="Pending" variant="warning" />
             <Badge label="Cancelled" variant="neutral" />
@@ -107,10 +107,10 @@ const ExampleScreen = () => {
           <Divider spacing={spacing.lg} />
 
           {/* Card Section */}
-          <Text style={styles.sectionTitle}>Cards</Text>
+          <Text style={styles(colors).sectionTitle}>Cards</Text>
           <Card variant="elevated" padding="medium">
-            <Text style={styles.cardTitle}>Trip Information</Text>
-            <Text style={styles.cardBody}>
+            <Text style={styles(colors).cardTitle}>Trip Information</Text>
+            <Text style={styles(colors).cardBody}>
               Your child is currently on the bus. Estimated arrival: 3:45 PM
             </Text>
             <Spacer size="sm" />
@@ -125,21 +125,21 @@ const ExampleScreen = () => {
           <Spacer size="lg" />
 
           <Card variant="outlined" padding="medium">
-            <Text style={styles.cardTitle}>Payment Status</Text>
-            <Text style={styles.cardBody}>March 2026 - R450.00 - Paid</Text>
+            <Text style={styles(colors).cardTitle}>Payment Status</Text>
+            <Text style={styles(colors).cardBody}>March 2026 - R450.00 - Paid</Text>
           </Card>
 
           <Spacer size="lg" />
 
           <Card variant="soft" padding="medium">
-            <Text style={styles.cardTitle}>Driver Update</Text>
-            <Text style={styles.cardBody}>Driver John is running 5 minutes late</Text>
+            <Text style={styles(colors).cardTitle}>Driver Update</Text>
+            <Text style={styles(colors).cardBody}>Driver John is running 5 minutes late</Text>
           </Card>
 
           <Divider spacing={spacing.lg} />
 
           {/* Input Section */}
-          <Text style={styles.sectionTitle}>Inputs</Text>
+          <Text style={styles(colors).sectionTitle}>Inputs</Text>
           <Input
             label="Email Address"
             placeholder="parent@example.com"
@@ -168,8 +168,8 @@ const ExampleScreen = () => {
           <Divider spacing={spacing.lg} />
 
           {/* Icon Buttons */}
-          <Text style={styles.sectionTitle}>Icon Buttons</Text>
-          <View style={styles.row}>
+          <Text style={styles(colors).sectionTitle}>Icon Buttons</Text>
+          <View style={styles(colors).row}>
             <IconButton
               icon="add-circle"
               onPress={() => Alert.alert('Add')}
@@ -200,7 +200,7 @@ const ExampleScreen = () => {
           <Divider spacing={spacing.lg} />
 
           {/* Empty State */}
-          <Text style={styles.sectionTitle}>Empty State</Text>
+          <Text style={styles(colors).sectionTitle}>Empty State</Text>
           <EmptyState
             icon="bus-outline"
             title="No Trips Found"
@@ -216,7 +216,7 @@ const ExampleScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

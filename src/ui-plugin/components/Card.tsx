@@ -66,7 +66,7 @@ export const Card: React.FC<CardProps> = ({
   const cardContent = (
     <View
       style={[
-        styles.base,
+        styles(colors).base,
         getVariantStyles(),
         { padding: getPadding() },
         elevatedStyle,
@@ -82,7 +82,7 @@ export const Card: React.FC<CardProps> = ({
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={styles.touchable}
+        style={styles(colors).touchable}
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         testID={testID}
@@ -95,7 +95,7 @@ export const Card: React.FC<CardProps> = ({
   return cardContent;
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   base: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',

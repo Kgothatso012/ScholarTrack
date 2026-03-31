@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 interface SkeletonProps {
   width?: DimensionValue;
@@ -9,41 +10,44 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ width = '100%', height = 20, borderRadius = 4, style }: SkeletonProps) {
+  const { colors } = useTheme();
   return (
-    <View 
+    <View
       style={[
-        styles.skeleton, 
+        styles(colors).skeleton,
         { width, height, borderRadius },
         style
-      ]} 
+      ]}
     />
   );
 }
 
 export function SkeletonCard() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.card}>
-      <Skeleton height={120} style={styles.mb} />
-      <Skeleton height={16} width="60%" style={styles.mb} />
+    <View style={styles(colors).card}>
+      <Skeleton height={120} style={styles(colors).mb} />
+      <Skeleton height={16} width="60%" style={styles(colors).mb} />
       <Skeleton height={16} width="40%" />
     </View>
   );
 }
 
 export function SkeletonDashboard() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.dashboard}>
-      <Skeleton height={80} style={styles.mb} />
-      <Skeleton height={200} style={styles.mb} />
-      <View style={styles.row}>
-        <Skeleton height={100} width="48%" style={styles.mb} />
-        <Skeleton height={100} width="48%" style={styles.mb} />
+    <View style={styles(colors).dashboard}>
+      <Skeleton height={80} style={styles(colors).mb} />
+      <Skeleton height={200} style={styles(colors).mb} />
+      <View style={styles(colors).row}>
+        <Skeleton height={100} width="48%" style={styles(colors).mb} />
+        <Skeleton height={100} width="48%" style={styles(colors).mb} />
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   skeleton: {
     backgroundColor: '#333',
   },

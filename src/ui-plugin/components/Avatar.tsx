@@ -113,7 +113,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     <Image
       source={{ uri }}
       style={[
-        styles.image,
+        styles(colors).image,
         {
           width: sizeValue,
           height: sizeValue,
@@ -124,7 +124,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   ) : (
     <View
       style={[
-        styles.placeholder,
+        styles(colors).placeholder,
         {
           width: sizeValue,
           height: sizeValue,
@@ -133,7 +133,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         },
       ]}
     >
-      <Text style={[styles.initials, { fontSize, color: txtColor }]}>
+      <Text style={[styles(colors).initials, { fontSize, color: txtColor }]}>
         {getInitials(name || 'U')}
       </Text>
     </View>
@@ -141,14 +141,14 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <View
-      style={[styles.container, { width: sizeValue, height: sizeValue }, style]}
+      style={[styles(colors).container, { width: sizeValue, height: sizeValue }, style]}
       testID={testID}
     >
       {content}
       {badge && (
         <View
           style={[
-            styles.badge,
+            styles(colors).badge,
             {
               backgroundColor: badgeColor,
               width: sizeValue * 0.28,
@@ -162,7 +162,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     position: 'relative',
   },

@@ -3,6 +3,7 @@
 
 import React, { ReactNode } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from './theme';
 
 interface LoadingProps {
@@ -36,9 +37,9 @@ interface StateWrapperProps {
 
 export function Loading({ message = 'Loading...' }: LoadingProps) {
   return (
-    <View style={styles.center}>
+    <View style={styles(colors).center}>
       <ActivityIndicator size="large" color={colors.accent} />
-      <Text style={styles.loadingText}>{message}</Text>
+      <Text style={styles(colors).loadingText}>{message}</Text>
     </View>
   );
 }
@@ -51,13 +52,13 @@ export function Empty({
   onAction 
 }: EmptyProps) {
   return (
-    <View style={styles.center}>
-      <Text style={styles.emptyIcon}>{icon}</Text>
-      <Text style={styles.emptyTitle}>{title}</Text>
-      {message && <Text style={styles.emptyMessage}>{message}</Text>}
+    <View style={styles(colors).center}>
+      <Text style={styles(colors).emptyIcon}>{icon}</Text>
+      <Text style={styles(colors).emptyTitle}>{title}</Text>
+      {message && <Text style={styles(colors).emptyMessage}>{message}</Text>}
       {actionLabel && onAction && (
-        <TouchableOpacity style={styles.actionButton} onPress={onAction}>
-          <Text style={styles.actionText}>{actionLabel}</Text>
+        <TouchableOpacity style={styles(colors).actionButton} onPress={onAction}>
+          <Text style={styles(colors).actionText}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -70,13 +71,13 @@ export function Error({
   onRetry 
 }: ErrorProps) {
   return (
-    <View style={styles.center}>
-      <Text style={styles.errorIcon}>⚠️</Text>
-      <Text style={styles.errorTitle}>{title}</Text>
-      <Text style={styles.errorMessage}>{message}</Text>
+    <View style={styles(colors).center}>
+      <Ionicons name="warning" size={32} color="#f59e0b" />
+      <Text style={styles(colors).errorTitle}>{title}</Text>
+      <Text style={styles(colors).errorMessage}>{message}</Text>
       {onRetry && (
-        <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-          <Text style={styles.retryText}>Try Again</Text>
+        <TouchableOpacity style={styles(colors).retryButton} onPress={onRetry}>
+          <Text style={styles(colors).retryText}>Try Again</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -114,7 +115,7 @@ export function StateWrapper({
   return <>{children}</>;
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   center: {
     flex: 1,
     justifyContent: 'center',

@@ -132,7 +132,7 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <View
       style={[
-        styles.badge,
+        styles(colors).badge,
         getSizeStyles(),
         {
           backgroundColor: getBackgroundColor(),
@@ -144,10 +144,10 @@ export const Badge: React.FC<BadgeProps> = ({
       ]}
       testID={testID}
     >
-      {icon && <View style={styles.icon}>{icon}</View>}
+      {icon && <View style={styles(colors).icon}>{icon}</View>}
       <Text
         style={[
-          styles.label,
+          styles(colors).label,
           {
             color: getTextColor(),
             fontSize: getFontSize(),
@@ -160,7 +160,7 @@ export const Badge: React.FC<BadgeProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',

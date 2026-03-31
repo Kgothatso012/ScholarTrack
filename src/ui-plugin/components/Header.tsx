@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <View
       style={[
-        styles.container,
+        styles(colors).container,
         safeArea && { paddingTop: insets.top },
         {
           backgroundColor: getBackgroundColor(),
@@ -80,8 +80,8 @@ export const Header: React.FC<HeaderProps> = ({
         style,
       ]}
     >
-      <View style={styles.content}>
-        <View style={styles.leftSection}>
+      <View style={styles(colors).content}>
+        <View style={styles(colors).leftSection}>
           {leftComponent || (leftIcon && (
             <IconButton
               icon={leftIcon}
@@ -92,12 +92,12 @@ export const Header: React.FC<HeaderProps> = ({
           ))}
         </View>
 
-        <View style={styles.centerSection}>
+        <View style={styles(colors).centerSection}>
           {centerComponent || (
             <>
               {title && (
                 <Text
-                  style={[styles.title, { color: getTitleColor() }]}
+                  style={[styles(colors).title, { color: getTitleColor() }]}
                   numberOfLines={1}
                 >
                   {title}
@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
               {subtitle && (
                 <Text
-                  style={[styles.subtitle, { color: getSubtitleColor() }]}
+                  style={[styles(colors).subtitle, { color: getSubtitleColor() }]}
                   numberOfLines={1}
                 >
                   {subtitle}
@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </View>
 
-        <View style={styles.rightSection}>
+        <View style={styles(colors).rightSection}>
           {rightComponent || (rightIcon && (
             <IconButton
               icon={rightIcon}
@@ -130,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     width: '100%',
   },

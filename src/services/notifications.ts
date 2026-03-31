@@ -113,35 +113,35 @@ export const notificationService = {
   // Notification types
   async notifyDriverAssigned(driverName: string, route: string): Promise<void> {
     await this.sendLocalNotification(
-      '🚗 Driver Assigned',
+      'Driver Assigned',
       `${driverName} has been assigned to your ${route} route.`
     );
   },
 
   async notifyDriverArrived(driverName: string): Promise<void> {
     await this.sendLocalNotification(
-      '🚌 Driver Arrived',
+      'Driver Arrived',
       `${driverName} has arrived! Please get ready.`
     );
   },
 
   async notifyTripCompleted(): Promise<void> {
     await this.sendLocalNotification(
-      '✅ Trip Completed',
+      'Trip Completed',
       'Your child has arrived at school/safely home.'
     );
   },
 
   async notifyPaymentReceived(amount: string): Promise<void> {
     await this.sendLocalNotification(
-      '💳 Payment Received',
+      'Payment Received',
       `Payment of ${amount} has been processed successfully.`
     );
   },
 
   async notifyPaymentDue(amount: string, dueDate: string): Promise<void> {
     await this.sendLocalNotification(
-      '💰 Payment Due',
+      'Payment Due',
       `Payment of ${amount} is due on ${dueDate}.`
     );
   },

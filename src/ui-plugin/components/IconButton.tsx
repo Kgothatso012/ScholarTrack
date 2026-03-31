@@ -120,7 +120,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       disabled={disabled}
       activeOpacity={0.7}
       style={[
-        styles.button,
+        styles(colors).button,
         {
           width: buttonSize,
           height: buttonSize,
@@ -142,7 +142,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
