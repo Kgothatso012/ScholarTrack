@@ -173,64 +173,64 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: '#000000' }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Loading compliance data...</Text>
+        <Text style={styles(colors).loadingText}>Loading compliance data...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <View style={styles(colors).header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Compliance Dashboard</Text>
-        <TouchableOpacity onPress={fetchComplianceData} style={styles.refreshButton}>
+        <Text style={styles(colors).headerTitle}>Compliance Dashboard</Text>
+        <TouchableOpacity onPress={fetchComplianceData} style={styles(colors).refreshButton}>
           <Ionicons name="refresh" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles(colors).scrollView} showsVerticalScrollIndicator={false}>
         {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor: '#007749' }]}>
+        <View style={styles(colors).statsContainer}>
+          <View style={[styles(colors).statCard, { backgroundColor: '#007749' }]}>
             <Ionicons name="checkmark-circle" size={32} color="#fff" />
-            <Text style={styles.statNumber}>{stats.compliant}</Text>
-            <Text style={styles.statLabel}>Compliant</Text>
+            <Text style={styles(colors).statNumber}>{stats.compliant}</Text>
+            <Text style={styles(colors).statLabel}>Compliant</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#FFB81C' }]}>
+          <View style={[styles(colors).statCard, { backgroundColor: '#FFB81C' }]}>
             <Ionicons name="time" size={32} color="#fff" />
-            <Text style={styles.statNumber}>{stats.expiringSoon}</Text>
-            <Text style={styles.statLabel}>Expiring Soon</Text>
+            <Text style={styles(colors).statNumber}>{stats.expiringSoon}</Text>
+            <Text style={styles(colors).statLabel}>Expiring Soon</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#E03C31' }]}>
+          <View style={[styles(colors).statCard, { backgroundColor: '#E03C31' }]}>
             <Ionicons name="warning" size={32} color="#fff" />
-            <Text style={styles.statNumber}>{stats.expired}</Text>
-            <Text style={styles.statLabel}>Expired</Text>
+            <Text style={styles(colors).statNumber}>{stats.expired}</Text>
+            <Text style={styles(colors).statLabel}>Expired</Text>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: '#FF9500' }]}>
+          <View style={[styles(colors).statCard, { backgroundColor: '#FF9500' }]}>
             <Ionicons name="hourglass" size={32} color="#fff" />
-            <Text style={styles.statNumber}>{stats.pendingReview}</Text>
-            <Text style={styles.statLabel}>Pending Review</Text>
+            <Text style={styles(colors).statNumber}>{stats.pendingReview}</Text>
+            <Text style={styles(colors).statLabel}>Pending Review</Text>
           </View>
         </View>
 
         {/* Summary */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Fleet Overview</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Drivers:</Text>
-            <Text style={styles.summaryValue}>{stats.totalDrivers}</Text>
+        <View style={styles(colors).summaryCard}>
+          <Text style={styles(colors).summaryTitle}>Fleet Overview</Text>
+          <View style={styles(colors).summaryRow}>
+            <Text style={styles(colors).summaryLabel}>Total Drivers:</Text>
+            <Text style={styles(colors).summaryValue}>{stats.totalDrivers}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Compliance Rate:</Text>
-            <Text style={[styles.summaryValue, { color: '#007749' }]}>
+          <View style={styles(colors).summaryRow}>
+            <Text style={styles(colors).summaryLabel}>Compliance Rate:</Text>
+            <Text style={[styles(colors).summaryValue, { color: '#007749' }]}>
               {stats.totalDrivers > 0
                 ? Math.round((stats.compliant / stats.totalDrivers) * 100)
                 : 0}%
@@ -239,13 +239,13 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
         </View>
 
         {/* Driver List */}
-        <View style={styles.driverListSection}>
-          <Text style={styles.sectionTitle}>Driver Compliance Status</Text>
+        <View style={styles(colors).driverListSection}>
+          <Text style={styles(colors).sectionTitle}>Driver Compliance Status</Text>
 
           {drivers.length === 0 ? (
-            <View style={styles.emptyState}>
+            <View style={styles(colors).emptyState}>
               <Ionicons name="document-text-outline" size={48} color="#999" />
-              <Text style={styles.emptyText}>No driver documents yet</Text>
+              <Text style={styles(colors).emptyText}>No driver documents yet</Text>
             </View>
           ) : (
             drivers.map((driver) => {
@@ -253,16 +253,16 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
               return (
                 <TouchableOpacity
                   key={driver.id}
-                  style={styles.driverCard}
+                  style={styles(colors).driverCard}
                   onPress={() => {
                     // Navigate to driver detail - would need implementation
                     Alert.alert('Driver Details', `Driver: ${driver.driver_name}\nStatus: ${status.label}`);
                   }}
                 >
-                  <View style={styles.driverInfo}>
-                    <Text style={styles.driverName}>{driver.driver_name}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
-                      <Text style={styles.statusBadgeText}>{status.label}</Text>
+                  <View style={styles(colors).driverInfo}>
+                    <Text style={styles(colors).driverName}>{driver.driver_name}</Text>
+                    <View style={[styles(colors).statusBadge, { backgroundColor: status.color }]}>
+                      <Text style={styles(colors).statusBadgeText}>{status.label}</Text>
                     </View>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#999" />
@@ -272,13 +272,13 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
           )}
         </View>
 
-        <View style={styles.bottomPadding} />
+        <View style={styles(colors).bottomPadding} />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
   },
   refreshButton: {
     padding: 8,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
     marginTop: 8,
   },
   statLabel: {
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     marginHorizontal: 16,
     marginBottom: 16,
     padding: 20,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#888888',
   },
   summaryValue: {
     fontSize: 14,
@@ -372,11 +372,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
     marginBottom: 12,
   },
   driverCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   statusBadgeText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 12,
     fontWeight: '600',
   },

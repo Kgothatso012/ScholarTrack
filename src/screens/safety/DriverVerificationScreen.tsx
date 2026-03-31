@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Driver {
   id: number;
@@ -22,6 +23,7 @@ interface Driver {
 }
 
 export default function DriverVerificationScreen() {
+  const { colors } = useTheme();
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [verificationModal, setVerificationModal] = useState(false);
 
@@ -85,13 +87,13 @@ export default function DriverVerificationScreen() {
   };
 
   const VerificationBadge = ({ verified, label }: { verified: boolean; label: string }) => (
-    <View style={[styles.badge, verified ? styles.badgeVerified : styles.badgePending]}>
+    <View style={[styles(colors).badge, verified ? styles(colors).badgeVerified : styles(colors).badgePending]}>
       <Ionicons 
         name={verified ? 'checkmark-circle' : 'time-outline'} 
         size={16} 
         color={verified ? '#007749' : '#FFB81C'} 
       />
-      <Text style={[styles.badgeText, verified ? styles.badgeTextVerified : styles.badgeTextPending]}>
+      <Text style={[styles(colors).badgeText, verified ? styles(colors).badgeTextVerified : styles(colors).badgeTextPending]}>
         {label}
       </Text>
     </View>
@@ -99,20 +101,20 @@ export default function DriverVerificationScreen() {
 
   const StatusBadge = ({ status }: { status: string }) => (
     <View style={[
-      styles.statusBadge,
-      status === 'active' && styles.statusActive,
-      status === 'pending' && styles.statusPending,
-      status === 'suspended' && styles.statusSuspended,
+      styles(colors).statusBadge,
+      status === 'active' && styles(colors).statusActive,
+      status === 'pending' && styles(colors).statusPending,
+      status === 'suspended' && styles(colors).statusSuspended,
     ]}>
-      <Text style={styles.statusText}>
-        {status === 'active' ? '✓ Verified' : status === 'pending' ? '⏳ Pending' : '⚠️ Suspended'}
+      <Text style={styles(colors).statusText}>
+        {status === 'active' ? '✓ Verified' : status === 'pending' ? '⏳ Pending' : 'Warning  Suspended'}
       </Text>
     </View>
   );
 
   const renderStars = (rating: number) => {
     return (
-      <View style={styles.stars}>
+      <View style={styles(colors).stars}>
         {[1, 2, 3, 4, 5].map((star) => (
           <Ionicons
             key={star}
@@ -121,60 +123,60 @@ export default function DriverVerificationScreen() {
             color="#FFB81C"
           />
         ))}
-        <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+        <Text style={styles(colors).ratingText}>{rating.toFixed(1)}</Text>
       </View>
     );
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles(colors).container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🛡️ Driver Verification</Text>
-        <Text style={styles.headerSubtext}>Verified & trusted drivers</Text>
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>🛡️ Driver Verification</Text>
+        <Text style={styles(colors).headerSubtext}>Verified & trusted drivers</Text>
       </View>
 
       {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{drivers.filter(d => d.status === 'active').length}</Text>
-          <Text style={styles.statLabel}>Verified</Text>
+      <View style={styles(colors).statsRow}>
+        <View style={styles(colors).statCard}>
+          <Text style={styles(colors).statNumber}>{drivers.filter(d => d.status === 'active').length}</Text>
+          <Text style={styles(colors).statLabel}>Verified</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{drivers.filter(d => d.status === 'pending').length}</Text>
-          <Text style={styles.statLabel}>Pending</Text>
+        <View style={styles(colors).statCard}>
+          <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{drivers.filter(d => d.status === 'pending').length}</Text>
+          <Text style={styles(colors).statLabel}>Pending</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{drivers.reduce((sum, d) => sum + d.trips, 0)}</Text>
-          <Text style={styles.statLabel}>Total Trips</Text>
+        <View style={styles(colors).statCard}>
+          <Text style={styles(colors).statNumber}>{drivers.reduce((sum, d) => sum + d.trips, 0)}</Text>
+          <Text style={styles(colors).statLabel}>Total Trips</Text>
         </View>
       </View>
 
       {/* Driver List */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>All Drivers ({drivers.length})</Text>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>All Drivers ({drivers.length})</Text>
         
         {drivers.map((driver) => (
           <TouchableOpacity 
             key={driver.id} 
-            style={styles.driverCard}
+            style={styles(colors).driverCard}
             onPress={() => viewDriverDetails(driver)}
           >
-            <View style={styles.driverPhoto}>
-              <Text style={styles.photoText}>{driver.photo}</Text>
+            <View style={styles(colors).driverPhoto}>
+              <Text style={styles(colors).photoText}>{driver.photo}</Text>
             </View>
             
-            <View style={styles.driverInfo}>
-              <View style={styles.driverHeader}>
-                <Text style={styles.driverName}>{driver.name}</Text>
+            <View style={styles(colors).driverInfo}>
+              <View style={styles(colors).driverHeader}>
+                <Text style={styles(colors).driverName}>{driver.name}</Text>
                 <StatusBadge status={driver.status} />
               </View>
               {renderStars(driver.rating)}
-              <Text style={styles.driverRoute}>{driver.route} • {driver.trips} trips</Text>
+              <Text style={styles(colors).driverRoute}>{driver.route} • {driver.trips} trips</Text>
             </View>
             
-            <View style={styles.driverActions}>
-              <View style={styles.verifiedIcons}>
+            <View style={styles(colors).driverActions}>
+              <View style={styles(colors).verifiedIcons}>
                 {driver.verified.id && <Ionicons name="person" size={14} color="#007749" />}
                 {driver.verified.license && <Ionicons name="car" size={14} color="#007749" />}
                 {driver.verified.criminal && <Ionicons name="shield" size={14} color="#007749" />}
@@ -186,62 +188,62 @@ export default function DriverVerificationScreen() {
       </View>
 
       {/* Verification Legend */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Verification Types</Text>
-        <View style={styles.legendCard}>
-          <View style={styles.legendItem}>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Verification Types</Text>
+        <View style={styles(colors).legendCard}>
+          <View style={styles(colors).legendItem}>
             <Ionicons name="person" size={20} color="#007749" />
-            <Text style={styles.legendText}>ID Verification</Text>
+            <Text style={styles(colors).legendText}>ID Verification</Text>
           </View>
-          <View style={styles.legendItem}>
+          <View style={styles(colors).legendItem}>
             <Ionicons name="car" size={20} color="#007749" />
-            <Text style={styles.legendText}>Driver's License</Text>
+            <Text style={styles(colors).legendText}>Driver's License</Text>
           </View>
-          <View style={styles.legendItem}>
+          <View style={styles(colors).legendItem}>
             <Ionicons name="shield" size={20} color="#007749" />
-            <Text style={styles.legendText}>Criminal Check</Text>
+            <Text style={styles(colors).legendText}>Criminal Check</Text>
           </View>
-          <View style={styles.legendItem}>
+          <View style={styles(colors).legendItem}>
             <Ionicons name="construct" size={20} color="#007749" />
-            <Text style={styles.legendText}>Vehicle Inspection</Text>
+            <Text style={styles(colors).legendText}>Vehicle Inspection</Text>
           </View>
         </View>
       </View>
 
       {/* Driver Details Modal */}
       <Modal visible={!!selectedDriver} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View style={styles(colors).modalOverlay}>
+          <View style={styles(colors).modalContent}>
             {selectedDriver && (
               <>
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalPhoto}>
-                    <Text style={styles.modalPhotoText}>{selectedDriver.photo}</Text>
+                <View style={styles(colors).modalHeader}>
+                  <View style={styles(colors).modalPhoto}>
+                    <Text style={styles(colors).modalPhotoText}>{selectedDriver.photo}</Text>
                   </View>
-                  <Text style={styles.modalName}>{selectedDriver.name}</Text>
+                  <Text style={styles(colors).modalName}>{selectedDriver.name}</Text>
                   {renderStars(selectedDriver.rating)}
-                  <Text style={styles.modalTrips}>{selectedDriver.trips} trips completed</Text>
+                  <Text style={styles(colors).modalTrips}>{selectedDriver.trips} trips completed</Text>
                   <StatusBadge status={selectedDriver.status} />
                 </View>
 
-                <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>Vehicle</Text>
-                  <Text style={styles.modalText}>{selectedDriver.vehicle}</Text>
+                <View style={styles(colors).modalSection}>
+                  <Text style={styles(colors).modalSectionTitle}>Vehicle</Text>
+                  <Text style={styles(colors).modalText}>{selectedDriver.vehicle}</Text>
                 </View>
 
-                <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>Route</Text>
-                  <Text style={styles.modalText}>{selectedDriver.route}</Text>
+                <View style={styles(colors).modalSection}>
+                  <Text style={styles(colors).modalSectionTitle}>Route</Text>
+                  <Text style={styles(colors).modalText}>{selectedDriver.route}</Text>
                 </View>
 
-                <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>Price</Text>
-                  <Text style={styles.modalPrice}>{selectedDriver.price}</Text>
+                <View style={styles(colors).modalSection}>
+                  <Text style={styles(colors).modalSectionTitle}>Price</Text>
+                  <Text style={styles(colors).modalPrice}>{selectedDriver.price}</Text>
                 </View>
 
-                <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>Verification Status</Text>
-                  <View style={styles.verificationGrid}>
+                <View style={styles(colors).modalSection}>
+                  <Text style={styles(colors).modalSectionTitle}>Verification Status</Text>
+                  <View style={styles(colors).verificationGrid}>
                     <VerificationBadge verified={selectedDriver.verified.id} label="ID" />
                     <VerificationBadge verified={selectedDriver.verified.license} label="License" />
                     <VerificationBadge verified={selectedDriver.verified.criminal} label="Criminal" />
@@ -249,16 +251,16 @@ export default function DriverVerificationScreen() {
                   </View>
                 </View>
 
-                <View style={styles.modalActions}>
-                  <TouchableOpacity style={styles.hireButton}>
+                <View style={styles(colors).modalActions}>
+                  <TouchableOpacity style={styles(colors).hireButton}>
                     <Ionicons name="call" size={20} color="#fff" />
-                    <Text style={styles.hireButtonText}>Contact Driver</Text>
+                    <Text style={styles(colors).hireButtonText}>Contact Driver</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={styles.closeButton}
+                    style={styles(colors).closeButton}
                     onPress={() => setSelectedDriver(null)}
                   >
-                    <Text style={styles.closeButtonText}>Close</Text>
+                    <Text style={styles(colors).closeButtonText}>Close</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -270,36 +272,36 @@ export default function DriverVerificationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.card },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+  headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.text },
   headerSubtext: { fontSize: 13, color: '#FFB81C', marginTop: 5 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: '#fff', marginTop: -15, marginHorizontal: 15, borderRadius: 12, elevation: 3 },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 15, backgroundColor: '#1a1a1a', marginTop: -15, marginHorizontal: 15, borderRadius: 12, elevation: 3 },
   statCard: { alignItems: 'center' },
   statNumber: { fontSize: 24, fontWeight: 'bold', color: '#002395' },
-  statLabel: { fontSize: 12, color: '#666' },
+  statLabel: { fontSize: 12, color: colors.textSecondary },
   section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-  driverCard: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 15 },
+  driverCard: { backgroundColor: '#1a1a1a', borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   driverPhoto: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#002395', justifyContent: 'center', alignItems: 'center' },
-  photoText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  photoText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
   driverInfo: { flex: 1, marginLeft: 12 },
   driverHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  driverName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  driverRoute: { fontSize: 12, color: '#666', marginTop: 3 },
+  driverName: { fontSize: 16, fontWeight: 'bold', color: colors.textSecondary },
+  driverRoute: { fontSize: 12, color: colors.textSecondary, marginTop: 3 },
   driverActions: { alignItems: 'flex-end' },
   verifiedIcons: { flexDirection: 'row', marginBottom: 5 },
   stars: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  ratingText: { marginLeft: 5, fontSize: 12, color: '#333', fontWeight: 'bold' },
+  ratingText: { marginLeft: 5, fontSize: 12, color: colors.textSecondary, fontWeight: 'bold' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   statusActive: { backgroundColor: '#007749' },
   statusPending: { backgroundColor: '#FFB81C' },
   statusSuspended: { backgroundColor: '#d32f2f' },
-  statusText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
-  legendCard: { backgroundColor: '#fff', borderRadius: 12, padding: 15, elevation: 2 },
+  statusText: { color: '#ffffff', fontSize: 10, fontWeight: 'bold' },
+  legendCard: { backgroundColor: '#1a1a1a', borderRadius: 12, padding: 15, elevation: 2 },
   legendItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  legendText: { marginLeft: 12, fontSize: 14, color: '#333' },
+  legendText: { marginLeft: 12, fontSize: 14, color: colors.textSecondary },
   badge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginRight: 6, marginBottom: 6 },
   badgeVerified: { backgroundColor: '#00774920' },
   badgePending: { backgroundColor: '#FFB81C20' },
@@ -307,20 +309,20 @@ const styles = StyleSheet.create({
   badgeTextVerified: { color: '#007749' },
   badgeTextPending: { color: '#FFB81C' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 20, maxHeight: '90%' },
+  modalContent: { backgroundColor: '#1a1a1a', borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 20, maxHeight: '90%' },
   modalHeader: { alignItems: 'center', marginBottom: 20 },
   modalPhoto: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#002395', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  modalPhotoText: { color: '#fff', fontWeight: 'bold', fontSize: 28 },
-  modalName: { fontSize: 22, fontWeight: 'bold', color: '#333' },
-  modalTrips: { fontSize: 14, color: '#666', marginTop: 5 },
+  modalPhotoText: { color: '#ffffff', fontWeight: 'bold', fontSize: 28 },
+  modalName: { fontSize: 22, fontWeight: 'bold', color: colors.textSecondary },
+  modalTrips: { fontSize: 14, color: colors.textSecondary, marginTop: 5 },
   modalSection: { marginBottom: 15 },
-  modalSectionTitle: { fontSize: 12, color: '#666', marginBottom: 5, textTransform: 'uppercase' },
-  modalText: { fontSize: 16, color: '#333' },
+  modalSectionTitle: { fontSize: 12, color: colors.textSecondary, marginBottom: 5, textTransform: 'uppercase' },
+  modalText: { fontSize: 16, color: colors.textSecondary },
   modalPrice: { fontSize: 20, fontWeight: 'bold', color: '#007749' },
   verificationGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   modalActions: { flexDirection: 'row', marginTop: 10 },
   hireButton: { flex: 1, backgroundColor: '#007749', padding: 15, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
-  hireButtonText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
+  hireButtonText: { color: '#ffffff', fontWeight: 'bold', marginLeft: 8 },
   closeButton: { padding: 15, borderRadius: 10, borderWidth: 1, borderColor: '#ccc' },
-  closeButtonText: { color: '#666', fontWeight: 'bold' },
+  closeButtonText: { color: colors.textSecondary, fontWeight: 'bold' },
 });

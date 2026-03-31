@@ -185,37 +185,37 @@ const ReviewDriverScreen = ({ navigation }: any) => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles(colors).container, { backgroundColor: colors.background }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Monthly Review</Text>
-        <Text style={[styles.headerSubtext, { color: colors.accent }]}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <Text style={styles(colors).headerTitle}>Monthly Review</Text>
+        <Text style={[styles(colors).headerSubtext, { color: colors.accent }]}>
           Rate your driver for {currentMonth} {currentYear}
         </Text>
       </View>
 
       {/* Driver Card */}
       {driver ? (
-        <View style={[styles.driverCard, { backgroundColor: colors.card }]}>
-          <View style={[styles.driverAvatar, { backgroundColor: colors.primary }]}>
+        <View style={[styles(colors).driverCard, { backgroundColor: colors.card }]}>
+          <View style={[styles(colors).driverAvatar, { backgroundColor: colors.primary }]}>
             <Ionicons name="person" size={40} color="#fff" />
           </View>
-          <Text style={[styles.driverName, { color: colors.text }]}>{driver.full_name}</Text>
-          <Text style={[styles.driverSchool, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).driverName, { color: colors.text }]}>{driver.full_name}</Text>
+          <Text style={[styles(colors).driverSchool, { color: colors.textSecondary }]}>
             Vehicle: {driver.vehicle_plate}
           </Text>
           {driver.monthly_rate && (
-            <Text style={[styles.driverRate, { color: colors.accent }]}>
+            <Text style={[styles(colors).driverRate, { color: colors.accent }]}>
               Monthly Rate: R{driver.monthly_rate}
             </Text>
           )}
         </View>
       ) : (
-        <View style={[styles.driverCard, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).driverCard, { backgroundColor: colors.card }]}>
           <Ionicons name="car-sport-outline" size={50} color={colors.textSecondary} />
-          <Text style={[styles.driverName, { color: colors.text, marginTop: 10 }]}>No Driver Assigned</Text>
-          <Text style={[styles.driverSchool, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).driverName, { color: colors.text, marginTop: 10 }]}>No Driver Assigned</Text>
+          <Text style={[styles(colors).driverSchool, { color: colors.textSecondary }]}>
             Hire a driver to start using ScholarTrack
           </Text>
         </View>
@@ -224,9 +224,9 @@ const ReviewDriverScreen = ({ navigation }: any) => {
       {/* Review Form */}
       {canReview && driver ? (
         <>
-          <View style={[styles.ratingSection, { backgroundColor: colors.card }]}>
-            <Text style={[styles.ratingTitle, { color: colors.text }]}>How was the service this month?</Text>
-            <View style={styles.stars}>
+          <View style={[styles(colors).ratingSection, { backgroundColor: colors.card }]}>
+            <Text style={[styles(colors).ratingTitle, { color: colors.text }]}>How was the service this month?</Text>
+            <View style={styles(colors).stars}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity key={star} onPress={() => setRating(star)} disabled={loading}>
                   <Ionicons
@@ -237,23 +237,23 @@ const ReviewDriverScreen = ({ navigation }: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={[styles.ratingText, { color: rating >= 4 ? '#007749' : rating >= 3 ? '#FFB81C' : '#E03C31' }]}>
+            <Text style={[styles(colors).ratingText, { color: rating >= 4 ? '#007749' : rating >= 3 ? '#FFB81C' : '#E03C31' }]}>
               {getRatingLabel(rating)}
             </Text>
             {rating < 4 && (
-              <View style={[styles.warningBox, { backgroundColor: '#FFF3CD', borderColor: '#FFB81C' }]}>
+              <View style={[styles(colors).warningBox, { backgroundColor: '#FFF3CD', borderColor: '#FFB81C' }]}>
                 <Ionicons name="warning" size={20} color="#E03C31" />
-                <Text style={styles.warningText}>
+                <Text style={styles(colors).warningText}>
                   Ratings below 4 stars will flag the payment for admin review
                 </Text>
               </View>
             )}
           </View>
 
-          <View style={[styles.feedbackSection, { backgroundColor: colors.card }]}>
-            <Text style={[styles.feedbackTitle, { color: colors.text }]}>Additional Comments</Text>
+          <View style={[styles(colors).feedbackSection, { backgroundColor: colors.card }]}>
+            <Text style={[styles(colors).feedbackTitle, { color: colors.text }]}>Additional Comments</Text>
             <TextInput
-              style={[styles.feedbackInput, { backgroundColor: colors.background, color: colors.text }]}
+              style={[styles(colors).feedbackInput, { backgroundColor: colors.background, color: colors.text }]}
               placeholder="Tell us more about your experience (optional)"
               placeholderTextColor="#999"
               multiline
@@ -265,7 +265,7 @@ const ReviewDriverScreen = ({ navigation }: any) => {
           </View>
 
           <TouchableOpacity
-            style={[styles.submitBtn, { backgroundColor: colors.primary }, loading && styles.submitBtnDisabled]}
+            style={[styles(colors).submitBtn, { backgroundColor: colors.primary }, loading && styles(colors).submitBtnDisabled]}
             onPress={submitReview}
             disabled={loading || rating === 0}
           >
@@ -274,38 +274,38 @@ const ReviewDriverScreen = ({ navigation }: any) => {
             ) : (
               <>
                 <Ionicons name="checkmark-circle" size={24} color="#fff" />
-                <Text style={styles.submitBtnText}>Submit Review</Text>
+                <Text style={styles(colors).submitBtnText}>Submit Review</Text>
               </>
             )}
           </TouchableOpacity>
         </>
       ) : !driver ? null : (
-        <View style={[styles.completedSection, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).completedSection, { backgroundColor: colors.card }]}>
           <Ionicons name="checkmark-done-circle" size={60} color="#007749" />
-          <Text style={[styles.completedTitle, { color: colors.text }]}>Review Submitted!</Text>
-          <Text style={[styles.completedText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).completedTitle, { color: colors.text }]}>Review Submitted!</Text>
+          <Text style={[styles(colors).completedText, { color: colors.textSecondary }]}>
             You've already reviewed for {currentMonth} {currentYear}. See your history below.
           </Text>
         </View>
       )}
 
       {/* Review History */}
-      <View style={[styles.historySection, { backgroundColor: colors.card }]}>
-        <Text style={[styles.historyTitle, { color: colors.text }]}>Review History</Text>
+      <View style={[styles(colors).historySection, { backgroundColor: colors.card }]}>
+        <Text style={[styles(colors).historyTitle, { color: colors.text }]}>Review History</Text>
 
         {reviews.length === 0 ? (
-          <View style={styles.emptyHistory}>
+          <View style={styles(colors).emptyHistory}>
             <Ionicons name="document-text-outline" size={40} color="#999" />
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
               Your review history will appear here after you submit reviews.
             </Text>
           </View>
         ) : (
           reviews.map((review) => (
-            <View key={review.id} style={[styles.reviewCard, { backgroundColor: colors.background }]}>
-              <View style={styles.reviewHeader}>
-                <Text style={[styles.reviewMonth, { color: colors.text }]}>{review.month}</Text>
-                <View style={styles.reviewRating}>
+            <View key={review.id} style={[styles(colors).reviewCard, { backgroundColor: colors.background }]}>
+              <View style={styles(colors).reviewHeader}>
+                <Text style={[styles(colors).reviewMonth, { color: colors.text }]}>{review.month}</Text>
+                <View style={styles(colors).reviewRating}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Ionicons
                       key={star}
@@ -317,14 +317,14 @@ const ReviewDriverScreen = ({ navigation }: any) => {
                 </View>
               </View>
               {review.comment && (
-                <Text style={[styles.reviewComment, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).reviewComment, { color: colors.textSecondary }]}>
                   "{review.comment}"
                 </Text>
               )}
               {review.status === 'flagged' && (
-                <View style={[styles.flaggedBadge, { backgroundColor: '#FFE5E5' }]}>
+                <View style={[styles(colors).flaggedBadge, { backgroundColor: '#FFE5E5' }]}>
                   <Ionicons name="flag" size={12} color="#E03C31" />
-                  <Text style={[styles.flaggedText, { color: '#E03C31' }]}>Flagged for review</Text>
+                  <Text style={[styles(colors).flaggedText, { color: '#E03C31' }]}>Flagged for review</Text>
                 </View>
               )}
             </View>
@@ -333,20 +333,20 @@ const ReviewDriverScreen = ({ navigation }: any) => {
       </View>
 
       {/* Payment Info */}
-      <View style={[styles.infoSection, { backgroundColor: colors.card }]}>
+      <View style={[styles(colors).infoSection, { backgroundColor: colors.card }]}>
         <Ionicons name="information-circle" size={24} color={colors.primary} />
-        <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+        <Text style={[styles(colors).infoText, { color: colors.textSecondary }]}>
           Payments are held in escrow until you submit your monthly review.
           Ratings of 4+ stars release the payment to your driver.
         </Text>
       </View>
 
-      <View style={styles.bottomPadding} />
+      <View style={styles(colors).bottomPadding} />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },

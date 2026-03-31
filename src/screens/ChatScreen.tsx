@@ -215,11 +215,11 @@ export default function ChatScreen({ navigation }: Props) {
   const renderMessage = ({ item }: { item: Message }) => {
     const isMyMessage = item.sender_id === currentUser?.id;
     return (
-      <View style={[styles.messageBubble, isMyMessage ? styles.myMessage : styles.theirMessage]}>
-        <Text style={[styles.messageText, isMyMessage ? { color: '#fff' } : { color: colors.text }]}>
+      <View style={[styles(colors).messageBubble, isMyMessage ? styles(colors).myMessage : styles(colors).theirMessage]}>
+        <Text style={[styles(colors).messageText, isMyMessage ? { color: colors.text } : { color: colors.text }]}>
           {item.message}
         </Text>
-        <Text style={[styles.messageTime, isMyMessage ? { color: '#fff8' } : { color: colors.textSecondary }]}>
+        <Text style={[styles(colors).messageTime, isMyMessage ? { color: '#fff8' } : { color: colors.textSecondary }]}>
           {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>
@@ -228,7 +228,7 @@ export default function ChatScreen({ navigation }: Props) {
 
   if (loading && !selectedChat) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -237,17 +237,17 @@ export default function ChatScreen({ navigation }: Props) {
   if (selectedChat) {
     return (
       <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[styles(colors).container, { backgroundColor: colors.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <TouchableOpacity onPress={() => setSelectedChat(null)} style={styles.backBtn}>
+        <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity onPress={() => setSelectedChat(null)} style={styles(colors).backBtn}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <View style={styles.headerInfo}>
-            <Text style={styles.headerName}>{selectedChat.participant_name}</Text>
-            <Text style={styles.headerRole}>{selectedChat.participant_role}</Text>
+          <View style={styles(colors).headerInfo}>
+            <Text style={styles(colors).headerName}>{selectedChat.participant_name}</Text>
+            <Text style={styles(colors).headerRole}>{selectedChat.participant_role}</Text>
           </View>
         </View>
 
@@ -257,14 +257,14 @@ export default function ChatScreen({ navigation }: Props) {
           data={messages}
           renderItem={renderMessage}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.messagesList}
+          contentContainerStyle={styles(colors).messagesList}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
         />
 
         {/* Input */}
-        <View style={[styles.inputContainer, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).inputContainer, { backgroundColor: colors.card }]}>
           <TextInput
-            style={[styles.input, { backgroundColor: colors.background, color: colors.text }]}
+            style={[styles(colors).input, { backgroundColor: '#000000', color: colors.text }]}
             placeholder="Type a message..."
             placeholderTextColor={colors.textSecondary}
             value={newMessage}
@@ -272,7 +272,7 @@ export default function ChatScreen({ navigation }: Props) {
             multiline
           />
           <TouchableOpacity
-            style={[styles.sendBtn, { backgroundColor: colors.primary }]}
+            style={[styles(colors).sendBtn, { backgroundColor: colors.primary }]}
             onPress={sendMessage}
             disabled={sending || !newMessage.trim()}
           >
@@ -284,13 +284,13 @@ export default function ChatScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles(colors).headerTitle}>Messages</Text>
       </View>
 
       {/* Conversations */}
@@ -299,38 +299,38 @@ export default function ChatScreen({ navigation }: Props) {
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.convItem, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles(colors).convItem, { backgroundColor: '#1a1a1a', borderColor: colors.border }]}
             onPress={() => setSelectedChat(item)}
           >
-            <View style={[styles.convAvatar, { backgroundColor: colors.primary + '20' }]}>
+            <View style={[styles(colors).convAvatar, { backgroundColor: colors.primary + '20' }]}>
               <Ionicons name="person" size={24} color={colors.primary} />
             </View>
-            <View style={styles.convInfo}>
-              <View style={styles.convHeader}>
-                <Text style={[styles.convName, { color: colors.text }]}>{item.participant_name}</Text>
-                <Text style={[styles.convTime, { color: colors.textSecondary }]}>
+            <View style={styles(colors).convInfo}>
+              <View style={styles(colors).convHeader}>
+                <Text style={[styles(colors).convName, { color: colors.text }]}>{item.participant_name}</Text>
+                <Text style={[styles(colors).convTime, { color: colors.textSecondary }]}>
                   {new Date(item.last_message_at).toLocaleDateString()}
                 </Text>
               </View>
-              <Text style={[styles.convRole, { color: colors.textSecondary }]}>{item.participant_role}</Text>
+              <Text style={[styles(colors).convRole, { color: colors.textSecondary }]}>{item.participant_role}</Text>
               {item.last_message && (
-                <Text style={[styles.convLast, { color: colors.textSecondary }]} numberOfLines={1}>
+                <Text style={[styles(colors).convLast, { color: colors.textSecondary }]} numberOfLines={1}>
                   {item.last_message}
                 </Text>
               )}
             </View>
             {item.unread_count > 0 && (
-              <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
-                <Text style={styles.unreadText}>{item.unread_count}</Text>
+              <View style={[styles(colors).unreadBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles(colors).unreadText}>{item.unread_count}</Text>
               </View>
             )}
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
+          <View style={styles(colors).emptyContainer}>
             <Ionicons name="chatbubbles-outline" size={64} color={colors.textSecondary} />
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No conversations yet</Text>
-            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
+            <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>No conversations yet</Text>
+            <Text style={[styles(colors).emptySubtext, { color: colors.textSecondary }]}>
               Start chatting with your driver
             </Text>
           </View>
@@ -340,18 +340,18 @@ export default function ChatScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },
-  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#fff', marginLeft: 10 },
+  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#ffffff', marginLeft: 10 },
   headerInfo: { flex: 1, marginLeft: 10 },
-  headerName: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
+  headerName: { fontSize: 18, fontWeight: 'bold', color: colors.text },
   headerRole: { fontSize: 12, color: '#FFB81C' },
   messagesList: { padding: 15 },
   messageBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 10 },
   myMessage: { alignSelf: 'flex-end', backgroundColor: '#002395' },
-  theirMessage: { alignSelf: 'flex-start', backgroundColor: '#fff' },
+  theirMessage: { alignSelf: 'flex-start', backgroundColor: colors.card },
   messageText: { fontSize: 15 },
   messageTime: { fontSize: 10, marginTop: 4 },
   inputContainer: { flexDirection: 'row', padding: 10, alignItems: 'flex-end' },
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   convRole: { fontSize: 12, marginTop: 2 },
   convLast: { fontSize: 13, marginTop: 4 },
   unreadBadge: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  unreadText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  unreadText: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 },
   emptyText: { fontSize: 18, fontWeight: '600', marginTop: 20 },
   emptySubtext: { fontSize: 14, marginTop: 5 }

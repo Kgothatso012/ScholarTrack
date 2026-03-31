@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Language {
   code: string;
@@ -10,6 +14,7 @@ interface Language {
 }
 
 export default function LanguageSettingsScreen() {
+  const { colors } = useTheme();
   const [currentLang, setCurrentLang] = useState('en');
 
   const languages: Language[] = [
@@ -36,91 +41,62 @@ export default function LanguageSettingsScreen() {
     settings: 'Settings',
   };
 
+  const styles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { backgroundColor: colors.primary, padding: spacing.lg },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    langCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    langFlag: { fontSize: 24 },
+    langName: { ...typography.label, color: colors.text, flex: 1, marginLeft: spacing.md },
+    checkmark: { color: colors.success },
+    previewCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, elevation: 2 },
+    previewTitle: { ...typography.label, color: colors.textSecondary, marginBottom: spacing.sm },
+    previewItem: { ...typography.body, color: colors.text, marginBottom: spacing.xs },
+  });
+
   return (
     <ScrollView style={styles(colors).container}>
+      {/* Header */}
       <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>🌐 Language</Text>
-        <Text style={styles(colors).headerSubtext}>Select your preferred language</Text>
+        <Text style={styles(colors).headerTitle}>Language</Text>
+        <Text style={styles(colors).headerSub}>Choose your preferred language</Text>
       </View>
 
-      {/* Current Preview */}
-      <View style={styles(colors).previewCard}>
-        <Text style={styles(colors).previewTitle}>App Preview</Text>
-        <View style={styles(colors).previewContent}>
-          <View style={styles(colors).previewItem}>
-            <Ionicons name="home" size={20} color="#002395" />
-            <Text style={styles(colors).previewText}>{translations.dashboard}</Text>
-          </View>
-          <View style={styles(colors).previewItem}>
-            <Ionicons name="map" size={20} color="#002395" />
-            <Text style={styles(colors).previewText}>{translations.track}</Text>
-          </View>
-          <View style={styles(colors).previewItem}>
-            <Ionicons name="warning" size={20} color="#d32f2f" />
-            <Text style={styles(colors).previewText}>{translations.safety}</Text>
-          </View>
-          <View style={styles(colors).previewItem}>
-            <Ionicons name="card" size={20} color="#007749" />
-            <Text style={styles(colors).previewText}>{translations.payments}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Language List */}
+      {/* Languages List */}
       <View style={styles(colors).section}>
         <Text style={styles(colors).sectionTitle}>Available Languages</Text>
-        
         {languages.map((lang) => (
-          <TouchableOpacity
-            key={lang.code}
-            style={[styles(colors).langCard, currentLang === lang.code && styles(colors).langCardActive]}
-            onPress={() => selectLanguage(lang.code)}
-          >
-            <Text style={styles(colors).langFlag}>{lang.flag}</Text>
-            <View style={styles(colors).langInfo}>
-              <Text style={[styles(colors).langName, currentLang === lang.code && styles(colors).langNameActive]}>
-                {lang.name}
-              </Text>
-              <Text style={styles(colors).langCode}>{lang.code.toUpperCase()}</Text>
-            </View>
-            {currentLang === lang.code && (
-              <Ionicons name="checkmark-circle" size={24} color="#007749" />
-            )}
+          <TouchableOpacity key={lang.code} onPress={() => selectLanguage(lang.code)}>
+            <Card variant={currentLang === lang.code ? 'elevated' : 'outlined'} padding="medium">
+              <View style={styles(colors).langCard}>
+                <Text style={styles(colors).langFlag}>{lang.flag}</Text>
+                <Text style={styles(colors).langName}>{lang.name}</Text>
+                {currentLang === lang.code && (
+                  <Ionicons name="checkmark-circle" size={24} style={styles(colors).checkmark} />
+                )}
+              </View>
+            </Card>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Language Info */}
-      <View style={styles(colors).infoCard}>
-        <Ionicons name="information-circle" size={24} color="#002395" />
-        <Text style={styles(colors).infoText}>
-          ScholarTrack is committed to serving all South African communities. 
-          More languages will be added based on demand.
-        </Text>
+      {/* Preview */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Preview</Text>
+        <Card variant="elevated" padding="large">
+          <View style={styles(colors).previewCard}>
+            <Text style={styles(colors).previewTitle}>App Translations</Text>
+            {Object.entries(translations).map(([key, value]) => (
+              <Text key={key} style={styles(colors).previewItem}>{value}</Text>
+            ))}
+          </View>
+        </Card>
       </View>
+
+      <Spacer size="xl" />
     </ScrollView>
   );
 }
-
-const styles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.card },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.text },
-  headerSubtext: { fontSize: 13, color: '#FFB81C', marginTop: 5 },
-  previewCard: { backgroundColor: colors.card, margin: 15, padding: 15, borderRadius: 12, elevation: 3 },
-  previewTitle: { fontSize: 14, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 15 },
-  previewContent: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
-  previewItem: { alignItems: 'center', width: '25%' },
-  previewText: { fontSize: 11, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 15 },
-  langCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  langCardActive: { borderWidth: 2, borderColor: '#007749', backgroundColor: '#f0fff4' },
-  langFlag: { fontSize: 28 },
-  langInfo: { flex: 1, marginLeft: 15 },
-  langName: { fontSize: 16, fontWeight: 'bold', color: colors.textSecondary },
-  langNameActive: { color: '#007749' },
-  langCode: { fontSize: 12, color: colors.textSecondary },
-  infoCard: { backgroundColor: '#e3f2fd', margin: 15, padding: 15, borderRadius: 12, flexDirection: 'row', alignItems: 'center' },
-  infoText: { flex: 1, marginLeft: 12, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-});

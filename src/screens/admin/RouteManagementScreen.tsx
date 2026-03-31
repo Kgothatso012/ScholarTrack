@@ -78,19 +78,19 @@ export default function RouteManagementScreen({ navigation }: Props) {
   };
 
   const renderRoute = ({ item }: { item: Route }) => (
-    <View style={[styles.routeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={styles.routeHeader}>
-        <View style={[styles.routeIcon, { backgroundColor: colors.primary }]}>
+    <View style={[styles(colors).routeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={styles(colors).routeHeader}>
+        <View style={[styles(colors).routeIcon, { backgroundColor: colors.primary }]}>
           <Ionicons name="bus" size={24} color="#fff" />
         </View>
-        <View style={styles.routeInfo}>
-          <Text style={[styles.routeName, { color: colors.text }]}>{item.name}</Text>
-          <Text style={[styles.routeDriver, { color: colors.textSecondary }]}>
+        <View style={styles(colors).routeInfo}>
+          <Text style={[styles(colors).routeName, { color: colors.text }]}>{item.name}</Text>
+          <Text style={[styles(colors).routeDriver, { color: colors.textSecondary }]}>
             Driver: {item.driver?.full_name || 'Unassigned'}
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.assignBtn, { backgroundColor: colors.primary }]}
+          style={[styles(colors).assignBtn, { backgroundColor: colors.primary }]}
           onPress={() => {
             setSelectedRoute(item);
           }}
@@ -100,52 +100,52 @@ export default function RouteManagementScreen({ navigation }: Props) {
       </View>
 
       {item.stops && item.stops.length > 0 && (
-        <View style={styles.stopsContainer}>
-          <Text style={[styles.stopsTitle, { color: colors.text }]}>Stops ({item.stops.length})</Text>
+        <View style={styles(colors).stopsContainer}>
+          <Text style={[styles(colors).stopsTitle, { color: colors.text }]}>Stops ({item.stops.length})</Text>
           {item.stops.sort((a, b) => a.order - b.order).map((stop, idx) => (
-            <View key={stop.id} style={styles.stopItem}>
-              <View style={[styles.stopDot, { backgroundColor: colors.primary }]}>
-                <Text style={styles.stopNumber}>{idx + 1}</Text>
+            <View key={stop.id} style={styles(colors).stopItem}>
+              <View style={[styles(colors).stopDot, { backgroundColor: colors.primary }]}>
+                <Text style={styles(colors).stopNumber}>{idx + 1}</Text>
               </View>
-              <Text style={[styles.stopName, { color: colors.textSecondary }]}>{stop.name}</Text>
+              <Text style={[styles(colors).stopName, { color: colors.textSecondary }]}>{stop.name}</Text>
             </View>
           ))}
         </View>
       )}
 
-      <TouchableOpacity style={[styles.viewBtn, { borderColor: colors.primary }]}>
-        <Text style={[styles.viewBtnText, { color: colors.primary }]}>Manage Route</Text>
+      <TouchableOpacity style={[styles(colors).viewBtn, { borderColor: colors.primary }]}>
+        <Text style={[styles(colors).viewBtnText, { color: colors.primary }]}>Manage Route</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Route Management</Text>
-        <TouchableOpacity onPress={() => setShowModal(true)} style={styles.addBtn}>
+        <Text style={styles(colors).headerTitle}>Route Management</Text>
+        <TouchableOpacity onPress={() => setShowModal(true)} style={styles(colors).addBtn}>
           <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View style={styles.loading}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={styles(colors).loading}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : routes.length === 0 ? (
-        <View style={styles.empty}>
+        <View style={styles(colors).empty}>
           <Ionicons name="bus-outline" size={64} color={colors.textSecondary} />
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
             No routes configured
           </Text>
           <TouchableOpacity
-            style={[styles.addFirstBtn, { backgroundColor: colors.primary }]}
+            style={[styles(colors).addFirstBtn, { backgroundColor: colors.primary }]}
             onPress={() => setShowModal(true)}
           >
             <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.addFirstText}>Create First Route</Text>
+            <Text style={styles(colors).addFirstText}>Create First Route</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -153,44 +153,44 @@ export default function RouteManagementScreen({ navigation }: Props) {
           data={routes}
           renderItem={renderRoute}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={styles(colors).list}
         />
       )}
 
       {/* Create Route Modal */}
       <Modal visible={showModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Create New Route</Text>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Create New Route</Text>
               <TouchableOpacity onPress={() => setShowModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Route Name *</Text>
+            <ScrollView style={styles(colors).modalBody}>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Route Name *</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                 placeholder="e.g., Morning Route - Zone A"
                 placeholderTextColor={colors.textSecondary}
                 value={newRoute.name}
                 onChangeText={t => setNewRoute({ ...newRoute, name: t })}
               />
 
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Assign Driver *</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.driverScroll}>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Assign Driver *</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles(colors).driverScroll}>
                 {drivers.map(driver => (
                   <TouchableOpacity
                     key={driver.id}
                     style={[
-                      styles.driverChip,
+                      styles(colors).driverChip,
                       { backgroundColor: newRoute.driver_id === driver.id ? colors.primary : colors.background, borderColor: colors.border }
                     ]}
                     onPress={() => setNewRoute({ ...newRoute, driver_id: driver.id })}
                   >
                     <Ionicons name="person" size={16} color={newRoute.driver_id === driver.id ? '#fff' : colors.text} />
-                    <Text style={[styles.driverChipText, { color: newRoute.driver_id === driver.id ? '#fff' : colors.text }]}>
+                    <Text style={[styles(colors).driverChipText, { color: newRoute.driver_id === driver.id ? '#fff' : colors.text }]}>
                       {driver.full_name}
                     </Text>
                   </TouchableOpacity>
@@ -199,10 +199,10 @@ export default function RouteManagementScreen({ navigation }: Props) {
             </ScrollView>
 
             <TouchableOpacity
-              style={[styles.submitBtn, { backgroundColor: colors.primary }]}
+              style={[styles(colors).submitBtn, { backgroundColor: colors.primary }]}
               onPress={handleCreateRoute}
             >
-              <Text style={styles.submitText}>Create Route</Text>
+              <Text style={styles(colors).submitText}>Create Route</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -210,10 +210,10 @@ export default function RouteManagementScreen({ navigation }: Props) {
 
       {/* Assign Child Modal */}
       <Modal visible={!!selectedRoute} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>
                 Assign Children to {selectedRoute?.name}
               </Text>
               <TouchableOpacity onPress={() => setSelectedRoute(null)}>
@@ -221,24 +221,24 @@ export default function RouteManagementScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles(colors).modalBody}>
               {children.length === 0 ? (
-                <Text style={[styles.noChildren, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).noChildren, { color: colors.textSecondary }]}>
                   No unassigned children available
                 </Text>
               ) : (
                 children.map(child => (
                   <TouchableOpacity
                     key={child.id}
-                    style={[styles.childItem, { borderColor: colors.border }]}
+                    style={[styles(colors).childItem, { borderColor: colors.border }]}
                     onPress={() => selectedRoute && handleAssignChild(selectedRoute.id, child.id)}
                   >
-                    <View style={[styles.childAvatar, { backgroundColor: colors.primary }]}>
-                      <Text style={styles.childInitial}>{child.full_name?.charAt(0)}</Text>
+                    <View style={[styles(colors).childAvatar, { backgroundColor: colors.primary }]}>
+                      <Text style={styles(colors).childInitial}>{child.full_name?.charAt(0)}</Text>
                     </View>
-                    <View style={styles.childInfo}>
-                      <Text style={[styles.childName, { color: colors.text }]}>{child.full_name}</Text>
-                      <Text style={[styles.childSchool, { color: colors.textSecondary }]}>
+                    <View style={styles(colors).childInfo}>
+                      <Text style={[styles(colors).childName, { color: colors.text }]}>{child.full_name}</Text>
+                      <Text style={[styles(colors).childSchool, { color: colors.textSecondary }]}>
                         {child.school?.name || 'No school'}
                       </Text>
                     </View>
@@ -254,7 +254,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },

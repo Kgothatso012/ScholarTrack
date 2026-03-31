@@ -170,57 +170,57 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Attendance & Reports</Text>
+        <Text style={styles(colors).headerTitle}>Attendance & Reports</Text>
       </View>
 
       {/* Tabs */}
-      <View style={[styles.tabs, { backgroundColor: colors.card }]}>
+      <View style={[styles(colors).tabs, { backgroundColor: colors.card }]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'attendance' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
+          style={[styles(colors).tab, activeTab === 'attendance' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
           onPress={() => setActiveTab('attendance')}
         >
-          <Text style={[styles.tabText, { color: activeTab === 'attendance' ? colors.primary : colors.textSecondary }]}>
+          <Text style={[styles(colors).tabText, { color: activeTab === 'attendance' ? colors.primary : colors.textSecondary }]}>
             Daily Attendance
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'reports' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
+          style={[styles(colors).tab, activeTab === 'reports' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
           onPress={() => setActiveTab('reports')}
         >
-          <Text style={[styles.tabText, { color: activeTab === 'reports' ? colors.primary : colors.textSecondary }]}>
+          <Text style={[styles(colors).tabText, { color: activeTab === 'reports' ? colors.primary : colors.textSecondary }]}>
             Reports
           </Text>
         </TouchableOpacity>
       </View>
 
       {activeTab === 'attendance' ? (
-        <ScrollView style={styles.content}>
+        <ScrollView style={styles(colors).content}>
           {/* Date Picker & Filter */}
-          <View style={[styles.filterRow, { backgroundColor: colors.card }]}>
-            <View style={styles.dateBox}>
+          <View style={[styles(colors).filterRow, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).dateBox}>
               <Ionicons name="calendar" size={20} color={colors.primary} />
               <TextInput
-                style={[styles.dateInput, { color: colors.text }]}
+                style={[styles(colors).dateInput, { color: colors.text }]}
                 value={dateFilter}
                 onChangeText={setDateFilter}
                 placeholder="YYYY-MM-DD"
               />
             </View>
             <TouchableOpacity
-              style={[styles.filterBtn, { backgroundColor: selectedChild ? colors.primary : colors.card }]}
+              style={[styles(colors).filterBtn, { backgroundColor: selectedChild ? colors.primary : colors.card }]}
               onPress={() => setSelectedChild(selectedChild ? null : children[0]?.id || null)}
             >
               <Text style={{ color: selectedChild ? '#fff' : colors.text }}>
@@ -230,47 +230,47 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
           </View>
 
           {/* Children List for Marking */}
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>
             Mark Attendance for {dateFilter}
           </Text>
 
           {children.map((child) => {
             const record = attendance.find(a => a.child_id === child.id);
             return (
-              <View key={child.id} style={[styles.childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <View style={styles.childInfo}>
-                  <View style={[styles.childAvatar, { backgroundColor: colors.primary + '20' }]}>
+              <View key={child.id} style={[styles(colors).childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={styles(colors).childInfo}>
+                  <View style={[styles(colors).childAvatar, { backgroundColor: colors.primary + '20' }]}>
                     <Ionicons name="person" size={20} color={colors.primary} />
                   </View>
                   <View>
-                    <Text style={[styles.childName, { color: colors.text }]}>{child.full_name}</Text>
-                    <Text style={[styles.childSchool, { color: colors.textSecondary }]}>
+                    <Text style={[styles(colors).childName, { color: colors.text }]}>{child.full_name}</Text>
+                    <Text style={[styles(colors).childSchool, { color: colors.textSecondary }]}>
                       {child.school_name || 'School'}
                     </Text>
                   </View>
                 </View>
 
                 {record ? (
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(record.status) }]}>
+                  <View style={[styles(colors).statusBadge, { backgroundColor: getStatusColor(record.status) }]}>
                     <Ionicons name={getStatusIcon(record.status) as any} size={16} color="#fff" />
-                    <Text style={styles.statusText}>{record.status}</Text>
+                    <Text style={styles(colors).statusText}>{record.status}</Text>
                   </View>
                 ) : (
-                  <View style={styles.actionBtns}>
+                  <View style={styles(colors).actionBtns}>
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: '#007749' }]}
+                      style={[styles(colors).actionBtn, { backgroundColor: '#007749' }]}
                       onPress={() => markAttendance(child.id, 'present')}
                     >
                       <Ionicons name="checkmark" size={16} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: '#E91E63' }]}
+                      style={[styles(colors).actionBtn, { backgroundColor: '#E91E63' }]}
                       onPress={() => markAttendance(child.id, 'absent')}
                     >
                       <Ionicons name="close" size={16} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: '#FFB81C' }]}
+                      style={[styles(colors).actionBtn, { backgroundColor: '#FFB81C' }]}
                       onPress={() => markAttendance(child.id, 'excused')}
                     >
                       <Ionicons name="time" size={16} color="#fff" />
@@ -282,41 +282,41 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
           })}
 
           {/* Today's Summary */}
-          <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.summaryTitle, { color: colors.text }]}>Today's Summary</Text>
-            <View style={styles.summaryRow}>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryNumber, { color: '#007749' }]}>
+          <View style={[styles(colors).summaryCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles(colors).summaryTitle, { color: colors.text }]}>Today's Summary</Text>
+            <View style={styles(colors).summaryRow}>
+              <View style={styles(colors).summaryItem}>
+                <Text style={[styles(colors).summaryNumber, { color: '#007749' }]}>
                   {attendance.filter(a => a.status === 'present').length}
                 </Text>
-                <Text style={styles.summaryLabel}>Present</Text>
+                <Text style={styles(colors).summaryLabel}>Present</Text>
               </View>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryNumber, { color: '#E91E63' }]}>
+              <View style={styles(colors).summaryItem}>
+                <Text style={[styles(colors).summaryNumber, { color: '#E91E63' }]}>
                   {attendance.filter(a => a.status === 'absent').length}
                 </Text>
-                <Text style={styles.summaryLabel}>Absent</Text>
+                <Text style={styles(colors).summaryLabel}>Absent</Text>
               </View>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryNumber, { color: '#FFB81C' }]}>
+              <View style={styles(colors).summaryItem}>
+                <Text style={[styles(colors).summaryNumber, { color: '#FFB81C' }]}>
                   {attendance.filter(a => a.status === 'excused').length}
                 </Text>
-                <Text style={styles.summaryLabel}>Excused</Text>
+                <Text style={styles(colors).summaryLabel}>Excused</Text>
               </View>
             </View>
           </View>
         </ScrollView>
       ) : (
-        <ScrollView style={styles.content}>
+        <ScrollView style={styles(colors).content}>
           {/* Report Type */}
-          <View style={[styles.reportTypeRow, { backgroundColor: colors.card }]}>
+          <View style={[styles(colors).reportTypeRow, { backgroundColor: colors.card }]}>
             {(['daily', 'weekly', 'monthly'] as const).map((type) => (
               <TouchableOpacity
                 key={type}
-                style={[styles.reportTypeBtn, reportType === type && { backgroundColor: colors.primary }]}
+                style={[styles(colors).reportTypeBtn, reportType === type && { backgroundColor: colors.primary }]}
                 onPress={() => setReportType(type)}
               >
-                <Text style={[styles.reportTypeText, { color: reportType === type ? '#fff' : colors.text }]}>
+                <Text style={[styles(colors).reportTypeText, { color: reportType === type ? '#fff' : colors.text }]}>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </Text>
               </TouchableOpacity>
@@ -324,52 +324,52 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
           </View>
 
           {/* Quick Stats */}
-          <View style={[styles.statsCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.statsTitle, { color: colors.text }]}>Quick Stats</Text>
-            <View style={styles.statsGrid}>
-              <View style={styles.statBox}>
-                <Text style={[styles.statValue, { color: colors.primary }]}>{children.length}</Text>
-                <Text style={styles.statLabel}>Total Children</Text>
+          <View style={[styles(colors).statsCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles(colors).statsTitle, { color: colors.text }]}>Quick Stats</Text>
+            <View style={styles(colors).statsGrid}>
+              <View style={styles(colors).statBox}>
+                <Text style={[styles(colors).statValue, { color: colors.primary }]}>{children.length}</Text>
+                <Text style={styles(colors).statLabel}>Total Children</Text>
               </View>
-              <View style={styles.statBox}>
-                <Text style={[styles.statValue, { color: '#007749' }]}>{attendance.length}</Text>
-                <Text style={styles.statLabel}>Records Today</Text>
+              <View style={styles(colors).statBox}>
+                <Text style={[styles(colors).statValue, { color: '#007749' }]}>{attendance.length}</Text>
+                <Text style={styles(colors).statLabel}>Records Today</Text>
               </View>
-              <View style={styles.statBox}>
-                <Text style={[styles.statValue, { color: '#007749' }]}>
+              <View style={styles(colors).statBox}>
+                <Text style={[styles(colors).statValue, { color: '#007749' }]}>
                   {attendance.length > 0 ? ((attendance.filter(a => a.status === 'present').length / attendance.length * 100).toFixed(0)) : 0}%
                 </Text>
-                <Text style={styles.statLabel}>Attendance Rate</Text>
+                <Text style={styles(colors).statLabel}>Attendance Rate</Text>
               </View>
             </View>
           </View>
 
           {/* Report Actions */}
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Generate Reports</Text>
+          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Generate Reports</Text>
 
-          <TouchableOpacity style={[styles.reportBtn, { backgroundColor: colors.card }]} onPress={generateReport}>
+          <TouchableOpacity style={[styles(colors).reportBtn, { backgroundColor: colors.card }]} onPress={generateReport}>
             <Ionicons name="document-text" size={24} color={colors.primary} />
-            <View style={styles.reportBtnInfo}>
-              <Text style={[styles.reportBtnTitle, { color: colors.text }]}>Attendance Report</Text>
-              <Text style={[styles.reportBtnSub, { color: colors.textSecondary }]}>Export as CSV</Text>
+            <View style={styles(colors).reportBtnInfo}>
+              <Text style={[styles(colors).reportBtnTitle, { color: colors.text }]}>Attendance Report</Text>
+              <Text style={[styles(colors).reportBtnSub, { color: colors.textSecondary }]}>Export as CSV</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.reportBtn, { backgroundColor: colors.card }]}>
+          <TouchableOpacity style={[styles(colors).reportBtn, { backgroundColor: colors.card }]}>
             <Ionicons name="bus" size={24} color={colors.primary} />
-            <View style={styles.reportBtnInfo}>
-              <Text style={[styles.reportBtnTitle, { color: colors.text }]}>Trip Summary</Text>
-              <Text style={[styles.reportBtnSub, { color: colors.textSecondary }]}>All trips for period</Text>
+            <View style={styles(colors).reportBtnInfo}>
+              <Text style={[styles(colors).reportBtnTitle, { color: colors.text }]}>Trip Summary</Text>
+              <Text style={[styles(colors).reportBtnSub, { color: colors.textSecondary }]}>All trips for period</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.reportBtn, { backgroundColor: colors.card }]}>
+          <TouchableOpacity style={[styles(colors).reportBtn, { backgroundColor: colors.card }]}>
             <Ionicons name="people" size={24} color={colors.primary} />
-            <View style={styles.reportBtnInfo}>
-              <Text style={[styles.reportBtnTitle, { color: colors.text }]}>Driver Performance</Text>
-              <Text style={[styles.reportBtnSub, { color: colors.textSecondary }]}>Compliance & ratings</Text>
+            <View style={styles(colors).reportBtnInfo}>
+              <Text style={[styles(colors).reportBtnTitle, { color: colors.text }]}>Driver Performance</Text>
+              <Text style={[styles(colors).reportBtnSub, { color: colors.textSecondary }]}>Compliance & ratings</Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
@@ -379,7 +379,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },

@@ -82,69 +82,69 @@ export default function LinkChildScreen({ navigation }: Props) {
   };
 
   const renderChild = ({ item }: { item: any }) => (
-    <View style={[styles.childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={styles.childHeader}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          <Text style={styles.avatarText}>{item.full_name?.charAt(0)}</Text>
+    <View style={[styles(colors).childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={styles(colors).childHeader}>
+        <View style={[styles(colors).avatar, { backgroundColor: colors.primary }]}>
+          <Text style={styles(colors).avatarText}>{item.full_name?.charAt(0)}</Text>
         </View>
-        <View style={styles.childInfo}>
-          <Text style={[styles.childName, { color: colors.text }]}>{item.full_name}</Text>
-          <Text style={[styles.childSchool, { color: colors.textSecondary }]}>
+        <View style={styles(colors).childInfo}>
+          <Text style={[styles(colors).childName, { color: colors.text }]}>{item.full_name}</Text>
+          <Text style={[styles(colors).childSchool, { color: colors.textSecondary }]}>
             {item.school?.name || 'No school'}
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: colors.success }]}>
-          <Text style={styles.statusText}>Active</Text>
+        <View style={[styles(colors).statusBadge, { backgroundColor: colors.success }]}>
+          <Text style={styles(colors).statusText}>Active</Text>
         </View>
       </View>
       {item.grade && (
-        <Text style={[styles.childDetail, { color: colors.textSecondary }]}>Grade: {item.grade}</Text>
+        <Text style={[styles(colors).childDetail, { color: colors.textSecondary }]}>Grade: {item.grade}</Text>
       )}
       {item.pickup_address && (
-        <Text style={[styles.childDetail, { color: colors.textSecondary }]}>
+        <Text style={[styles(colors).childDetail, { color: colors.textSecondary }]}>
           <Ionicons name="location" size={14} /> {item.pickup_address}
         </Text>
       )}
-      <View style={styles.childActions}>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+      <View style={styles(colors).childActions}>
+        <TouchableOpacity style={[styles(colors).actionBtn, { backgroundColor: colors.primary }]}>
           <Ionicons name="pencil" size={16} color="#fff" />
-          <Text style={styles.actionText}>Edit</Text>
+          <Text style={styles(colors).actionText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.danger }]}>
+        <TouchableOpacity style={[styles(colors).actionBtn, { backgroundColor: colors.danger }]}>
           <Ionicons name="trash" size={16} color="#fff" />
-          <Text style={styles.actionText}>Remove</Text>
+          <Text style={styles(colors).actionText}>Remove</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Children</Text>
-        <TouchableOpacity onPress={() => setShowAddModal(true)} style={styles.addBtn}>
+        <Text style={styles(colors).headerTitle}>My Children</Text>
+        <TouchableOpacity onPress={() => setShowAddModal(true)} style={styles(colors).addBtn}>
           <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View style={styles.loading}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={styles(colors).loading}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : children.length === 0 ? (
-        <View style={styles.empty}>
+        <View style={styles(colors).empty}>
           <Ionicons name="people-outline" size={64} color={colors.textSecondary} />
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
             No children linked yet
           </Text>
           <TouchableOpacity
-            style={[styles.addFirstBtn, { backgroundColor: colors.primary }]}
+            style={[styles(colors).addFirstBtn, { backgroundColor: colors.primary }]}
             onPress={() => setShowAddModal(true)}
           >
             <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.addFirstText}>Add Your First Child</Text>
+            <Text style={styles(colors).addFirstText}>Add Your First Child</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -152,61 +152,61 @@ export default function LinkChildScreen({ navigation }: Props) {
           data={children}
           renderItem={renderChild}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={styles(colors).list}
         />
       )}
 
       {/* Add Child Modal */}
       <Modal visible={showAddModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Add Child</Text>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Add Child</Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Full Name *</Text>
+            <ScrollView style={styles(colors).modalBody}>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Full Name *</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                 placeholder="Enter child's full name"
                 placeholderTextColor={colors.textSecondary}
                 value={newChild.full_name}
                 onChangeText={t => setNewChild({ ...newChild, full_name: t })}
               />
 
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Grade</Text>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Grade</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                 placeholder="e.g., Grade 5"
                 placeholderTextColor={colors.textSecondary}
                 value={newChild.grade}
                 onChangeText={t => setNewChild({ ...newChild, grade: t })}
               />
 
-              <Text style={[styles.inputLabel, { color: colors.text }]}>School *</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.schoolScroll}>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>School *</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles(colors).schoolScroll}>
                 {schools.map(school => (
                   <TouchableOpacity
                     key={school.id}
                     style={[
-                      styles.schoolChip,
+                      styles(colors).schoolChip,
                       { backgroundColor: newChild.school_id === school.id ? colors.primary : colors.background, borderColor: colors.border }
                     ]}
                     onPress={() => setNewChild({ ...newChild, school_id: school.id })}
                   >
-                    <Text style={[styles.schoolChipText, { color: newChild.school_id === school.id ? '#fff' : colors.text }]}>
+                    <Text style={[styles(colors).schoolChipText, { color: newChild.school_id === school.id ? '#fff' : colors.text }]}>
                       {school.name}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
 
-              <Text style={[styles.inputLabel, { color: colors.text }]}>Pickup Address</Text>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Pickup Address</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                 placeholder="Enter pickup address"
                 placeholderTextColor={colors.textSecondary}
                 value={newChild.pickup_address}
@@ -215,10 +215,10 @@ export default function LinkChildScreen({ navigation }: Props) {
             </ScrollView>
 
             <TouchableOpacity
-              style={[styles.submitBtn, { backgroundColor: colors.primary }]}
+              style={[styles(colors).submitBtn, { backgroundColor: colors.primary }]}
               onPress={handleAddChild}
             >
-              <Text style={styles.submitText}>Add Child</Text>
+              <Text style={styles(colors).submitText}>Add Child</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -227,7 +227,7 @@ export default function LinkChildScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },

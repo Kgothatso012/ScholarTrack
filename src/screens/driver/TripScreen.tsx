@@ -100,32 +100,32 @@ const TripScreen = ({ navigation }: any) => {
   if (!loading && trips.length === 0) {
     return (
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[styles(colors).container, { backgroundColor: colors.background }]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <Text style={styles.headerTitle}>Active Trip</Text>
-          <Text style={[styles.headerSubtext, { color: colors.accent }]}>No trips assigned</Text>
+        <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+          <Text style={styles(colors).headerTitle}>Active Trip</Text>
+          <Text style={[styles(colors).headerSubtext, { color: colors.accent }]}>No trips assigned</Text>
         </View>
 
-        <View style={[styles.emptyContainer, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).emptyContainer, { backgroundColor: colors.card }]}>
           <Ionicons name="bus-outline" size={80} color={colors.textSecondary} />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No Active Trips</Text>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).emptyTitle, { color: colors.text }]}>No Active Trips</Text>
+          <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
             You don't have any trips assigned yet. Trips will appear here when parents book your service.
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-          <View style={styles.quickActions}>
-            <TouchableOpacity style={[styles.quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
+        <View style={styles(colors).section}>
+          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+          <View style={styles(colors).quickActions}>
+            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
               <Ionicons name="navigate" size={24} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.text }]}>Navigate</Text>
+              <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Navigate</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Support', 'Contact support...')}>
+            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Support', 'Contact support...')}>
               <Ionicons name="help-circle" size={24} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.text }]}>Support</Text>
+              <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Support</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -135,9 +135,9 @@ const TripScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Loading trips...</Text>
+        <Text style={styles(colors).loadingText}>Loading trips...</Text>
       </View>
     );
   }
@@ -147,80 +147,80 @@ const TripScreen = ({ navigation }: any) => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles(colors).container, { backgroundColor: colors.background }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Active Trip</Text>
-        <Text style={[styles.headerSubtext, { color: colors.accent }]}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <Text style={styles(colors).headerTitle}>Active Trip</Text>
+        <Text style={[styles(colors).headerSubtext, { color: colors.accent }]}>
           {currentTrip ? currentTrip.pickup_location || 'Your route' : 'No active trip'}
         </Text>
       </View>
 
       {currentTrip ? (
         <>
-          <View style={[styles.tripStatus, { backgroundColor: colors.card }]}>
-            <View style={[styles.statusBadge, tripActive ? styles.statusActive : styles.statusPending]}>
-              <Text style={styles.statusText}>{tripActive ? 'IN PROGRESS' : 'SCHEDULED'}</Text>
+          <View style={[styles(colors).tripStatus, { backgroundColor: colors.card }]}>
+            <View style={[styles(colors).statusBadge, tripActive ? styles(colors).statusActive : styles(colors).statusPending]}>
+              <Text style={styles(colors).statusText}>{tripActive ? 'IN PROGRESS' : 'SCHEDULED'}</Text>
             </View>
-            <Text style={[styles.routeName, { color: colors.text }]}>
+            <Text style={[styles(colors).routeName, { color: colors.text }]}>
               {currentTrip.pickup_location || 'Route'} to {currentTrip.dropoff_location || 'Destination'}
             </Text>
-            <View style={styles.tripStats}>
-              <View style={styles.stat}>
-                <Text style={styles.statNumber}>{completedTrips}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Completed</Text>
+            <View style={styles(colors).tripStats}>
+              <View style={styles(colors).stat}>
+                <Text style={styles(colors).statNumber}>{completedTrips}</Text>
+                <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Completed</Text>
               </View>
-              <View style={styles.stat}>
-                <Text style={styles.statNumber}>{upcomingTrips}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Upcoming</Text>
+              <View style={styles(colors).stat}>
+                <Text style={styles(colors).statNumber}>{upcomingTrips}</Text>
+                <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Upcoming</Text>
               </View>
-              <View style={styles.stat}>
-                <Text style={styles.statNumber}>{trips.length}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+              <View style={styles(colors).stat}>
+                <Text style={styles(colors).statNumber}>{trips.length}</Text>
+                <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.tripActions}>
+          <View style={styles(colors).tripActions}>
             {!tripActive ? (
-              <TouchableOpacity style={styles.startBtn} onPress={startTrip}>
+              <TouchableOpacity style={styles(colors).startBtn} onPress={startTrip}>
                 <Ionicons name="play" size={24} color="#fff" />
-                <Text style={styles.btnText}>Start Trip</Text>
+                <Text style={styles(colors).btnText}>Start Trip</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.endBtn} onPress={endTrip}>
+              <TouchableOpacity style={styles(colors).endBtn} onPress={endTrip}>
                 <Ionicons name="stop" size={24} color="#fff" />
-                <Text style={styles.btnText}>End Trip</Text>
+                <Text style={styles(colors).btnText}>End Trip</Text>
               </TouchableOpacity>
             )}
           </View>
         </>
       ) : (
-        <View style={[styles.noTripCard, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).noTripCard, { backgroundColor: colors.card }]}>
           <Ionicons name="calendar-outline" size={40} color={colors.textSecondary} />
-          <Text style={[styles.noTripText, { color: colors.text }]}>No trip scheduled</Text>
-          <Text style={[styles.noTripSubtext, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).noTripText, { color: colors.text }]}>No trip scheduled</Text>
+          <Text style={[styles(colors).noTripSubtext, { color: colors.textSecondary }]}>
             You have no upcoming trips. Check back later or contact support.
           </Text>
         </View>
       )}
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>All Trips</Text>
+      <View style={styles(colors).section}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>All Trips</Text>
 
         {trips.length === 0 ? (
-          <View style={[styles.emptyContainer, { backgroundColor: colors.card }]}>
+          <View style={[styles(colors).emptyContainer, { backgroundColor: colors.card }]}>
             <Ionicons name="bus-outline" size={50} color={colors.textSecondary} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Trips Yet</Text>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            <Text style={[styles(colors).emptyTitle, { color: colors.text }]}>No Trips Yet</Text>
+            <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
               Your trip history will appear here.
             </Text>
           </View>
         ) : (
           trips.slice(0, 10).map((trip) => (
-            <View key={trip.id} style={[styles.tripCard, { backgroundColor: colors.card }]}>
-              <View style={styles.tripIcon}>
+            <View key={trip.id} style={[styles(colors).tripCard, { backgroundColor: colors.card }]}>
+              <View style={styles(colors).tripIcon}>
                 {trip.status === 'completed' ? (
                   <Ionicons name="checkmark-circle" size={24} color="#007749" />
                 ) : trip.status === 'in_progress' ? (
@@ -229,22 +229,22 @@ const TripScreen = ({ navigation }: any) => {
                   <Ionicons name="time-outline" size={24} color={colors.textSecondary} />
                 )}
               </View>
-              <View style={styles.tripInfo}>
-                <Text style={[styles.tripName, { color: colors.text }]}>
+              <View style={styles(colors).tripInfo}>
+                <Text style={[styles(colors).tripName, { color: colors.text }]}>
                   {trip.pickup_location || 'Pickup'} to {trip.dropoff_location || 'Dropoff'}
                 </Text>
-                <Text style={[styles.tripTime, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).tripTime, { color: colors.textSecondary }]}>
                   {trip.pickup_time
                     ? new Date(trip.pickup_time).toLocaleDateString('en-ZA')
                     : 'Not scheduled'}
                 </Text>
               </View>
-              <View style={[styles.tripStatusBadge,
-                trip.status === 'completed' ? styles.tripCompleted :
-                trip.status === 'in_progress' ? styles.tripInProgress :
-                styles.tripScheduled
+              <View style={[styles(colors).tripStatusBadge,
+                trip.status === 'completed' ? styles(colors).tripCompleted :
+                trip.status === 'in_progress' ? styles(colors).tripInProgress :
+                styles(colors).tripScheduled
               ]}>
-                <Text style={styles.tripStatusText}>
+                <Text style={styles(colors).tripStatusText}>
                   {trip.status === 'completed' ? 'Done' :
                    trip.status === 'in_progress' ? 'Active' : 'Scheduled'}
                 </Text>
@@ -254,20 +254,20 @@ const TripScreen = ({ navigation }: any) => {
         )}
       </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
+      <View style={styles(colors).section}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+        <View style={styles(colors).quickActions}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
             <Ionicons name="navigate" size={24} color={colors.primary} />
-            <Text style={[styles.quickActionText, { color: colors.text }]}>Navigate</Text>
+            <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Navigate</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Call', 'Opening dialer...')}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Call', 'Opening dialer...')}>
             <Ionicons name="call" size={24} color="#007749" />
-            <Text style={[styles.quickActionText, { color: colors.text }]}>Call Parent</Text>
+            <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Call Parent</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Message', 'Opening messages...')}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Message', 'Opening messages...')}>
             <Ionicons name="chatbubbles" size={24} color="#FFB81C" />
-            <Text style={[styles.quickActionText, { color: colors.text }]}>Message</Text>
+            <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Message</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -275,7 +275,7 @@ const TripScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000000' },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },
   loadingText: { color: '#888888', marginTop: 10, fontSize: 16 },

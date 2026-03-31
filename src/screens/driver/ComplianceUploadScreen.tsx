@@ -605,9 +605,9 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: '#000000' }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Loading compliance status...</Text>
+        <Text style={styles(colors).loadingText}>Loading compliance status...</Text>
       </View>
     );
   }
@@ -615,24 +615,24 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   // Show existing compliance status if already submitted
   if (existingCompliance && existingCompliance.status === 'pending_review') {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <Text style={styles.headerTitle}>Driver Compliance</Text>
-          <Text style={styles.headerSubtitle}>Submitted for review</Text>
+      <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
+        <View style={[styles(colors).header, { backgroundColor: '#002395' }]}>
+          <Text style={styles(colors).headerTitle}>Driver Compliance</Text>
+          <Text style={styles(colors).headerSubtitle}>Submitted for review</Text>
         </View>
-        <View style={styles.section}>
-          <View style={[styles.successCard, { backgroundColor: colors.card }]}>
+        <View style={styles(colors).section}>
+          <View style={[styles(colors).successCard, { backgroundColor: '#1a1a1a' }]}>
             <Ionicons name="checkmark-circle" size={80} color="#007749" />
-            <Text style={[styles.successTitle, { color: colors.text }]}>Submitted Successfully!</Text>
-            <Text style={[styles.successText, { color: colors.textSecondary }]}>
+            <Text style={[styles(colors).successTitle, { color: '#ffffff' }]}>Submitted Successfully!</Text>
+            <Text style={[styles(colors).successText, { color: '#888888' }]}>
               Your compliance documents have been submitted for review. This typically takes 1-2 business days.
             </Text>
-            <Text style={[styles.submittedDate, { color: colors.textSecondary }]}>
+            <Text style={[styles(colors).submittedDate, { color: '#888888' }]}>
               Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}
             </Text>
           </View>
           <TouchableOpacity
-            style={styles.submitButton}
+            style={styles(colors).submitButton}
             onPress={() => {
               Alert.alert('View Documents', 'This would open the submitted documents.', [
                 { text: 'OK' }
@@ -640,7 +640,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
             }}
           >
             <Ionicons name="document-text" size={20} color="#fff" />
-            <Text style={styles.submitButtonText}>View Submitted Documents</Text>
+            <Text style={styles(colors).submitButtonText}>View Submitted Documents</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -648,27 +648,27 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles(colors).header}>
         <View>
-          <Text style={styles.headerTitle}>Driver Compliance</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={styles(colors).headerTitle}>Driver Compliance</Text>
+          <Text style={styles(colors).headerSubtitle}>
             Complete all required documents
           </Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <TouchableOpacity onPress={handleLogout} style={styles(colors).logoutButton}>
           <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles(colors).scrollView} showsVerticalScrollIndicator={false}>
         {/* Progress Indicator */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
+        <View style={styles(colors).progressContainer}>
+          <View style={styles(colors).progressBar}>
             <View
               style={[
-                styles.progressFill,
+                styles(colors).progressFill,
                 {
                   width:
                     complianceStatus === 'complete'
@@ -680,7 +680,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               ]}
             />
           </View>
-          <Text style={styles.progressText}>
+          <Text style={styles(colors).progressText}>
             {complianceStatus === 'complete'
               ? '✓ All documents uploaded'
               : complianceStatus === 'partial'
@@ -690,19 +690,22 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         </View>
 
         {/* Personal Information Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👤 Personal Information</Text>
+        <View style={styles(colors).section}>
+          <View style={styles(colors).sectionTitleRow}>
+            <Ionicons name="person" size={20} color={colors.primary} />
+            <Text style={styles(colors).sectionTitle}> Personal Information</Text>
+          </View>
 
           {/* Full Name */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name (as on ID)</Text>
+          <View style={styles(colors).inputGroup}>
+            <Text style={styles(colors).label}>Full Name (as on ID)</Text>
             <Controller
               control={control}
               name="fullName"
               rules={{ required: 'Full name is required' }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.fullName && styles.inputError]}
+                  style={[styles(colors).input, errors.fullName && styles(colors).inputError]}
                   placeholder="e.g., John Sipho Moyo"
                   placeholderTextColor="#999"
                   onBlur={onBlur}
@@ -713,13 +716,13 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
             />
             {errors.fullName && (
-              <Text style={styles.errorText}>{errors.fullName.message}</Text>
+              <Text style={styles(colors).errorText}>{errors.fullName.message}</Text>
             )}
           </View>
 
           {/* RSA ID Number */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>🇿🇦 RSA ID Number (13 digits)</Text>
+          <View style={styles(colors).inputGroup}>
+            <Text style={styles(colors).label}>🇿🇦 RSA ID Number (13 digits)</Text>
             <Controller
               control={control}
               name="idNumber"
@@ -731,7 +734,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.idNumber && styles.inputError]}
+                  style={[styles(colors).input, errors.idNumber && styles(colors).inputError]}
                   placeholder="e.g., 8501011234567"
                   placeholderTextColor="#999"
                   onBlur={onBlur}
@@ -743,16 +746,19 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
             />
             {errors.idNumber && (
-              <Text style={styles.errorText}>{errors.idNumber.message}</Text>
+              <Text style={styles(colors).errorText}>{errors.idNumber.message}</Text>
             )}
-            <Text style={styles.helperText}>
+            <Text style={styles(colors).helperText}>
               Enter your 13-digit South African ID number
             </Text>
           </View>
 
           {/* Phone Number */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>📱 Cell Number</Text>
+          <View style={styles(colors).inputGroup}>
+            <View style={styles(colors).labelRow}>
+              <Ionicons name="call" size={16} color="#666" />
+              <Text style={styles(colors).label}> Cell Number</Text>
+            </View>
             <Controller
               control={control}
               name="phoneNumber"
@@ -764,7 +770,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.phoneNumber && styles.inputError]}
+                  style={[styles(colors).input, errors.phoneNumber && styles(colors).inputError]}
                   placeholder="e.g., 0821234567"
                   placeholderTextColor="#999"
                   onBlur={onBlur}
@@ -776,20 +782,20 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
             />
             {errors.phoneNumber && (
-              <Text style={styles.errorText}>{errors.phoneNumber.message}</Text>
+              <Text style={styles(colors).errorText}>{errors.phoneNumber.message}</Text>
             )}
           </View>
 
           {/* Email */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>📧 Email Address</Text>
+          <View style={styles(colors).inputGroup}>
+            <Text style={styles(colors).label}>📧 Email Address</Text>
             <Controller
               control={control}
               name="email"
               rules={{ required: 'Email is required' }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[styles(colors).input, errors.email && styles(colors).inputError]}
                   placeholder="e.g., john@example.com"
                   placeholderTextColor="#999"
                   onBlur={onBlur}
@@ -801,17 +807,20 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
             />
             {errors.email && (
-              <Text style={styles.errorText}>{errors.email.message}</Text>
+              <Text style={styles(colors).errorText}>{errors.email.message}</Text>
             )}
           </View>
         </View>
 
         {/* PDP License Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🚌 PDP License</Text>
+        <View style={styles(colors).section}>
+          <View style={styles(colors).sectionTitleRow}>
+            <Ionicons name="bus" size={20} color={colors.primary} />
+            <Text style={styles(colors).sectionTitle}> PDP License</Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>PDP Number</Text>
+          <View style={styles(colors).inputGroup}>
+            <Text style={styles(colors).label}>PDP Number</Text>
             <Controller
               control={control}
               name="pdpNumber"
@@ -823,7 +832,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.pdpNumber && styles.inputError]}
+                  style={[styles(colors).input, errors.pdpNumber && styles(colors).inputError]}
                   placeholder="e.g., PDP12345678"
                   placeholderTextColor="#999"
                   onBlur={onBlur}
@@ -835,61 +844,61 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
             />
             {errors.pdpNumber && (
-              <Text style={styles.errorText}>{errors.pdpNumber.message}</Text>
+              <Text style={styles(colors).errorText}>{errors.pdpNumber.message}</Text>
             )}
-            <Text style={styles.helperText}>
+            <Text style={styles(colors).helperText}>
               Public Driver Permit - 11 characters (PDP + 8 digits)
             </Text>
           </View>
         </View>
 
         {/* Documents Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📄 Required Documents</Text>
-          <Text style={styles.sectionSubtitle}>
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>📄 Required Documents</Text>
+          <Text style={styles(colors).sectionSubtitle}>
             Upload clear photos or PDFs of each document
           </Text>
 
           {documents.map((doc) => (
-            <View key={doc.id} style={styles.documentCard}>
-              <View style={styles.documentHeader}>
-                <View style={styles.documentInfo}>
-                  <Text style={styles.documentLabel}>
+            <View key={doc.id} style={styles(colors).documentCard}>
+              <View style={styles(colors).documentHeader}>
+                <View style={styles(colors).documentInfo}>
+                  <Text style={styles(colors).documentLabel}>
                     {doc.label}
-                    {doc.required && <Text style={styles.required}> *</Text>}
+                    {doc.required && <Text style={styles(colors).required}> *</Text>}
                   </Text>
-                  <Text style={styles.documentDescription}>
+                  <Text style={styles(colors).documentDescription}>
                     {doc.description}
                   </Text>
                 </View>
                 {doc.document ? (
-                  <View style={styles.uploadedBadge}>
+                  <View style={styles(colors).uploadedBadge}>
                     <Ionicons name="checkmark-circle" size={24} color="#34C759" />
                   </View>
                 ) : (
-                  <View style={styles.pendingBadge}>
+                  <View style={styles(colors).pendingBadge}>
                     <Ionicons name="time-outline" size={20} color="#FF9500" />
                   </View>
                 )}
               </View>
 
               {doc.document ? (
-                <View style={styles.uploadedPreview}>
+                <View style={styles(colors).uploadedPreview}>
                   <Image
                     source={{ uri: doc.document.uri }}
-                    style={styles.previewImage}
+                    style={styles(colors).previewImage}
                     resizeMode="cover"
                   />
-                  <View style={styles.previewInfo}>
-                    <Text style={styles.previewName} numberOfLines={1}>
+                  <View style={styles(colors).previewInfo}>
+                    <Text style={styles(colors).previewName} numberOfLines={1}>
                       {doc.document.name}
                     </Text>
-                    <Text style={styles.previewDate}>
+                    <Text style={styles(colors).previewDate}>
                       Uploaded {doc.document.uploadedAt.toLocaleDateString()}
                     </Text>
                   </View>
                   <TouchableOpacity
-                    style={styles.removeButton}
+                    style={styles(colors).removeButton}
                     onPress={() => removeDocument(doc.id)}
                   >
                     <Ionicons name="trash-outline" size={20} color="#FF3B30" />
@@ -898,7 +907,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               ) : (
                 <View>
                   <TouchableOpacity
-                    style={styles.uploadButton}
+                    style={styles(colors).uploadButton}
                     onPress={() => {
                       // DEBUG: console.log('Upload button pressed for:', doc.id);
                       // Directly call takePhoto for test mode
@@ -906,19 +915,19 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                     }}
                   >
                     <Ionicons name="cloud-upload-outline" size={24} color="#007749" />
-                    <Text style={styles.uploadButtonText}>
+                    <Text style={styles(colors).uploadButtonText}>
                       Take Photo or Choose File
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.uploadButton, { marginTop: 8, backgroundColor: '#E8F5E9' }]}
+                    style={[styles(colors).uploadButton, { marginTop: 8, backgroundColor: '#E8F5E9' }]}
                     onPress={() => {
                       // DEBUG: console.log('Pick button pressed for:', doc.id);
                       pickDocument(doc.id);
                     }}
                   >
                     <Ionicons name="folder-outline" size={24} color="#007749" />
-                    <Text style={styles.uploadButtonText}>
+                    <Text style={styles(colors).uploadButtonText}>
                       Test: Add File
                     </Text>
                   </TouchableOpacity>
@@ -926,10 +935,10 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
 
               {uploadProgress[doc.id] !== undefined && (
-                <View style={styles.uploadProgress}>
+                <View style={styles(colors).uploadProgress}>
                   <View
                     style={[
-                      styles.uploadProgressBar,
+                      styles(colors).uploadProgressBar,
                       { width: `${uploadProgress[doc.id]}%` },
                     ]}
                   />
@@ -937,20 +946,20 @@ export default function ComplianceUploadScreen({ navigation }: any) {
               )}
 
               {/* Expiry Date Picker */}
-              <View style={styles.expiryContainer}>
-                <Text style={styles.expiryLabel}>Expiry Date:</Text>
+              <View style={styles(colors).expiryContainer}>
+                <Text style={styles(colors).expiryLabel}>Expiry Date:</Text>
                 <TouchableOpacity
-                  style={[styles.expiryButton, { borderColor: getExpiryStatusColor(doc.expiryDate) }]}
+                  style={[styles(colors).expiryButton, { borderColor: getExpiryStatusColor(doc.expiryDate) }]}
                   onPress={() => openDatePicker(doc.id)}
                 >
                   <Ionicons name="calendar-outline" size={20} color={getExpiryStatusColor(doc.expiryDate)} />
-                  <Text style={[styles.expiryButtonText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
+                  <Text style={[styles(colors).expiryButtonText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
                     {formatDate(doc.expiryDate) || 'Select expiry date'}
                   </Text>
                 </TouchableOpacity>
                 {doc.expiryDate && (
-                  <View style={styles.expiryStatus}>
-                    <Text style={[styles.expiryStatusText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
+                  <View style={styles(colors).expiryStatus}>
+                    <Text style={[styles(colors).expiryStatusText, { color: getExpiryStatusColor(doc.expiryDate) }]}>
                       {getDaysUntilExpiry(doc.expiryDate)! < 0
                         ? 'EXPIRED'
                         : `${getDaysUntilExpiry(doc.expiryDate)} days remaining`}
@@ -966,63 +975,63 @@ export default function ComplianceUploadScreen({ navigation }: any) {
                 animationType="slide"
                 onRequestClose={() => setShowDatePicker(null)}
               >
-                <View style={styles.modalOverlay}>
-                  <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Select Expiry Date</Text>
+                <View style={styles(colors).modalOverlay}>
+                  <View style={styles(colors).modalContent}>
+                    <Text style={styles(colors).modalTitle}>Select Expiry Date</Text>
 
-                    <View style={styles.pickerRow}>
-                      <View style={styles.pickerColumn}>
-                        <Text style={styles.pickerLabel}>Day</Text>
-                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    <View style={styles(colors).pickerRow}>
+                      <View style={styles(colors).pickerColumn}>
+                        <Text style={styles(colors).pickerLabel}>Day</Text>
+                        <ScrollView style={styles(colors).pickerScroll} showsVerticalScrollIndicator={false}>
                           {days.map((day) => (
                             <TouchableOpacity
                               key={day}
-                              style={[styles.pickerItem, selectedDay === day && styles.pickerItemSelected]}
+                              style={[styles(colors).pickerItem, selectedDay === day && styles(colors).pickerItemSelected]}
                               onPress={() => setSelectedDay(day)}
                             >
-                              <Text style={[styles.pickerItemText, selectedDay === day && styles.pickerItemTextSelected]}>{day}</Text>
+                              <Text style={[styles(colors).pickerItemText, selectedDay === day && styles(colors).pickerItemTextSelected]}>{day}</Text>
                             </TouchableOpacity>
                           ))}
                         </ScrollView>
                       </View>
 
-                      <View style={styles.pickerColumn}>
-                        <Text style={styles.pickerLabel}>Month</Text>
-                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                      <View style={styles(colors).pickerColumn}>
+                        <Text style={styles(colors).pickerLabel}>Month</Text>
+                        <ScrollView style={styles(colors).pickerScroll} showsVerticalScrollIndicator={false}>
                           {months.map((month, idx) => (
                             <TouchableOpacity
                               key={month}
-                              style={[styles.pickerItem, selectedMonth === idx && styles.pickerItemSelected]}
+                              style={[styles(colors).pickerItem, selectedMonth === idx && styles(colors).pickerItemSelected]}
                               onPress={() => setSelectedMonth(idx)}
                             >
-                              <Text style={[styles.pickerItemText, selectedMonth === idx && styles.pickerItemTextSelected]}>{month}</Text>
+                              <Text style={[styles(colors).pickerItemText, selectedMonth === idx && styles(colors).pickerItemTextSelected]}>{month}</Text>
                             </TouchableOpacity>
                           ))}
                         </ScrollView>
                       </View>
 
-                      <View style={styles.pickerColumn}>
-                        <Text style={styles.pickerLabel}>Year</Text>
-                        <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                      <View style={styles(colors).pickerColumn}>
+                        <Text style={styles(colors).pickerLabel}>Year</Text>
+                        <ScrollView style={styles(colors).pickerScroll} showsVerticalScrollIndicator={false}>
                           {years.map((year) => (
                             <TouchableOpacity
                               key={year}
-                              style={[styles.pickerItem, selectedYear === year && styles.pickerItemSelected]}
+                              style={[styles(colors).pickerItem, selectedYear === year && styles(colors).pickerItemSelected]}
                               onPress={() => setSelectedYear(year)}
                             >
-                              <Text style={[styles.pickerItemText, selectedYear === year && styles.pickerItemTextSelected]}>{year}</Text>
+                              <Text style={[styles(colors).pickerItemText, selectedYear === year && styles(colors).pickerItemTextSelected]}>{year}</Text>
                             </TouchableOpacity>
                           ))}
                         </ScrollView>
                       </View>
                     </View>
 
-                    <View style={styles.modalButtons}>
-                      <TouchableOpacity style={styles.modalButtonCancel} onPress={() => setShowDatePicker(null)}>
-                        <Text style={styles.modalButtonCancelText}>Cancel</Text>
+                    <View style={styles(colors).modalButtons}>
+                      <TouchableOpacity style={styles(colors).modalButtonCancel} onPress={() => setShowDatePicker(null)}>
+                        <Text style={styles(colors).modalButtonCancelText}>Cancel</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.modalButtonConfirm} onPress={handleDateConfirm}>
-                        <Text style={styles.modalButtonConfirmText}>Confirm</Text>
+                      <TouchableOpacity style={styles(colors).modalButtonConfirm} onPress={handleDateConfirm}>
+                        <Text style={styles(colors).modalButtonConfirmText}>Confirm</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -1033,9 +1042,9 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         </View>
 
         {/* Legal Disclaimer */}
-        <View style={styles.disclaimer}>
+        <View style={styles(colors).disclaimer}>
           <Ionicons name="shield-checkmark-outline" size={20} color="#666" />
-          <Text style={styles.disclaimerText}>
+          <Text style={styles(colors).disclaimerText}>
             By submitting, I confirm all documents are authentic and valid. I
             understand that providing false information is a criminal offence
             under South African law.
@@ -1045,8 +1054,8 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         {/* Submit Button */}
         <TouchableOpacity
           style={[
-            styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
+            styles(colors).submitButton,
+            isSubmitting && styles(colors).submitButtonDisabled,
           ]}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
@@ -1056,12 +1065,12 @@ export default function ComplianceUploadScreen({ navigation }: any) {
           ) : (
             <>
               <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles.submitButtonText}>Submit for Review</Text>
+              <Text style={styles(colors).submitButtonText}>Submit for Review</Text>
             </>
           )}
         </TouchableOpacity>
 
-        <View style={styles.bottomPadding} />
+        <View style={styles(colors).bottomPadding} />
       </ScrollView>
     </View>
   );
@@ -1069,7 +1078,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
 // ============ STYLES ============
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -1086,7 +1095,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
   },
   headerSubtitle: {
     fontSize: 14,
@@ -1103,7 +1112,7 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     marginBottom: 10,
   },
   progressBar: {
@@ -1124,7 +1133,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     marginHorizontal: 16,
     marginBottom: 16,
     padding: 20,
@@ -1138,7 +1147,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#ffffff',
+    marginBottom: 16,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
   sectionSubtitle: {
@@ -1153,17 +1167,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1a1a1a',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#1a1a1a',
     borderRadius: 10,
     padding: 14,
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#ffffff',
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#333333',
   },
   inputError: {
     borderColor: '#FF3B30',
@@ -1185,7 +1204,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#333333',
   },
   documentHeader: {
     flexDirection: 'row',
@@ -1198,7 +1217,7 @@ const styles = StyleSheet.create({
   documentLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   required: {
     color: '#FF3B30',
@@ -1235,7 +1254,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderRadius: 8,
     padding: 8,
   },
@@ -1252,7 +1271,7 @@ const styles = StyleSheet.create({
   previewName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   previewDate: {
     fontSize: 12,
@@ -1282,13 +1301,13 @@ const styles = StyleSheet.create({
   expiryLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1a1a1a',
+    color: '#ffffff',
     marginBottom: 8,
   },
   expiryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#1a1a1a',
     borderRadius: 10,
     padding: 14,
     borderWidth: 1,
@@ -1308,7 +1327,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderRadius: 16,
     padding: 20,
     width: '85%',
@@ -1317,7 +1336,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#ffffff',
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -1351,10 +1370,10 @@ const styles = StyleSheet.create({
   },
   pickerItemText: {
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   pickerItemTextSelected: {
-    color: '#fff',
+    color: '#ffffff',
     fontWeight: '600',
   },
   modalButtons: {
@@ -1366,7 +1385,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#1a1a1a',
     marginRight: 8,
   },
   modalButtonCancelText: {
@@ -1383,7 +1402,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   modalButtonConfirmText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
@@ -1424,7 +1443,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     marginLeft: 10,
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 18,
     fontWeight: '600',
   },

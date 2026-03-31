@@ -71,43 +71,43 @@ export default function DocumentManagementScreen({ navigation }: Props) {
 
   const renderDriverDoc = ({ item }: { item: any }) => (
     <TouchableOpacity
-      style={[styles.docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+      style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => setSelectedDoc(item)}
     >
-      <View style={styles.docHeader}>
-        <View style={[styles.docIcon, { backgroundColor: colors.primary + '20' }]}>
+      <View style={styles(colors).docHeader}>
+        <View style={[styles(colors).docIcon, { backgroundColor: colors.primary + '20' }]}>
           <Ionicons name="document-text" size={24} color={colors.primary} />
         </View>
-        <View style={styles.docInfo}>
-          <Text style={[styles.docType, { color: colors.text }]}>
+        <View style={styles(colors).docInfo}>
+          <Text style={[styles(colors).docType, { color: colors.text }]}>
             {documentTypes[item.document_type as keyof typeof documentTypes] || item.document_type}
           </Text>
-          <Text style={[styles.docDriver, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).docDriver, { color: colors.textSecondary }]}>
             {item.driver?.full_name || 'Unknown Driver'}
           </Text>
         </View>
         <View style={[
-          styles.statusBadge,
+          styles(colors).statusBadge,
           { backgroundColor: item.status === 'approved' ? '#007749' : item.status === 'rejected' ? '#E91E63' : '#FFB81C' }
         ]}>
-          <Text style={styles.statusText}>{item.status}</Text>
+          <Text style={styles(colors).statusText}>{item.status}</Text>
         </View>
       </View>
-      <View style={styles.docFooter}>
-        <Text style={[styles.docDate, { color: colors.textSecondary }]}>
+      <View style={styles(colors).docFooter}>
+        <Text style={[styles(colors).docDate, { color: colors.textSecondary }]}>
           {new Date(item.uploaded_at).toLocaleDateString()}
         </Text>
         {item.status === 'pending' && (
-          <View style={styles.actionButtons}>
+          <View style={styles(colors).actionButtons}>
             <TouchableOpacity
-              style={[styles.approveBtn, { backgroundColor: '#007749' }]}
+              style={[styles(colors).approveBtn, { backgroundColor: '#007749' }]}
               onPress={() => {
                 setSelectedDoc(item);
                 setShowReviewModal(true);
               }}
             >
               <Ionicons name="checkmark" size={16} color="#fff" />
-              <Text style={styles.btnText}>Review</Text>
+              <Text style={styles(colors).btnText}>Review</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -117,104 +117,104 @@ export default function DocumentManagementScreen({ navigation }: Props) {
 
   const renderParentDoc = ({ item }: { item: any }) => (
     <TouchableOpacity
-      style={[styles.docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+      style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => setSelectedDoc(item)}
     >
-      <View style={styles.docHeader}>
-        <View style={[styles.docIcon, { backgroundColor: '#FFB81C' + '20' }]}>
+      <View style={styles(colors).docHeader}>
+        <View style={[styles(colors).docIcon, { backgroundColor: '#FFB81C' + '20' }]}>
           <Ionicons name="people" size={24} color="#FFB81C" />
         </View>
-        <View style={styles.docInfo}>
-          <Text style={[styles.docType, { color: colors.text }]}>
+        <View style={styles(colors).docInfo}>
+          <Text style={[styles(colors).docType, { color: colors.text }]}>
             {documentTypes[item.document_type as keyof typeof documentTypes] || item.document_type}
           </Text>
-          <Text style={[styles.docDriver, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).docDriver, { color: colors.textSecondary }]}>
             {item.parent?.full_name || 'Unknown Parent'}
             {item.child ? ` - ${item.child.full_name}` : ''}
           </Text>
         </View>
         <View style={[
-          styles.statusBadge,
+          styles(colors).statusBadge,
           { backgroundColor: item.status === 'approved' ? '#007749' : item.status === 'rejected' ? '#E91E63' : '#FFB81C' }
         ]}>
-          <Text style={styles.statusText}>{item.status}</Text>
+          <Text style={styles(colors).statusText}>{item.status}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>📁 Document Management</Text>
-        <TouchableOpacity onPress={loadDocuments} style={styles.refreshBtn}>
+        <Text style={styles(colors).headerTitle}>📁 Document Management</Text>
+        <TouchableOpacity onPress={loadDocuments} style={styles(colors).refreshBtn}>
           <Ionicons name="refresh" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {/* Tabs */}
-      <View style={[styles.tabs, { backgroundColor: colors.card }]}>
+      <View style={[styles(colors).tabs, { backgroundColor: colors.card }]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'drivers' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
+          style={[styles(colors).tab, activeTab === 'drivers' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
           onPress={() => setActiveTab('drivers')}
         >
-          <Text style={[styles.tabText, { color: activeTab === 'drivers' ? colors.primary : colors.textSecondary }]}>
-            🚗 Driver Documents
+          <Text style={[styles(colors).tabText, { color: activeTab === 'drivers' ? colors.primary : colors.textSecondary }]}>
+            <Ionicons name="car" size={16} color={activeTab === 'drivers' ? colors.primary : colors.textSecondary} /> Driver Documents
           </Text>
-          <View style={[styles.badge, { backgroundColor: colors.danger || '#E91E63' }]}>
-            <Text style={styles.badgeText}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
+          <View style={[styles(colors).badge, { backgroundColor: colors.danger || '#E91E63' }]}>
+            <Text style={styles(colors).badgeText}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'parents' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
+          style={[styles(colors).tab, activeTab === 'parents' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
           onPress={() => setActiveTab('parents')}
         >
-          <Text style={[styles.tabText, { color: activeTab === 'parents' ? colors.primary : colors.textSecondary }]}>
-            👨‍👩‍👧 Parent Documents
+          <Text style={[styles(colors).tabText, { color: activeTab === 'parents' ? colors.primary : colors.textSecondary }]}>
+            <Ionicons name="people" size={16} color={activeTab === 'parents' ? colors.primary : colors.textSecondary} /> Parent Parent Documents
           </Text>
-          <View style={[styles.badge, { backgroundColor: colors.danger || '#E91E63' }]}>
-            <Text style={styles.badgeText}>{parentDocs.filter(d => d.status === 'pending').length}</Text>
+          <View style={[styles(colors).badge, { backgroundColor: colors.danger || '#E91E63' }]}>
+            <Text style={styles(colors).badgeText}>{parentDocs.filter(d => d.status === 'pending').length}</Text>
           </View>
         </TouchableOpacity>
       </View>
 
       {/* Stats */}
-      <View style={[styles.statsRow, { backgroundColor: colors.card }]}>
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: colors.primary }]}>{driverDocs.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+      <View style={[styles(colors).statsRow, { backgroundColor: colors.card }]}>
+        <View style={styles(colors).statItem}>
+          <Text style={[styles(colors).statNumber, { color: colors.primary }]}>{driverDocs.length}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#007749' }]}>{driverDocs.filter(d => d.status === 'approved').length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Approved</Text>
+        <View style={styles(colors).statItem}>
+          <Text style={[styles(colors).statNumber, { color: '#007749' }]}>{driverDocs.filter(d => d.status === 'approved').length}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Approved</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <View style={styles(colors).statItem}>
+          <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Pending</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#E91E63' }]}>{driverDocs.filter(d => d.status === 'rejected').length}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Rejected</Text>
+        <View style={styles(colors).statItem}>
+          <Text style={[styles(colors).statNumber, { color: '#E91E63' }]}>{driverDocs.filter(d => d.status === 'rejected').length}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Rejected</Text>
         </View>
       </View>
 
       {/* Document List */}
       {loading ? (
-        <View style={styles.loading}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={styles(colors).loading}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
           data={activeTab === 'drivers' ? driverDocs : parentDocs}
           renderItem={activeTab === 'drivers' ? renderDriverDoc : renderParentDoc}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={styles(colors).list}
           ListEmptyComponent={
-            <View style={styles.empty}>
+            <View style={styles(colors).empty}>
               <Ionicons name="folder-open" size={64} color={colors.textSecondary} />
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
                 No documents yet
               </Text>
             </View>
@@ -224,38 +224,38 @@ export default function DocumentManagementScreen({ navigation }: Props) {
 
       {/* Review Modal */}
       <Modal visible={showReviewModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Review Document</Text>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Review Document</Text>
               <TouchableOpacity onPress={() => setShowReviewModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
             {selectedDoc && (
-              <ScrollView style={styles.modalBody}>
-                <View style={[styles.previewCard, { backgroundColor: colors.background }]}>
+              <ScrollView style={styles(colors).modalBody}>
+                <View style={[styles(colors).previewCard, { backgroundColor: colors.background }]}>
                   {selectedDoc.file_url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <Image source={{ uri: selectedDoc.file_url }} style={styles.previewImage} resizeMode="contain" />
+                    <Image source={{ uri: selectedDoc.file_url }} style={styles(colors).previewImage} resizeMode="contain" />
                   ) : (
-                    <View style={styles.filePreview}>
+                    <View style={styles(colors).filePreview}>
                       <Ionicons name="document" size={48} color={colors.primary} />
-                      <Text style={[styles.fileName, { color: colors.text }]}>{selectedDoc.file_name}</Text>
+                      <Text style={[styles(colors).fileName, { color: colors.text }]}>{selectedDoc.file_name}</Text>
                     </View>
                   )}
                 </View>
 
-                <Text style={[styles.docDetail, { color: colors.text }]}>
+                <Text style={[styles(colors).docDetail, { color: colors.text }]}>
                   Type: {documentTypes[selectedDoc.document_type as keyof typeof documentTypes]}
                 </Text>
-                <Text style={[styles.docDetail, { color: colors.text }]}>
+                <Text style={[styles(colors).docDetail, { color: colors.text }]}>
                   Submitted: {new Date(selectedDoc.uploaded_at).toLocaleString()}
                 </Text>
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Notes (Optional)</Text>
+                <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Notes (Optional)</Text>
                 <TextInput
-                  style={[styles.notesInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                  style={[styles(colors).notesInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                   placeholder="Add notes about this document..."
                   placeholderTextColor={colors.textSecondary}
                   value={reviewNotes}
@@ -266,20 +266,20 @@ export default function DocumentManagementScreen({ navigation }: Props) {
               </ScrollView>
             )}
 
-            <View style={styles.modalActions}>
+            <View style={styles(colors).modalActions}>
               <TouchableOpacity
-                style={[styles.rejectBtn, { backgroundColor: '#E91E63' }]}
+                style={[styles(colors).rejectBtn, { backgroundColor: '#E91E63' }]}
                 onPress={() => handleReview(selectedDoc.id, 'rejected')}
               >
                 <Ionicons name="close" size={20} color="#fff" />
-                <Text style={styles.actionBtnText}>Reject</Text>
+                <Text style={styles(colors).actionBtnText}>Reject</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.approveActionBtn, { backgroundColor: '#007749' }]}
+                style={[styles(colors).approveActionBtn, { backgroundColor: '#007749' }]}
                 onPress={() => handleReview(selectedDoc.id, 'approved')}
               >
                 <Ionicons name="checkmark" size={20} color="#fff" />
-                <Text style={styles.actionBtnText}>Approve</Text>
+                <Text style={styles(colors).actionBtnText}>Approve</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -289,7 +289,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },

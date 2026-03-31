@@ -195,41 +195,41 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   };
 
   const renderStatCard = (title: string, value: string | number, icon: string, color: string) => (
-    <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
+    <View style={[styles(colors).statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[styles(colors).statIcon, { backgroundColor: color + '20' }]}>
         <Ionicons name={icon as any} size={24} color={color} />
       </View>
-      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
-      <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{title}</Text>
+      <Text style={[styles(colors).statValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>{title}</Text>
     </View>
   );
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loading, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, styles(colors).loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading reports...</Text>
+        <Text style={[styles(colors).loadingText, { color: colors.textSecondary }]}>Loading reports...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>📊 Reports Dashboard</Text>
-        <TouchableOpacity onPress={() => setShowExportModal(true)} style={styles.exportBtn}>
+        <Text style={styles(colors).headerTitle}>Reports Dashboard</Text>
+        <TouchableOpacity onPress={() => setShowExportModal(true)} style={styles(colors).exportBtn}>
           <Ionicons name="download" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles(colors).content} showsVerticalScrollIndicator={false}>
         {/* Overview Stats */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
-        <View style={styles.statsGrid}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Overview</Text>
+        <View style={styles(colors).statsGrid}>
           {renderStatCard('Total Students', reportData?.totalStudents || 0, 'people', '#002395')}
           {renderStatCard('Active Drivers', reportData?.activeDrivers || 0, 'car', '#007749')}
           {renderStatCard('Completed Trips', reportData?.completedTrips || 0, 'navigate', '#FFB81C')}
@@ -237,126 +237,126 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
         </View>
 
         {/* Trip Analytics Chart */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Trip Analytics (Last 7 Days)</Text>
-        <View style={[styles.chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles.chartContainer}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Trip Analytics (Last 7 Days)</Text>
+        <View style={[styles(colors).chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={styles(colors).chartContainer}>
             {tripAnalytics.map((item, index) => (
-              <View key={index} style={styles.barContainer}>
-                <View style={[styles.bar, { backgroundColor: colors.primary, height: `${(item.trips / 40) * 100}%` }]} />
-                <Text style={[styles.barLabel, { color: colors.textSecondary }]}>{item.date}</Text>
-                <Text style={[styles.barValue, { color: colors.text }]}>{item.trips}</Text>
+              <View key={index} style={styles(colors).barContainer}>
+                <View style={[styles(colors).bar, { backgroundColor: colors.primary, height: `${(item.trips / 40) * 100}%` }]} />
+                <Text style={[styles(colors).barLabel, { color: colors.textSecondary }]}>{item.date}</Text>
+                <Text style={[styles(colors).barValue, { color: colors.text }]}>{item.trips}</Text>
               </View>
             ))}
           </View>
-          <View style={styles.chartLegend}>
-            <Text style={[styles.legendText, { color: colors.textSecondary }]}>
+          <View style={styles(colors).chartLegend}>
+            <Text style={[styles(colors).legendText, { color: colors.textSecondary }]}>
               Total: {tripAnalytics.reduce((s, d) => s + d.trips, 0)} trips | R{tripAnalytics.reduce((s, d) => s + d.revenue, 0).toLocaleString()} revenue
             </Text>
           </View>
         </View>
 
         {/* Payment Summary */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Payment Summary</Text>
-        <View style={[styles.paymentCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Payment Summary</Text>
+        <View style={[styles(colors).paymentCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {paymentSummary.map((item, index) => (
-            <View key={index} style={[styles.paymentRow, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.paymentMonth, { color: colors.text }]}>{item.month}</Text>
-              <View style={styles.paymentAmounts}>
-                <Text style={[styles.paid, { color: '#007749' }]}>R{item.collected.toLocaleString()}</Text>
-                <Text style={[styles.pending, { color: '#FFB81C' }]}>R{item.pending.toLocaleString()}</Text>
-                <Text style={[styles.overdue, { color: '#E91E63' }]}>R{item.overdue.toLocaleString()}</Text>
+            <View key={index} style={[styles(colors).paymentRow, { borderBottomColor: colors.border }]}>
+              <Text style={[styles(colors).paymentMonth, { color: colors.text }]}>{item.month}</Text>
+              <View style={styles(colors).paymentAmounts}>
+                <Text style={[styles(colors).paid, { color: '#007749' }]}>R{item.collected.toLocaleString()}</Text>
+                <Text style={[styles(colors).pending, { color: '#FFB81C' }]}>R{item.pending.toLocaleString()}</Text>
+                <Text style={[styles(colors).overdue, { color: '#E91E63' }]}>R{item.overdue.toLocaleString()}</Text>
               </View>
             </View>
           ))}
         </View>
 
         {/* Driver Performance */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Driver Performance</Text>
-        <View style={[styles.driverCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Driver Performance</Text>
+        <View style={[styles(colors).driverCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {driverPerformance.slice(0, 5).map((driver, index) => (
-            <View key={driver.id} style={[styles.driverRow, { borderBottomColor: colors.border }]}>
-              <View style={styles.driverRank}>
-                <Text style={[styles.rankNumber, { backgroundColor: index < 3 ? colors.primary : colors.border }]}>
+            <View key={driver.id} style={[styles(colors).driverRow, { borderBottomColor: colors.border }]}>
+              <View style={styles(colors).driverRank}>
+                <Text style={[styles(colors).rankNumber, { backgroundColor: index < 3 ? colors.primary : colors.border }]}>
                   {index + 1}
                 </Text>
               </View>
-              <View style={styles.driverInfo}>
-                <Text style={[styles.driverName, { color: colors.text }]}>{driver.full_name}</Text>
-                <Text style={[styles.driverStats, { color: colors.textSecondary }]}>
+              <View style={styles(colors).driverInfo}>
+                <Text style={[styles(colors).driverName, { color: colors.text }]}>{driver.full_name}</Text>
+                <Text style={[styles(colors).driverStats, { color: colors.textSecondary }]}>
                   {driver.trips_completed} trips | {driver.on_time_rate}% on-time
                 </Text>
               </View>
-              <View style={styles.driverRating}>
+              <View style={styles(colors).driverRating}>
                 <Ionicons name="star" size={16} color="#FFB81C" />
-                <Text style={[styles.ratingValue, { color: colors.text }]}>{driver.rating.toFixed(1)}</Text>
+                <Text style={[styles(colors).ratingValue, { color: colors.text }]}>{driver.rating.toFixed(1)}</Text>
               </View>
             </View>
           ))}
         </View>
 
         {/* Government Compliance Section */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Government Compliance</Text>
-        <View style={[styles.complianceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles.complianceRow}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Government Compliance</Text>
+        <View style={[styles(colors).complianceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={styles(colors).complianceRow}>
             <Ionicons name="shield-checkmark" size={24} color="#007749" />
-            <View style={styles.complianceInfo}>
-              <Text style={[styles.complianceTitle, { color: colors.text }]}>POPIA Compliant</Text>
-              <Text style={[styles.complianceStatus, { color: '#007749' }]}>✓ Verified</Text>
+            <View style={styles(colors).complianceInfo}>
+              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>POPIA Compliant</Text>
+              <Text style={[styles(colors).complianceStatus, { color: '#007749' }]}>✓ Verified</Text>
             </View>
           </View>
-          <View style={styles.complianceRow}>
+          <View style={styles(colors).complianceRow}>
             <Ionicons name="document-text" size={24} color="#002395" />
-            <View style={styles.complianceInfo}>
-              <Text style={[styles.complianceTitle, { color: colors.text }]}>Transport Act Reports</Text>
-              <Text style={[styles.complianceStatus, { color: colors.textSecondary }]}>Monthly submission required</Text>
+            <View style={styles(colors).complianceInfo}>
+              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>Transport Act Reports</Text>
+              <Text style={[styles(colors).complianceStatus, { color: colors.textSecondary }]}>Monthly submission required</Text>
             </View>
           </View>
-          <View style={styles.complianceRow}>
+          <View style={styles(colors).complianceRow}>
             <Ionicons name="people" size={24} color="#FFB81C" />
-            <View style={styles.complianceInfo}>
-              <Text style={[styles.complianceTitle, { color: colors.text }]}>Learner Transport Database</Text>
-              <Text style={[styles.complianceStatus, { color: colors.textSecondary }]}>12,450 registered learners</Text>
+            <View style={styles(colors).complianceInfo}>
+              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>Learner Transport Database</Text>
+              <Text style={[styles(colors).complianceStatus, { color: colors.textSecondary }]}>12,450 registered learners</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles(colors).bottomSpacer} />
       </ScrollView>
 
       {/* Export Modal */}
       <Modal visible={showExportModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Export Report</Text>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Export Report</Text>
               <TouchableOpacity onPress={() => setShowExportModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.exportOptions}>
-              <TouchableOpacity style={[styles.exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('full')}>
+            <View style={styles(colors).exportOptions}>
+              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('full')}>
                 <Ionicons name="document" size={28} color={colors.primary} />
-                <Text style={[styles.exportOptionText, { color: colors.text }]}>Full Report</Text>
-                <Text style={[styles.exportOptionDesc, { color: colors.textSecondary }]}>Complete system overview</Text>
+                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Full Report</Text>
+                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Complete system overview</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('trips')}>
+              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('trips')}>
                 <Ionicons name="bus" size={28} color="#FFB81C" />
-                <Text style={[styles.exportOptionText, { color: colors.text }]}>Trip Report</Text>
-                <Text style={[styles.exportOptionDesc, { color: colors.textSecondary }]}>Last 7 days analytics</Text>
+                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Trip Report</Text>
+                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Last 7 days analytics</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('payments')}>
+              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('payments')}>
                 <Ionicons name="card" size={28} color="#007749" />
-                <Text style={[styles.exportOptionText, { color: colors.text }]}>Payment Report</Text>
-                <Text style={[styles.exportOptionDesc, { color: colors.textSecondary }]}>Revenue & collections</Text>
+                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Payment Report</Text>
+                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Revenue & collections</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('drivers')}>
+              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('drivers')}>
                 <Ionicons name="people" size={28} color="#E91E63" />
-                <Text style={[styles.exportOptionText, { color: colors.text }]}>Driver Report</Text>
-                <Text style={[styles.exportOptionDesc, { color: colors.textSecondary }]}>Performance metrics</Text>
+                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Driver Report</Text>
+                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Performance metrics</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -366,7 +366,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   loading: { justifyContent: 'center', alignItems: 'center' },
   loadingText: { marginTop: 10 },

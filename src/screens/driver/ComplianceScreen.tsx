@@ -201,9 +201,9 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles.loadingText}>Loading compliance...</Text>
+        <Text style={styles(colors).loadingText}>Loading compliance...</Text>
       </View>
     );
   }
@@ -211,32 +211,32 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
   // Show submitted status
   if (existingCompliance?.status === 'pending_review') {
     return (
-      <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <Text style={styles.headerTitle}>Compliance</Text>
-          <Text style={[styles.headerSubtext, { color: colors.accent }]}>Driver Documents</Text>
+      <ScrollView style={[styles(colors).container, { backgroundColor: colors.background }]}>
+        <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+          <Text style={styles(colors).headerTitle}>Compliance</Text>
+          <Text style={[styles(colors).headerSubtext, { color: colors.accent }]}>Driver Documents</Text>
         </View>
 
-        <View style={[styles.successCard, { backgroundColor: colors.card }]}>
+        <View style={[styles(colors).successCard, { backgroundColor: colors.card }]}>
           <Ionicons name="checkmark-circle" size={80} color="#007749" />
-          <Text style={[styles.successTitle, { color: colors.text }]}>Submitted Successfully!</Text>
-          <Text style={[styles.successText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).successTitle, { color: colors.text }]}>Submitted Successfully!</Text>
+          <Text style={[styles(colors).successText, { color: colors.textSecondary }]}>
             Your documents are being reviewed. This typically takes 1-2 business days.
           </Text>
-          <Text style={[styles.submittedDate, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).submittedDate, { color: colors.textSecondary }]}>
             Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Uploaded Documents</Text>
+        <View style={styles(colors).section}>
+          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Uploaded Documents</Text>
           {documents.map(doc => (
-            <View key={doc.id} style={[styles.docCard, { backgroundColor: colors.card }]}>
-              <View style={styles.docInfo}>
-                <Text style={[styles.docLabel, { color: colors.text }]}>{doc.label}</Text>
-                <View style={[styles.docStatus, { backgroundColor: '#00774920' }]}>
+            <View key={doc.id} style={[styles(colors).docCard, { backgroundColor: colors.card }]}>
+              <View style={styles(colors).docInfo}>
+                <Text style={[styles(colors).docLabel, { color: colors.text }]}>{doc.label}</Text>
+                <View style={[styles(colors).docStatus, { backgroundColor: '#00774920' }]}>
                   <Ionicons name="checkmark" size={14} color="#007749" />
-                  <Text style={[styles.docStatusText, { color: '#007749' }]}>Uploaded</Text>
+                  <Text style={[styles(colors).docStatusText, { color: '#007749' }]}>Uploaded</Text>
                 </View>
               </View>
             </View>
@@ -248,82 +248,82 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles(colors).container, { backgroundColor: colors.background }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Compliance</Text>
-        <Text style={[styles.headerSubtext, { color: colors.accent }]}>Driver Documents</Text>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <Text style={styles(colors).headerTitle}>Compliance</Text>
+        <Text style={[styles(colors).headerSubtext, { color: colors.accent }]}>Driver Documents</Text>
       </View>
 
       {/* Progress */}
-      <View style={[styles.progressCard, { backgroundColor: colors.card }]}>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${(verified / documents.length) * 100}%` }]} />
+      <View style={[styles(colors).progressCard, { backgroundColor: colors.card }]}>
+        <View style={styles(colors).progressBar}>
+          <View style={[styles(colors).progressFill, { width: `${(verified / documents.length) * 100}%` }]} />
         </View>
-        <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+        <Text style={[styles(colors).progressText, { color: colors.textSecondary }]}>
           {verified} of {documents.length} documents uploaded
         </Text>
       </View>
 
       {/* Stats */}
-      <View style={[styles.statsRow, { backgroundColor: colors.card }]}>
-        <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: '#007749' }]}>{verified}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Uploaded</Text>
+      <View style={[styles(colors).statsRow, { backgroundColor: colors.card }]}>
+        <View style={styles(colors).statCard}>
+          <Text style={[styles(colors).statNumber, { color: '#007749' }]}>{verified}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Uploaded</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{pending}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <View style={styles(colors).statCard}>
+          <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{pending}</Text>
+          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Pending</Text>
         </View>
       </View>
 
       {/* Documents */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Required Documents</Text>
+      <View style={styles(colors).section}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Required Documents</Text>
         {documents.map(doc => (
-          <View key={doc.id} style={[styles.documentCard, { backgroundColor: colors.card }]}>
-            <View style={styles.documentHeader}>
-              <View style={styles.documentInfo}>
-                <Text style={[styles.documentLabel, { color: colors.text }]}>
+          <View key={doc.id} style={[styles(colors).documentCard, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).documentHeader}>
+              <View style={styles(colors).documentInfo}>
+                <Text style={[styles(colors).documentLabel, { color: colors.text }]}>
                   {doc.label}
                   {doc.required && <Text style={{ color: '#FF3B30' }}> *</Text>}
                 </Text>
-                <Text style={[styles.documentDescription, { color: colors.textSecondary }]}>
+                <Text style={[styles(colors).documentDescription, { color: colors.textSecondary }]}>
                   {doc.description}
                 </Text>
               </View>
               {doc.document ? (
-                <View style={[styles.uploadedBadge, { backgroundColor: '#00774920' }]}>
+                <View style={[styles(colors).uploadedBadge, { backgroundColor: '#00774920' }]}>
                   <Ionicons name="checkmark-circle" size={24} color="#007749" />
                 </View>
               ) : (
-                <View style={[styles.pendingBadge, { backgroundColor: '#FFB81C20' }]}>
+                <View style={[styles(colors).pendingBadge, { backgroundColor: '#FFB81C20' }]}>
                   <Ionicons name="time-outline" size={20} color="#FFB81C" />
                 </View>
               )}
             </View>
 
             {doc.document ? (
-              <View style={styles.uploadedPreview}>
+              <View style={styles(colors).uploadedPreview}>
                 <Ionicons name="document-text" size={20} color="#007749" />
-                <Text style={[styles.previewName, { color: colors.text }]} numberOfLines={1}>
+                <Text style={[styles(colors).previewName, { color: colors.text }]} numberOfLines={1}>
                   {doc.document.name}
                 </Text>
                 <TouchableOpacity
                   onPress={() => showDocumentOptions(doc.id)}
-                  style={styles.changeBtn}
+                  style={styles(colors).changeBtn}
                 >
-                  <Text style={styles.changeBtnText}>Change</Text>
+                  <Text style={styles(colors).changeBtnText}>Change</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity
-                style={styles.uploadButton}
+                style={styles(colors).uploadButton}
                 onPress={() => showDocumentOptions(doc.id)}
               >
                 <Ionicons name="cloud-upload" size={24} color="#FFB81C" />
-                <Text style={styles.uploadButtonText}>Upload Document</Text>
+                <Text style={styles(colors).uploadButtonText}>Upload Document</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -331,23 +331,23 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
       </View>
 
       {/* Submit Button */}
-      <View style={styles.section}>
+      <View style={styles(colors).section}>
         <TouchableOpacity
-          style={[styles.submitButton, pending > 0 && styles.submitButtonDisabled]}
+          style={[styles(colors).submitButton, pending > 0 && styles(colors).submitButtonDisabled]}
           onPress={submitCompliance}
           disabled={pending > 0}
         >
           <Ionicons name="send" size={20} color="#fff" />
-          <Text style={styles.submitButtonText}>Submit for Review</Text>
+          <Text style={styles(colors).submitButtonText}>Submit for Review</Text>
         </TouchableOpacity>
       </View>
 
       {/* Help */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Need Help?</Text>
-        <View style={[styles.helpCard, { backgroundColor: colors.card }]}>
+      <View style={styles(colors).section}>
+        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Need Help?</Text>
+        <View style={[styles(colors).helpCard, { backgroundColor: colors.card }]}>
           <Ionicons name="help-circle" size={24} color="#FFB81C" />
-          <Text style={[styles.helpText, { color: colors.textSecondary }]}>
+          <Text style={[styles(colors).helpText, { color: colors.textSecondary }]}>
             Contact support for help with document verification
           </Text>
         </View>
@@ -358,48 +358,48 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1 },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: '#888', marginTop: 10, fontSize: 16 },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 50 },
+  loadingText: { marginTop: 10, fontSize: 16, color: '#888' },
+  header: { padding: 20, paddingTop: 50, backgroundColor: '#002395' },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 4 },
-  progressCard: { margin: 16, padding: 16, borderRadius: 12 },
-  progressBar: { height: 8, backgroundColor: '#333', borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#007749', borderRadius: 4 },
-  progressText: { fontSize: 14, marginTop: 8, textAlign: 'center' },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 16, marginHorizontal: 16, borderRadius: 12 },
+  headerSubtext: { fontSize: 14, marginTop: 4, color: '#FFB81C' },
+  progressCard: { margin: 16, padding: 16, borderRadius: 12, backgroundColor: '#1a1a1a' },
+  progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: '#333' },
+  progressFill: { height: '100%', borderRadius: 4, backgroundColor: '#007749' },
+  progressText: { fontSize: 14, marginTop: 8, textAlign: 'center', color: '#888' },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 16, marginHorizontal: 16, borderRadius: 12, backgroundColor: '#1a1a1a' },
   statCard: { alignItems: 'center' },
   statNumber: { fontSize: 28, fontWeight: 'bold' },
-  statLabel: { fontSize: 12, marginTop: 4 },
+  statLabel: { fontSize: 12, marginTop: 4, color: '#888' },
   section: { padding: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 },
-  documentCard: { borderRadius: 12, padding: 16, marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: '#fff' },
+  documentCard: { borderRadius: 12, padding: 16, marginBottom: 12, backgroundColor: '#1a1a1a' },
   documentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   documentInfo: { flex: 1 },
   documentLabel: { fontSize: 16, fontWeight: '600', color: '#fff' },
-  documentDescription: { fontSize: 12, marginTop: 2 },
+  documentDescription: { fontSize: 12, marginTop: 2, color: '#888' },
   uploadedBadge: { padding: 4, borderRadius: 12 },
   pendingBadge: { padding: 4, borderRadius: 12 },
-  uploadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFB81C20', padding: 12, borderRadius: 8, marginTop: 12, borderWidth: 1, borderColor: '#FFB81C', borderStyle: 'dashed' },
-  uploadButtonText: { color: '#FFB81C', marginLeft: 8, fontWeight: '600' },
-  uploadedPreview: { flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: '#00774920', padding: 10, borderRadius: 8 },
-  previewName: { flex: 1, marginLeft: 8, fontSize: 14 },
+  uploadButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 8, marginTop: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: '#FFB81C', backgroundColor: 'transparent' },
+  uploadButtonText: { marginLeft: 8, fontWeight: '600', color: '#FFB81C' },
+  uploadedPreview: { flexDirection: 'row', alignItems: 'center', marginTop: 12, padding: 10, borderRadius: 8, backgroundColor: '#00774920' },
+  previewName: { flex: 1, marginLeft: 8, fontSize: 14, color: '#fff' },
   changeBtn: { paddingHorizontal: 12, paddingVertical: 6 },
-  changeBtnText: { color: '#FFB81C', fontWeight: '600', fontSize: 12 },
-  submitButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#007749', padding: 16, borderRadius: 12 },
-  submitButtonDisabled: { backgroundColor: '#666' },
-  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
-  helpCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12 },
-  helpText: { flex: 1, marginLeft: 12, fontSize: 14 },
-  successCard: { margin: 16, padding: 30, borderRadius: 12, alignItems: 'center' },
-  successTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff', marginTop: 20, marginBottom: 10 },
-  successText: { fontSize: 14, color: '#888', textAlign: 'center', lineHeight: 20 },
-  submittedDate: { fontSize: 12, color: '#888', marginTop: 15 },
-  docCard: { borderRadius: 10, padding: 12, marginBottom: 8 },
+  changeBtnText: { fontWeight: '600', fontSize: 12, color: '#FFB81C' },
+  submitButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: 12, backgroundColor: '#007749' },
+  submitButtonDisabled: { opacity: 0.5, backgroundColor: '#666' },
+  submitButtonText: { fontSize: 16, fontWeight: 'bold', marginLeft: 8, color: '#fff' },
+  helpCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: '#1a1a1a' },
+  helpText: { flex: 1, marginLeft: 12, fontSize: 14, color: '#888' },
+  successCard: { margin: 16, padding: 30, borderRadius: 12, alignItems: 'center', backgroundColor: '#1a1a1a' },
+  successTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 20, marginBottom: 10, color: '#fff' },
+  successText: { fontSize: 14, textAlign: 'center', lineHeight: 20, color: '#888' },
+  submittedDate: { fontSize: 12, marginTop: 15, color: '#888' },
+  docCard: { borderRadius: 10, padding: 12, marginBottom: 8, backgroundColor: '#1a1a1a' },
   docInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   docLabel: { fontSize: 14, fontWeight: '600', color: '#fff' },
   docStatus: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  docStatusText: { fontSize: 12, marginLeft: 4, fontWeight: '600' },
+  docStatusText: { fontSize: 12, marginLeft: 4, fontWeight: '600', color: '#007749' },
 });

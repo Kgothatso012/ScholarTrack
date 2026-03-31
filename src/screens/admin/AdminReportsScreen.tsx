@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+
+// UI Plugin components
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const AdminReportsScreen = ({ navigation }: any) => {
   const { colors } = useTheme();
@@ -20,31 +24,26 @@ const AdminReportsScreen = ({ navigation }: any) => {
     try {
       setLoading(true);
 
-      // Get students count
       const { count: studentsCount } = await supabase
         .from('children')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Get drivers count
       const { count: driversCount } = await supabase
         .from('drivers')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Get schools count
       const { count: schoolsCount } = await supabase
         .from('schools')
         .select('*', { count: 'exact', head: true });
 
-      // Get today's trips
       const today = new Date().toISOString().split('T')[0];
       const { count: tripsCount } = await supabase
         .from('trips')
         .select('*', { count: 'exact', head: true })
         .gte('scheduled_time', today);
 
-      // Get total revenue
       const { data: payments } = await supabase
         .from('payments')
         .select('amount')
@@ -63,7 +62,6 @@ const AdminReportsScreen = ({ navigation }: any) => {
       console.error('Error loading stats:', error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -74,123 +72,118 @@ const AdminReportsScreen = ({ navigation }: any) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadStats();
+    setRefreshing(false);
   }, []);
 
-  const generateReport = (reportName: string) => {
-    Alert.alert('Generating Report', `Creating ${reportName}...`, [
-      { text: 'OK' }
-    ]);
+  const exportReport = (type: string) => {
+    Alert.alert('Export', `Exporting ${type} report...`);
   };
 
-  const styles = StyleSheet.create({
+  const reportTypes = [
+    { name: 'Student Report', icon: 'school', color: colors.primary, action: () => exportReport('Student') },
+    { name: 'Driver Report', icon: 'car', color: colors.success, action: () => exportReport('Driver') },
+    { name: 'Revenue Report', icon: 'cash', color: colors.accent, action: () => exportReport('Revenue') },
+    { name: 'Trip Report', icon: 'bus', color: colors.secondary, action: () => exportReport('Trip') },
+  ];
+
+  const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: 20, paddingTop: 10 },
-    headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.textInverse },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 50 },
-    loadingText: { color: colors.textSecondary, marginTop: 10 },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10 },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: 15, borderRadius: 10, alignItems: 'center', elevation: 2 },
-    statNumber: { fontSize: 24, fontWeight: 'bold', color: colors.accent, marginTop: 8 },
-    statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
-    section: { padding: 15 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
-    reportCard: { backgroundColor: colors.card, padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    reportIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center' },
-    reportInfo: { flex: 1, marginLeft: 12 },
-    reportName: { fontSize: 15, fontWeight: 'bold', color: colors.text },
-    reportDate: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.sm },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+    statValue: { ...typography.h2, color: colors.accent, marginTop: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    reportCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    reportIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
+    reportInfo: { flex: 1, marginLeft: spacing.md },
+    reportName: { ...typography.label, color: colors.text },
+    reportDesc: { ...typography.bodySmall, color: colors.textSecondary },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
   });
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading reports...</Text>
+      <View style={styles(colors).container}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Loading reports...</Text>
+        </Card>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} />
-      }
+      style={styles(colors).container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
     >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Reports</Text>
-        <Text style={{ color: colors.accent }}>Analytics and insights</Text>
+      {/* Header */}
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Reports</Text>
+        <Text style={styles(colors).headerSubtext}>Analytics and insights</Text>
       </View>
 
-      <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Ionicons name="people" size={24} color="#002395" />
-          <Text style={styles.statNumber}>{stats.totalStudents}</Text>
-          <Text style={styles.statLabel}>Students</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Ionicons name="car" size={24} color="#007749" />
-          <Text style={styles.statNumber}>{stats.activeDrivers}</Text>
-          <Text style={styles.statLabel}>Drivers</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Ionicons name="school" size={24} color="#FFB81C" />
-          <Text style={styles.statNumber}>{stats.schools}</Text>
-          <Text style={styles.statLabel}>Schools</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Ionicons name="bus" size={24} color="#E91E63" />
-          <Text style={styles.statNumber}>{stats.tripsToday}</Text>
-          <Text style={styles.statLabel}>Trips Today</Text>
-        </View>
+      {/* Stats Grid */}
+      <View style={styles(colors).statsGrid}>
+        <Card variant="elevated" padding="medium">
+          <View style={styles(colors).statCard}>
+            <Text style={styles(colors).statLabel}>Students</Text>
+            <Text style={styles(colors).statValue}>{stats.totalStudents}</Text>
+          </View>
+        </Card>
+        <Card variant="elevated" padding="medium">
+          <View style={styles(colors).statCard}>
+            <Text style={styles(colors).statLabel}>Drivers</Text>
+            <Text style={styles(colors).statValue}>{stats.activeDrivers}</Text>
+          </View>
+        </Card>
+        <Card variant="elevated" padding="medium">
+          <View style={styles(colors).statCard}>
+            <Text style={styles(colors).statLabel}>Schools</Text>
+            <Text style={styles(colors).statValue}>{stats.schools}</Text>
+          </View>
+        </Card>
+        <Card variant="elevated" padding="medium">
+          <View style={styles(colors).statCard}>
+            <Text style={styles(colors).statLabel}>Trips Today</Text>
+            <Text style={styles(colors).statValue}>{stats.tripsToday}</Text>
+          </View>
+        </Card>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Reports</Text>
-        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Daily Trip Report')}>
-          <View style={styles.reportIcon}>
-            <Ionicons name="calendar" size={20} color={colors.primary} />
-          </View>
-          <View style={styles.reportInfo}>
-            <Text style={styles.reportName}>Daily Trip Report</Text>
-            <Text style={styles.reportDate}>View today's trips</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Revenue Report')}>
-          <View style={styles.reportIcon}>
-            <Ionicons name="cash" size={20} color="#007749" />
-          </View>
-          <View style={styles.reportInfo}>
-            <Text style={styles.reportName}>Revenue Report</Text>
-            <Text style={styles.reportDate}>Total: R{(stats.revenue / 100).toLocaleString()}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Driver Performance')}>
-          <View style={styles.reportIcon}>
-            <Ionicons name="speedometer" size={20} color="#FFB81C" />
-          </View>
-          <View style={styles.reportInfo}>
-            <Text style={styles.reportName}>Driver Performance</Text>
-            <Text style={styles.reportDate}>View driver stats</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.reportCard} onPress={() => generateReport('Student Attendance')}>
-          <View style={styles.reportIcon}>
-            <Ionicons name="people" size={20} color="#E91E63" />
-          </View>
-          <View style={styles.reportInfo}>
-            <Text style={styles.reportName}>Student Attendance</Text>
-            <Text style={styles.reportDate}>View attendance</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
+      {/* Revenue Card */}
+      <View style={styles(colors).section}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).statLabel}>Total Revenue</Text>
+          <Text style={styles(colors).statValue}>R{(stats.revenue / 100).toLocaleString()}</Text>
+        </Card>
       </View>
+
+      {/* Report Types */}
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Generate Reports</Text>
+        {reportTypes.map((report, index) => (
+          <TouchableOpacity key={index} onPress={report.action}>
+            <Card variant="elevated" padding="medium">
+              <View style={styles(colors).reportCard}>
+                <View style={[styles(colors).reportIcon, { backgroundColor: report.color + '20' }]}>
+                  <Ionicons name={report.icon as any} size={24} color={report.color} />
+                </View>
+                <View style={styles(colors).reportInfo}>
+                  <Text style={styles(colors).reportName}>{report.name}</Text>
+                  <Text style={styles(colors).reportDesc}>Export and view details</Text>
+                </View>
+                <Ionicons name="download" size={20} color={colors.textSecondary} />
+              </View>
+            </Card>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Spacer size="xl" />
     </ScrollView>
   );
 };

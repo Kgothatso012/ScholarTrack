@@ -13,8 +13,10 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function RegisterScreen({ navigation, onLogin }: any) {
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -259,25 +261,25 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   if (step === 'otp') {
     return (
       <KeyboardAvoidingView
-        style={styles.container}
+        style={styles(colors).container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => setStep('register')} style={styles.backButton}>
+        <ScrollView contentContainerStyle={styles(colors).scrollView} keyboardShouldPersistTaps="handled">
+          <View style={styles(colors).header}>
+            <TouchableOpacity onPress={() => setStep('register')} style={styles(colors).backButton}>
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Verify Phone</Text>
-            <Text style={styles.headerSubtitle}>Enter the code sent to {pendingPhone}</Text>
+            <Text style={styles(colors).headerTitle}>Verify Phone</Text>
+            <Text style={styles(colors).headerSubtitle}>Enter the code sent to {pendingPhone}</Text>
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.otpContainer}>
+          <View style={styles(colors).formContainer}>
+            <View style={styles(colors).otpContainer}>
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={(el: any) => otpInputRefs.current[index] = el}
-                  style={styles.otpInput}
+                  style={styles(colors).otpInput}
                   value={digit}
                   onChangeText={(value) => {
                     const newOtp = [...otp];
@@ -301,25 +303,25 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
             </View>
 
             <TouchableOpacity
-              style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+              style={[styles(colors).registerButton, loading && styles(colors).registerButtonDisabled]}
               onPress={handleVerifyOTP}
               disabled={loading}
             >
-              <Text style={styles.registerButtonText}>
+              <Text style={styles(colors).registerButtonText}>
                 {loading ? 'Verifying...' : 'Verify Code'}
               </Text>
             </TouchableOpacity>
 
-            <View style={styles.resendContainer}>
-              <Text style={styles.resendText}>Didn't receive the code?</Text>
+            <View style={styles(colors).resendContainer}>
+              <Text style={styles(colors).resendText}>Didn't receive the code?</Text>
               <TouchableOpacity onPress={handleResendOTP}>
-                <Text style={styles.resendLink}> Resend</Text>
+                <Text style={styles(colors).resendLink}> Resend</Text>
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={() => setStep('register')} style={styles.loginContainer}>
-              <Text style={styles.loginText}>
-                Wrong number? <Text style={styles.loginLink}>Go Back</Text>
+            <TouchableOpacity onPress={() => setStep('register')} style={styles(colors).loginContainer}>
+              <Text style={styles(colors).loginText}>
+                Wrong number? <Text style={styles(colors).loginLink}>Go Back</Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -331,33 +333,33 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   // Registration Screen
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles(colors).container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <ScrollView contentContainerStyle={styles(colors).scrollView} keyboardShouldPersistTaps="handled">
+        <View style={styles(colors).header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backButton}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Create Account</Text>
-          <Text style={styles.headerSubtitle}>Join ScholarTrack SA</Text>
+          <Text style={styles(colors).headerTitle}>Create Account</Text>
+          <Text style={styles(colors).headerSubtitle}>Join ScholarTrack SA</Text>
         </View>
 
-        <View style={styles.formContainer}>
-          <Text style={styles.sectionTitle}>I am a...</Text>
-          <View style={styles.roleContainer}>
+        <View style={styles(colors).formContainer}>
+          <Text style={styles(colors).sectionTitle}>I am a...</Text>
+          <View style={styles(colors).roleContainer}>
             {roles.map((role) => (
               <TouchableOpacity
                 key={role.id}
                 style={[
-                  styles.roleCard,
-                  selectedRole === role.id && styles.roleCardSelected
+                  styles(colors).roleCard,
+                  selectedRole === role.id && styles(colors).roleCardSelected
                 ]}
                 onPress={() => setSelectedRole(role.id as 'parent' | 'driver')}
               >
                 <View style={[
-                  styles.roleIcon,
-                  selectedRole === role.id && styles.roleIconSelected
+                  styles(colors).roleIcon,
+                  selectedRole === role.id && styles(colors).roleIconSelected
                 ]}>
                   <Ionicons
                     name={role.icon as any}
@@ -365,12 +367,12 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
                     color={selectedRole === role.id ? '#fff' : '#002395'}
                   />
                 </View>
-                <View style={styles.roleInfo}>
+                <View style={styles(colors).roleInfo}>
                   <Text style={[
-                    styles.roleName,
-                    selectedRole === role.id && styles.roleNameSelected
+                    styles(colors).roleName,
+                    selectedRole === role.id && styles(colors).roleNameSelected
                   ]}>{role.name}</Text>
-                  <Text style={styles.roleDesc}>{role.description}</Text>
+                  <Text style={styles(colors).roleDesc}>{role.description}</Text>
                 </View>
                 {selectedRole === role.id && (
                   <Ionicons name="checkmark-circle" size={24} color="#FFB81C" />
@@ -379,30 +381,30 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>Personal Details</Text>
+          <Text style={styles(colors).sectionTitle}>Personal Details</Text>
 
           {/* Auth Method Toggle */}
-          <View style={styles.authToggle}>
+          <View style={styles(colors).authToggle}>
             <TouchableOpacity
-              style={[styles.authToggleBtn, usePhoneAuth && styles.authToggleActive]}
+              style={[styles(colors).authToggleBtn, usePhoneAuth && styles(colors).authToggleActive]}
               onPress={() => setUsePhoneAuth(true)}
             >
               <Ionicons name="call-outline" size={18} color={usePhoneAuth ? '#000' : '#666'} />
-              <Text style={[styles.authToggleText, usePhoneAuth && styles.authToggleTextActive]}>Phone</Text>
+              <Text style={[styles(colors).authToggleText, usePhoneAuth && styles(colors).authToggleTextActive]}>Phone</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.authToggleBtn, !usePhoneAuth && styles.authToggleActive]}
+              style={[styles(colors).authToggleBtn, !usePhoneAuth && styles(colors).authToggleActive]}
               onPress={() => setUsePhoneAuth(false)}
             >
               <Ionicons name="mail-outline" size={18} color={!usePhoneAuth ? '#000' : '#666'} />
-              <Text style={[styles.authToggleText, !usePhoneAuth && styles.authToggleTextActive]}>Email</Text>
+              <Text style={[styles(colors).authToggleText, !usePhoneAuth && styles(colors).authToggleTextActive]}>Email</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+          <View style={styles(colors).inputWrapper}>
+            <Ionicons name="person-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
             <TextInput
-              style={styles.input}
+              style={styles(colors).input}
               placeholder="Full Name"
               placeholderTextColor="#666666"
               value={name}
@@ -412,10 +414,10 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           </View>
 
           {usePhoneAuth ? (
-          <View style={styles.inputWrapper}>
-            <Ionicons name="call-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+          <View style={styles(colors).inputWrapper}>
+            <Ionicons name="call-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
             <TextInput
-              style={styles.input}
+              style={styles(colors).input}
               placeholder="Phone Number (e.g., 0821234567)"
               placeholderTextColor="#666666"
               value={phone}
@@ -424,10 +426,10 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
             />
           </View>
           ) : (
-          <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+          <View style={styles(colors).inputWrapper}>
+            <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
             <TextInput
-              style={styles.input}
+              style={styles(colors).input}
               placeholder="Email Address"
               placeholderTextColor="#666666"
               value={email}
@@ -438,25 +440,25 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           </View>
           )}
 
-          <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+          <View style={styles(colors).inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
             <TextInput
-              style={styles.input}
+              style={styles(colors).input}
               placeholder="Password"
               placeholderTextColor="#666666"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles(colors).eyeIcon}>
               <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles.inputIcon} />
+          <View style={styles(colors).inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
             <TextInput
-              style={styles.input}
+              style={styles(colors).input}
               placeholder="Confirm Password"
               placeholderTextColor="#666666"
               value={confirmPassword}
@@ -466,26 +468,26 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           </View>
 
           <TouchableOpacity
-            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+            style={[styles(colors).registerButton, loading && styles(colors).registerButtonDisabled]}
             onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()}
             disabled={loading}
           >
-            <Text style={styles.registerButtonText}>
+            <Text style={styles(colors).registerButtonText}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.termsContainer}>
-            <Text style={styles.termsText}>
+          <View style={styles(colors).termsContainer}>
+            <Text style={styles(colors).termsText}>
               By signing up, you agree to our{' '}
-              <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
+              <Text style={styles(colors).termsLink}>Terms of Service</Text> and{' '}
+              <Text style={styles(colors).termsLink}>Privacy Policy</Text>
             </Text>
           </View>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginContainer}>
-            <Text style={styles.loginText}>
-              Already have an account? <Text style={styles.loginLink}>Login</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles(colors).loginContainer}>
+            <Text style={styles(colors).loginText}>
+              Already have an account? <Text style={styles(colors).loginLink}>Login</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -494,7 +496,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',

@@ -62,16 +62,25 @@ export default function DriverTripScreen({ navigation }: Props) {
   };
 
   const updateDriverLocation = async (lat: number, lng: number) => {
+    if (!driver?.id) return;
     try {
+      // Update driver_tracking table
       await supabase.from('driver_tracking').insert({
-        driver_id: driver?.id,
+        driver_id: driver.id,
         latitude: lat,
         longitude: lng,
         status: isOnline ? 'active' : 'idle',
         last_updated: new Date().toISOString()
       });
+
+      // Also update driver's current location in drivers table
+      await supabase.from('drivers').update({
+        current_latitude: lat,
+        current_longitude: lng,
+        last_location_update: new Date().toISOString()
+      }).eq('id', driver.id);
     } catch (error) {
-      // Silent fail for location updates
+      console.error('Location update error:', error);
     }
   };
 
@@ -220,27 +229,27 @@ export default function DriverTripScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>🚐 My Trips</Text>
+      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
+        <View style={styles(colors).headerTop}>
+          <Text style={styles(colors).headerTitle}>🚐 My Trips</Text>
           <TouchableOpacity
-            style={[styles.onlineBtn, { backgroundColor: isOnline ? '#007749' : '#E91E63' }]}
+            style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? '#007749' : '#E91E63' }]}
             onPress={toggleOnlineStatus}
           >
             <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={16} color="#fff" />
-            <Text style={styles.onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
+            <Text style={styles(colors).onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerSub}>
+        <Text style={styles(colors).headerSub}>
           {driver?.full_name || 'Driver'} • {driver?.vehicle_type || 'Vehicle'}
         </Text>
       </View>
@@ -248,48 +257,48 @@ export default function DriverTripScreen({ navigation }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Active Trip Card */}
         {activeTrip ? (
-          <View style={[styles.activeTripCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
-            <View style={styles.activeTripHeader}>
-              <View style={[styles.statusBadge, { backgroundColor: '#FFB81C' }]}>
+          <View style={[styles(colors).activeTripCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
+            <View style={styles(colors).activeTripHeader}>
+              <View style={[styles(colors).statusBadge, { backgroundColor: '#FFB81C' }]}>
                 <Ionicons name="bus" size={16} color="#fff" />
-                <Text style={styles.statusBadgeText}>IN PROGRESS</Text>
+                <Text style={styles(colors).statusBadgeText}>IN PROGRESS</Text>
               </View>
-              <Text style={[styles.tripTime, { color: colors.text }]}>
+              <Text style={[styles(colors).tripTime, { color: colors.text }]}>
                 Started: {new Date(activeTrip.actual_pickup_time || Date.now()).toLocaleTimeString()}
               </Text>
             </View>
 
-            <Text style={[styles.tripRoute, { color: colors.text }]}>
+            <Text style={[styles(colors).tripRoute, { color: colors.text }]}>
               {activeTrip.children?.pickup_address || 'Pickup'} → {activeTrip.children?.school?.name || 'School'}
             </Text>
 
             {/* Student Check-in */}
-            <View style={[styles.checkinSection, { backgroundColor: colors.background }]}>
-              <Text style={[styles.checkinTitle, { color: colors.text }]}>Student Check-in</Text>
-              <View style={styles.studentRow}>
-                <View style={[styles.studentAvatar, { backgroundColor: colors.primary + '20' }]}>
+            <View style={[styles(colors).checkinSection, { backgroundColor: colors.background }]}>
+              <Text style={[styles(colors).checkinTitle, { color: colors.text }]}>Student Check-in</Text>
+              <View style={styles(colors).studentRow}>
+                <View style={[styles(colors).studentAvatar, { backgroundColor: colors.primary + '20' }]}>
                   <Ionicons name="person" size={20} color={colors.primary} />
                 </View>
-                <View style={styles.studentInfo}>
-                  <Text style={[styles.studentName, { color: colors.text }]}>
+                <View style={styles(colors).studentInfo}>
+                  <Text style={[styles(colors).studentName, { color: colors.text }]}>
                     {activeTrip.children?.full_name || 'Student'}
                   </Text>
-                  <Text style={[styles.studentSchool, { color: colors.textSecondary }]}>
+                  <Text style={[styles(colors).studentSchool, { color: colors.textSecondary }]}>
                     {activeTrip.children?.school?.name}
                   </Text>
                 </View>
                 {checkedInStudents.includes(activeTrip.children?.id) ? (
-                  <View style={[styles.checkedIn, { backgroundColor: '#007749' }]}>
+                  <View style={[styles(colors).checkedIn, { backgroundColor: '#007749' }]}>
                     <Ionicons name="checkmark" size={16} color="#fff" />
-                    <Text style={styles.checkedInText}>Checked In</Text>
+                    <Text style={styles(colors).checkedInText}>Checked In</Text>
                   </View>
                 ) : (
                   <TouchableOpacity
-                    style={[styles.checkinBtn, { backgroundColor: colors.primary }]}
+                    style={[styles(colors).checkinBtn, { backgroundColor: colors.primary }]}
                     onPress={() => checkInStudent(activeTrip.children?.id, activeTrip.children?.full_name)}
                   >
                     <Ionicons name="add" size={20} color="#fff" />
-                    <Text style={styles.checkinBtnText}>Check In</Text>
+                    <Text style={styles(colors).checkinBtnText}>Check In</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -297,71 +306,71 @@ export default function DriverTripScreen({ navigation }: Props) {
 
             {/* Complete Trip Button */}
             <TouchableOpacity
-              style={[styles.completeTripBtn, { backgroundColor: '#007749' }]}
+              style={[styles(colors).completeTripBtn, { backgroundColor: '#007749' }]}
               onPress={() => completeTrip(activeTrip.id)}
             >
               <Ionicons name="flag" size={24} color="#fff" />
-              <Text style={styles.completeTripBtnText}>Complete Trip</Text>
+              <Text style={styles(colors).completeTripBtnText}>Complete Trip</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={[styles.noTripCard, { backgroundColor: colors.card }]}>
+          <View style={[styles(colors).noTripCard, { backgroundColor: colors.card }]}>
             <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
-            <Text style={[styles.noTripText, { color: colors.text }]}>
+            <Text style={[styles(colors).noTripText, { color: colors.text }]}>
               {isOnline ? 'No active trips' : 'Go online to receive trips'}
             </Text>
             {currentLocation && (
-              <Text style={[styles.locationText, { color: colors.textSecondary }]}>
-                📍 Location active
+              <Text style={[styles(colors).locationText, { color: colors.textSecondary }]}>
+                <Ionicons name="location" size={14} color={colors.textSecondary} /> Location active
               </Text>
             )}
           </View>
         )}
 
         {/* Today's Schedule */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
+        <View style={styles(colors).section}>
+          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
 
           {trips.length === 0 ? (
-            <View style={[styles.emptyCard, { backgroundColor: colors.card }]}>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            <View style={[styles(colors).emptyCard, { backgroundColor: colors.card }]}>
+              <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
                 No trips scheduled for today
               </Text>
             </View>
           ) : (
             trips.map((trip: any) => (
-              <View key={trip.id} style={[styles.tripCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <View style={styles.tripHeader}>
-                  <View style={[styles.tripTimeBox, { backgroundColor: colors.selected }]}>
-                    <Text style={[styles.tripTimeText, { color: colors.primary }]}>
+              <View key={trip.id} style={[styles(colors).tripCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={styles(colors).tripHeader}>
+                  <View style={[styles(colors).tripTimeBox, { backgroundColor: colors.selected }]}>
+                    <Text style={[styles(colors).tripTimeText, { color: colors.primary }]}>
                       {trip.pickup_time ? new Date(trip.pickup_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}
                     </Text>
                   </View>
-                  <View style={styles.tripInfo}>
-                    <Text style={[styles.tripChild, { color: colors.text }]}>
+                  <View style={styles(colors).tripInfo}>
+                    <Text style={[styles(colors).tripChild, { color: colors.text }]}>
                       {trip.children?.full_name || 'Student'}
                     </Text>
-                    <Text style={[styles.tripSchool, { color: colors.textSecondary }]}>
+                    <Text style={[styles(colors).tripSchool, { color: colors.textSecondary }]}>
                       {trip.children?.school?.name || 'School'}
                     </Text>
                   </View>
-                  <View style={[styles.statusDot, { backgroundColor: getStatusColor(trip.status) }]} />
+                  <View style={[styles(colors).statusDot, { backgroundColor: getStatusColor(trip.status) }]} />
                 </View>
 
-                <View style={styles.tripAddress}>
+                <View style={styles(colors).tripAddress}>
                   <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
-                  <Text style={[styles.addressText, { color: colors.textSecondary }]}>
+                  <Text style={[styles(colors).addressText, { color: colors.textSecondary }]}>
                     {trip.children?.pickup_address || 'Pickup address'}
                   </Text>
                 </View>
 
                 {trip.status === 'scheduled' && !activeTrip && (
                   <TouchableOpacity
-                    style={[styles.startBtn, { backgroundColor: colors.primary }]}
+                    style={[styles(colors).startBtn, { backgroundColor: colors.primary }]}
                     onPress={() => startTrip(trip.id)}
                   >
                     <Ionicons name="play" size={20} color="#fff" />
-                    <Text style={styles.startBtnText}>Start Trip</Text>
+                    <Text style={styles(colors).startBtnText}>Start Trip</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -370,28 +379,28 @@ export default function DriverTripScreen({ navigation }: Props) {
         </View>
 
         {/* Quick Stats */}
-        <View style={[styles.statsRow, { backgroundColor: colors.card }]}>
-          <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: colors.primary }]}>{trips.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total</Text>
+        <View style={[styles(colors).statsRow, { backgroundColor: colors.card }]}>
+          <View style={styles(colors).statItem}>
+            <Text style={[styles(colors).statNumber, { color: colors.primary }]}>{trips.length}</Text>
+            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: '#007749' }]}>{trips.filter((t: any) => t.status === 'completed').length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Done</Text>
+          <View style={styles(colors).statItem}>
+            <Text style={[styles(colors).statNumber, { color: '#007749' }]}>{trips.filter((t: any) => t.status === 'completed').length}</Text>
+            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Done</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: '#FFB81C' }]}>{trips.filter((t: any) => t.status === 'in_progress').length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Active</Text>
+          <View style={styles(colors).statItem}>
+            <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{trips.filter((t: any) => t.status === 'in_progress').length}</Text>
+            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Active</Text>
           </View>
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles(colors).bottomSpacer} />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: { padding: 20, paddingTop: 50 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
