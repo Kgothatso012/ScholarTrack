@@ -10,6 +10,10 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 // ============ RSA VALIDATION UTILITIES ============
 
 // Validate RSA ID number (13 digits with Luhn checksum)

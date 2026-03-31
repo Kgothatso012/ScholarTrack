@@ -5,6 +5,10 @@ import * as Location from 'expo-location';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase, driverService, tripServiceEnhanced, Driver } from '../../lib/api';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }

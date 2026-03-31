@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, FlatList, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -16,27 +19,9 @@ interface OnboardingData {
 }
 
 const onboardingData: OnboardingData[] = [
-  {
-    id: '1',
-    title: 'Safe Student Transport',
-    description: 'ScholarTrack ensures your children travel safely to and from school with verified drivers.',
-    icon: 'shield-checkmark',
-    color: '#007749',
-  },
-  {
-    id: '2',
-    title: 'Live Tracking',
-    description: 'Track your child\'s bus in real-time. Know exactly where they are at all times.',
-    icon: 'location',
-    color: '#002395',
-  },
-  {
-    id: '3',
-    title: 'Emergency Response',
-    description: 'One-tap panic button alerts emergency services and parents instantly.',
-    icon: 'warning',
-    color: '#E91E63',
-  },
+  { id: '1', title: 'Safe Student Transport', description: 'ScholarTrack ensures your children travel safely to and from school with verified drivers.', icon: 'shield-checkmark', color: '#007749' },
+  { id: '2', title: 'Live Tracking', description: "Track your child's bus in real-time. Know exactly where they are at all times.", icon: 'location', color: '#002395' },
+  { id: '3', title: 'Emergency Response', description: 'One-tap panic button alerts emergency services and parents instantly.', icon: 'warning', color: '#E91E63' },
 ];
 
 interface Props {
@@ -44,6 +29,7 @@ interface Props {
 }
 
 export default function OnboardingScreen({ onComplete }: Props) {
+  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -65,7 +51,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
     try {
       await AsyncStorage.setItem('onboardingComplete', 'true');
     } catch (e) {
-      // DEBUG: console.log('Error saving onboarding state:', e);
+      // Error saving onboarding state
     }
     onComplete();
   };
@@ -84,138 +70,55 @@ export default function OnboardingScreen({ onComplete }: Props) {
     <View style={styles(colors).dotsContainer}>
       {onboardingData.map((_, index) => {
         const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-        const dotWidth = scrollX.interpolate({
-          inputRange,
-          outputRange: [8, 24, 8],
-          extrapolate: 'clamp',
-        });
-        const dotColor = scrollX.interpolate({
-          inputRange,
-          outputRange: ['#666', '#FFB81C', '#666'],
-          extrapolate: 'clamp',
-        });
+        const scale = scrollX.interpolate({ inputRange, outputRange: [0.8, 1.2, 0.8], extrapolate: 'clamp' });
         return (
-          <Animated.View
-            key={index}
-            style={[
-              styles(colors).dot,
-              { width: dotWidth, backgroundColor: dotColor },
-            ]}
-          />
+          <Animated.View key={index} style={[styles(colors).dot, { transform: [{ scale }] }]} />
         );
       })}
     </View>
   );
 
+  const styles = (colors: any) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    slide: { width, flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+    iconContainer: { width: 160, height: 160, borderRadius: 80, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xxl },
+    title: { ...typography.h1, color: colors.text, textAlign: 'center', marginBottom: spacing.md },
+    description: { ...typography.body, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xl },
+    dotsContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xl },
+    dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.textSecondary, marginHorizontal: spacing.xs },
+    buttonsContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: spacing.xl, paddingBottom: spacing.xl },
+    skipBtn: { padding: spacing.md },
+    skipText: { ...typography.button, color: colors.textSecondary },
+    nextBtn: { backgroundColor: colors.primary, paddingHorizontal: spacing.xl, paddingVertical: spacing.md, borderRadius: borderRadius.md },
+    nextText: { ...typography.button, color: colors.textInverse },
+  });
+
   return (
     <View style={styles(colors).container}>
-      <TouchableOpacity style={styles(colors).skipButton} onPress={handleSkip}>
+      <TouchableOpacity style={styles(colors).skipBtn} onPress={handleSkip}>
         <Text style={styles(colors).skipText}>Skip</Text>
       </TouchableOpacity>
 
-      <Animated.FlatList
+      <FlatList
         ref={flatListRef}
         data={onboardingData}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(index);
-        }}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
+        scrollEventThrottle={16}
       />
 
       {renderDots()}
 
-      <View style={styles(colors).footer}>
-        <TouchableOpacity style={styles(colors).nextButton} onPress={handleNext}>
-          <Text style={styles(colors).nextButtonText}>
-            {currentIndex === onboardingData.length - 1 ? 'Get Started' : 'Next'}
-          </Text>
-          <Ionicons name="arrow-forward" size={20} color="#000" />
+      <View style={styles(colors).buttonsContainer}>
+        <View />
+        <TouchableOpacity style={styles(colors).nextBtn} onPress={handleNext}>
+          <Text style={styles(colors).nextText}>Next</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  skipButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 10,
-    padding: 10,
-  },
-  skipText: {
-    color: '#888',
-    fontSize: 16,
-  },
-  slide: {
-    width,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  iconContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  description: {
-    fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  nextButton: {
-    backgroundColor: '#FFB81C',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  nextButtonText: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});

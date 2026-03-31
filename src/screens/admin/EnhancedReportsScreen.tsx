@@ -4,6 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }

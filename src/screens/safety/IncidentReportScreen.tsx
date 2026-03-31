@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Incident {
   id: number;
@@ -14,6 +18,7 @@ interface Incident {
 }
 
 export default function IncidentReportScreen() {
+  const { colors } = useTheme();
   const [showReportModal, setShowReportModal] = useState(false);
   const [incidentType, setIncidentType] = useState('');
   const [description, setDescription] = useState('');

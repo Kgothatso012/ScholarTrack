@@ -4,6 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface ComplianceStats {
   totalDrivers: number;
   compliant: number;

@@ -1,10 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 const DevDashboard = ({ navigation }: any) => {
+  const { colors } = useTheme();
   
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [

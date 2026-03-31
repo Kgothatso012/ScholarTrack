@@ -5,6 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { tripService, Trip } from '../../lib/api';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 const TripScreen = ({ navigation }: any) => {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);

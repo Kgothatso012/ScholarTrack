@@ -4,9 +4,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export default function RegulatoryDisplayScreen({ navigation, setScreen }: any) {
+  const { colors } = useTheme();
   const regulatoryInfo = {
     operatorLicense: 'OP/2026/001234',
     operatorName: 'ScholarTrack Transport Services',

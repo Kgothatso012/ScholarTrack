@@ -4,7 +4,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
+
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface DocStatus {
   id: string;
@@ -17,6 +21,7 @@ interface DocStatus {
 }
 
 export default function DriverComplianceScreen({ navigation, setScreen }: any) {
+  const { colors } = useTheme();
   const [docs, setDocs] = useState<DocStatus[]>([
     {
       id: 'prdp',

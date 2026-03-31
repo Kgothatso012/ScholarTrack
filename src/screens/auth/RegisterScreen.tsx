@@ -15,6 +15,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 export default function RegisterScreen({ navigation, onLogin }: any) {
   const { colors } = useTheme();
   const [name, setName] = useState('');

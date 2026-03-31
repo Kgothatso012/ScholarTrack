@@ -6,6 +6,10 @@ import { useTheme } from '../../context/ThemeContext';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 
+// UI Plugin components
+import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
 interface UploadedDocument {
   uri: string;
   name: string;
