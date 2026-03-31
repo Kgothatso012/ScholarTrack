@@ -4,13 +4,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import { colors } from '../../ui-plugin/theme';
 
 // UI Plugin components - Soft & Friendly theme
 import { Button } from '../../ui-plugin/components/Button';
 import { Input } from '../../ui-plugin/components/Input';
 import { Card } from '../../ui-plugin/components/Card';
 import { Spacer } from '../../ui-plugin/components/Spacer';
-import { colors, spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export default function LoginScreen({ navigation, onLogin }: any) {
   const insets = useSafeAreaInsets();
@@ -162,23 +163,23 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      style={[styles(colors).container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles(colors).scrollView} keyboardShouldPersistTaps="handled">
         {/* Logo Section */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
+        <View style={styles(colors).logoContainer}>
+          <View style={styles(colors).logoCircle}>
             <Ionicons name="school" size={40} color={colors.textInverse} />
           </View>
-          <Text style={styles.appTitle}>ScholarTrack</Text>
-          <Text style={styles.appSubtitle}>Safe Student Transport</Text>
+          <Text style={styles(colors).appTitle}>ScholarTrack</Text>
+          <Text style={styles(colors).appSubtitle}>Safe Student Transport</Text>
         </View>
 
         {/* Form Card */}
-        <Card style={styles.formCard}>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.subtitleText}>Login to your account</Text>
+        <Card style={styles(colors).formCard}>
+          <Text style={styles(colors).welcomeText}>Welcome Back</Text>
+          <Text style={styles(colors).subtitleText}>Login to your account</Text>
 
           {/* Info Toggle */}
           <Button
@@ -190,21 +191,21 @@ export default function LoginScreen({ navigation, onLogin }: any) {
           />
 
           {showInfo && (
-            <View style={styles.infoBox}>
-              <Text style={styles.infoTitle}>Safe Student Transport</Text>
-              <Text style={styles.infoText}>• Track your child's bus in real-time</Text>
-              <Text style={styles.infoText}>• Hire trusted, verified drivers</Text>
-              <Text style={styles.infoText}>• Get instant arrival alerts</Text>
-              <Text style={styles.infoText}>• Emergency SOS button</Text>
-              <Text style={styles.infoText}>• View payments & history</Text>
+            <View style={styles(colors).infoBox}>
+              <Text style={styles(colors).infoTitle}>Safe Student Transport</Text>
+              <Text style={styles(colors).infoText}>• Track your child's bus in real-time</Text>
+              <Text style={styles(colors).infoText}>• Hire trusted, verified drivers</Text>
+              <Text style={styles(colors).infoText}>• Get instant arrival alerts</Text>
+              <Text style={styles(colors).infoText}>• Emergency SOS button</Text>
+              <Text style={styles(colors).infoText}>• View payments & history</Text>
             </View>
           )}
 
           <Spacer size="md" />
 
           {/* Demo Login */}
-          <Text style={styles.demoTitle}>Quick Demo Login</Text>
-          <View style={styles.demoButtons}>
+          <Text style={styles(colors).demoTitle}>Quick Demo Login</Text>
+          <View style={styles(colors).demoButtons}>
             <Button
               title="Parent"
               variant="primary"
@@ -294,17 +295,17 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
       {/* Password Reset Modal */}
       <Modal visible={showResetModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <Card style={styles.modalContent}>
+        <View style={styles(colors).modalOverlay}>
+          <Card style={styles(colors).modalContent}>
             <Button
               title=""
               variant="ghost"
               onPress={() => setShowResetModal(false)}
               icon={<Ionicons name="close" size={24} color={colors.text} />}
-              style={styles.modalClose}
+              style={styles(colors).modalClose}
             />
-            <Text style={styles.modalTitle}>Reset Password</Text>
-            <Text style={styles.modalSubtitle}>Enter your email to receive a reset link</Text>
+            <Text style={styles(colors).modalTitle}>Reset Password</Text>
+            <Text style={styles(colors).modalSubtitle}>Enter your email to receive a reset link</Text>
 
             <Input
               label="Email"
@@ -334,7 +335,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 }
 
 // Styles using Soft & Friendly theme
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
