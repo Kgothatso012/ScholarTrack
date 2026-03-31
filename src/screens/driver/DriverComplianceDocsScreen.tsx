@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../lib/theme';
 
 interface DocStatus {
   id: string;
@@ -104,58 +105,58 @@ export default function DriverComplianceScreen({ navigation, setScreen }: any) {
   const compliancePercent = Math.round((verifiedCount / requiredCount) * 100);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Compliance Documents</Text>
-        <Text style={styles.headerSubtitle}>South African Scholar Transport Requirements</Text>
+    <ScrollView style={styles(colors).container}>
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>Compliance Documents</Text>
+        <Text style={styles(colors).headerSubtitle}>South African Scholar Transport Requirements</Text>
       </View>
 
       {/* Compliance Score */}
-      <View style={styles.scoreCard}>
-        <View style={styles.scoreCircle}>
-          <Text style={styles.scoreText}>{compliancePercent}%</Text>
-          <Text style={styles.scoreLabel}>Compliant</Text>
+      <View style={styles(colors).scoreCard}>
+        <View style={styles(colors).scoreCircle}>
+          <Text style={styles(colors).scoreText}>{compliancePercent}%</Text>
+          <Text style={styles(colors).scoreLabel}>Compliant</Text>
         </View>
-        <View style={styles.scoreInfo}>
-          <Text style={styles.scoreTitle}>Document Compliance</Text>
-          <Text style={styles.scoreSubtitle}>{verifiedCount} of {requiredCount} required documents verified</Text>
+        <View style={styles(colors).scoreInfo}>
+          <Text style={styles(colors).scoreTitle}>Document Compliance</Text>
+          <Text style={styles(colors).scoreSubtitle}>{verifiedCount} of {requiredCount} required documents verified</Text>
           {compliancePercent < 100 && (
-            <Text style={styles.warningText}>Some documents need verification</Text>
+            <Text style={styles(colors).warningText}>Some documents need verification</Text>
           )}
         </View>
       </View>
 
       {/* Legal Reference */}
-      <View style={styles.legalBox}>
+      <View style={styles(colors).legalBox}>
         <Ionicons name="information-circle" size={20} color="#000000" />
-        <Text style={styles.legalText}>
+        <Text style={styles(colors).legalText}>
           Required by: National Land Transport Act (Act 5 of 2009) & Scholar Transport Regulations
         </Text>
       </View>
 
       {/* Documents List */}
-      <View style={styles.docsContainer}>
-        <Text style={styles.sectionTitle}>Required Documents</Text>
+      <View style={styles(colors).docsContainer}>
+        <Text style={styles(colors).sectionTitle}>Required Documents</Text>
 
         {docs.map((doc) => (
           <TouchableOpacity
             key={doc.id}
-            style={styles.docCard}
+            style={styles(colors).docCard}
             onPress={() => handleVerifyDoc(doc.id)}
           >
-            <View style={[styles.docIcon, { backgroundColor: getStatusColor(doc.verified, doc.required) + '20' }]}>
+            <View style={[styles(colors).docIcon, { backgroundColor: getStatusColor(doc.verified, doc.required) + '20' }]}>
               <Ionicons name={doc.icon as any} size={24} color={getStatusColor(doc.verified, doc.required)} />
             </View>
-            <View style={styles.docInfo}>
-              <View style={styles.docHeader}>
-                <Text style={styles.docName}>{doc.name}</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(doc.verified, doc.required) }]}>
-                  <Text style={styles.statusText}>{getStatusText(doc.verified, doc.required)}</Text>
+            <View style={styles(colors).docInfo}>
+              <View style={styles(colors).docHeader}>
+                <Text style={styles(colors).docName}>{doc.name}</Text>
+                <View style={[styles(colors).statusBadge, { backgroundColor: getStatusColor(doc.verified, doc.required) }]}>
+                  <Text style={styles(colors).statusText}>{getStatusText(doc.verified, doc.required)}</Text>
                 </View>
               </View>
-              <Text style={styles.docDesc}>{doc.description}</Text>
+              <Text style={styles(colors).docDesc}>{doc.description}</Text>
               {doc.expiryDate && (
-                <Text style={styles.expiryText}>Expires: {doc.expiryDate}</Text>
+                <Text style={styles(colors).expiryText}>Expires: {doc.expiryDate}</Text>
               )}
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
@@ -164,23 +165,23 @@ export default function DriverComplianceScreen({ navigation, setScreen }: any) {
       </View>
 
       {/* Upload Button */}
-      <TouchableOpacity style={styles.uploadBtn}>
+      <TouchableOpacity style={styles(colors).uploadBtn}>
         <Ionicons name="cloud-upload" size={24} color="#fff" />
-        <Text style={styles.uploadBtnText}>Upload All Documents</Text>
+        <Text style={styles(colors).uploadBtnText}>Upload All Documents</Text>
       </TouchableOpacity>
 
-      <View style={styles.bottomPadding} />
+      <View style={styles(colors).bottomPadding} />
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
-  header: { backgroundColor: '#000000', padding: 20, paddingTop: 50 },
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#1a1a1a' },
+  header: { backgroundColor: '#1a1a1a', padding: 20, paddingTop: 50 },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
   headerSubtitle: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  scoreCard: { flexDirection: 'row', backgroundColor: '#fff', margin: 15, padding: 20, borderRadius: 12, alignItems: 'center', elevation: 2 },
-  scoreCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center' },
+  scoreCard: { flexDirection: 'row', backgroundColor: '#1a1a1a', margin: 15, padding: 20, borderRadius: 12, alignItems: 'center', elevation: 2 },
+  scoreCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#1a1a1a', justifyContent: 'center', alignItems: 'center' },
   scoreText: { fontSize: 24, fontWeight: 'bold', color: '#FFB81C' },
   scoreLabel: { fontSize: 12, color: '#fff' },
   scoreInfo: { flex: 1, marginLeft: 15 },
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   legalText: { flex: 1, marginLeft: 8, fontSize: 12, color: '#ffffff', lineHeight: 18 },
   docsContainer: { padding: 15 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 12 },
-  docCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  docCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1a1a1a', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
   docIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
   docInfo: { flex: 1, marginLeft: 12 },
   docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

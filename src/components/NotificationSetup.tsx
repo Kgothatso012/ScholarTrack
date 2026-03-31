@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native
 import * as Notifications from 'expo-notifications';
 import { Ionicons } from '@expo/vector-icons';
 import { notificationService } from '../services/notifications';
+import { colors } from '../lib/theme';
 
 interface NotificationSetupProps {
   userId: string;
@@ -38,7 +39,7 @@ export default function NotificationSetup({ userId, userRole }: NotificationSetu
 
   const testNotification = async () => {
     await notificationService.sendLocalNotification(
-      '🔔 Test Notification',
+      'Bell  Test Notification',
       `Notifications are working! Role: ${userRole}`
     );
   };
@@ -46,18 +47,18 @@ export default function NotificationSetup({ userId, userRole }: NotificationSetu
   // Don't show anything if permissions granted
   if (hasPermission === true) {
     return (
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.testButton} onPress={testNotification}>
+      <View style={styles(colors).container}>
+        <TouchableOpacity style={styles(colors).testButton} onPress={testNotification}>
           <Ionicons name="paper-plane" size={20} color="#000000" />
-          <Text style={styles.testButtonText}>Send Test</Text>
+          <Text style={styles(colors).testButtonText}>Send Test</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.iconContainer}>
+    <View style={styles(colors).container}>
+      <View style={styles(colors).iconContainer}>
         <Ionicons
           name={hasPermission === false ? "notifications-off" : "notifications"}
           size={32}
@@ -65,25 +66,25 @@ export default function NotificationSetup({ userId, userRole }: NotificationSetu
         />
       </View>
 
-      <Text style={styles.title}>
+      <Text style={styles(colors).title}>
         {hasPermission === false ? 'Notifications Disabled' : 'Enable Notifications'}
       </Text>
 
-      <Text style={styles.description}>
+      <Text style={styles(colors).description}>
         {hasPermission === false
           ? 'Push notifications are disabled. Enable them in your device settings to receive trip updates.'
           : 'Enable push notifications to receive trip alerts, driver arrivals, and payment updates.'}
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={setupNotifications}>
+      <TouchableOpacity style={styles(colors).button} onPress={setupNotifications}>
         <Ionicons name="settings" size={20} color="#fff" />
-        <Text style={styles.buttonText}>Enable Notifications</Text>
+        <Text style={styles(colors).buttonText}>Enable Notifications</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     borderRadius: 12,

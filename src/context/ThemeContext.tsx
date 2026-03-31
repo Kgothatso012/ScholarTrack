@@ -17,6 +17,7 @@ export type ThemeColors = {
   // Text
   text: string;         // Primary text
   textSecondary: string; // Secondary/subtle text
+  textMuted: string;    // Muted/disabled text
   textInverse: string;  // Text on primary backgrounds
 
   // Borders & dividers
@@ -50,6 +51,7 @@ const darkColors: ThemeColors = {
 
   text: '#ffffff',
   textSecondary: '#888888',
+  textMuted: '#666666',
   textInverse: '#ffffff',  // Fixed: white text for dark backgrounds
 
   border: '#333333',
@@ -78,6 +80,7 @@ const blueColors: ThemeColors = {
 
   text: '#333333',
   textSecondary: '#666666',
+  textMuted: '#8C8CA1',
   textInverse: '#ffffff',
 
   border: '#dddddd',
@@ -106,6 +109,7 @@ const lightColors: ThemeColors = {
 
   text: '#333333',
   textSecondary: '#666666',
+  textMuted: '#8C8CA1',
   textInverse: '#ffffff',
 
   border: '#e0e0e0',

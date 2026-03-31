@@ -6,7 +6,9 @@ export const colors = {
   primary: '#000000',
   accent: '#FFB81C',
   accentLight: '#FFB81C',
-  
+  textSecondary: '#666666',
+  textMuted: '#8C8CA1',
+
   // Light mode
   light: {
     background: '#FFFFFF',
@@ -14,6 +16,7 @@ export const colors = {
     card: '#FFFFFF',
     text: '#1A1A1A',
     textSecondary: '#666666',
+    textMuted: '#8C8CA1',
     border: '#EEEEEE',
     danger: '#D32F2F',
     success: '#4CAF50',
@@ -28,6 +31,7 @@ export const colors = {
     card: '#1A1A1A',
     text: '#FFFFFF',
     textSecondary: '#888888',
+    textMuted: '#666666',
     border: '#333333',
     danger: '#EF5350',
     success: '#66BB6A',

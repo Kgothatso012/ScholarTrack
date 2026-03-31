@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, FlatList, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../lib/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -69,17 +71,17 @@ export default function OnboardingScreen({ onComplete }: Props) {
   };
 
   const renderItem = ({ item }: { item: OnboardingData }) => (
-    <View style={styles.slide}>
-      <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
+    <View style={styles(colors).slide}>
+      <View style={[styles(colors).iconContainer, { backgroundColor: item.color + '20' }]}>
         <Ionicons name={item.icon as any} size={80} color={item.color} />
       </View>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles(colors).title}>{item.title}</Text>
+      <Text style={styles(colors).description}>{item.description}</Text>
     </View>
   );
 
   const renderDots = () => (
-    <View style={styles.dotsContainer}>
+    <View style={styles(colors).dotsContainer}>
       {onboardingData.map((_, index) => {
         const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
         const dotWidth = scrollX.interpolate({
@@ -96,7 +98,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
           <Animated.View
             key={index}
             style={[
-              styles.dot,
+              styles(colors).dot,
               { width: dotWidth, backgroundColor: dotColor },
             ]}
           />
@@ -106,9 +108,9 @@ export default function OnboardingScreen({ onComplete }: Props) {
   );
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
+    <View style={styles(colors).container}>
+      <TouchableOpacity style={styles(colors).skipButton} onPress={handleSkip}>
+        <Text style={styles(colors).skipText}>Skip</Text>
       </TouchableOpacity>
 
       <Animated.FlatList
@@ -131,9 +133,9 @@ export default function OnboardingScreen({ onComplete }: Props) {
 
       {renderDots()}
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>
+      <View style={styles(colors).footer}>
+        <TouchableOpacity style={styles(colors).nextButton} onPress={handleNext}>
+          <Text style={styles(colors).nextButtonText}>
             {currentIndex === onboardingData.length - 1 ? 'Get Started' : 'Next'}
           </Text>
           <Ionicons name="arrow-forward" size={20} color="#000" />
@@ -143,7 +145,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../lib/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DevDashboard = ({ navigation }: any) => {
@@ -24,63 +25,63 @@ const DevDashboard = ({ navigation }: any) => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>🛠️ Dev Dashboard</Text>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+    <ScrollView style={styles(colors).container}>
+      <View style={styles(colors).header}>
+        <View style={styles(colors).headerRow}>
+          <Text style={styles(colors).headerTitle}>🛠️ Dev Dashboard</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles(colors).logoutBtn}>
             <Ionicons name="log-out-outline" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerSubtitle}>ScholarTrack Development Tools</Text>
+        <Text style={styles(colors).headerSubtitle}>ScholarTrack Development Tools</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Development Tools</Text>
-        <View style={styles.grid}>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Development Tools</Text>
+        <View style={styles(colors).grid}>
           {devTools.map((tool, index) => (
-            <TouchableOpacity key={index} style={styles.card}>
+            <TouchableOpacity key={index} style={styles(colors).card}>
               <Ionicons name={tool.icon as keyof typeof Ionicons.glyphMap} size={32} color={tool.color} />
-              <Text style={styles.cardText}>{tool.name}</Text>
+              <Text style={styles(colors).cardText}>{tool.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>System Status</Text>
-        <View style={styles.statusCard}>
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>API Status</Text>
-            <Text style={styles.statusValue}>🟢 Online</Text>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>System Status</Text>
+        <View style={styles(colors).statusCard}>
+          <View style={styles(colors).statusRow}>
+            <Text style={styles(colors).statusLabel}>API Status</Text>
+            <Text style={styles(colors).statusValue}>🟢 Online</Text>
           </View>
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>Database</Text>
-            <Text style={styles.statusValue}>🟢 Connected</Text>
+          <View style={styles(colors).statusRow}>
+            <Text style={styles(colors).statusLabel}>Database</Text>
+            <Text style={styles(colors).statusValue}>🟢 Connected</Text>
           </View>
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>Environment</Text>
-            <Text style={styles.statusValue}>Development</Text>
+          <View style={styles(colors).statusRow}>
+            <Text style={styles(colors).statusLabel}>Environment</Text>
+            <Text style={styles(colors).statusValue}>Development</Text>
           </View>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <TouchableOpacity style={styles.actionButton}>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
+        <TouchableOpacity style={styles(colors).actionButton}>
           <Ionicons name="refresh" size={20} color="#fff" />
-          <Text style={styles.actionButtonText}>Sync Database</Text>
+          <Text style={styles(colors).actionButtonText}>Sync Database</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]}>
+        <TouchableOpacity style={[styles(colors).actionButton, styles(colors).secondaryButton]}>
           <Ionicons name="download" size={20} color="#002395" />
-          <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Export Logs</Text>
+          <Text style={[styles(colors).actionButtonText, styles(colors).secondaryButtonText]}>Export Logs</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

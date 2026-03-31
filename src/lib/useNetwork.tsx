@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { colors } from './theme';
 
 interface NetworkContextType {
   isConnected: boolean;
@@ -80,19 +81,19 @@ export function OfflineBanner({ onRetry }: OfflineBannerProps) {
   };
 
   return (
-    <View style={styles.banner}>
-      <View style={styles.bannerContent}>
+    <View style={styles(colors).banner}>
+      <View style={styles(colors).bannerContent}>
         <Ionicons name="cloud-offline" size={20} color="#fff" />
-        <Text style={styles.bannerText}>No internet connection</Text>
+        <Text style={styles(colors).bannerText}>No internet connection</Text>
       </View>
-      <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
-        <Text style={styles.retryText}>Retry</Text>
+      <TouchableOpacity onPress={handleRetry} style={styles(colors).retryButton}>
+        <Text style={styles(colors).retryText}>Retry</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   banner: {
     backgroundColor: '#FF9800',
     flexDirection: 'row',

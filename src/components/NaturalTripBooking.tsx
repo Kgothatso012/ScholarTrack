@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { aiService } from '../services/ai';
 import { supabase } from '../lib/api';
+import { colors } from '../lib/theme';
 
 interface TripDetails {
   pickup?: string;
@@ -126,19 +127,19 @@ export default function NaturalTripBooking({
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.bg }]}>
-      <View style={[styles.header, { backgroundColor: COLORS.primary }]}>
+    <View style={[styles(colors).container, { backgroundColor: COLORS.bg }]}>
+      <View style={[styles(colors).header, { backgroundColor: COLORS.primary }]}>
         <Ionicons name="calendar" size={24} color="#fff" />
-        <Text style={styles.headerText}>Book a Trip</Text>
+        <Text style={styles(colors).headerText}>Book a Trip</Text>
       </View>
 
-      <View style={[styles.inputCard, { backgroundColor: COLORS.card }]}>
-        <Text style={[styles.label, { color: COLORS.text }]}>
+      <View style={[styles(colors).inputCard, { backgroundColor: COLORS.card }]}>
+        <Text style={[styles(colors).label, { color: COLORS.text }]}>
           Describe your trip in plain English:
         </Text>
         
         <TextInput
-          style={[styles.input, { backgroundColor: COLORS.bg, color: COLORS.text, borderColor: COLORS.textSec }]}
+          style={[styles(colors).input, { backgroundColor: COLORS.bg, color: COLORS.text, borderColor: COLORS.textSec }]}
           placeholder="e.g., Pick up my child from school at 2pm"
           placeholderTextColor={COLORS.textSec}
           value={inputText}
@@ -150,7 +151,7 @@ export default function NaturalTripBooking({
         />
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: COLORS.primary }]}
+          style={[styles(colors).button, { backgroundColor: COLORS.primary }]}
           onPress={processBooking}
           disabled={loading || !inputText.trim()}
           accessibilityLabel="Book trip"
@@ -160,37 +161,37 @@ export default function NaturalTripBooking({
           ) : (
             <>
               <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles.buttonText}>Book Trip</Text>
+              <Text style={styles(colors).buttonText}>Book Trip</Text>
             </>
           )}
         </TouchableOpacity>
       </View>
 
       {extractedDetails && (
-        <View style={[styles.preview, { backgroundColor: COLORS.card }]}>
-          <Text style={[styles.previewTitle, { color: COLORS.text }]}>Detected:</Text>
+        <View style={[styles(colors).preview, { backgroundColor: COLORS.card }]}>
+          <Text style={[styles(colors).previewTitle, { color: COLORS.text }]}>Detected:</Text>
           {extractedDetails.pickup && (
-            <Text style={{ color: COLORS.textSec }}>📍 Pickup: {extractedDetails.pickup}</Text>
+            <Text style={{ color: COLORS.textSec }}><Ionicons name="location" size={14} color={COLORS.textSec} /> Pickup: {extractedDetails.pickup}</Text>
           )}
           {extractedDetails.dropoff && (
-            <Text style={{ color: COLORS.textSec }}>🏁 Dropoff: {extractedDetails.dropoff}</Text>
+            <Text style={{ color: COLORS.textSec }}><Ionicons name="flag" size={14} color={COLORS.textSec} /> Dropoff: {extractedDetails.dropoff}</Text>
           )}
           {extractedDetails.time && (
-            <Text style={{ color: COLORS.textSec }}>🕐 Time: {extractedDetails.time}</Text>
+            <Text style={{ color: COLORS.textSec }}><Ionicons name="time" size={14} color={COLORS.textSec} /> Time: {extractedDetails.time}</Text>
           )}
           {extractedDetails.childName && (
-            <Text style={{ color: COLORS.textSec }}>👤 Child: {extractedDetails.childName}</Text>
+            <Text style={{ color: COLORS.textSec }}><Ionicons name="person" size={14} color={COLORS.textSec} /> Child: {extractedDetails.childName}</Text>
           )}
         </View>
       )}
 
-      <View style={styles.examples}>
-        <Text style={[styles.examplesTitle, { color: COLORS.textSec }]}>Try saying:</Text>
+      <View style={styles(colors).examples}>
+        <Text style={[styles(colors).examplesTitle, { color: COLORS.textSec }]}>Try saying:</Text>
         {examples.map((example, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => setInputText(example)}
-            style={[styles.exampleChip, { backgroundColor: COLORS.card }]}
+            style={[styles(colors).exampleChip, { backgroundColor: COLORS.card }]}
           >
             <Text style={{ color: COLORS.primary, fontSize: 12 }}>{example}</Text>
           </TouchableOpacity>
@@ -200,7 +201,7 @@ export default function NaturalTripBooking({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },

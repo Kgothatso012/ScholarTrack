@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../lib/theme';
 
 const DevDatabaseScreen = ({ navigation }: any) => {
   const [query, setQuery] = useState('');
@@ -30,76 +31,76 @@ const DevDatabaseScreen = ({ navigation }: any) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🗄️ Database</Text>
-        <Text style={styles.headerSubtext}>Query & manage database</Text>
+    <ScrollView style={styles(colors).container}>
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>🗄️ Database</Text>
+        <Text style={styles(colors).headerSubtext}>Query & manage database</Text>
       </View>
 
-      <View style={styles.statusCard}>
-        <View style={styles.statusRow}>
-          <View style={styles.statusDot} />
-          <Text style={styles.statusText}>Connected to PostgreSQL</Text>
+      <View style={styles(colors).statusCard}>
+        <View style={styles(colors).statusRow}>
+          <View style={styles(colors).statusDot} />
+          <Text style={styles(colors).statusText}>Connected to PostgreSQL</Text>
         </View>
-        <View style={styles.statusRow}>
-          <Text style={styles.statusLabel}>Host:</Text>
-          <Text style={styles.statusValue}>localhost:5432</Text>
+        <View style={styles(colors).statusRow}>
+          <Text style={styles(colors).statusLabel}>Host:</Text>
+          <Text style={styles(colors).statusValue}>localhost:5432</Text>
         </View>
-        <View style={styles.statusRow}>
-          <Text style={styles.statusLabel}>Database:</Text>
-          <Text style={styles.statusValue}>scholartrack_dev</Text>
+        <View style={styles(colors).statusRow}>
+          <Text style={styles(colors).statusLabel}>Database:</Text>
+          <Text style={styles(colors).statusValue}>scholartrack_dev</Text>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>SQL Query</Text>
-        <View style={styles.queryCard}>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>SQL Query</Text>
+        <View style={styles(colors).queryCard}>
           <TextInput
-            style={styles.queryInput}
+            style={styles(colors).queryInput}
             placeholder="SELECT * FROM users LIMIT 10;"
             value={query}
             onChangeText={setQuery}
             multiline
           />
-          <TouchableOpacity style={styles.runBtn} onPress={runQuery}>
+          <TouchableOpacity style={styles(colors).runBtn} onPress={runQuery}>
             <Ionicons name="play" size={16} color="#fff" />
-            <Text style={styles.runBtnText}>Run</Text>
+            <Text style={styles(colors).runBtnText}>Run</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Tables</Text>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Tables</Text>
         {tables.map((table) => (
-          <TouchableOpacity key={table.name} style={styles.tableCard}>
-            <View style={styles.tableIcon}>
+          <TouchableOpacity key={table.name} style={styles(colors).tableCard}>
+            <View style={styles(colors).tableIcon}>
               <Ionicons name="server" size={20} color="#002395" />
             </View>
-            <View style={styles.tableInfo}>
-              <Text style={styles.tableName}>{table.name}</Text>
-              <Text style={styles.tableMeta}>{table.rows} rows • {table.size}</Text>
+            <View style={styles(colors).tableInfo}>
+              <Text style={styles(colors).tableName}>{table.name}</Text>
+              <Text style={styles(colors).tableMeta}>{table.rows} rows • {table.size}</Text>
             </View>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => Alert.alert('View Table', `Viewing ${table.name}...`)}>
+            <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('View Table', `Viewing ${table.name}...`)}>
               <Ionicons name="eye" size={16} color="#002395" />
             </TouchableOpacity>
           </TouchableOpacity>
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Actions</Text>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionCard} onPress={syncDb}>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Actions</Text>
+        <View style={styles(colors).actionsRow}>
+          <TouchableOpacity style={styles(colors).actionCard} onPress={syncDb}>
             <Ionicons name="sync" size={24} color="#007749" />
-            <Text style={styles.actionText}>Sync DB</Text>
+            <Text style={styles(colors).actionText}>Sync DB</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard} onPress={() => Alert.alert('Backup', 'Creating backup...')}>
+          <TouchableOpacity style={styles(colors).actionCard} onPress={() => Alert.alert('Backup', 'Creating backup...')}>
             <Ionicons name="cloud-download" size={24} color="#002395" />
-            <Text style={styles.actionText}>Backup</Text>
+            <Text style={styles(colors).actionText}>Backup</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard} onPress={() => Alert.alert('Migrate', 'Running migrations...')}>
+          <TouchableOpacity style={styles(colors).actionCard} onPress={() => Alert.alert('Migrate', 'Running migrations...')}>
             <Ionicons name="git-branch" size={24} color="#FFB81C" />
-            <Text style={styles.actionText}>Migrate</Text>
+            <Text style={styles(colors).actionText}>Migrate</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -107,7 +108,7 @@ const DevDatabaseScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },

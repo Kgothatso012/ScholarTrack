@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../../lib/theme';
 
 interface Language {
   code: string;
@@ -36,51 +37,51 @@ export default function LanguageSettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🌐 Language</Text>
-        <Text style={styles.headerSubtext}>Select your preferred language</Text>
+    <ScrollView style={styles(colors).container}>
+      <View style={styles(colors).header}>
+        <Text style={styles(colors).headerTitle}>🌐 Language</Text>
+        <Text style={styles(colors).headerSubtext}>Select your preferred language</Text>
       </View>
 
       {/* Current Preview */}
-      <View style={styles.previewCard}>
-        <Text style={styles.previewTitle}>App Preview</Text>
-        <View style={styles.previewContent}>
-          <View style={styles.previewItem}>
+      <View style={styles(colors).previewCard}>
+        <Text style={styles(colors).previewTitle}>App Preview</Text>
+        <View style={styles(colors).previewContent}>
+          <View style={styles(colors).previewItem}>
             <Ionicons name="home" size={20} color="#002395" />
-            <Text style={styles.previewText}>{translations.dashboard}</Text>
+            <Text style={styles(colors).previewText}>{translations.dashboard}</Text>
           </View>
-          <View style={styles.previewItem}>
+          <View style={styles(colors).previewItem}>
             <Ionicons name="map" size={20} color="#002395" />
-            <Text style={styles.previewText}>{translations.track}</Text>
+            <Text style={styles(colors).previewText}>{translations.track}</Text>
           </View>
-          <View style={styles.previewItem}>
+          <View style={styles(colors).previewItem}>
             <Ionicons name="warning" size={20} color="#d32f2f" />
-            <Text style={styles.previewText}>{translations.safety}</Text>
+            <Text style={styles(colors).previewText}>{translations.safety}</Text>
           </View>
-          <View style={styles.previewItem}>
+          <View style={styles(colors).previewItem}>
             <Ionicons name="card" size={20} color="#007749" />
-            <Text style={styles.previewText}>{translations.payments}</Text>
+            <Text style={styles(colors).previewText}>{translations.payments}</Text>
           </View>
         </View>
       </View>
 
       {/* Language List */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Available Languages</Text>
+      <View style={styles(colors).section}>
+        <Text style={styles(colors).sectionTitle}>Available Languages</Text>
         
         {languages.map((lang) => (
           <TouchableOpacity
             key={lang.code}
-            style={[styles.langCard, currentLang === lang.code && styles.langCardActive]}
+            style={[styles(colors).langCard, currentLang === lang.code && styles(colors).langCardActive]}
             onPress={() => selectLanguage(lang.code)}
           >
-            <Text style={styles.langFlag}>{lang.flag}</Text>
-            <View style={styles.langInfo}>
-              <Text style={[styles.langName, currentLang === lang.code && styles.langNameActive]}>
+            <Text style={styles(colors).langFlag}>{lang.flag}</Text>
+            <View style={styles(colors).langInfo}>
+              <Text style={[styles(colors).langName, currentLang === lang.code && styles(colors).langNameActive]}>
                 {lang.name}
               </Text>
-              <Text style={styles.langCode}>{lang.code.toUpperCase()}</Text>
+              <Text style={styles(colors).langCode}>{lang.code.toUpperCase()}</Text>
             </View>
             {currentLang === lang.code && (
               <Ionicons name="checkmark-circle" size={24} color="#007749" />
@@ -90,9 +91,9 @@ export default function LanguageSettingsScreen() {
       </View>
 
       {/* Language Info */}
-      <View style={styles.infoCard}>
+      <View style={styles(colors).infoCard}>
         <Ionicons name="information-circle" size={24} color="#002395" />
-        <Text style={styles.infoText}>
+        <Text style={styles(colors).infoText}>
           ScholarTrack is committed to serving all South African communities. 
           More languages will be added based on demand.
         </Text>
@@ -101,25 +102,25 @@ export default function LanguageSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.card },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+  headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.text },
   headerSubtext: { fontSize: 13, color: '#FFB81C', marginTop: 5 },
-  previewCard: { backgroundColor: '#fff', margin: 15, padding: 15, borderRadius: 12, elevation: 3 },
-  previewTitle: { fontSize: 14, fontWeight: 'bold', color: '#666', marginBottom: 15 },
+  previewCard: { backgroundColor: colors.card, margin: 15, padding: 15, borderRadius: 12, elevation: 3 },
+  previewTitle: { fontSize: 14, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 15 },
   previewContent: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
   previewItem: { alignItems: 'center', width: '25%' },
-  previewText: { fontSize: 11, color: '#333', marginTop: 8, textAlign: 'center' },
+  previewText: { fontSize: 11, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
   section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-  langCard: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 15 },
+  langCard: { backgroundColor: colors.card, borderRadius: 12, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   langCardActive: { borderWidth: 2, borderColor: '#007749', backgroundColor: '#f0fff4' },
   langFlag: { fontSize: 28 },
   langInfo: { flex: 1, marginLeft: 15 },
-  langName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  langName: { fontSize: 16, fontWeight: 'bold', color: colors.textSecondary },
   langNameActive: { color: '#007749' },
-  langCode: { fontSize: 12, color: '#666' },
+  langCode: { fontSize: 12, color: colors.textSecondary },
   infoCard: { backgroundColor: '#e3f2fd', margin: 15, padding: 15, borderRadius: 12, flexDirection: 'row', alignItems: 'center' },
-  infoText: { flex: 1, marginLeft: 12, fontSize: 13, color: '#333', lineHeight: 18 },
+  infoText: { flex: 1, marginLeft: 12, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
 });
