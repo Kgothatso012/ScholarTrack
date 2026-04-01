@@ -2,7 +2,7 @@
 // Required for South African Scholar Transport - Track children on each trip
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -32,6 +32,7 @@ interface TripManifest {
 
 export default function TripManifestScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
   const [manifest, setManifest] = useState<TripManifest>({
     id: 'TRIP-001',
     date: new Date().toLocaleDateString(),
@@ -76,7 +77,17 @@ export default function TripManifestScreen({ navigation, setScreen }: any) {
   const waitingCount = manifest.children.filter(c => !c.onboard && c.status === 'waiting').length;
 
   return (
-    <ScrollView style={styles(colors).container}>
+    <ScrollView
+      style={styles(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => setRefreshing(true)}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles(colors).header}>
         <Text style={styles(colors).headerTitle}>Trip Manifest</Text>
         <Text style={styles(colors).headerSubtitle}>{manifest.route}</Text>
@@ -188,39 +199,39 @@ export default function TripManifestScreen({ navigation, setScreen }: any) {
 }
 
 const styles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a1a1a' },
-  header: { backgroundColor: '#1a1a1a', padding: 20, paddingTop: 50 },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  headerSubtitle: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  infoCard: { backgroundColor: '#1a1a1a', margin: 15, padding: 15, borderRadius: 10, elevation: 2 },
+  container: { flex: 1, backgroundColor: colors.surface || '#1a1a1a' },
+  header: { backgroundColor: colors.surface || '#1a1a1a', padding: 20, paddingTop: 50 },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: colors.text || '#fff' },
+  headerSubtitle: { fontSize: 14, color: colors.accent || '#FFB81C', marginTop: 5 },
+  infoCard: { backgroundColor: colors.surface || '#1a1a1a', margin: 15, padding: 15, borderRadius: 10, elevation: 2 },
   infoRow: { flexDirection: 'row', marginBottom: 10 },
   infoItem: { flex: 1, alignItems: 'center' },
-  infoLabel: { fontSize: 12, color: '#888888', marginTop: 5 },
-  infoValue: { fontSize: 14, fontWeight: 'bold', color: '#ffffff', marginTop: 2 },
+  infoLabel: { fontSize: 12, color: colors.textSecondary || '#888888', marginTop: 5 },
+  infoValue: { fontSize: 14, fontWeight: 'bold', color: colors.text || '#ffffff', marginTop: 2 },
   statsRow: { flexDirection: 'row', padding: 15, paddingTop: 0, gap: 10 },
-  statCard: { flex: 1, backgroundColor: '#1a1a1a', padding: 15, borderRadius: 10, alignItems: 'center', elevation: 2 },
-  statNumber: { fontSize: 28, fontWeight: 'bold', color: '#000000' },
-  statLabel: { fontSize: 12, color: '#888888' },
+  statCard: { flex: 1, backgroundColor: colors.surface || '#1a1a1a', padding: 15, borderRadius: 10, alignItems: 'center', elevation: 2 },
+  statNumber: { fontSize: 28, fontWeight: 'bold', color: colors.text || '#000000' },
+  statLabel: { fontSize: 12, color: colors.textSecondary || '#888888' },
   listContainer: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
-  sectionSubtitle: { fontSize: 13, color: '#888888', marginBottom: 15 },
-  childCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1a1a1a', padding: 12, borderRadius: 10, marginBottom: 10, elevation: 2 },
-  childCardActive: { borderLeftWidth: 4, borderLeftColor: '#007749' },
-  childAvatar: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: '#1a1a1a', justifyContent: 'center', alignItems: 'center' },
-  childInitial: { color: '#FFB81C', fontSize: 18, fontWeight: 'bold' },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text || '#ffffff' },
+  sectionSubtitle: { fontSize: 13, color: colors.textSecondary || '#888888', marginBottom: 15 },
+  childCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface || '#1a1a1a', padding: 12, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  childCardActive: { borderLeftWidth: 4, borderLeftColor: colors.secondary || '#007749' },
+  childAvatar: { width: 45, height: 45, borderRadius: 22.5, backgroundColor: colors.surface || '#1a1a1a', justifyContent: 'center', alignItems: 'center' },
+  childInitial: { color: colors.accent || '#FFB81C', fontSize: 18, fontWeight: 'bold' },
   childInfo: { flex: 1, marginLeft: 12 },
   childHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  childName: { fontSize: 15, fontWeight: 'bold', color: '#ffffff' },
+  childName: { fontSize: 15, fontWeight: 'bold', color: colors.text || '#ffffff' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   statusText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
-  childGrade: { fontSize: 12, color: '#888888' },
+  childGrade: { fontSize: 12, color: colors.textSecondary || '#888888' },
   childLocation: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
-  locationText: { fontSize: 11, color: '#888888', marginLeft: 4 },
-  parentContact: { fontSize: 11, color: '#000000', marginTop: 3, fontWeight: '600' },
+  locationText: { fontSize: 11, color: colors.textSecondary || '#888888', marginLeft: 4 },
+  parentContact: { fontSize: 11, color: colors.text || '#000000', marginTop: 3, fontWeight: '600' },
   emergencyBox: { backgroundColor: '#ffebee', margin: 15, padding: 15, borderRadius: 10 },
   emergencyHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  emergencyTitle: { fontSize: 14, fontWeight: 'bold', color: '#d32f2f', marginLeft: 8 },
-  emergencyText: { fontSize: 12, color: '#ffffff', lineHeight: 18 },
+  emergencyTitle: { fontSize: 14, fontWeight: 'bold', color: colors.danger || '#d32f2f', marginLeft: 8 },
+  emergencyText: { fontSize: 12, color: colors.text || '#ffffff', lineHeight: 18 },
   completeBtn: { flexDirection: 'row', backgroundColor: '#007749', margin: 15, padding: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   completeBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 10 },
   bottomPadding: { height: 50 },

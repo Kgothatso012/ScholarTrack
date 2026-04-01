@@ -265,7 +265,7 @@ const styles = (colors: any) => StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: colors.text },
   headerSubtext: { fontSize: 13, color: '#FFB81C', marginTop: 5 },
   reportSection: { padding: 20, alignItems: 'center' },
-  reportButton: { backgroundColor: '#d32f2f', flexDirection: 'row', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 30, borderRadius: 30, elevation: 5 },
+  reportButton: { backgroundColor: colors.danger, flexDirection: 'row', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 30, borderRadius: 30, elevation: 5 },
   reportButtonText: { color: colors.text, fontSize: 18, fontWeight: 'bold', marginLeft: 10 },
   reportSubtext: { fontSize: 12, color: colors.textSecondary, marginTop: 10, textAlign: 'center' },
   section: { padding: 15 },

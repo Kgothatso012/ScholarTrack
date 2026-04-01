@@ -268,7 +268,7 @@ export default function ChatScreen({ navigation }: Props) {
         {/* Input */}
         <View style={[styles(colors).inputContainer, { backgroundColor: colors.card }]}>
           <TextInput
-            style={[styles(colors).input, { backgroundColor: '#000000', color: colors.text }]}
+            style={[styles(colors).input, { backgroundColor: '#1a1a1a', color: colors.text }]}
             placeholder="Type a message..."
             placeholderTextColor={colors.textSecondary}
             value={newMessage}

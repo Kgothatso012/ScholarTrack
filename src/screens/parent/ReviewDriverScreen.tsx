@@ -237,12 +237,12 @@ const ReviewDriverScreen = ({ navigation }: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={[styles(colors).ratingText, { color: rating >= 4 ? '#007749' : rating >= 3 ? '#FFB81C' : '#E03C31' }]}>
+            <Text style={[styles(colors).ratingText, { color: rating >= 4 ? colors.secondary : rating >= 3 ? colors.accent : colors.danger }]}>
               {getRatingLabel(rating)}
             </Text>
             {rating < 4 && (
-              <View style={[styles(colors).warningBox, { backgroundColor: '#FFF3CD', borderColor: '#FFB81C' }]}>
-                <Ionicons name="warning" size={20} color="#E03C31" />
+              <View style={[styles(colors).warningBox, { backgroundColor: '#FFF3CD', borderColor: colors.accent }]}>
+                <Ionicons name="warning" size={20} color={colors.danger} />
                 <Text style={styles(colors).warningText}>
                   Ratings below 4 stars will flag the payment for admin review
                 </Text>
@@ -281,7 +281,7 @@ const ReviewDriverScreen = ({ navigation }: any) => {
         </>
       ) : !driver ? null : (
         <View style={[styles(colors).completedSection, { backgroundColor: colors.card }]}>
-          <Ionicons name="checkmark-done-circle" size={60} color="#007749" />
+          <Ionicons name="checkmark-done-circle" size={60} color={colors.secondary} />
           <Text style={[styles(colors).completedTitle, { color: colors.text }]}>Review Submitted!</Text>
           <Text style={[styles(colors).completedText, { color: colors.textSecondary }]}>
             You've already reviewed for {currentMonth} {currentYear}. See your history below.
@@ -323,8 +323,8 @@ const ReviewDriverScreen = ({ navigation }: any) => {
               )}
               {review.status === 'flagged' && (
                 <View style={[styles(colors).flaggedBadge, { backgroundColor: '#FFE5E5' }]}>
-                  <Ionicons name="flag" size={12} color="#E03C31" />
-                  <Text style={[styles(colors).flaggedText, { color: '#E03C31' }]}>Flagged for review</Text>
+                  <Ionicons name="flag" size={12} color={colors.danger} />
+                  <Text style={[styles(colors).flaggedText, { color: colors.danger }]}>Flagged for review</Text>
                 </View>
               )}
             </View>

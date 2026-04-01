@@ -2,7 +2,7 @@
 // Daily inspection required by South African Transport Regulations
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -21,6 +21,7 @@ interface CheckItem {
 
 export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
   const [checks, setChecks] = useState<CheckItem[]>([
     // Lights & Signals
     { id: 'headlights', category: 'Lights', name: 'Headlights (high/low beam)', icon: 'flashlight', checked: false, required: true },
@@ -91,7 +92,17 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
   const progress = Math.round((checkedCount / requiredCount) * 100);
 
   return (
-    <ScrollView style={styles(colors).container}>
+    <ScrollView
+      style={styles(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => setRefreshing(true)}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles(colors).header}>
         <Text style={styles(colors).headerTitle}>Vehicle Safety Checklist</Text>
         <Text style={styles(colors).headerSubtitle}>Daily Pre-Trip Inspection</Text>
@@ -156,27 +167,27 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
 }
 
 const styles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a1a1a' },
-  header: { backgroundColor: '#1a1a1a', padding: 20, paddingTop: 50 },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  headerSubtitle: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  progressCard: { backgroundColor: '#1a1a1a', margin: 15, padding: 15, borderRadius: 10, elevation: 2 },
-  progressBar: { height: 10, backgroundColor: '#1a1a1a', borderRadius: 5, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#007749', borderRadius: 5 },
-  progressText: { fontSize: 14, color: '#ffffff', marginTop: 10, textAlign: 'center' },
+  container: { flex: 1, backgroundColor: colors.surface || '#1a1a1a' },
+  header: { backgroundColor: colors.surface || '#1a1a1a', padding: 20, paddingTop: 50 },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: colors.text || '#fff' },
+  headerSubtitle: { fontSize: 14, color: colors.accent || '#FFB81C', marginTop: 5 },
+  progressCard: { backgroundColor: colors.surface || '#1a1a1a', margin: 15, padding: 15, borderRadius: 10, elevation: 2 },
+  progressBar: { height: 10, backgroundColor: colors.surface || '#1a1a1a', borderRadius: 5, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.secondary || '#007749', borderRadius: 5 },
+  progressText: { fontSize: 14, color: colors.text || '#ffffff', marginTop: 10, textAlign: 'center' },
   categorySection: { margin: 15, marginTop: 0 },
-  categoryTitle: { fontSize: 16, fontWeight: 'bold', color: '#ffffff', marginBottom: 10 },
-  checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1a1a1a', padding: 15, borderRadius: 10, marginBottom: 8, elevation: 1 },
+  categoryTitle: { fontSize: 16, fontWeight: 'bold', color: colors.text || '#ffffff', marginBottom: 10 },
+  checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface || '#1a1a1a', padding: 15, borderRadius: 10, marginBottom: 8, elevation: 1 },
   checkItemChecked: { backgroundColor: '#f0fff4' },
   itemIcon: { marginHorizontal: 10 },
-  itemText: { flex: 1, fontSize: 14, color: '#ffffff' },
-  itemTextChecked: { color: '#FFB81C', fontWeight: '600' },
+  itemText: { flex: 1, fontSize: 14, color: colors.text || '#ffffff' },
+  itemTextChecked: { color: colors.accent || '#FFB81C', fontWeight: '600' },
   buttonContainer: { flexDirection: 'row', padding: 15, gap: 10 },
-  resetBtn: { flex: 1, flexDirection: 'row', backgroundColor: '#1a1a1a', padding: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#333' },
-  resetBtnText: { color: '#888888', fontSize: 14, fontWeight: '600', marginLeft: 8 },
-  submitBtn: { flex: 1, flexDirection: 'row', backgroundColor: '#007749', padding: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  resetBtn: { flex: 1, flexDirection: 'row', backgroundColor: colors.surface || '#1a1a1a', padding: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.border || '#333' },
+  resetBtnText: { color: colors.textSecondary || '#888888', fontSize: 14, fontWeight: '600', marginLeft: 8 },
+  submitBtn: { flex: 1, flexDirection: 'row', backgroundColor: colors.secondary || '#007749', padding: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   submitBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold', marginLeft: 8 },
   noticeBox: { flexDirection: 'row', backgroundColor: '#e3f2fd', margin: 15, padding: 12, borderRadius: 8, alignItems: 'flex-start' },
-  noticeText: { flex: 1, marginLeft: 8, fontSize: 11, color: '#ffffff', lineHeight: 16 },
+  noticeText: { flex: 1, marginLeft: 8, fontSize: 11, color: colors.text || '#ffffff', lineHeight: 16 },
   bottomPadding: { height: 50 },
 });
