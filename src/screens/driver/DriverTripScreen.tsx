@@ -162,7 +162,7 @@ export default function DriverTripScreen({ navigation }: Props) {
 
     try {
       await tripServiceEnhanced.startTrip(tripId, driver?.id || '', currentLocation.latitude, currentLocation.longitude);
-      setActiveTrip(trips.find(t => t.id === tripId));
+      setActiveTrip(trips.find(t => t.id === tripId) || null);
       setCheckedInStudents([]);
       Alert.alert('Success', 'Trip started! Remember to check in each student.');
       loadData();
@@ -291,7 +291,7 @@ export default function DriverTripScreen({ navigation }: Props) {
                     {activeTrip.children?.school?.name}
                   </Text>
                 </View>
-                {checkedInStudents.includes(activeTrip.children?.id) ? (
+                {checkedInStudents.includes(activeTrip.children?.id || '') ? (
                   <View style={[styles(colors).checkedIn, { backgroundColor: '#007749' }]}>
                     <Ionicons name="checkmark" size={16} color="#fff" />
                     <Text style={styles(colors).checkedInText}>Checked In</Text>
@@ -299,7 +299,7 @@ export default function DriverTripScreen({ navigation }: Props) {
                 ) : (
                   <TouchableOpacity
                     style={[styles(colors).checkinBtn, { backgroundColor: colors.primary }]}
-                    onPress={() => checkInStudent(activeTrip.children?.id, activeTrip.children?.full_name)}
+                    onPress={() => checkInStudent(activeTrip.children?.id || '', activeTrip.children?.full_name || '')}
                   >
                     <Ionicons name="add" size={20} color="#fff" />
                     <Text style={styles(colors).checkinBtnText}>Check In</Text>

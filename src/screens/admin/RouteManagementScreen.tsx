@@ -18,6 +18,7 @@ interface Child {
   full_name: string;
   parent_id?: string;
   status: string;
+  school?: { name: string };
 }
 
 export default function RouteManagementScreen({ navigation }: Props) {

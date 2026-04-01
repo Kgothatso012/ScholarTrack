@@ -58,6 +58,13 @@ export interface Trip {
   dropoff_time?: string;
   pickup_location?: string;
   dropoff_location?: string;
+  actual_pickup_time?: string;
+  children?: {
+    id: string;
+    full_name: string;
+    school?: { name: string };
+    pickup_address?: string;
+  };
   created_at: string;
 }
 

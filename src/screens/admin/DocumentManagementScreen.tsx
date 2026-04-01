@@ -273,14 +273,14 @@ export default function DocumentManagementScreen({ navigation }: Props) {
             <View style={styles(colors).modalActions}>
               <TouchableOpacity
                 style={[styles(colors).rejectBtn, { backgroundColor: '#E91E63' }]}
-                onPress={() => handleReview(selectedDoc.id, 'rejected')}
+                onPress={() => selectedDoc && handleReview(selectedDoc.id, 'rejected')}
               >
                 <Ionicons name="close" size={20} color="#fff" />
                 <Text style={styles(colors).actionBtnText}>Reject</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles(colors).approveActionBtn, { backgroundColor: '#007749' }]}
-                onPress={() => handleReview(selectedDoc.id, 'approved')}
+                onPress={() => selectedDoc && handleReview(selectedDoc.id, 'approved')}
               >
                 <Ionicons name="checkmark" size={20} color="#fff" />
                 <Text style={styles(colors).actionBtnText}>Approve</Text>
