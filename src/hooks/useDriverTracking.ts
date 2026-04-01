@@ -20,27 +20,34 @@ interface DriverLocation {
   accuracy?: number;
 }
 
-export function useDriverTracking({ 
-  driverId, 
+export function useDriverTracking({
+  driverId,
   updateIntervalMs = 30000, // Default: 30 seconds
-  enabled = true 
+  enabled = true
 }: UseDriverTrackingOptions) {
   const [location, setLocation] = useState<DriverLocation | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tripActive, setTripActive] = useState(false);
-  
+
+  // Use ref to track tripActive in callback - fixes stale closure issue
+  const tripActiveRef = useRef(false);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    tripActiveRef.current = tripActive;
+  }, [tripActive]);
 
   // Request permissions and start tracking
   const startTracking = async () => {
     try {
       setError(null);
-      
+
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status !== 'granted') {
         setError('Location permission denied');
         return false;
@@ -63,11 +70,11 @@ export function useDriverTracking({
             heading: newLocation.coords.heading ?? undefined,
             accuracy: newLocation.coords.accuracy ?? undefined,
           };
-          
+
           setLocation(locationData);
-          
-          // Send to Supabase if trip is active
-          if (tripActive) {
+
+          // Send to Supabase if trip is active - use ref for current value
+          if (tripActiveRef.current) {
             await sendLocationUpdate(locationData);
           }
         }

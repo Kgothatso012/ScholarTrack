@@ -871,22 +871,48 @@ export const driverTrackingService = {
       if (error) throw error;
       return data;
     } else {
-      // No valid location exists, don't create a 0,0 record
-      // Instead just update any existing record or create new one with null coords
-      const { data, error } = await supabase
+      // No valid location exists - try to update any existing record's status
+      // without changing coordinates (to avoid NOT NULL constraint issues)
+      const { data: anyRecord } = await supabase
         .from('driver_tracking')
-        .insert({
-          driver_id: driverId,
-          latitude: null,
-          longitude: null,
-          status,
-          last_updated: new Date().toISOString()
-        })
-        .select()
+        .select('id')
+        .eq('driver_id', driverId)
+        .order('last_updated', { ascending: false })
+        .limit(1)
         .single();
 
-      if (error) throw error;
-      return data;
+      if (anyRecord) {
+        // Update existing record status only
+        const { data, error } = await supabase
+          .from('driver_tracking')
+          .update({
+            status,
+            last_updated: new Date().toISOString()
+          })
+          .eq('id', anyRecord.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // No record exists at all - insert with valid default coordinates
+        // (NOT NULL constraint requires values)
+        const { data, error } = await supabase
+          .from('driver_tracking')
+          .insert({
+            driver_id: driverId,
+            latitude: 0,
+            longitude: 0,
+            status,
+            last_updated: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     }
   }
 };
