@@ -27,6 +27,12 @@ const DEFAULT_RADIUS_METERS = 200;
 const DEFAULT_AVG_SPEED_KMH = 40; // km/h average city speed
 
 export const geofenceService = {
+  /**
+   * Creates geofence zones from trip data.
+   * Fetches pickup and dropoff coordinates from the trip and creates zone definitions.
+   * @param tripId - The trip ID to fetch zones for
+   * @returns Promise<GeofenceZone[]> Array of geofence zones (pickup and dropoff)
+   */
   // Create geofence zones from trip data
   async getZonesForTrip(tripId: string): Promise<GeofenceZone[]> {
     try {
@@ -50,7 +56,8 @@ export const geofenceService = {
       }
 
       const zones: GeofenceZone[] = [];
-      const childName = trip.children?.full_name || 'Your child';
+      const childData = trip.children as { full_name?: string } | null;
+      const childName = childData?.full_name || 'Your child';
 
       // Pickup zone
       if (trip.pickup_location_lat && trip.pickup_location_lng) {
@@ -89,6 +96,14 @@ export const geofenceService = {
     }
   },
 
+  /**
+   * Checks if a location is inside a geofence zone.
+   * Uses Haversine formula to calculate distance between points.
+   * @param latitude - Current latitude
+   * @param longitude - Current longitude
+   * @param zone - The geofence zone to check against
+   * @returns boolean - True if location is within the zone's radius
+   */
   // Check if location is inside a geofence zone
   isInsideZone(
     latitude: number,
@@ -105,6 +120,14 @@ export const geofenceService = {
     return distanceMeters <= zone.radius;
   },
 
+  /**
+   * Checks all zones and triggers alerts for any zones that have been entered.
+   * Marks zones as triggered to prevent duplicate alerts.
+   * @param latitude - Current latitude
+   * @param longitude - Current longitude
+   * @param zones - Array of geofence zones to check
+   * @returns Promise<GeofenceEvent[]> Array of triggered events
+   */
   // Check all zones and trigger alerts for entered zones
   async checkZones(
     latitude: number,
@@ -145,6 +168,14 @@ export const geofenceService = {
     return events;
   },
 
+  /**
+   * Triggers a geofence alert when a zone is entered.
+   * Creates an alert in the database and sends a notification to the parent.
+   * @param eventType - Type of event (pickup_arrived or dropoff_arrived)
+   * @param zone - The geofence zone that was entered
+   * @param latitude - Current latitude
+   * @param longitude - Current longitude
+   */
   // Trigger geofence alert
   async triggerAlert(
     eventType: 'pickup_arrived' | 'dropoff_arrived',
@@ -198,6 +229,13 @@ export const geofenceService = {
     }
   },
 
+  /**
+   * Calculates the distance from a location to a geofence zone center.
+   * @param latitude - Current latitude
+   * @param longitude - Current longitude
+   * @param zone - The geofence zone
+   * @returns number - Distance in meters
+   */
   // Calculate distance to zone in meters
   getDistanceToZone(latitude: number, longitude: number, zone: GeofenceZone): number {
     const distanceKm = locationService.calculateDistance(
@@ -209,6 +247,14 @@ export const geofenceService = {
     return distanceKm * 1000;
   },
 
+  /**
+   * Calculates estimated time to arrival based on distance.
+   * Uses default average speed of 40 km/h.
+   * @param latitude - Current latitude
+   * @param longitude - Current longitude
+   * @param zone - The geofence zone
+   * @returns number - Estimated time in minutes
+   */
   // Get estimated time to arrival based on distance
   getETAtoZone(latitude: number, longitude: number, zone: GeofenceZone): number {
     const distanceMeters = this.getDistanceToZone(latitude, longitude, zone);
