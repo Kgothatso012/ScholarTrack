@@ -22,6 +22,7 @@ export type ParentStackParamList = {
   ParentDocs: undefined;
   EmergencyContacts: undefined;
   LiveTrack: undefined;
+  History: undefined;
   Emergency: undefined;
   Chat: undefined;
   HireDriver: undefined;

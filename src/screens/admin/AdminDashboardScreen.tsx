@@ -147,26 +147,26 @@ export default function AdminDashboardScreen({ navigation }: any) {
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h1, color: colors.textInverse },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
     headerActions: { flexDirection: 'row' },
     headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: borderRadius.md, marginLeft: spacing.xs },
-    section: { padding: spacing.lg },
+    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
     sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    tabs: { flexDirection: 'row', backgroundColor: colors.surface, padding: spacing.sm, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
     tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
     tabButtonActive: { backgroundColor: colors.primary },
     tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
     tabTextActive: { color: colors.textInverse },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.surface, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
     statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.displayMedium, color: colors.accent, marginVertical: spacing.xs },
-    quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    quickActionCard: { width: '48%', backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md, elevation: 2 },
+    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
     quickActionIcon: { marginBottom: spacing.xs },
-    quickActionText: { ...typography.label, color: colors.text },
-    listItem: { backgroundColor: colors.surface, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
+    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
     listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
     listInfo: { flex: 1, marginLeft: spacing.md },
     listName: { ...typography.label, color: colors.text },
@@ -187,8 +187,8 @@ export default function AdminDashboardScreen({ navigation }: any) {
 
   const quickActions = [
     { name: 'Add Driver', icon: 'person-add', color: colors.success, route: 'ManageDrivers' },
-    { name: 'Add School', icon: 'school', color: colors.primary, route: 'FleetTracking' },
-    { name: 'Reports', icon: 'document-text', color: colors.accent, route: 'AdminReports' },
+    { name: 'Documents', icon: 'document-text', color: colors.accent, route: 'Documents' },
+    { name: 'Reports', icon: 'analytics', color: colors.primary, route: 'EnhancedReports' },
     { name: 'Settings', icon: 'settings', color: colors.textSecondary, route: 'Settings' },
   ];
 
@@ -246,12 +246,10 @@ export default function AdminDashboardScreen({ navigation }: any) {
           {/* Stats Grid */}
           <View style={styles(colors).statsGrid}>
             {stats.map((stat, index) => (
-              <Card key={index} variant="elevated" padding="medium">
-                <View style={styles(colors).statCard}>
-                  <Text style={styles(colors).statLabel}>{stat.label}</Text>
-                  <Text style={styles(colors).statValue}>{stat.value}</Text>
-                </View>
-              </Card>
+              <View key={index} style={styles(colors).statCard}>
+                <Text style={styles(colors).statLabel}>{stat.label}</Text>
+                <Text style={styles(colors).statValue}>{stat.value}</Text>
+              </View>
             ))}
           </View>
 

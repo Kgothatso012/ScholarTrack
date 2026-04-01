@@ -7,15 +7,15 @@ import { useTheme } from '../../context/ThemeContext';
 import { Card, Button, Spacer } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-export default function SupportScreen() {
+export default function SupportScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const contactOptions = [
-    { icon: 'chatbubbles', title: 'Live Chat', subtitle: 'Chat with our team', action: () => Alert.alert('Chat', 'Opening live chat...'), color: colors.primary },
+    { icon: 'chatbubbles', title: 'Live Chat', subtitle: 'Chat with our team', route: 'Chat', color: colors.primary },
     { icon: 'call', title: 'Call Us', subtitle: '0800 123 456', action: () => Linking.openURL('tel:0800123456'), color: colors.success },
     { icon: 'mail', title: 'Email', subtitle: 'support@scholartrack.co.za', action: () => Linking.openURL('mailto:support@scholartrack.co.za'), color: colors.secondary },
-    { icon: 'logo-whatsapp', title: 'WhatsApp', subtitle: 'Chat on WhatsApp', action: () => Alert.alert('WhatsApp', 'Opening WhatsApp...'), color: '#25D366' },
+    { icon: 'logo-whatsapp', title: 'WhatsApp', subtitle: 'Chat on WhatsApp', route: 'Chat', color: '#25D366' },
   ];
 
   const faqs = [
@@ -62,7 +62,7 @@ export default function SupportScreen() {
       <View style={styles(colors).section}>
         <Text style={styles(colors).sectionTitle}>Contact Us</Text>
         {contactOptions.map((option, index) => (
-          <TouchableOpacity key={index} onPress={option.action}>
+          <TouchableOpacity key={index} onPress={() => option.route ? navigation?.navigate?.(option.route) : option.action?.()}>
             <Card variant="elevated" padding="medium">
               <View style={styles(colors).contactCard}>
                 <View style={[styles(colors).contactIcon, { backgroundColor: option.color + '20' }]}>
@@ -101,7 +101,7 @@ export default function SupportScreen() {
       <View style={styles(colors).section}>
         <Button
           title="Report an Issue"
-          onPress={() => Alert.alert('Report', 'Opening report form...')}
+          onPress={() => navigation?.navigate?.('Chat')}
           variant="danger"
           fullWidth
           icon={<Ionicons name="warning" size={20} color={colors.textInverse} />}

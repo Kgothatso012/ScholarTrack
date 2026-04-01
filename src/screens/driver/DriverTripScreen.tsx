@@ -161,7 +161,7 @@ export default function DriverTripScreen({ navigation }: Props) {
     }
 
     try {
-      await tripServiceEnhanced.startTrip(tripId, driver?.id || '', currentLocation.latitude, currentLocation.longitude);
+      await tripServiceEnhanced.startTrip(tripId);
       setActiveTrip(trips.find(t => t.id === tripId) || null);
       setCheckedInStudents([]);
       Alert.alert('Success', 'Trip started! Remember to check in each student.');
@@ -180,20 +180,13 @@ export default function DriverTripScreen({ navigation }: Props) {
     if (checkedInStudents.length === 0) {
       Alert.alert('Warning', 'No students checked in. Are you sure you want to complete this trip?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Complete Anyway', onPress: () => doCompleteTrip(tripId) }
+        { text: 'Complete Anyway', onPress: () => tripServiceEnhanced.completeTrip(tripId).then(() => loadData()) }
       ]);
       return;
     }
 
-    Alert.alert('Complete Trip', 'Are you sure you want to complete this trip?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Complete', onPress: () => doCompleteTrip(tripId) }
-    ]);
-  };
-
-  const doCompleteTrip = async (tripId: string) => {
     try {
-      await tripServiceEnhanced.completeTrip(tripId, driver?.id || '', currentLocation?.latitude || 0, currentLocation?.longitude || 0);
+      await tripServiceEnhanced.completeTrip(tripId);
       setActiveTrip(null);
       setCheckedInStudents([]);
       Alert.alert('Success', 'Trip completed! Great work.');
@@ -246,7 +239,7 @@ export default function DriverTripScreen({ navigation }: Props) {
         <View style={styles(colors).headerTop}>
           <Text style={styles(colors).headerTitle}>🚐 My Trips</Text>
           <TouchableOpacity
-            style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? '#007749' : '#E91E63' }]}
+            style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? colors.success : colors.danger }]}
             onPress={toggleOnlineStatus}
           >
             <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={16} color="#fff" />
@@ -263,7 +256,7 @@ export default function DriverTripScreen({ navigation }: Props) {
         {activeTrip ? (
           <View style={[styles(colors).activeTripCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
             <View style={styles(colors).activeTripHeader}>
-              <View style={[styles(colors).statusBadge, { backgroundColor: '#FFB81C' }]}>
+              <View style={[styles(colors).statusBadge, { backgroundColor: colors.warning }]}>
                 <Ionicons name="bus" size={16} color="#fff" />
                 <Text style={styles(colors).statusBadgeText}>IN PROGRESS</Text>
               </View>
@@ -292,7 +285,7 @@ export default function DriverTripScreen({ navigation }: Props) {
                   </Text>
                 </View>
                 {checkedInStudents.includes(activeTrip.children?.id || '') ? (
-                  <View style={[styles(colors).checkedIn, { backgroundColor: '#007749' }]}>
+                  <View style={[styles(colors).checkedIn, { backgroundColor: colors.success }]}>
                     <Ionicons name="checkmark" size={16} color="#fff" />
                     <Text style={styles(colors).checkedInText}>Checked In</Text>
                   </View>
@@ -310,7 +303,7 @@ export default function DriverTripScreen({ navigation }: Props) {
 
             {/* Complete Trip Button */}
             <TouchableOpacity
-              style={[styles(colors).completeTripBtn, { backgroundColor: '#007749' }]}
+              style={[styles(colors).completeTripBtn, { backgroundColor: colors.success }]}
               onPress={() => completeTrip(activeTrip.id)}
             >
               <Ionicons name="flag" size={24} color="#fff" />
@@ -389,11 +382,11 @@ export default function DriverTripScreen({ navigation }: Props) {
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
           </View>
           <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: '#007749' }]}>{trips.filter((t: any) => t.status === 'completed').length}</Text>
+            <Text style={[styles(colors).statNumber, { color: colors.success }]}>{trips.filter((t: any) => t.status === 'completed').length}</Text>
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Done</Text>
           </View>
           <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{trips.filter((t: any) => t.status === 'in_progress').length}</Text>
+            <Text style={[styles(colors).statNumber, { color: colors.warning }]}>{trips.filter((t: any) => t.status === 'in_progress').length}</Text>
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Active</Text>
           </View>
         </View>
@@ -405,54 +398,54 @@ export default function DriverTripScreen({ navigation }: Props) {
 }
 
 const styles = (colors: any) => StyleSheet.create({
-  container: { flex: 1 },
-  header: { padding: 20, paddingTop: 50 },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xxl },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  onlineBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, gap: 6 },
-  onlineBtnText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  headerSub: { color: '#FFB81C', fontSize: 14, marginTop: 5 },
-  activeTripCard: { margin: 15, padding: 20, borderRadius: 16, borderWidth: 2 },
-  activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, gap: 6 },
-  statusBadgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  tripTime: { fontSize: 14 },
-  tripRoute: { fontSize: 18, fontWeight: '600', marginBottom: 15 },
-  checkinSection: { padding: 15, borderRadius: 12, marginBottom: 15 },
-  checkinTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  headerTitle: { ...typography.h1, color: colors.textInverse },
+  onlineBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
+  onlineBtnText: { ...typography.labelSmall, color: colors.textInverse },
+  headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+  activeTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, borderWidth: 2, borderColor: colors.accent },
+  activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
+  statusBadgeText: { ...typography.labelSmall, color: colors.textInverse },
+  tripTime: { ...typography.bodySmall, color: colors.textSecondary },
+  tripRoute: { ...typography.h4, color: colors.text, marginBottom: spacing.md },
+  checkinSection: { backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md },
+  checkinTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.sm },
   studentRow: { flexDirection: 'row', alignItems: 'center' },
-  studentAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-  studentInfo: { flex: 1, marginLeft: 12 },
-  studentName: { fontSize: 16, fontWeight: '600' },
-  studentSchool: { fontSize: 12 },
-  checkedIn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, gap: 4 },
-  checkedInText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  checkinBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, gap: 6 },
-  checkinBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  completeTripBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: 12, gap: 10 },
-  completeTripBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  noTripCard: { margin: 15, padding: 40, borderRadius: 16, alignItems: 'center' },
-  noTripText: { fontSize: 16, marginTop: 15 },
-  locationText: { fontSize: 12, marginTop: 5 },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
-  emptyCard: { padding: 30, borderRadius: 12, alignItems: 'center' },
-  emptyText: { fontSize: 14 },
-  tripCard: { borderRadius: 12, padding: 15, marginBottom: 10, borderWidth: 1 },
+  studentAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary },
+  studentInfo: { flex: 1, marginLeft: spacing.md },
+  studentName: { ...typography.label, color: colors.text },
+  studentSchool: { ...typography.bodySmall, color: colors.textSecondary },
+  checkedIn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xxs },
+  checkedInText: { ...typography.labelSmall, color: colors.textInverse },
+  checkinBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accent, paddingHorizontal: spacing.lg, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
+  checkinBtnText: { ...typography.button, color: colors.textInverse },
+  completeTripBtn: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.lg, borderRadius: borderRadius.md, gap: spacing.sm },
+  completeTripBtnText: { ...typography.button, color: colors.textInverse },
+  noTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.xxl, borderRadius: borderRadius.lg, alignItems: 'center' },
+  noTripText: { ...typography.h4, color: colors.text, marginTop: spacing.md },
+  locationText: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
+  section: { padding: spacing.lg },
+  sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+  emptyCard: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.md, alignItems: 'center' },
+  emptyText: { ...typography.body, color: colors.textSecondary },
+  tripCard: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
   tripHeader: { flexDirection: 'row', alignItems: 'center' },
-  tripTimeBox: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
-  tripTimeText: { fontSize: 14, fontWeight: 'bold' },
-  tripInfo: { flex: 1, marginLeft: 12 },
-  tripChild: { fontSize: 16, fontWeight: '600' },
-  tripSchool: { fontSize: 12, marginTop: 2 },
-  statusDot: { width: 12, height: 12, borderRadius: 6 },
-  tripAddress: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 6 },
-  addressText: { fontSize: 13 },
-  startBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 10, marginTop: 12, gap: 8 },
-  startBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 20, marginHorizontal: 15, borderRadius: 12 },
+  tripTimeBox: { backgroundColor: colors.primary + '20', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: borderRadius.sm },
+  tripTimeText: { ...typography.label, color: colors.primary },
+  tripInfo: { flex: 1, marginLeft: spacing.md },
+  tripChild: { ...typography.label, color: colors.text },
+  tripSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xxs },
+  statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.success },
+  tripAddress: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, gap: spacing.xs },
+  addressText: { ...typography.bodySmall, color: colors.textSecondary },
+  startBtn: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.md, borderRadius: borderRadius.md, marginTop: spacing.sm, gap: spacing.xs },
+  startBtnText: { ...typography.button, color: colors.textInverse },
+  statsRow: { backgroundColor: colors.card, flexDirection: 'row', justifyContent: 'space-around', padding: spacing.lg, marginHorizontal: spacing.lg, borderRadius: borderRadius.md },
   statItem: { alignItems: 'center' },
-  statNumber: { fontSize: 28, fontWeight: 'bold' },
-  statLabel: { fontSize: 12, marginTop: 4 },
-  bottomSpacer: { height: 30 }
+  statNumber: { ...typography.h2, color: colors.accent },
+  statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+  bottomSpacer: { height: spacing.xxl }
 });

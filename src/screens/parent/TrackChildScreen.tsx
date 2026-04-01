@@ -1,6 +1,6 @@
 // Web-safe version of TrackChildScreen - shows placeholder
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -89,7 +89,7 @@ export default function TrackChildScreen({ navigation }: any) {
               </View>
             </Card>
 
-            <Button title="View on Map" onPress={() => Alert.alert('Map', 'Opening map...')} variant="primary" fullWidth />
+            <Button title="View on Map" onPress={() => navigation?.navigate?.('LiveTrack')} variant="primary" fullWidth />
             <Spacer size="md" />
             <Button title="Back to List" onPress={() => setSelectedChild(null)} variant="outline" fullWidth />
           </>

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../lib/supabase';
+import { childrenService } from '../../lib/api';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
@@ -16,21 +18,62 @@ interface Child {
   status: 'active' | 'inactive';
 }
 
-export default function ChildrenScreen() {
+export default function ChildrenScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
-  const [children] = useState<Child[]>([
-    { id: 1, name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
-    { id: 2, name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [children, setChildren] = useState<Child[]>([]);
 
-  const onRefresh = () => {
+  const fetchChildren = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        // Use mock data for demo
+        setChildren([
+          { id: 1, name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
+          { id: 2, name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
+        ]);
+        return;
+      }
+
+      const data = await childrenService.getChildren(user.id);
+      if (data && data.length > 0) {
+        setChildren(data.map((c: any) => ({
+          id: c.id,
+          name: c.full_name,
+          school: c.school?.name || 'Unknown School',
+          grade: c.grade || 'N/A',
+          driver: c.driver?.full_name || 'Pending',
+          status: c.driver ? 'active' : 'inactive',
+        })));
+      } else {
+        setChildren([]);
+      }
+    } catch (error) {
+      console.error('Error fetching children:', error);
+      // Fallback to mock data
+      setChildren([
+        { id: 1, name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
+        { id: 2, name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchChildren();
+  }, [fetchChildren]);
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchChildren();
+    setRefreshing(false);
   };
 
   const addChild = () => {
-    Alert.alert('Add Child', 'Feature coming soon!');
+    navigation?.navigate?.('LinkChild');
   };
 
   const getInitials = (name: string) => name.substring(0, 1).toUpperCase();
@@ -56,14 +99,31 @@ export default function ChildrenScreen() {
     actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
     actionBtn: { width: '48%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.lg, alignItems: 'center', marginBottom: spacing.sm, elevation: 2 },
     actionText: { ...typography.labelSmall, color: colors.text, marginTop: spacing.xs },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
   });
 
   const quickActions = [
-    { name: 'Track All', icon: 'map', color: colors.accent, action: () => Alert.alert('Track', 'Opening tracking...') },
-    { name: 'Add Driver', icon: 'person-add', color: colors.accent, action: () => Alert.alert('Hire', 'Finding drivers...') },
-    { name: 'Emergency', icon: 'warning', color: colors.error, action: () => Alert.alert('Emergency', 'Opening...') },
-    { name: 'Documents', icon: 'document-text', color: colors.primary, action: () => Alert.alert('Documents', 'Opening...') },
+    { name: 'Track All', icon: 'map', color: colors.accent, route: 'LiveTrack' },
+    { name: 'Add Driver', icon: 'person-add', color: colors.accent, route: 'HireDriver' },
+    { name: 'Emergency', icon: 'warning', color: colors.error, route: 'Emergency' },
+    { name: 'Documents', icon: 'document-text', color: colors.primary, route: 'ParentDocs' },
   ];
+
+  if (loading) {
+    return (
+      <View style={styles(colors).container}>
+        <View style={styles(colors).header}>
+          <Text style={styles(colors).headerTitle}>My Children</Text>
+          <Text style={styles(colors).headerSub}>Manage your children</Text>
+        </View>
+        <View style={styles(colors).emptyContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles(colors).emptyText, { marginTop: spacing.md }]}>Loading children...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -84,30 +144,38 @@ export default function ChildrenScreen() {
 
       {/* Children List */}
       <View style={styles(colors).section}>
-        {children.map((child) => (
-          <Card key={child.id} variant="elevated" padding="medium">
-            <View style={styles(colors).childCard}>
-              <View style={styles(colors).childAvatar}>
-                <Text style={styles(colors).childInitial}>{getInitials(child.name)}</Text>
+        {children.length === 0 ? (
+          <View style={styles(colors).emptyContainer}>
+            <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
+            <Text style={styles(colors).emptyText}>No children added yet</Text>
+            <Text style={[styles(colors).emptyText, { marginTop: spacing.sm }]}>Tap "Add Child" to get started</Text>
+          </View>
+        ) : (
+          children.map((child) => (
+            <Card key={child.id} variant="elevated" padding="medium">
+              <View style={styles(colors).childCard}>
+                <View style={styles(colors).childAvatar}>
+                  <Text style={styles(colors).childInitial}>{getInitials(child.name)}</Text>
+                </View>
+                <View style={styles(colors).childInfo}>
+                  <Text style={styles(colors).childName}>{child.name}</Text>
+                  <Text style={styles(colors).childSchool}>{child.school}</Text>
+                  <Text style={styles(colors).childGrade}>{child.grade}</Text>
+                </View>
+                <View style={styles(colors).childStatus}>
+                  <Badge
+                    label={child.status === 'active' ? 'Active' : 'No Driver'}
+                    variant={child.status === 'active' ? 'success' : 'warning'}
+                    size="small"
+                  />
+                  {child.driver !== 'Pending' && (
+                    <Text style={styles(colors).childDriver}>{child.driver}</Text>
+                  )}
+                </View>
               </View>
-              <View style={styles(colors).childInfo}>
-                <Text style={styles(colors).childName}>{child.name}</Text>
-                <Text style={styles(colors).childSchool}>{child.school}</Text>
-                <Text style={styles(colors).childGrade}>{child.grade}</Text>
-              </View>
-              <View style={styles(colors).childStatus}>
-                <Badge
-                  label={child.status === 'active' ? 'Active' : 'No Driver'}
-                  variant={child.status === 'active' ? 'success' : 'warning'}
-                  size="small"
-                />
-                {child.driver !== 'Pending' && (
-                  <Text style={styles(colors).childDriver}>{child.driver}</Text>
-                )}
-              </View>
-            </View>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </View>
 
       {/* Quick Actions */}
@@ -115,7 +183,7 @@ export default function ChildrenScreen() {
         <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
         <View style={styles(colors).actionsGrid}>
           {quickActions.map((action, index) => (
-            <TouchableOpacity key={index} style={styles(colors).actionBtn} onPress={action.action}>
+            <TouchableOpacity key={index} style={styles(colors).actionBtn} onPress={() => navigation?.navigate?.(action.route)}>
               <Ionicons name={action.icon as any} size={24} color={action.color} />
               <Text style={styles(colors).actionText}>{action.name}</Text>
             </TouchableOpacity>

@@ -13,6 +13,9 @@ export type ThemeColors = {
   background: string;   // Main app background
   card: string;         // Card/elevated surfaces
   inputBg: string;     // Input fields background
+  surface: string;      // Secondary surfaces
+  backgroundAlt: string; // Alternative backgrounds
+  primaryMuted: string; // Primary color with opacity
 
   // Text
   text: string;         // Primary text
@@ -39,33 +42,36 @@ export type ThemeColors = {
 
 export type ThemeMode = 'dark' | 'blue' | 'light';
 
-// Dark theme (Black/Yellow) - Default
+// Dark theme (Black/Yellow/Green) - SA Transport
 const darkColors: ThemeColors = {
-  primary: '#000000',      // Black
+  primary: '#007749',      // SA Green - main brand
   accent: '#FFB81C',       // SA Gold
-  secondary: '#FFB81C',    // Gold for dark mode
+  secondary: '#FFB81C',    // Gold for accents
 
-  background: '#000000',
-  card: '#1a1a1a',
+  background: '#000000',   // Pure black
+  card: '#121212',         // Slightly lighter for subtle depth
   inputBg: '#1a1a1a',
+  surface: '#1a1a1a',
+  backgroundAlt: '#1f1f1f',
+  primaryMuted: '#00774930',
 
   text: '#ffffff',
-  textSecondary: '#888888',
-  textMuted: '#666666',
-  textInverse: '#ffffff',  // Fixed: white text for dark backgrounds
+  textSecondary: '#a0a0a0',
+  textMuted: '#707070',
+  textInverse: '#ffffff',
 
-  border: '#333333',
-  divider: '#222222',
+  border: '#2a2a2a',
+  divider: '#1f1f1f',
 
-  success: '#4caf50',
-  error: '#f44336',
+  success: '#007749',
+  error: '#E03C31',
   warning: '#FFB81C',
   info: '#FFB81C',
   danger: '#E91E63',
 
-  disabled: '#444444',
-  pressed: 'rgba(255,255,255,0.1)',
-  selected: '#FFB81C20',
+  disabled: '#333333',
+  pressed: '#ffffff15',
+  selected: '#00774930',
 };
 
 // Blue theme (SA Blue/Yellow)
@@ -77,6 +83,9 @@ const blueColors: ThemeColors = {
   background: '#f5f5f5',
   card: '#ffffff',
   inputBg: '#ffffff',
+  surface: '#f0f0f0',
+  backgroundAlt: '#e8e8e8',
+  primaryMuted: '#00239520',
 
   text: '#333333',
   textSecondary: '#666666',
@@ -106,6 +115,9 @@ const lightColors: ThemeColors = {
   background: '#f5f5f5',
   card: '#ffffff',
   inputBg: '#f8f8f8',
+  surface: '#f0f0f0',
+  backgroundAlt: '#e8e8e8',
+  primaryMuted: '#00000010',
 
   text: '#333333',
   textSecondary: '#666666',

@@ -373,7 +373,7 @@ const styles = (colors: any) => StyleSheet.create({
     marginTop: spacing.xs,
   },
   formCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     padding: spacing.xl,
   },
   welcomeText: {
@@ -423,7 +423,7 @@ const styles = (colors: any) => StyleSheet.create({
     padding: spacing.lg,
   },
   modalContent: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     padding: spacing.xl,
     width: '100%',
     maxWidth: 400,

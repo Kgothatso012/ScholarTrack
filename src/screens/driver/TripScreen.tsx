@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
@@ -123,11 +123,16 @@ const TripScreen = ({ navigation }: any) => {
         <View style={styles(colors).section}>
           <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Quick Actions</Text>
           <View style={styles(colors).quickActions}>
-            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
+            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => {
+              // Open maps navigation
+              const pickupLat = -25.7461;
+              const pickupLng = 28.1881;
+              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${pickupLat},${pickupLng}`);
+            }}>
               <Ionicons name="navigate" size={24} color={colors.primary} />
               <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Navigate</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Support', 'Contact support...')}>
+            <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => navigation?.navigate?.('Support')}>
               <Ionicons name="help-circle" size={24} color={colors.primary} />
               <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Support</Text>
             </TouchableOpacity>
@@ -261,15 +266,23 @@ const TripScreen = ({ navigation }: any) => {
       <View style={styles(colors).section}>
         <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Quick Actions</Text>
         <View style={styles(colors).quickActions}>
-          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Navigation', 'Opening navigation...')}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => {
+            // Open maps with current location (demo coordinates - Pretoria)
+            const pickupLat = -25.7461;
+            const pickupLng = 28.1881;
+            Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${pickupLat},${pickupLng}`);
+          }}>
             <Ionicons name="navigate" size={24} color={colors.primary} />
             <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Navigate</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Call', 'Opening dialer...')}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => {
+            // Call emergency contact or parent
+            Linking.openURL('tel:0800123456');
+          }}>
             <Ionicons name="call" size={24} color="#007749" />
             <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Call Parent</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => Alert.alert('Message', 'Opening messages...')}>
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => navigation?.navigate?.('Chat')}>
             <Ionicons name="chatbubbles" size={24} color="#FFB81C" />
             <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Message</Text>
           </TouchableOpacity>
@@ -280,47 +293,47 @@ const TripScreen = ({ navigation }: any) => {
 };
 
 const styles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000000' },
+  container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { color: '#888888', marginTop: 10, fontSize: 16 },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  tripStatus: { backgroundColor: '#fff', margin: 15, padding: 20, borderRadius: 10, alignItems: 'center', elevation: 3 },
-  statusBadge: { paddingHorizontal: 15, paddingVertical: 5, borderRadius: 15 },
-  statusActive: { backgroundColor: '#007749' },
-  statusPending: { backgroundColor: '#FFB81C' },
-  statusText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  routeName: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginTop: 10 },
-  tripStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 15 },
+  loadingText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
+  header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xxl },
+  headerTitle: { ...typography.h2, color: colors.textInverse },
+  headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+  tripStatus: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, alignItems: 'center', elevation: 3 },
+  statusBadge: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full },
+  statusActive: { backgroundColor: colors.success },
+  statusPending: { backgroundColor: colors.warning },
+  statusText: { ...typography.labelSmall, color: colors.textInverse, fontWeight: 'bold' },
+  routeName: { ...typography.h4, color: colors.text, marginTop: spacing.sm },
+  tripStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: spacing.md },
   stat: { alignItems: 'center' },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#FFB81C' },
-  statLabel: { fontSize: 12, color: '#888888' },
-  tripActions: { padding: 15 },
-  startBtn: { backgroundColor: '#007749', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, borderRadius: 10 },
-  endBtn: { backgroundColor: '#d32f2f', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, borderRadius: 10 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 10 },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginBottom: 15 },
-  tripCard: { borderRadius: 10, padding: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  tripIcon: { marginRight: 12 },
+  statNumber: { ...typography.h3, color: colors.accent },
+  statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+  tripActions: { padding: spacing.lg },
+  startBtn: { backgroundColor: colors.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: spacing.lg, borderRadius: borderRadius.md },
+  endBtn: { backgroundColor: colors.error, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: spacing.lg, borderRadius: borderRadius.md },
+  btnText: { ...typography.button, color: colors.textInverse },
+  section: { padding: spacing.lg },
+  sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+  tripCard: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+  tripIcon: { marginRight: spacing.md },
   tripInfo: { flex: 1 },
-  tripName: { fontSize: 15, fontWeight: 'bold', color: '#ffffff' },
-  tripTime: { fontSize: 13, color: '#888888', marginTop: 2 },
-  tripStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  tripCompleted: { backgroundColor: '#007749' },
-  tripInProgress: { backgroundColor: '#FFB81C' },
-  tripScheduled: { backgroundColor: '#002395' },
-  tripStatusText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
+  tripName: { ...typography.label, color: colors.text },
+  tripTime: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
+  tripStatusBadge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xxs, borderRadius: borderRadius.sm },
+  tripCompleted: { backgroundColor: colors.success },
+  tripInProgress: { backgroundColor: colors.warning },
+  tripScheduled: { backgroundColor: colors.info },
+  tripStatusText: { ...typography.labelSmall, color: colors.textInverse, fontWeight: 'bold' },
   quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
-  quickAction: { padding: 15, borderRadius: 10, alignItems: 'center', width: 100, elevation: 2 },
-  quickActionText: { fontSize: 12, color: '#ffffff', marginTop: 5, fontWeight: '600' },
-  noTripCard: { margin: 15, padding: 30, borderRadius: 10, alignItems: 'center' },
-  noTripText: { fontSize: 16, fontWeight: 'bold', color: '#ffffff', marginTop: 10 },
-  noTripSubtext: { fontSize: 13, color: '#888888', marginTop: 5, textAlign: 'center' },
-  emptyContainer: { borderRadius: 10, padding: 30, alignItems: 'center', justifyContent: 'center' },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff', marginTop: 15, marginBottom: 8 },
-  emptyText: { fontSize: 14, color: '#888888', textAlign: 'center', lineHeight: 20 },
+  quickAction: { backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', width: 100, elevation: 2 },
+  quickActionText: { ...typography.labelSmall, color: colors.text, marginTop: spacing.xs },
+  noTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.xxl, borderRadius: borderRadius.lg, alignItems: 'center' },
+  noTripText: { ...typography.h4, color: colors.text, marginTop: spacing.sm },
+  noTripSubtext: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs, textAlign: 'center' },
+  emptyContainer: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.xxl, alignItems: 'center', justifyContent: 'center' },
+  emptyTitle: { ...typography.h4, color: colors.text, marginTop: spacing.md, marginBottom: spacing.sm },
+  emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
 });
 
 export default TripScreen;

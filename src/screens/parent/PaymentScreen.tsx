@@ -42,8 +42,9 @@ const PaymentScreen = ({ navigation }: any) => {
     setRefreshing(false);
   };
 
-  const payNow = () => {
-    Alert.alert('Payment', 'Redirecting to payment gateway...');
+  const handlePayNow = () => {
+    // Navigate to PaymentDetails screen for full payment flow
+    navigation.navigate('Payments');
   };
 
   const pendingPayments = payments.filter(p => p.status === 'pending');
@@ -65,29 +66,29 @@ const PaymentScreen = ({ navigation }: any) => {
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h1, color: colors.textInverse },
     headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    balanceCard: { backgroundColor: colors.surface, margin: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center', elevation: 3 },
+    balanceCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center', elevation: 3 },
     balanceLabel: { ...typography.label, color: colors.textSecondary },
     balanceAmount: { ...typography.displayLarge, color: colors.accent, marginVertical: spacing.sm },
     balanceDue: { ...typography.bodySmall, color: colors.textSecondary },
     payBtn: { backgroundColor: colors.success, paddingHorizontal: spacing.xl, paddingVertical: spacing.md, borderRadius: borderRadius.md, marginTop: spacing.md },
     payBtnText: { ...typography.button, color: colors.textInverse },
-    statsRow: { flexDirection: 'row', backgroundColor: colors.surface, marginHorizontal: spacing.md, marginTop: spacing.md, borderRadius: borderRadius.md, padding: spacing.md, elevation: 2 },
+    statsRow: { flexDirection: 'row', backgroundColor: colors.card, marginHorizontal: spacing.md, marginTop: spacing.md, borderRadius: borderRadius.md, padding: spacing.md, elevation: 2 },
     infoRow: { flex: 1, flexDirection: 'row', alignItems: 'center' },
     infoContent: { marginLeft: spacing.sm },
     infoLabel: { ...typography.labelSmall, color: colors.textSecondary },
     infoValue: { ...typography.h4, color: colors.text },
     section: { padding: spacing.lg },
     sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    emptyContainer: { backgroundColor: colors.surface, padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center', elevation: 2 },
+    emptyContainer: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center', elevation: 2 },
     emptyTitle: { ...typography.h4, color: colors.text, marginTop: spacing.md },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginTop: spacing.sm },
-    paymentCard: { backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    paymentCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     paymentInfo: { flex: 1 },
     paymentMonth: { ...typography.label, color: colors.text },
     paymentDate: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
     paymentRight: { alignItems: 'flex-end' },
     paymentAmount: { ...typography.h4, color: colors.accent },
-    methodCard: { backgroundColor: colors.surface, padding: spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    methodCard: { backgroundColor: colors.card, padding: spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     methodInfo: { flex: 1, marginLeft: spacing.md },
     methodName: { ...typography.label, color: colors.text },
     methodExpiry: { ...typography.bodySmall, color: colors.textSecondary },
@@ -123,7 +124,7 @@ const PaymentScreen = ({ navigation }: any) => {
             <Text style={styles(colors).balanceDue}>
               {pendingPayments.length} payment{pendingPayments.length > 1 ? 's' : ''} pending
             </Text>
-            <Button title="Pay Now" onPress={payNow} variant="primary" />
+            <Button title="Pay Now" onPress={handlePayNow} variant="primary" />
           </View>
         </Card>
       ) : (

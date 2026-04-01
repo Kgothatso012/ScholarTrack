@@ -31,12 +31,47 @@ CREATE TABLE IF NOT EXISTS public.drivers (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   phone TEXT NOT NULL,
+  email TEXT,
+  id_number TEXT,
   vehicle_type TEXT,
   license_number TEXT,
   permit_number TEXT,
+  -- Compliance Status Fields (Uber/inDrive style)
   is_verified BOOLEAN DEFAULT false,
   is_available BOOLEAN DEFAULT false,
   rating FLOAT DEFAULT 5.0,
+  total_trips INTEGER DEFAULT 0,
+  -- Compliance Document Status
+  id_copy_status TEXT DEFAULT 'pending' CHECK (id_copy_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  profile_photo_status TEXT DEFAULT 'pending' CHECK (profile_photo_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  pdp_status TEXT DEFAULT 'pending' CHECK (pdp_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  drivers_license_status TEXT DEFAULT 'pending' CHECK (drivers_license_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  criminal_check_status TEXT DEFAULT 'pending' CHECK (criminal_check_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  roadworthy_status TEXT DEFAULT 'pending' CHECK (roadworthy_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  insurance_status TEXT DEFAULT 'pending' CHECK (insurance_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  operating_license_status TEXT DEFAULT 'pending' CHECK (operating_license_status IN ('pending', 'submitted', 'approved', 'rejected')),
+  compliance_status TEXT DEFAULT 'pending' CHECK (compliance_status IN ('pending', 'under_review', 'approved', 'rejected')),
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Vehicles table for driver fleet
+CREATE TABLE IF NOT EXISTS public.vehicles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  driver_id UUID REFERENCES drivers(id) ON DELETE CASCADE,
+  make TEXT NOT NULL,
+  model TEXT NOT NULL,
+  year INTEGER NOT NULL,
+  color TEXT,
+  license_plate TEXT NOT NULL,
+  vin_number TEXT,
+  vehicle_type TEXT DEFAULT 'sedan',
+  -- Vehicle Compliance
+  roadworthy_expiry DATE,
+  insurance_expiry DATE,
+  license_disc_expiry DATE,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -67,7 +67,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       case 'danger':
         return colors.error;
       default:
-        return colors.surface;
+        return colors.card;
     }
   };
 

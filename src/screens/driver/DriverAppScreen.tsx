@@ -172,14 +172,14 @@ export default function DriverAppScreen({ navigation }: any) {
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h1, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    headerActions: { flexDirection: 'row', alignItems: 'center' },
+    headerTitle: { ...typography.h2, color: colors.textInverse, textAlign: 'center', position: 'absolute', left: 0, right: 0 },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xl, textAlign: 'center' },
+    headerActions: { flexDirection: 'row', alignItems: 'center', zIndex: 1 },
     headerBtn: { padding: spacing.xs, marginLeft: spacing.sm },
-    section: { padding: spacing.lg },
+    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
     sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    menuGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    menuCard: { width: '31%', backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    menuGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: spacing.sm },
+    menuCard: { width: '31%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
     menuIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xs },
     menuText: { ...typography.labelSmall, color: colors.text, textAlign: 'center' },
     tripButton: { padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center' },
@@ -187,15 +187,15 @@ export default function DriverAppScreen({ navigation }: any) {
     tripButtonInactive: { backgroundColor: colors.success },
     tripButtonText: { ...typography.h3, color: colors.textInverse },
     tripButtonSubtext: { ...typography.bodySmall, color: colors.textInverse, marginTop: spacing.xs },
-    earningsGrid: { flexDirection: 'row', justifyContent: 'space-between' },
-    earningCard: { flex: 1, backgroundColor: colors.surface, padding: spacing.md, marginHorizontal: spacing.xs, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    earningsGrid: { flexDirection: 'row', gap: spacing.sm },
+    earningCard: { flex: 1, backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
     earningLabel: { ...typography.labelSmall, color: colors.textSecondary },
     earningValue: { ...typography.h3, color: colors.accent, marginTop: spacing.xs },
-    tripCard: { backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    tripCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     tripInfo: { flex: 1 },
     tripTime: { ...typography.h4, color: colors.text },
     tripRoute: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
-    paymentCard: { backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    paymentCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     paymentInfo: { flex: 1 },
     paymentStatus: { ...typography.labelSmall, color: colors.textSecondary },
     paymentAmount: { ...typography.h4, color: colors.accent },
@@ -235,18 +235,13 @@ export default function DriverAppScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles(colors).header}>
         <View style={styles(colors).headerTop}>
-          <TouchableOpacity onPress={() => navigation?.navigate?.('Settings')}>
-            <Ionicons name="menu" size={28} color={colors.textInverse} />
+          <TouchableOpacity onPress={onRefresh} style={styles(colors).headerBtn}>
+            <Ionicons name="refresh" size={22} color={colors.textInverse} />
           </TouchableOpacity>
           <Text style={styles(colors).headerTitle}>Driver Dashboard</Text>
-          <View style={styles(colors).headerActions}>
-            <TouchableOpacity onPress={onRefresh} style={styles(colors).headerBtn}>
-              <Ionicons name="refresh" size={22} color={colors.textInverse} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout} style={styles(colors).headerBtn}>
-              <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={handleLogout} style={styles(colors).headerBtn}>
+            <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
+          </TouchableOpacity>
         </View>
         <Text style={styles(colors).headerSubtext}>Welcome back, {currentUser?.full_name || 'Driver'}!</Text>
       </View>

@@ -18,7 +18,7 @@ interface Payment {
   description: string;
 }
 
-export default function PaymentDetailsScreen() {
+export default function PaymentDetailsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('card');
@@ -26,6 +26,7 @@ export default function PaymentDetailsScreen() {
   const [userEmail, setUserEmail] = useState('');
   const [paymentHistory, setPaymentHistory] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     loadPaymentHistory();
@@ -77,6 +78,52 @@ export default function PaymentDetailsScreen() {
     }
   };
 
+  const handlePayment = async () => {
+    if (processing) return;
+
+    Alert.alert(
+      'Confirm Payment',
+      `Pay R${currentAmount} for transport services?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Pay Now',
+          onPress: async () => {
+            setProcessing(true);
+            try {
+              // Create payment record in Supabase
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) {
+                Alert.alert('Error', 'Please login first');
+                return;
+              }
+
+              const { error } = await supabase.from('payments').insert({
+                parent_id: user.id,
+                amount: currentAmount * 100, // Store in cents
+                status: 'pending',
+                description: 'Transport payment',
+                method: selectedMethod,
+              });
+
+              if (error) throw error;
+
+              Alert.alert(
+                'Payment Initiated',
+                'Your payment has been initiated. You will be redirected to the payment gateway.',
+                [{ text: 'OK', onPress: () => navigation.goBack() }]
+              );
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Failed to process payment');
+            } finally {
+              setProcessing(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
@@ -115,7 +162,7 @@ export default function PaymentDetailsScreen() {
             <Text style={styles(colors).balanceLabel}>Current Amount Due</Text>
             <Text style={styles(colors).balanceAmount}>R{currentAmount}</Text>
             <Spacer size="md" />
-            <Button title="Pay Now" onPress={() => Alert.alert('Pay', 'Processing payment...')} variant="primary" fullWidth />
+            <Button title={processing ? 'Processing...' : 'Pay Now'} onPress={handlePayment} variant="primary" fullWidth disabled={processing} />
           </View>
         </Card>
       </View>

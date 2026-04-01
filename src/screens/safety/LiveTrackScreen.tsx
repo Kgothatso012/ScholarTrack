@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -7,7 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-export default function LiveTrackScreen() {
+export default function LiveTrackScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [trackingEnabled, setTrackingEnabled] = useState(true);
   const [tripActive, setTripActive] = useState(false);
@@ -38,12 +38,25 @@ export default function LiveTrackScreen() {
     );
   };
 
-  const shareLocation = () => {
-    Alert.alert('Share Live Location', 'Share your current location via:', [
-      { text: 'WhatsApp', onPress: () => Alert.alert('Sharing', 'Opening WhatsApp...') },
-      { text: 'SMS', onPress: () => Alert.alert('Sharing', 'Sending SMS...') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+  const shareLocation = async () => {
+    try {
+      const message = `Live bus location for ${tripInfo.route}\nSchool: ${tripInfo.school}\nETA: ${tripInfo.eta}\nTrack with ScholarTrack app`;
+
+      await Share.share({
+        message,
+        title: 'Share Bus Location',
+      });
+    } catch (error) {
+      Alert.alert('Error', 'Unable to share location');
+    }
+  };
+
+  const handleHistory = () => {
+    navigation.navigate('History');
+  };
+
+  const handleAlert = () => {
+    navigation.navigate('Emergency');
   };
 
   const styles = (colors: any) => StyleSheet.create({
@@ -140,13 +153,13 @@ export default function LiveTrackScreen() {
           </View>
           <Text style={styles(colors).actionText}>Share</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('History', 'Opening trip history...')}>
+        <TouchableOpacity style={styles(colors).actionBtn} onPress={handleHistory}>
           <View style={styles(colors).actionIcon}>
             <Ionicons name="time" size={24} color={colors.accent} />
           </View>
           <Text style={styles(colors).actionText}>History</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('Alert', 'Sending alert...')}>
+        <TouchableOpacity style={styles(colors).actionBtn} onPress={handleAlert}>
           <View style={styles(colors).actionIcon}>
             <Ionicons name="warning" size={24} color={colors.error} />
           </View>

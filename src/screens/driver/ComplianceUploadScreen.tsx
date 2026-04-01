@@ -158,15 +158,21 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   const [documents, setDocuments] = useState<ComplianceDocument[]>([
     {
-      id: 'pdp',
-      label: 'PDP License',
-      description: 'Public Driver Permit (PDP) Certificate',
+      id: 'idCopy',
+      label: 'ID Document',
+      description: 'South African ID or valid passport',
       required: true,
     },
     {
-      id: 'roadworthy',
-      label: 'Roadworthy Certificate',
-      description: 'Vehicle roadworthy certification',
+      id: 'profilePhoto',
+      label: 'Profile Photo',
+      description: 'Clear selfie for driver profile',
+      required: true,
+    },
+    {
+      id: 'pdp',
+      label: 'PDP License',
+      description: 'Public Driver Permit (PDP) Certificate - Code 10',
       required: true,
     },
     {
@@ -176,16 +182,40 @@ export default function ComplianceUploadScreen({ navigation }: any) {
       required: true,
     },
     {
-      id: 'insurance',
-      label: 'Vehicle Insurance',
-      description: 'Comprehensive insurance cover',
+      id: 'criminalCheck',
+      label: 'Criminal Check',
+      description: 'HURU or MIE safety screening certificate',
       required: true,
     },
     {
-      id: 'vehiclePermit',
+      id: 'roadworthy',
+      label: 'Roadworthy Certificate',
+      description: 'Vehicle roadworthy certification (A30)',
+      required: true,
+    },
+    {
+      id: 'vehicleRegistration',
+      label: 'Vehicle Registration',
+      description: 'Vehicle license disk / registration papers',
+      required: true,
+    },
+    {
+      id: 'insurance',
+      label: 'Vehicle Insurance',
+      description: 'Comprehensive insurance with rideshare cover',
+      required: true,
+    },
+    {
+      id: 'operatingLicense',
       label: 'Operating License',
       description: 'National Land Transport Act permit',
       required: true,
+    },
+    {
+      id: 'proofOfAddress',
+      label: 'Proof of Address',
+      description: 'Utility bill or bank statement (recent)',
+      required: false,
     },
   ]);
 
@@ -517,15 +547,17 @@ export default function ComplianceUploadScreen({ navigation }: any) {
         if (doc.document) {
           try {
             // Upload to Supabase Storage
-            const fileUrl = await documentService.uploadDocument(
-              'documents',  // bucket name
-              `driver/${user.id}`,  // folder
-              {
-                uri: doc.document.uri,
-                name: doc.document.name,
-                type: doc.document.type
-              }
-            );
+            const fileName = `driver/${user.id}/${doc.id}_${Date.now()}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('documents')
+              .upload(fileName, doc.document as any);
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+              .from('documents')
+              .getPublicUrl(fileName);
 
             // Map doc.id to document_type
             const docTypeMap: Record<string, any> = {
@@ -540,7 +572,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
             await documentService.saveDriverDocument(
               user.id,
               docTypeMap[doc.id] || 'pdp_certificate',
-              fileUrl,
+              publicUrl,
               doc.document.name,
               doc.expiryDate?.toISOString()
             );
@@ -1257,7 +1289,7 @@ const styles = (colors: any) => StyleSheet.create({
   },
   uploadButtonText: {
     marginLeft: 10,
-    color: '#FFB81C',
+    color: '#007749',
     fontWeight: '500',
   },
   uploadedPreview: {

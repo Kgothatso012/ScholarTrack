@@ -160,31 +160,31 @@ const ParentDashboard = ({ navigation }: any) => {
     helpPanel: { marginTop: spacing.md, backgroundColor: 'rgba(255,255,255,0.15)', padding: spacing.md, borderRadius: borderRadius.md },
     helpTitle: { ...typography.label, color: colors.accent, marginBottom: spacing.sm },
     helpItem: { ...typography.caption, color: colors.textInverse, marginBottom: spacing.xs },
-    quickActionsContainer: { backgroundColor: colors.surface, marginTop: -spacing.xl, marginHorizontal: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, elevation: 3 },
+    quickActionsContainer: { backgroundColor: colors.card, marginTop: spacing.lg, marginHorizontal: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, elevation: 3 },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
-    actionCard: { alignItems: 'center', padding: spacing.md },
+    actionCard: { alignItems: 'center', padding: spacing.sm, flex: 1 },
     actionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xs },
-    actionText: { ...typography.labelSmall, color: colors.text },
+    actionText: { ...typography.label, color: colors.text, fontWeight: '600' },
     actionDesc: { ...typography.caption, color: colors.textSecondary },
-    section: { padding: spacing.lg },
+    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     sectionTitle: { ...typography.h3, color: colors.text },
     seeAll: { ...typography.label, color: colors.accent },
-    childCard: { backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', justifyContent: 'space-between', borderRadius: borderRadius.md, elevation: 2 },
+    childCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     childInfo: { flex: 1 },
-    childName: { ...typography.h4, color: colors.accent },
+    childName: { ...typography.h4, color: colors.text },
     childSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
-    childStatus: { alignItems: 'flex-end' },
+    childStatus: { marginLeft: spacing.sm },
     statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xxs, borderRadius: borderRadius.full },
-    tripCard: { backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    tripCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     tripInfo: { flex: 1, marginLeft: spacing.md },
     tripTitle: { ...typography.label, color: colors.text },
     tripSubtitle: { ...typography.bodySmall, color: colors.textSecondary },
     tripRight: { alignItems: 'flex-end' },
     tripTime: { ...typography.h4, color: colors.accent },
-    linkCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md },
+    linkCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md },
     linkText: { flex: 1, marginLeft: spacing.md, ...typography.body, color: colors.text },
-    emptyContainer: { alignItems: 'center', padding: spacing.xl, backgroundColor: colors.surface, borderRadius: borderRadius.md },
+    emptyContainer: { alignItems: 'center', padding: spacing.xl },
     emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
   });
 
@@ -247,14 +247,14 @@ const ParentDashboard = ({ navigation }: any) => {
       {/* Quick Actions */}
       <View style={styles(colors).quickActionsContainer}>
         <View style={styles(colors).quickActions}>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('Live')}>
+          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('LiveTrack')}>
             <View style={[styles(colors).actionIcon, { backgroundColor: colors.success + '20' }]}>
               <Ionicons name="map" size={22} color={colors.success} />
             </View>
             <Text style={styles(colors).actionText}>Track</Text>
             <Text style={styles(colors).actionDesc}>View bus</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('Hire')}>
+          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('HireDriver')}>
             <View style={[styles(colors).actionIcon, { backgroundColor: colors.primary + '20' }]}>
               <Ionicons name="person-add" size={22} color={colors.primary} />
             </View>
@@ -361,6 +361,16 @@ const ParentDashboard = ({ navigation }: any) => {
             <View style={styles(colors).linkCard}>
               <Ionicons name="card" size={24} color={colors.primary} />
               <Text style={styles(colors).linkText}>View Payments</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </View>
+          </Card>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('ParentDocs')}>
+          <Card variant="outlined" padding="medium">
+            <View style={styles(colors).linkCard}>
+              <Ionicons name="document-text" size={24} color={colors.primary} />
+              <Text style={styles(colors).linkText}>My Documents</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
             </View>
           </Card>

@@ -181,7 +181,7 @@ const styles = (colors: any) => StyleSheet.create({
     bottom: 0,
     right: 0,
     borderWidth: 2,
-    borderColor: colors.surface,
+    borderColor: colors.card,
   },
 });
 

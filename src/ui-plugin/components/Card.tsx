@@ -43,21 +43,21 @@ export const Card: React.FC<CardProps> = ({
     switch (variant) {
       case 'outlined':
         return {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.card,
           borderWidth: 1,
           borderColor: colors.border,
         };
       case 'filled':
         return {
-          backgroundColor: colors.backgroundAlt,
+          backgroundColor: colors.inputBg,
         };
       case 'soft':
         return {
-          backgroundColor: colors.primaryMuted,
+          backgroundColor: colors.selected,
         };
       default:
         return {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.card,
           ...shadows.md,
         };
     }

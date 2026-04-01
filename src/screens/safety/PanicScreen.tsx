@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
@@ -124,7 +124,7 @@ export default function PanicScreen() {
                   <Text style={styles(colors).contactName}>{contact.name}</Text>
                   <Text style={styles(colors).contactPhone}>{contact.phone}</Text>
                 </View>
-                <TouchableOpacity onPress={() => Alert.alert('Call', `Calling ${contact.phone}...`)}>
+                <TouchableOpacity onPress={() => Linking.openURL(`tel:${contact.phone}`)}>
                   <Ionicons name="call" size={20} color={colors.success} />
                 </TouchableOpacity>
               </View>

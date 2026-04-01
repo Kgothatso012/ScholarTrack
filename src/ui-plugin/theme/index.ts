@@ -24,6 +24,8 @@ export const colors = {
   backgroundAlt: '#EEEEEE',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
+  card: '#FFFFFF',
+  inputBg: '#F8F8F8',
 
   // Text - Dark professional
   text: '#1A1A2E',
@@ -52,6 +54,11 @@ export const colors = {
   border: '#E0E0E0',
   borderLight: '#EEEEEE',
   divider: '#E0E0E0',
+
+  // Interactive states
+  selected: '#00774920',
+  pressed: 'rgba(0,0,0,0.1)',
+  disabled: '#CCCCCC',
 
   // Shadows
   shadow: 'rgba(26, 26, 46, 0.08)',

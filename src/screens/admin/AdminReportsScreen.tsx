@@ -75,8 +75,43 @@ const AdminReportsScreen = ({ navigation }: any) => {
     setRefreshing(false);
   }, []);
 
-  const exportReport = (type: string) => {
-    Alert.alert('Export', `Exporting ${type} report...`);
+  const exportReport = async (type: string) => {
+    try {
+      let data: any[] = [];
+      let description = '';
+
+      switch (type) {
+        case 'Student':
+          const { data: students } = await supabase.from('children').select('*');
+          data = students || [];
+          description = `${data.length} student records`;
+          break;
+        case 'Driver':
+          const { data: drivers } = await supabase.from('drivers').select('*');
+          data = drivers || [];
+          description = `${data.length} driver records`;
+          break;
+        case 'Revenue':
+          const { data: payments } = await supabase.from('payments').select('*');
+          data = payments || [];
+          description = `${data.length} payment records`;
+          break;
+        case 'Trip':
+          const { data: trips } = await supabase.from('trips').select('*');
+          data = trips || [];
+          description = `${data.length} trip records`;
+          break;
+      }
+
+      // In production, this would generate a CSV/PDF and download
+      Alert.alert(
+        'Export Ready',
+        `${type} report prepared with ${description}.\n\nIn production, this would download as a CSV file.`,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to export report');
+    }
   };
 
   const reportTypes = [

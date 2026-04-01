@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 'filled':
         return colors.primary;
       default:
-        return colors.surface;
+        return colors.card;
     }
   };
 

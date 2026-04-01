@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { paymentService, Payment } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
@@ -21,6 +22,7 @@ const EarningsScreen = ({ navigation }: any) => {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [earnings, setEarnings] = useState<EarningsData>({
     thisMonth: 0,
@@ -85,8 +87,55 @@ const EarningsScreen = ({ navigation }: any) => {
     setRefreshing(false);
   }, [fetchData]);
 
-  const withdraw = () => {
-    Alert.alert('Withdraw', 'Processing withdrawal request...');
+  const handleWithdraw = async () => {
+    if (processing) return;
+    if (earnings.available <= 0) {
+      Alert.alert('No Funds', 'You have no available balance to withdraw.');
+      return;
+    }
+
+    Alert.alert(
+      'Withdraw Funds',
+      `Withdraw R${(earnings.available / 100).toFixed(2)} to your bank account?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            setProcessing(true);
+            try {
+              // Get driver info for bank details
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) {
+                Alert.alert('Error', 'Please login first');
+                return;
+              }
+
+              // In production, this would integrate with a payment provider
+              // For now, create a withdrawal record
+              const { error } = await supabase.from('driver_withdrawals').insert({
+                driver_id: user.id,
+                amount: earnings.available,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+              });
+
+              if (error) throw error;
+
+              Alert.alert(
+                'Withdrawal Requested',
+                'Your withdrawal request has been submitted. Funds will be processed within 2-3 business days.',
+                [{ text: 'OK' }]
+              );
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Failed to process withdrawal');
+            } finally {
+              setProcessing(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const styles = (colors: any) => StyleSheet.create({
@@ -140,7 +189,7 @@ const EarningsScreen = ({ navigation }: any) => {
           <Text style={styles(colors).balanceAmount}>R{(earnings.available / 100).toFixed(2)}</Text>
           <Text style={styles(colors).balanceSubtext}>Ready to withdraw</Text>
           <Spacer size="md" />
-          <Button title="Withdraw" onPress={withdraw} variant="primary" fullWidth />
+          <Button title={processing ? 'Processing...' : 'Withdraw'} onPress={handleWithdraw} variant="primary" fullWidth disabled={processing || earnings.available <= 0} />
         </View>
       </Card>
 

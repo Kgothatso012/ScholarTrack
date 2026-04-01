@@ -74,7 +74,7 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     contactPhone: { ...typography.bodySmall, color: colors.textSecondary },
     contactRelation: { ...typography.caption, color: colors.textSecondary },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
-    modalContent: { backgroundColor: colors.surface, padding: spacing.xl, borderRadius: borderRadius.lg, margin: spacing.lg },
+    modalContent: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, margin: spacing.lg },
     modalTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.lg },
     input: { backgroundColor: colors.backgroundAlt, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text },
   });

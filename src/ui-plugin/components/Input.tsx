@@ -60,7 +60,7 @@ export const Input: React.FC<InputProps> = ({
 
   const getBackgroundColor = () => {
     if (variant === 'filled') return colors.backgroundAlt;
-    return colors.surface;
+    return colors.card;
   };
 
   const getSizeStyles = (): ViewStyle => {
