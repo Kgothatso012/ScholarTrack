@@ -165,11 +165,11 @@ async function getNotificationSettings(): Promise<NotificationSettings | null> {
 
 // Map notification type to setting key
 function getSettingKey(type: NotificationType): keyof NotificationSettings | null {
-  if (type.startsWith('TRIP')) return 'tripUpdates';
+  if (type === 'TRIP_STARTED' || type === 'TRIP_COMPLETED' || type === 'CHILD_PICKED_UP' || type === 'CHILD_DROPPED_OFF' || type === 'DRIVER_ASSIGNED') return 'tripUpdates';
+  if (type === 'TRIP_DELAYED') return 'routeChanges';
   if (type === 'PANIC_TRIGGERED' || type === 'EMERGENCY') return 'safetyAlerts';
   if (type.startsWith('PAYMENT')) return 'paymentNotifications';
   if (type === 'ROUTE_UPDATE') return 'routeChanges';
-  if (type === 'DRIVER_ASSIGNED') return 'driverMessages';
   return null;
 }
 
