@@ -1,9 +1,12 @@
 // PayStack Payment Service for ScholarTrack
 // Handles card payments for South African market
 
-import { supabase } from './supabase';
+import { supabase } from './services/supabase';
 
-const PAYSTACK_SECRET_KEY = process.env.EXPO_PUBLIC_PAYSTACK_SECRET_KEY || '';
+const PAYSTACK_SECRET_KEY = process.env.EXPO_PUBLIC_PAYSTACK_SECRET_KEY;
+if (!PAYSTACK_SECRET_KEY) {
+  throw new Error('Missing Paystack configuration. Set EXPO_PUBLIC_PAYSTACK_SECRET_KEY');
+}
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
 
 export interface PayStackTransaction {

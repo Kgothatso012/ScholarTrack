@@ -223,7 +223,7 @@ export const geofenceService = {
         );
       }
 
-      console.log(`Geofence alert triggered: ${eventType} for child ${zone.childId}`);
+      // Geofence alert triggered
     } catch (error) {
       console.error('Error triggering geofence alert:', error);
     }

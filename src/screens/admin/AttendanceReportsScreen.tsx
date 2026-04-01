@@ -249,7 +249,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
                   <View>
                     <Text style={[styles(colors).childName, { color: colors.text }]}>{child.full_name}</Text>
                     <Text style={[styles(colors).childSchool, { color: colors.textSecondary }]}>
-                      {child.school_name || 'School'}
+                      {child.school?.name || 'School'}
                     </Text>
                   </View>
                 </View>

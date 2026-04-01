@@ -75,7 +75,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
 
   const handleAssignChild = async (routeId: string, childId: string) => {
     const route = routes.find(r => r.id === routeId);
-    if (!route) return;
+    if (!route || !route.driver_id) return;
 
     try {
       setLoading(true);

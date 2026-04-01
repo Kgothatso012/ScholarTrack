@@ -136,13 +136,13 @@ const ParentDashboard = ({ navigation }: any) => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' });
   };
 
-  const formatTime = (dateStr: string) => {
+  const formatTime = (dateStr: string | undefined) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
