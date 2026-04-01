@@ -57,6 +57,10 @@ export function useDriverTracking({
     }
   }, [tripId, tripActive, loadGeofenceZones]);
 
+  // Throttle geofence checks to prevent excessive calls
+  const lastGeofenceCheck = useRef<number>(0);
+  const GEOFENCE_CHECK_INTERVAL = 10000; // 10 seconds
+
   // Load geofence zones when trip starts
   const loadGeofenceZones = useCallback(async (currentTripId: string) => {
     if (!currentTripId) return;
@@ -147,9 +151,13 @@ export function useDriverTracking({
       );
       console.log('Location sent:', locationData.latitude, locationData.longitude);
 
-      // Check geofence zones if we have active zones
+      // Check geofence zones if we have active zones (throttled)
       if (geofenceZones.length > 0 && locationData.latitude !== 0 && locationData.longitude !== 0) {
-        const events = await geofenceService.checkZones(
+        const now = Date.now();
+        if (now - lastGeofenceCheck.current >= GEOFENCE_CHECK_INTERVAL) {
+          lastGeofenceCheck.current = now;
+
+          const events = await geofenceService.checkZones(
           locationData.latitude,
           locationData.longitude,
           geofenceZones

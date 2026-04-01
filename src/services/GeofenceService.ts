@@ -24,6 +24,7 @@ export interface GeofenceEvent {
 }
 
 const DEFAULT_RADIUS_METERS = 200;
+const DEFAULT_AVG_SPEED_KMH = 40; // km/h average city speed
 
 export const geofenceService = {
   // Create geofence zones from trip data
@@ -172,6 +173,11 @@ export const geofenceService = {
         .eq('id', zone.childId)
         .single();
 
+      if (!child?.parent_id) {
+        console.warn('No parent found for child:', zone.childId);
+        return;
+      }
+
       if (child?.parent_id) {
         await sendAppNotification(
           notificationType,
@@ -206,8 +212,7 @@ export const geofenceService = {
   // Get estimated time to arrival based on distance
   getETAtoZone(latitude: number, longitude: number, zone: GeofenceZone): number {
     const distanceMeters = this.getDistanceToZone(latitude, longitude, zone);
-    // Assume 40 km/h average speed in city
-    const speedMps = 40 * 1000 / 3600; // ~11.11 m/s
+    const speedMps = DEFAULT_AVG_SPEED_KMH * 1000 / 3600; // ~11.11 m/s
     return Math.ceil(distanceMeters / speedMps / 60); // minutes
   },
 };
