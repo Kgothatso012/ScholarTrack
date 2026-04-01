@@ -3,6 +3,7 @@
     "name": "ScholarTrack",
     "slug": "scholartrack-expo54",
     "version": "1.0.0",
+    "scheme": "scholartrack",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {

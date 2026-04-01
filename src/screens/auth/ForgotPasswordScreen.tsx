@@ -184,7 +184,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
             <Text style={styles(colors).helpText}>Check your spam folder</Text>
           </View>
           <View style={styles(colors).helpRow}>
-            <Ionicons name="support" size={16} style={styles(colors).helpIcon} />
+            <Ionicons name="help-circle" size={16} style={styles(colors).helpIcon} />
             <Text style={styles(colors).helpText}>Contact support@scholartrack.co.za</Text>
           </View>
         </View>
