@@ -2,10 +2,11 @@
 // No more hardcoded hex values scattered everywhere
 
 export const colors = {
-  // Primary palette
-  primary: '#000000',
-  accent: '#FFB81C',
-  accentLight: '#FFB81C',
+  // Primary palette - SA Theme
+  primary: '#002395',  // SA Blue
+  secondary: '#007749', // SA Green
+  accent: '#FFB81C',    // SA Gold
+  danger: '#E03C31',     // SA Red
   textSecondary: '#666666',
   textMuted: '#8C8CA1',
 

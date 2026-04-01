@@ -2,7 +2,7 @@
 // Required for South African Scholar Transport - National Land Transport Act
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -22,6 +22,7 @@ interface DocStatus {
 
 export default function DriverComplianceScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
   const [docs, setDocs] = useState<DocStatus[]>([
     {
       id: 'prdp',
@@ -110,7 +111,17 @@ export default function DriverComplianceScreen({ navigation, setScreen }: any) {
   const compliancePercent = Math.round((verifiedCount / requiredCount) * 100);
 
   return (
-    <ScrollView style={styles(colors).container}>
+    <ScrollView
+      style={styles(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => setRefreshing(true)}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles(colors).header}>
         <Text style={styles(colors).headerTitle}>Compliance Documents</Text>
         <Text style={styles(colors).headerSubtitle}>South African Scholar Transport Requirements</Text>

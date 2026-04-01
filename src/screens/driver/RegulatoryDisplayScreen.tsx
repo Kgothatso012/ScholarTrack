@@ -1,8 +1,8 @@
 // Regulatory Display Screen
 // Display required operating information per South African Transport Laws
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -12,6 +12,7 @@ import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export default function RegulatoryDisplayScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
   const regulatoryInfo = {
     operatorLicense: 'OP/2026/001234',
     operatorName: 'ScholarTrack Transport Services',
@@ -29,7 +30,17 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: any) 
   };
 
   return (
-    <ScrollView style={styles(colors).container}>
+    <ScrollView
+      style={styles(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => setRefreshing(true)}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <View style={styles(colors).header}>
         <Text style={styles(colors).headerTitle}>Regulatory Display</Text>
         <Text style={styles(colors).headerSubtitle}>Required by South African Law</Text>
