@@ -17,6 +17,8 @@ export default function LinkChildScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedChild, setSelectedChild] = useState<any>(null);
   const [schools, setSchools] = useState<School[]>([]);
   const [children, setChildren] = useState<any[]>([]);
   const [newChild, setNewChild] = useState({
@@ -85,6 +87,81 @@ export default function LinkChildScreen({ navigation }: Props) {
     }
   };
 
+  const handleEditChild = (child: any) => {
+    setSelectedChild(child);
+    setNewChild({
+      full_name: child.full_name,
+      grade: child.grade || '',
+      pickup_address: child.pickup_address || '',
+      school_id: child.school_id
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateChild = async () => {
+    if (!selectedChild || !newChild.full_name || !newChild.school_id) {
+      Alert.alert('Error', 'Please fill in required fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('children')
+        .update({
+          full_name: newChild.full_name,
+          grade: newChild.grade,
+          pickup_address: newChild.pickup_address,
+          school_id: newChild.school_id
+        })
+        .eq('id', selectedChild.id);
+
+      if (error) throw error;
+
+      Alert.alert('Success', 'Child updated successfully');
+      setShowEditModal(false);
+      setSelectedChild(null);
+      setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
+      loadData();
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteChild = (child: any) => {
+    Alert.alert(
+      'Remove Child',
+      `Are you sure you want to remove ${child.full_name}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const { error } = await supabase
+                .from('children')
+                .update({ status: 'inactive' })
+                .eq('id', child.id);
+
+              if (error) throw error;
+
+              Alert.alert('Success', 'Child removed successfully');
+              loadData();
+            } catch (error: any) {
+              Alert.alert('Error', error.message);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const renderChild = ({ item }: { item: any }) => (
     <View style={[styles(colors).childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={styles(colors).childHeader}>
@@ -110,11 +187,17 @@ export default function LinkChildScreen({ navigation }: Props) {
         </Text>
       )}
       <View style={styles(colors).childActions}>
-        <TouchableOpacity style={[styles(colors).actionBtn, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity
+          style={[styles(colors).actionBtn, { backgroundColor: colors.primary }]}
+          onPress={() => handleEditChild(item)}
+        >
           <Ionicons name="pencil" size={16} color="#fff" />
           <Text style={styles(colors).actionText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles(colors).actionBtn, { backgroundColor: colors.danger }]}>
+        <TouchableOpacity
+          style={[styles(colors).actionBtn, { backgroundColor: colors.error }]}
+          onPress={() => handleDeleteChild(item)}
+        >
           <Ionicons name="trash" size={16} color="#fff" />
           <Text style={styles(colors).actionText}>Remove</Text>
         </TouchableOpacity>
@@ -223,6 +306,74 @@ export default function LinkChildScreen({ navigation }: Props) {
               onPress={handleAddChild}
             >
               <Text style={styles(colors).submitText}>Add Child</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Child Modal */}
+      <Modal visible={showEditModal} animationType="slide" transparent>
+        <View style={styles(colors).modalOverlay}>
+          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles(colors).modalHeader}>
+              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Edit Child</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles(colors).modalBody}>
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Full Name *</Text>
+              <TextInput
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                placeholder="Enter child's full name"
+                placeholderTextColor={colors.textSecondary}
+                value={newChild.full_name}
+                onChangeText={t => setNewChild({ ...newChild, full_name: t })}
+              />
+
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Grade</Text>
+              <TextInput
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                placeholder="e.g., Grade 5"
+                placeholderTextColor={colors.textSecondary}
+                value={newChild.grade}
+                onChangeText={t => setNewChild({ ...newChild, grade: t })}
+              />
+
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>School *</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles(colors).schoolScroll}>
+                {schools.map(school => (
+                  <TouchableOpacity
+                    key={school.id}
+                    style={[
+                      styles(colors).schoolChip,
+                      { backgroundColor: newChild.school_id === school.id ? colors.primary : colors.background, borderColor: colors.border }
+                    ]}
+                    onPress={() => setNewChild({ ...newChild, school_id: school.id })}
+                  >
+                    <Text style={[styles(colors).schoolChipText, { color: newChild.school_id === school.id ? '#fff' : colors.text }]}>
+                      {school.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Pickup Address</Text>
+              <TextInput
+                style={[styles(colors).input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                placeholder="Enter pickup address"
+                placeholderTextColor={colors.textSecondary}
+                value={newChild.pickup_address}
+                onChangeText={t => setNewChild({ ...newChild, pickup_address: t })}
+              />
+            </ScrollView>
+
+            <TouchableOpacity
+              style={[styles(colors).submitBtn, { backgroundColor: colors.primary }]}
+              onPress={handleUpdateChild}
+            >
+              <Text style={styles(colors).submitText}>Save Changes</Text>
             </TouchableOpacity>
           </View>
         </View>
