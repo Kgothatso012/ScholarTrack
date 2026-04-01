@@ -647,7 +647,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: '#000000' }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.surface || '#1a1a1a' }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
         <Text style={styles(colors).loadingText}>Loading compliance status...</Text>
       </View>
@@ -657,7 +657,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   // Show existing compliance status if already submitted
   if (existingCompliance && existingCompliance.status === 'pending_review') {
     return (
-      <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
+      <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
         <View style={[styles(colors).header, { backgroundColor: '#002395' }]}>
           <Text style={styles(colors).headerTitle}>Driver Compliance</Text>
           <Text style={styles(colors).headerSubtitle}>Submitted for review</Text>
@@ -690,7 +690,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
       {/* Header */}
       <View style={styles(colors).header}>
         <View>
@@ -1123,7 +1123,7 @@ export default function ComplianceUploadScreen({ navigation }: any) {
 const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: colors.surface || '#1a1a1a',
   },
   header: {
     flexDirection: 'row',

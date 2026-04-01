@@ -503,7 +503,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
 const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: colors.surface || '#1a1a1a',
   },
   scrollView: {
     flexGrow: 1,

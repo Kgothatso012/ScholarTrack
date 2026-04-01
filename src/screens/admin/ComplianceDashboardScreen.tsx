@@ -177,7 +177,7 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: '#000000' }]}>
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.surface || '#1a1a1a' }]}>
         <ActivityIndicator size="large" color="#FFB81C" />
         <Text style={styles(colors).loadingText}>Loading compliance data...</Text>
       </View>
@@ -185,7 +185,7 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: '#000000' }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
       {/* Header */}
       <View style={styles(colors).header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backButton}>
