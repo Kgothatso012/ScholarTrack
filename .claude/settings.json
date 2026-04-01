@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx expo *)",
+      "Bash(git *)",
+      "Read(**/*)",
+      "Write(src/**/*)",
+      "Write(App.tsx)",
+      "Write(app.json)",
+      "Write(supabase/**/*)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf ~/.*)",
+      "Bash(rm -rf /home/kgothatso012/Documents)"
+    ],
+    "defaultMode": "default"
+  }
+}

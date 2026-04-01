@@ -132,8 +132,12 @@ export const geofenceService = {
           timestamp: Date.now(),
         });
 
-        // Trigger the alert
-        await this.triggerAlert(eventType, zone, latitude, longitude);
+        // Trigger the alert (with error handling)
+        try {
+          await this.triggerAlert(eventType, zone, latitude, longitude);
+        } catch (error) {
+          console.error('Failed to trigger geofence alert:', error);
+        }
       }
     }
 

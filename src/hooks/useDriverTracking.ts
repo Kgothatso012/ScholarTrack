@@ -50,6 +50,13 @@ export function useDriverTracking({
     tripIdRef.current = tripId;
   }, [tripId]);
 
+  // React to tripId changes - reload geofence zones if trip becomes active
+  useEffect(() => {
+    if (tripId && tripActive) {
+      loadGeofenceZones(tripId);
+    }
+  }, [tripId, tripActive, loadGeofenceZones]);
+
   // Load geofence zones when trip starts
   const loadGeofenceZones = useCallback(async (currentTripId: string) => {
     if (!currentTripId) return;
