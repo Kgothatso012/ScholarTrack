@@ -13,12 +13,19 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
+interface Child {
+  id: string;
+  full_name: string;
+  parent_id?: string;
+  status: string;
+}
+
 export default function RouteManagementScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [children, setChildren] = useState<any[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [newRoute, setNewRoute] = useState({ name: '', driver_id: '' });

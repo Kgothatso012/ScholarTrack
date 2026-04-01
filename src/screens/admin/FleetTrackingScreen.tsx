@@ -29,6 +29,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
   const [driverLocations, setDriverLocations] = useState<DriverLocation[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<DriverLocation | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     loadDriverLocations();

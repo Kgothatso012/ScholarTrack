@@ -32,9 +32,9 @@ export default function DocumentManagementScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('drivers');
-  const [driverDocs, setDriverDocs] = useState<any[]>([]);
-  const [parentDocs, setParentDocs] = useState<any[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
+  const [driverDocs, setDriverDocs] = useState<DriverDocument[]>([]);
+  const [parentDocs, setParentDocs] = useState<ParentDocument[]>([]);
+  const [selectedDoc, setSelectedDoc] = useState<DriverDocument | ParentDocument | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
 
