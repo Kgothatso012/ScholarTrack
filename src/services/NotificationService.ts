@@ -1,6 +1,15 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface NotificationSettings {
+  tripUpdates: boolean;
+  safetyAlerts: boolean;
+  paymentNotifications: boolean;
+  routeChanges: boolean;
+  driverMessages: boolean;
+}
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -144,11 +153,41 @@ export type NotificationType =
   | 'ROUTE_UPDATE'
   | 'DRIVER_ASSIGNED';
 
+// Load notification settings from storage
+async function getNotificationSettings(): Promise<NotificationSettings | null> {
+  try {
+    const saved = await AsyncStorage.getItem('notificationSettings');
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Map notification type to setting key
+function getSettingKey(type: NotificationType): keyof NotificationSettings | null {
+  if (type.startsWith('TRIP')) return 'tripUpdates';
+  if (type === 'PANIC_TRIGGERED' || type === 'EMERGENCY') return 'safetyAlerts';
+  if (type.startsWith('PAYMENT')) return 'paymentNotifications';
+  if (type === 'ROUTE_UPDATE') return 'routeChanges';
+  if (type === 'DRIVER_ASSIGNED') return 'driverMessages';
+  return null;
+}
+
 export const sendAppNotification = async (
   type: NotificationType,
   userId: string,
   data: Record<string, any>
 ): Promise<void> => {
+  // Check notification settings before sending
+  const settings = await getNotificationSettings();
+  if (settings) {
+    const settingKey = getSettingKey(type);
+    if (settingKey && !settings[settingKey]) {
+      // User has disabled this notification type
+      return;
+    }
+  }
+
   const messages: Record<NotificationType, { title: string; body: string }> = {
     TRIP_STARTED: {
       title: 'Bus Trip Started',

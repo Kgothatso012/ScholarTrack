@@ -317,7 +317,10 @@ export default function LinkChildScreen({ navigation }: Props) {
           <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
             <View style={styles(colors).modalHeader}>
               <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Edit Child</Text>
-              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowEditModal(false);
+                setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
+              }}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
