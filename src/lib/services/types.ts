@@ -42,6 +42,10 @@ export interface Driver {
   created_at?: string;
   current_latitude?: number;
   current_longitude?: number;
+  // Compliance fields
+  pdp_verified?: boolean;
+  roadworthy_verified?: boolean;
+  criminal_check?: boolean;
 }
 
 // Trip

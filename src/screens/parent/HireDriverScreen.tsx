@@ -68,7 +68,7 @@ const HireDriverScreen = ({ navigation }: any) => {
     driverVehicle: { ...typography.bodySmall, color: colors.textSecondary },
     driverRating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs },
     ratingText: { ...typography.labelSmall, color: colors.accent, marginLeft: spacing.xs },
-    driverDetails: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+    driverDetails: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
     detailItem: { alignItems: 'center' },
     detailLabel: { ...typography.caption, color: colors.textSecondary },
     detailValue: { ...typography.label, color: colors.text, marginTop: spacing.xs },
@@ -143,7 +143,27 @@ const HireDriverScreen = ({ navigation }: any) => {
                   </View>
                   <View style={styles(colors).detailItem}>
                     <Text style={styles(colors).detailLabel}>License</Text>
-                    <Text style={styles(colors).detailValue}>PDP</Text>
+                    <Badge
+                      label={driver.pdp_verified ? 'PDP ✓' : 'PDP'}
+                      variant={driver.pdp_verified ? 'success' : 'warning'}
+                      size="small"
+                    />
+                  </View>
+                  <View style={styles(colors).detailItem}>
+                    <Text style={styles(colors).detailLabel}>Roadworthy</Text>
+                    <Badge
+                      label={driver.roadworthy_verified ? '✓' : '—'}
+                      variant={driver.roadworthy_verified ? 'success' : 'neutral'}
+                      size="small"
+                    />
+                  </View>
+                  <View style={styles(colors).detailItem}>
+                    <Text style={styles(colors).detailLabel}>Criminal</Text>
+                    <Badge
+                      label={driver.criminal_check ? '✓' : '—'}
+                      variant={driver.criminal_check ? 'success' : 'neutral'}
+                      size="small"
+                    />
                   </View>
                   <View style={styles(colors).detailItem}>
                     <Text style={styles(colors).detailLabel}>Price</Text>

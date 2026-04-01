@@ -1,18 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+import { driverTrackingService } from '../../lib/services/tripEnhanced';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
+interface DriverLocation {
+  latitude: number;
+  longitude: number;
+  speed: number;
+  heading: number;
+  updated_at: string;
+}
+
 export default function LiveTrackScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [trackingEnabled, setTrackingEnabled] = useState(true);
   const [tripActive, setTripActive] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const driverLocation = { status: 'moving', speed: 45 };
+  const loadDriverLocation = async () => {
+    try {
+      const driverId = await AsyncStorage.getItem('driverId');
+      if (!driverId) {
+        setLoading(false);
+        return;
+      }
+      const location = await driverTrackingService.getDriverLocation(driverId);
+      setDriverLocation(location);
+    } catch (error) {
+      console.error('Error loading driver location:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDriverLocation();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDriverLocation();
+    setRefreshing(false);
+  };
 
   const tripInfo = {
     route: 'Mamelodi Morning Route',
@@ -21,6 +58,14 @@ export default function LiveTrackScreen({ navigation }: any) {
     studentsOnboard: 8,
     stops: 4,
     stopsCompleted: 2,
+    speed: driverLocation?.speed || 0,
+  };
+
+  const getStatus = () => {
+    if (!driverLocation) return 'Offline';
+    if (driverLocation.speed === 0) return 'Stationary';
+    if (driverLocation.speed > 0) return 'Moving';
+    return 'Unknown';
   };
 
   const stops = [

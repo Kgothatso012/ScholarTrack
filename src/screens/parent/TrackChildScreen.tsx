@@ -1,8 +1,10 @@
-// Web-safe version of TrackChildScreen - shows placeholder
+// TrackChildScreen - Track child location
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+import { childrenService } from '../../lib/services/children';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
@@ -29,8 +31,19 @@ export default function TrackChildScreen({ navigation }: any) {
 
   const loadChildren = async () => {
     try {
-      setLoading(false);
+      setLoading(true);
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        Alert.alert('Error', 'Please login first');
+        setLoading(false);
+        return;
+      }
+      const data = await childrenService.getChildren(userId);
+      setChildren(data || []);
     } catch (error) {
+      console.error('Error loading children:', error);
+      Alert.alert('Error', 'Failed to load children');
+    } finally {
       setLoading(false);
     }
   };
