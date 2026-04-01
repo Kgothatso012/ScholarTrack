@@ -18,9 +18,9 @@ export default function LinkChildScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedChild, setSelectedChild] = useState<any>(null);
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [schools, setSchools] = useState<School[]>([]);
-  const [children, setChildren] = useState<any[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [newChild, setNewChild] = useState({
     full_name: '',
     grade: '',
