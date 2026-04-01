@@ -1,15 +1,17 @@
 // Driver Location Tracking Hook
 // Use this in the Driver App to send real-time location updates
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
 import { driverTrackingService } from '../lib/api';
+import { geofenceService, GeofenceZone } from '../services/GeofenceService';
 
 interface UseDriverTrackingOptions {
   driverId: string;
   updateIntervalMs?: number;
   enabled?: boolean;
+  tripId?: string; // Optional trip ID for geofencing
 }
 
 interface DriverLocation {
@@ -23,15 +25,18 @@ interface DriverLocation {
 export function useDriverTracking({
   driverId,
   updateIntervalMs = 30000, // Default: 30 seconds
-  enabled = true
+  enabled = true,
+  tripId
 }: UseDriverTrackingOptions) {
   const [location, setLocation] = useState<DriverLocation | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tripActive, setTripActive] = useState(false);
+  const [geofenceZones, setGeofenceZones] = useState<GeofenceZone[]>([]);
 
   // Use ref to track tripActive in callback - fixes stale closure issue
   const tripActiveRef = useRef(false);
+  const tripIdRef = useRef<string | undefined>(tripId);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,6 +44,24 @@ export function useDriverTracking({
   useEffect(() => {
     tripActiveRef.current = tripActive;
   }, [tripActive]);
+
+  // Keep tripId ref in sync
+  useEffect(() => {
+    tripIdRef.current = tripId;
+  }, [tripId]);
+
+  // Load geofence zones when trip starts
+  const loadGeofenceZones = useCallback(async (currentTripId: string) => {
+    if (!currentTripId) return;
+
+    try {
+      const zones = await geofenceService.getZonesForTrip(currentTripId);
+      setGeofenceZones(zones);
+      console.log('Geofence zones loaded:', zones.length);
+    } catch (err) {
+      console.error('Error loading geofence zones:', err);
+    }
+  }, []);
 
   // Request permissions and start tracking
   const startTracking = async () => {
@@ -116,24 +139,50 @@ export function useDriverTracking({
         locationData.heading
       );
       console.log('Location sent:', locationData.latitude, locationData.longitude);
+
+      // Check geofence zones if we have active zones
+      if (geofenceZones.length > 0 && locationData.latitude !== 0 && locationData.longitude !== 0) {
+        const events = await geofenceService.checkZones(
+          locationData.latitude,
+          locationData.longitude,
+          geofenceZones
+        );
+
+        // Update zones state with triggered status
+        if (events.length > 0) {
+          setGeofenceZones(prev =>
+            prev.map(zone => {
+              const triggered = events.some(e => e.zone.id === zone.id);
+              return triggered ? { ...zone, triggered: true } : zone;
+            })
+          );
+        }
+      }
     } catch (err) {
       console.error('Error sending location:', err);
     }
   };
 
-  // Start a trip (activates location sharing)
-  const startTrip = async () => {
+  // Start a trip (activates location sharing and geofencing)
+  const startTrip = async (newTripId?: string) => {
     // Only update status if we have valid location
     if (location && location.latitude !== 0 && location.longitude !== 0) {
       await sendLocationUpdate(location);
     }
 
+    // Load geofence zones for the trip
+    const tripIdToUse = newTripId || tripIdRef.current;
+    if (tripIdToUse) {
+      await loadGeofenceZones(tripIdToUse);
+    }
+
     setTripActive(true);
   };
 
-  // End trip (stops location sharing)
+  // End trip (stops location sharing and geofencing)
   const endTrip = async () => {
     setTripActive(false);
+    setGeofenceZones([]); // Clear geofence zones
     // Note: We don't call updateStatus here anymore to avoid creating
     // invalid 0,0 location records. The location simply stops updating.
   };
@@ -163,6 +212,7 @@ export function useDriverTracking({
     isTracking,
     error,
     tripActive,
+    geofenceZones,
     startTracking,
     stopTracking,
     startTrip,

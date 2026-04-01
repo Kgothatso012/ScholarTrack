@@ -1113,6 +1113,45 @@ export const panicAlertService = {
 
     if (error) throw error;
     return data as PanicAlert;
+  },
+
+  // Trigger geofence alert (automatic zone entry detection)
+  async triggerGeofenceAlert(
+    childId: string,
+    tripId: string,
+    zoneType: 'pickup' | 'dropoff',
+    location: { latitude: number; longitude: number }
+  ) {
+    // Get the child's parent user ID
+    const { data: child, error: childError } = await supabase
+      .from('children')
+      .select('parent_id')
+      .eq('id', childId)
+      .single();
+
+    if (childError || !child?.parent_id) {
+      console.error('Error getting child parent:', childError);
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('panic_alerts')
+      .insert({
+        user_id: child.parent_id,
+        child_id: childId,
+        alert_type: 'geofence',
+        latitude: location.latitude,
+        longitude: location.longitude,
+        status: 'active'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating geofence alert:', error);
+      return null;
+    }
+    return data as PanicAlert;
   }
 };
 
