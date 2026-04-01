@@ -128,10 +128,16 @@ interface ComplianceDocument {
 
 // ============ MAIN COMPONENT ============
 
+interface DriverCompliance {
+  status: string;
+  submittedAt: string;
+  documents?: Record<string, any>;
+}
+
 export default function ComplianceUploadScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
-  const [existingCompliance, setExistingCompliance] = useState<any>(null);
+  const [existingCompliance, setExistingCompliance] = useState<DriverCompliance | null>(null);
 
   useEffect(() => {
     checkExistingCompliance();

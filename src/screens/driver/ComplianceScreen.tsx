@@ -25,11 +25,18 @@ interface ComplianceDocument {
   document?: UploadedDocument;
 }
 
+interface ComplianceStatus {
+  status: 'pending_review' | 'approved' | 'rejected';
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+}
+
 export default function ComplianceScreen({ navigation, setScreen }: any) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [existingCompliance, setExistingCompliance] = useState<any>(null);
+  const [existingCompliance, setExistingCompliance] = useState<ComplianceStatus | null>(null);
 
   const [documents, setDocuments] = useState<ComplianceDocument[]>([
     { id: 'pdp', label: 'PDP License', description: 'Public Driver Permit Certificate', required: true },

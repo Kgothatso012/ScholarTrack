@@ -24,6 +24,21 @@ interface Payment {
   created_at: string;
 }
 
+interface DriverUser {
+  id: string;
+  full_name?: string;
+  phone?: string;
+  email?: string;
+  status?: string;
+}
+
+interface PaymentRecord {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+}
+
 export default function DriverAppScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -32,8 +47,8 @@ export default function DriverAppScreen({ navigation }: any) {
   const [tripActive, setTripActive] = useState(false);
   const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [recentPayments, setRecentPayments] = useState<any[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [recentPayments, setRecentPayments] = useState<PaymentRecord[]>([]);
+  const [currentUser, setCurrentUser] = useState<DriverUser | null>(null);
 
   const loadDriverData = async () => {
     try {

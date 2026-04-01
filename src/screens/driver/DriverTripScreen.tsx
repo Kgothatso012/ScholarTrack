@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIn
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useTheme } from '../../context/ThemeContext';
-import { supabase, driverService, tripServiceEnhanced, Driver } from '../../lib/api';
+import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
@@ -17,8 +17,8 @@ export default function DriverTripScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [driver, setDriver] = useState<Driver | null>(null);
-  const [trips, setTrips] = useState<any[]>([]);
-  const [activeTrip, setActiveTrip] = useState<any>(null);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [activeTrip, setActiveTrip] = useState<Trip | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [checkedInStudents, setCheckedInStudents] = useState<string[]>([]);
