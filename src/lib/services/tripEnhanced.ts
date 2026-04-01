@@ -34,13 +34,15 @@ export const tripServiceEnhanced = {
 
 // Driver Tracking Service
 export const driverTrackingService = {
-  async updateLocation(driverId: string, latitude: number, longitude: number) {
+  async updateLocation(driverId: string, latitude: number, longitude: number, speed?: number, heading?: number) {
     const { data, error } = await supabase
       .from('driver_locations')
       .upsert({
         driver_id: driverId,
         latitude,
         longitude,
+        speed: speed ?? null,
+        heading: heading ?? null,
         updated_at: new Date().toISOString()
       })
       .select()
