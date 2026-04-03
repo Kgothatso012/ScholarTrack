@@ -69,7 +69,7 @@ export default function SettingsScreen({ navigation }: any) {
 
       setEditProfile({ name: name || '', phone: phone || '' });
     } catch (error) {
-      console.error('Error loading profile:', error);
+      return;
     }
   };
 
@@ -91,7 +91,7 @@ export default function SettingsScreen({ navigation }: any) {
       await setThemeMode(mode);
       setAppSettings(prev => ({ ...prev, darkMode: mode === 'dark' }));
     } catch (error) {
-      console.error('Error changing theme:', error);
+      return;
     }
   };
 
