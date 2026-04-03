@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, FlatList, ActivityIndicator, TextInput, Share, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, ActivityIndicator, TextInput, Share, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
@@ -48,6 +48,7 @@ interface PaymentSummary {
 export default function EnhancedReportsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [driverPerformance, setDriverPerformance] = useState<DriverPerformance[]>([]);
   const [tripAnalytics, setTripAnalytics] = useState<TripAnalytics[]>([]);
@@ -140,6 +141,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
       console.error('Error loading report data:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase, Child } from '../../lib/api';
@@ -25,6 +25,7 @@ interface AttendanceRecord {
 export default function AttendanceReportsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
@@ -42,6 +43,11 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
     }
   }, [children, selectedChild, dateFilter]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadChildren();
+  };
+
   const loadChildren = async () => {
     try {
       const { data, error } = await supabase
@@ -56,6 +62,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       console.error('Error loading children:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -211,7 +218,17 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       </View>
 
       {activeTab === 'attendance' ? (
-        <ScrollView style={styles(colors).content}>
+        <ScrollView
+          style={styles(colors).content}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.accent]}
+              tintColor={colors.accent}
+            />
+          }
+        >
           {/* Date Picker & Filter */}
           <View style={[styles(colors).filterRow, { backgroundColor: colors.card }]}>
             <View style={styles(colors).dateBox}>

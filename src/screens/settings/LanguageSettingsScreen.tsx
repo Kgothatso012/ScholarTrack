@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -15,6 +16,7 @@ interface Language {
 
 export default function LanguageSettingsScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [currentLang, setCurrentLang] = useState('en');
 
   const languages: Language[] = [
@@ -43,7 +45,7 @@ export default function LanguageSettingsScreen() {
 
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
     section: { padding: spacing.lg },

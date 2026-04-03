@@ -34,19 +34,19 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 
       switch (role) {
         case 'parent':
-          userName = 'Demo Parent';
+          userName = 'Motswadi M';
           userEmail = 'parent@demo.com';
           break;
         case 'driver':
-          userName = 'Demo Driver';
+          userName = 'Tshiamo K';
           userEmail = 'driver@demo.com';
           break;
         case 'admin':
-          userName = 'Demo Admin';
+          userName = 'Kgothatso M';
           userEmail = 'admin@demo.com';
           break;
         default:
-          userName = 'Demo User';
+          userName = 'User';
           userEmail = 'demo@test.com';
       }
 

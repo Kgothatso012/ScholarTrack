@@ -81,7 +81,8 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           data: {
             full_name: name,
             role: selectedRole
-          }
+          },
+          emailRedirectTo: 'scholartrack://confirm'
         }
       });
 
@@ -160,7 +161,8 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
             full_name: name,
             phone: phone || '',
             role: selectedRole
-          }
+          },
+          emailRedirectTo: 'scholartrack://confirm'
         }
       });
 

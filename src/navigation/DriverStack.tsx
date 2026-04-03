@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DriverStackParamList } from './types';
+import { useTheme } from '../context/ThemeContext';
 
 // Direct imports
 import DriverAppScreen from '../screens/driver/DriverAppScreen';
@@ -18,14 +19,16 @@ import EarningsScreen from '../screens/driver/EarningsScreen';
 
 const Stack = createNativeStackNavigator<DriverStackParamList>();
 
-const screenOptions = {
-  headerBackTitleVisible: false,
-  headerTintColor: '#FFB81C',
-  headerStyle: { backgroundColor: '#000000' },
-  headerTitleStyle: { color: '#FFFFFF' },
-};
-
 export function DriverStack() {
+  const { colors } = useTheme();
+
+  const screenOptions = {
+    headerBackTitleVisible: false,
+    headerTintColor: colors.textInverse,
+    headerStyle: { backgroundColor: colors.primary },
+    headerTitleStyle: { color: colors.textInverse },
+  };
+
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen
@@ -51,7 +54,7 @@ export function DriverStack() {
       <Stack.Screen
         name="Compliance"
         component={ComplianceScreen}
-        options={{ title: 'Compliance' }}
+        options={{ title: 'Compliance', headerShown: false }}
       />
       <Stack.Screen
         name="RegulatoryDisplay"
@@ -78,15 +81,15 @@ export function DriverStack() {
         component={TripHistoryScreen}
         options={{ title: 'Trip History' }}
       />
-      <Stack.Screen 
-        name="Support" 
+      <Stack.Screen
+        name="Support"
         component={SupportScreen}
         options={{ title: 'Support' }}
       />
-      <Stack.Screen 
-        name="Settings" 
+      <Stack.Screen
+        name="Settings"
         component={SettingsScreen}
-        options={{ title: 'Settings' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

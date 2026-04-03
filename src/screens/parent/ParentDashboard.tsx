@@ -14,15 +14,33 @@ import { colors as uiColors, spacing, typography, borderRadius } from '../../ui-
 
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes cache
 
+interface DashboardStat {
+  label: string;
+  value: string | number;
+  change?: string;
+  positive?: boolean;
+}
+
+interface PaymentRecord {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+}
+
 const ParentDashboard = ({ navigation }: any) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const [stats, setStats] = useState<DashboardStat[]>([]);
   const [children, setChildren] = useState<Child[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [userEmail, setUserEmail] = useState('');
-  const [showHelp, setShowHelp] = useState(false);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     loadData();
@@ -33,7 +51,9 @@ const ParentDashboard = ({ navigation }: any) => {
       setLoading(true);
 
       const email = await AsyncStorage.getItem('userEmail');
+      const name = await AsyncStorage.getItem('userName');
       setUserEmail(email || '');
+      setUserName(name || '');
 
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -61,8 +81,12 @@ const ParentDashboard = ({ navigation }: any) => {
       await fetchFreshData(user.id, true);
     } catch (error: any) {
       console.error('Error loading data:', error);
-      setChildren([]);
-      setTrips([]);
+      setStats([
+        { label: 'Children', value: 0 },
+        { label: 'Trips Today', value: 0 },
+        { label: 'Active', value: 0 },
+        { label: 'Pending', value: 0 },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -70,6 +94,7 @@ const ParentDashboard = ({ navigation }: any) => {
 
   const fetchFreshData = async (userId: string, updateOfflineStatus = false) => {
     try {
+      // Children
       const { data: childrenData, error: childrenError } = await supabase
         .from('children')
         .select('*')
@@ -78,21 +103,54 @@ const ParentDashboard = ({ navigation }: any) => {
       if (!childrenError && childrenData) {
         setChildren(childrenData);
         await cacheService.set('parent_children_' + userId, childrenData, CACHE_TTL);
-      }
 
-      if (childrenData && childrenData.length > 0) {
-        const childIds = childrenData.map((c: Child) => c.id);
+        // Calculate stats
+        const activeChildren = childrenData.filter((c: Child) => c.status === 'active').length;
 
-        const { data: tripsData, error: tripsError } = await supabase
-          .from('trips')
-          .select('*')
-          .in('child_id', childIds)
-          .order('scheduled_time', { ascending: true })
-          .limit(5);
+        if (childrenData.length > 0) {
+          const childIds = childrenData.map((c: Child) => c.id);
 
-        if (!tripsError) {
+          // Today's trips
+          const today = new Date().toISOString().split('T')[0];
+          const { data: tripsData } = await supabase
+            .from('trips')
+            .select('*')
+            .in('child_id', childIds)
+            .gte('scheduled_time', today)
+            .order('scheduled_time', { ascending: true })
+            .limit(20);
+
           setTrips(tripsData || []);
           await cacheService.set('parent_trips_' + userId, tripsData || [], CACHE_TTL);
+
+          const activeTrips = (tripsData || []).filter((t: Trip) => t.status === 'in_progress').length;
+          const scheduledTrips = (tripsData || []).filter((t: Trip) => t.status === 'scheduled').length;
+
+          // Payments
+          const { data: paymentsData } = await supabase
+            .from('payments')
+            .select('*')
+            .in('child_id', childIds)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          setPayments(paymentsData || []);
+
+          const pendingPayments = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'pending').length;
+
+          setStats([
+            { label: 'Children', value: childrenData.length, positive: true },
+            { label: 'Trips Today', value: (tripsData || []).length, positive: true },
+            { label: 'Active', value: activeTrips, positive: activeTrips > 0 },
+            { label: 'Pending', value: pendingPayments, positive: pendingPayments === 0 },
+          ]);
+        } else {
+          setStats([
+            { label: 'Children', value: childrenData.length, positive: true },
+            { label: 'Trips Today', value: 0, positive: true },
+            { label: 'Active', value: 0, positive: true },
+            { label: 'Pending', value: 0, positive: true },
+          ]);
         }
       }
     } catch (error) {
@@ -126,13 +184,22 @@ const ParentDashboard = ({ navigation }: any) => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
     switch (status) {
-      case 'scheduled': return colors.primary;
-      case 'in_progress': return colors.success;
-      case 'completed': return colors.textSecondary;
-      case 'cancelled': return colors.error;
-      default: return colors.textSecondary;
+      case 'in_progress': case 'active': return 'success';
+      case 'scheduled': return 'warning';
+      case 'completed': return 'neutral';
+      case 'cancelled': return 'error';
+      default: return 'neutral';
+    }
+  };
+
+  const getPaymentVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
+    switch (status) {
+      case 'completed': case 'paid': return 'success';
+      case 'pending': return 'warning';
+      case 'failed': return 'error';
+      default: return 'neutral';
     }
   };
 
@@ -152,46 +219,66 @@ const ParentDashboard = ({ navigation }: any) => {
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h1, color: colors.textInverse },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
     headerActions: { flexDirection: 'row', alignItems: 'center' },
-    navButton: { marginLeft: spacing.md, padding: spacing.xs },
-    helpBtn: { marginLeft: spacing.md, padding: spacing.xs },
-    helpPanel: { marginTop: spacing.md, backgroundColor: 'rgba(255,255,255,0.15)', padding: spacing.md, borderRadius: borderRadius.md },
-    helpTitle: { ...typography.label, color: colors.accent, marginBottom: spacing.sm },
-    helpItem: { ...typography.caption, color: colors.textInverse, marginBottom: spacing.xs },
-    quickActionsContainer: { backgroundColor: colors.card, marginTop: spacing.lg, marginHorizontal: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, elevation: 3 },
-    quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
-    actionCard: { alignItems: 'center', padding: spacing.sm, flex: 1 },
-    actionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xs },
-    actionText: { ...typography.label, color: colors.text, fontWeight: '600' },
-    actionDesc: { ...typography.caption, color: colors.textSecondary },
+    headerBtn: { padding: spacing.xs, marginLeft: spacing.sm },
     section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-    sectionTitle: { ...typography.h3, color: colors.text },
-    seeAll: { ...typography.label, color: colors.accent },
-    childCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
+    tabButtonActive: { backgroundColor: colors.primary },
+    tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
+    tabTextActive: { color: colors.textInverse },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
+    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    quickActionIcon: { marginBottom: spacing.xs },
+    quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
+    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    listInfo: { flex: 1, marginLeft: spacing.md },
+    listName: { ...typography.label, color: colors.text },
+    listMeta: { ...typography.bodySmall, color: colors.textSecondary },
+    amount: { ...typography.h4, color: colors.accent },
+    childCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     childInfo: { flex: 1 },
     childName: { ...typography.h4, color: colors.text },
     childSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
     childStatus: { marginLeft: spacing.sm },
-    statusBadge: { paddingHorizontal: spacing.sm, paddingVertical: spacing.xxs, borderRadius: borderRadius.full },
-    tripCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
-    tripInfo: { flex: 1, marginLeft: spacing.md },
-    tripTitle: { ...typography.label, color: colors.text },
-    tripSubtitle: { ...typography.bodySmall, color: colors.textSecondary },
-    tripRight: { alignItems: 'flex-end' },
-    tripTime: { ...typography.h4, color: colors.accent },
-    linkCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, borderRadius: borderRadius.md },
-    linkText: { flex: 1, marginLeft: spacing.md, ...typography.body, color: colors.text },
-    emptyContainer: { alignItems: 'center', padding: spacing.xl },
-    emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
+    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
   });
+
+  const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
+    <TouchableOpacity
+      style={[styles(colors).tabButton, activeTab === tab && styles(colors).tabButtonActive]}
+      onPress={() => setActiveTab(tab)}
+    >
+      <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
+      <Text style={[styles(colors).tabText, activeTab === tab && styles(colors).tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  const quickActions = [
+    { name: 'Track Bus', icon: 'map', color: colors.success, route: 'LiveTrack' },
+    { name: 'My Children', icon: 'people', color: colors.primary, route: 'Children' },
+    { name: 'Hire Driver', icon: 'person-add', color: colors.warning, route: 'HireDriver' },
+    { name: 'Emergency', icon: 'warning', color: colors.error, route: 'Emergency' },
+    { name: 'Payments', icon: 'card', color: colors.accent, route: 'Payments' },
+    { name: 'Documents', icon: 'document-text', color: colors.textSecondary, route: 'ParentDocs' },
+    { name: 'History', icon: 'time', color: '#607D8B', route: 'History' },
+    { name: 'Settings', icon: 'settings', color: colors.textSecondary, route: 'Settings' },
+  ];
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <SkeletonDashboard />
+      <View style={[styles(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Loading dashboard...</Text>
+        </Card>
       </View>
     );
   }
@@ -213,179 +300,174 @@ const ParentDashboard = ({ navigation }: any) => {
         <View style={styles(colors).headerTop}>
           <Text style={styles(colors).headerTitle}>Parent Dashboard</Text>
           <View style={styles(colors).headerActions}>
-            <TouchableOpacity onPress={() => navigation?.navigate?.('Children')} style={styles(colors).navButton}>
-              <Ionicons name="people" size={24} color={colors.textInverse} />
+            <TouchableOpacity onPress={onRefresh} style={styles(colors).headerBtn}>
+              <Ionicons name="refresh" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation?.navigate?.('HireDriver')} style={styles(colors).navButton}>
-              <Ionicons name="person-add" size={24} color={colors.textInverse} />
+            <TouchableOpacity onPress={() => navigation?.navigate?.('Children')} style={styles(colors).headerBtn}>
+              <Ionicons name="people" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation?.navigate?.('Settings')} style={styles(colors).navButton}>
-              <Ionicons name="settings-outline" size={24} color={colors.textInverse} />
+            <TouchableOpacity onPress={() => navigation?.navigate?.('Settings')} style={styles(colors).headerBtn}>
+              <Ionicons name="settings-outline" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowHelp(!showHelp)} style={styles(colors).helpBtn}>
-              <Ionicons name="help-circle-outline" size={22} color={colors.textInverse} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout} style={styles(colors).navButton}>
-              <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
+            <TouchableOpacity onPress={handleLogout} style={styles(colors).headerBtn}>
+              <Ionicons name="log-out-outline" size={20} color={colors.textInverse} />
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles(colors).headerSubtext}>{userEmail || 'Welcome back!'}</Text>
-
-        {/* Help Panel */}
-        {showHelp && (
-          <View style={styles(colors).helpPanel}>
-            <Text style={styles(colors).helpTitle}>What can you do here?</Text>
-            <Text style={styles(colors).helpItem}>• Track your child's bus in real-time</Text>
-            <Text style={styles(colors).helpItem}>• Hire a trusted driver for school transport</Text>
-            <Text style={styles(colors).helpItem}>• Add your children to monitor their trips</Text>
-            <Text style={styles(colors).helpItem}>• Make payments and view trip history</Text>
-          </View>
-        )}
+        <Text style={styles(colors).headerSubtext}>{userName || userEmail || 'Welcome back!'}</Text>
       </View>
 
-      {/* Quick Actions */}
-      <View style={styles(colors).quickActionsContainer}>
-        <View style={styles(colors).quickActions}>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('LiveTrack')}>
-            <View style={[styles(colors).actionIcon, { backgroundColor: colors.success + '20' }]}>
-              <Ionicons name="map" size={22} color={colors.success} />
-            </View>
-            <Text style={styles(colors).actionText}>Track</Text>
-            <Text style={styles(colors).actionDesc}>View bus</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('HireDriver')}>
-            <View style={[styles(colors).actionIcon, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="person-add" size={22} color={colors.primary} />
-            </View>
-            <Text style={styles(colors).actionText}>Hire</Text>
-            <Text style={styles(colors).actionDesc}>Find driver</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => navigation.navigate('Emergency')}>
-            <View style={[styles(colors).actionIcon, { backgroundColor: colors.error + '20' }]}>
-              <Ionicons name="warning" size={22} color={colors.error} />
-            </View>
-            <Text style={styles(colors).actionText}>SOS</Text>
-            <Text style={styles(colors).actionDesc}>Emergency</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Tabs */}
+      <View style={styles(colors).tabs}>
+        <TabButton tab="overview" label="Overview" icon="grid" />
+        <TabButton tab="children" label="Children" icon="people" />
+        <TabButton tab="trips" label="Trips" icon="bus" />
       </View>
 
-      {/* My Children Section */}
-      <View style={styles(colors).section}>
-        <View style={styles(colors).sectionHeader}>
-          <Text style={styles(colors).sectionTitle}>My Children</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Children')}>
-            <Text style={styles(colors).seeAll}>Add Child +</Text>
-          </TouchableOpacity>
-        </View>
-
-        {children.length === 0 ? (
-          <Card variant="elevated" padding="medium">
-            <View style={styles(colors).emptyContainer}>
-              <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
-              <Text style={styles(colors).emptyText}>No children added yet</Text>
-              <Spacer size="md" />
-              <Button title="Add Your First Child" onPress={() => navigation.navigate('Children')} variant="primary" size="medium" />
-            </View>
-          </Card>
-        ) : (
-          children.map((child) => (
-            <Card key={child.id} variant="elevated" padding="medium">
-              <View style={styles(colors).childCard}>
-                <View style={styles(colors).childInfo}>
-                  <Text style={styles(colors).childName}>{child.full_name}</Text>
-                  <Text style={styles(colors).childSchool}>{child.grade ? `Grade: ${child.grade}` : 'School not set'}</Text>
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Stats Grid */}
+          <View style={styles(colors).section}>
+            <View style={styles(colors).statsGrid}>
+              {stats.map((stat, index) => (
+                <View key={index} style={styles(colors).statCard}>
+                  <Text style={styles(colors).statLabel}>{stat.label}</Text>
+                  <Text style={styles(colors).statValue}>{stat.value}</Text>
                 </View>
-                <View style={styles(colors).childStatus}>
+              ))}
+            </View>
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles(colors).section}>
+            <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
+            <View style={styles(colors).quickActionsGrid}>
+              {quickActions.map((action, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles(colors).quickActionCard}
+                  onPress={() => navigation?.navigate?.(action.route)}
+                >
+                  <View style={styles(colors).quickActionIcon}>
+                    <Ionicons name={action.icon as any} size={24} color={action.color} />
+                  </View>
+                  <Text style={styles(colors).quickActionText}>{action.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Recent Trips Preview */}
+          <View style={styles(colors).section}>
+            <Text style={styles(colors).sectionTitle}>Recent Trips</Text>
+            {trips.length === 0 ? (
+              <Card variant="outlined" padding="large">
+                <Text style={styles(colors).emptyText}>No upcoming trips</Text>
+              </Card>
+            ) : (
+              trips.slice(0, 3).map((trip) => (
+                <Card key={trip.id} variant="elevated" padding="medium">
+                  <View style={styles(colors).listItem}>
+                    <View style={styles(colors).listAvatar}>
+                      <Ionicons name="bus" size={20} color={colors.textInverse} />
+                    </View>
+                    <View style={styles(colors).listInfo}>
+                      <Text style={styles(colors).listName}>
+                        {trip.dropoff_location ? 'Drop off' : 'Pick up'}
+                      </Text>
+                      <Text style={styles(colors).listMeta}>
+                        {formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}
+                      </Text>
+                    </View>
+                    <Badge
+                      label={getTripStatus(trip)}
+                      variant={getStatusVariant(trip.status)}
+                      size="small"
+                    />
+                  </View>
+                </Card>
+              ))
+            )}
+          </View>
+        </>
+      )}
+
+      {/* Children Tab */}
+      {activeTab === 'children' && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>My Children ({children.length})</Text>
+          {children.length === 0 ? (
+            <Card variant="outlined" padding="large">
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles(colors).emptyText}>No children added yet</Text>
+                <Spacer size="md" />
+                <Button title="Add Child" onPress={() => navigation.navigate('Children')} variant="primary" size="medium" />
+              </View>
+            </Card>
+          ) : (
+            children.map((child) => (
+              <Card key={child.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Text style={{ color: colors.textInverse, fontWeight: 'bold', fontSize: 14 }}>
+                      {(child.full_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>{child.full_name}</Text>
+                    <Text style={styles(colors).listMeta}>{child.grade ? `Grade: ${child.grade}` : 'School not set'}</Text>
+                  </View>
                   <Badge
                     label={child.status === 'active' ? 'Active' : 'Inactive'}
                     variant={child.status === 'active' ? 'success' : 'neutral'}
                     size="small"
                   />
                 </View>
-              </View>
+              </Card>
+            ))
+          )}
+        </View>
+      )}
+
+      {/* Trips Tab */}
+      {activeTab === 'trips' && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>All Trips ({trips.length})</Text>
+          {trips.length === 0 ? (
+            <Card variant="outlined" padding="large">
+              <Text style={styles(colors).emptyText}>No trips found</Text>
             </Card>
-          ))
-        )}
-      </View>
-
-      {/* Upcoming Trips Section */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Upcoming Trips</Text>
-
-        {trips.length === 0 ? (
-          <Card variant="elevated" padding="large">
-            <View style={styles(colors).emptyContainer}>
-              <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
-              <Text style={styles(colors).emptyText}>No upcoming trips</Text>
-            </View>
-          </Card>
-        ) : (
-          trips.map((trip) => (
-            <Card key={trip.id} variant="elevated" padding="medium">
-              <View style={styles(colors).tripCard}>
-                <Ionicons
-                  name={trip.dropoff_location ? 'home' : 'school'}
-                  size={20}
-                  color={trip.dropoff_location ? colors.success : colors.primary}
-                />
-                <View style={styles(colors).tripInfo}>
-                  <Text style={styles(colors).tripTitle}>
-                    {trip.dropoff_location ? 'Drop off' : 'Pick up'} - {formatDate(trip.scheduled_time)}
-                  </Text>
-                  <Text style={styles(colors).tripSubtitle}>
-                    {trip.pickup_location || 'Location not set'}
-                  </Text>
-                </View>
-                <View style={styles(colors).tripRight}>
-                  <Text style={styles(colors).tripTime}>{formatTime(trip.scheduled_time)}</Text>
+          ) : (
+            trips.map((trip) => (
+              <Card key={trip.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Ionicons
+                      name={trip.dropoff_location ? 'home' : 'school'}
+                      size={20}
+                      color={colors.textInverse}
+                    />
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>
+                      {trip.dropoff_location ? 'Drop off' : 'Pick up'}
+                    </Text>
+                    <Text style={styles(colors).listMeta}>
+                      {formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}
+                    </Text>
+                  </View>
                   <Badge
                     label={getTripStatus(trip)}
-                    variant={trip.status === 'in_progress' ? 'success' : trip.status === 'scheduled' ? 'warning' : 'neutral'}
+                    variant={getStatusVariant(trip.status)}
                     size="small"
                   />
                 </View>
-              </View>
-            </Card>
-          ))
-        )}
-      </View>
-
-      {/* Quick Links Section */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Quick Links</Text>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Payments')}>
-          <Card variant="outlined" padding="medium">
-            <View style={styles(colors).linkCard}>
-              <Ionicons name="card" size={24} color={colors.primary} />
-              <Text style={styles(colors).linkText}>View Payments</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </View>
-          </Card>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('ParentDocs')}>
-          <Card variant="outlined" padding="medium">
-            <View style={styles(colors).linkCard}>
-              <Ionicons name="document-text" size={24} color={colors.primary} />
-              <Text style={styles(colors).linkText}>My Documents</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </View>
-          </Card>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Support')}>
-          <Card variant="outlined" padding="medium">
-            <View style={styles(colors).linkCard}>
-              <Ionicons name="help-circle" size={24} color={colors.primary} />
-              <Text style={styles(colors).linkText}>Get Support</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </View>
-          </Card>
-        </TouchableOpacity>
-      </View>
+              </Card>
+            ))
+          )}
+        </View>
+      )}
 
       <Spacer size="xl" />
     </ScrollView>

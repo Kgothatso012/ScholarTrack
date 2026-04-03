@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -16,6 +17,7 @@ interface EmergencyContact {
 
 export default function EmergencyScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [contacts] = useState<EmergencyContact[]>([
     { id: 1, name: 'Mom', phone: '078 123 4567', relation: 'Family' },
     { id: 2, name: 'Dad', phone: '082 987 6543', relation: 'Family' },

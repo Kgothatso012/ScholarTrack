@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
@@ -34,9 +36,11 @@ interface Payment {
 
 export default function AdminDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [userName, setUserName] = useState('');
 
   const [stats, setStats] = useState<DashboardStat[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -112,8 +116,14 @@ export default function AdminDashboardScreen({ navigation }: any) {
   };
 
   useEffect(() => {
+    loadUserInfo();
     loadDashboardData();
   }, []);
+
+  const loadUserInfo = async () => {
+    const name = await AsyncStorage.getItem('userName');
+    setUserName(name || '');
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -230,7 +240,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles(colors).headerSubtext}>Real-time data from database</Text>
+        <Text style={styles(colors).headerSubtext}>{userName || 'Admin'} - Real-time data</Text>
       </View>
 
       {/* Tabs */}

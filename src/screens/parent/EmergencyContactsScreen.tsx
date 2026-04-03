@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase, emergencyContactService, EmergencyContact } from '../../lib/api';
@@ -15,6 +15,7 @@ interface Props {
 export default function EmergencyContactsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', relationship: '', is_primary: false });
@@ -35,7 +36,13 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       console.error('Error loading contacts:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadContacts();
   };
 
   const handleSave = () => {
@@ -104,7 +111,17 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       </TouchableOpacity>
 
       {/* Contacts List */}
-      <ScrollView style={styles(colors).section}>
+      <ScrollView
+        style={styles(colors).section}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.accent]}
+            tintColor={colors.accent}
+          />
+        }
+      >
         <Text style={styles(colors).sectionTitle}>My Contacts ({contacts.length})</Text>
 
         {contacts.length === 0 ? (

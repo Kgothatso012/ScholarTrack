@@ -1,6 +1,7 @@
 // Comprehensive Settings Screen for All User Roles
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, ThemeMode } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ interface UserProfile {
 
 export default function SettingsScreen({ navigation }: any) {
   const { colors, themeMode, setThemeMode } = useTheme();
+  const insets = useSafeAreaInsets();
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', email: '', phone: '', role: 'parent' });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [editProfile, setEditProfile] = useState({ name: '', phone: '' });
@@ -56,7 +58,7 @@ export default function SettingsScreen({ navigation }: any) {
       const role = await AsyncStorage.getItem('userRole');
 
       setUserProfile({
-        name: name || 'User',
+        name: name || '',
         email: email || '',
         phone: phone || '',
         role: role || 'parent',
@@ -111,30 +113,33 @@ export default function SettingsScreen({ navigation }: any) {
 
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
-    headerTitle: { ...typography.h1, color: colors.textInverse },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
+    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    section: { padding: spacing.lg },
+    headerActions: { flexDirection: 'row' },
+    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: borderRadius.md, marginLeft: spacing.xs },
+    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
     sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    profileCard: { backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center', elevation: 3 },
-    profileAvatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    profileInitial: { ...typography.h2, color: colors.accent },
+    profileCard: { backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.md, flexDirection: 'row', alignItems: 'center', elevation: 3 },
+    profileAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    profileInitial: { ...typography.h3, color: colors.accent },
     profileInfo: { flex: 1, marginLeft: spacing.md },
     profileName: { ...typography.h4, color: colors.text },
     profileEmail: { ...typography.bodySmall, color: colors.textSecondary },
     profileRole: { marginTop: spacing.xs },
-    settingRow: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 1 },
+    settingRow: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
     settingInfo: { flex: 1 },
     settingLabel: { ...typography.label, color: colors.text },
     settingDesc: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
     settingAction: { marginLeft: spacing.md },
     divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
-    dangerBtn: { backgroundColor: colors.error, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginTop: spacing.lg },
+    dangerBtn: { backgroundColor: colors.danger, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginTop: spacing.lg },
     dangerBtnText: { ...typography.button, color: colors.textInverse },
     modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center' },
     modalContent: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, width: '85%' },
     modalTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.lg },
-    input: { backgroundColor: colors.backgroundAlt, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text },
+    input: { backgroundColor: colors.background, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text, borderWidth: 1, borderColor: colors.border },
   });
 
   const SettingRow = ({ label, description, value, onValueChange, icon }: any) => (
@@ -155,11 +160,28 @@ export default function SettingsScreen({ navigation }: any) {
   );
 
   return (
-    <ScrollView style={styles(colors).container}>
+    <ScrollView
+      style={styles(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={false}
+          onRefresh={loadUserProfile}
+          colors={[colors.accent]}
+          tintColor={colors.accent}
+        />
+      }
+    >
       {/* Header */}
       <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Settings</Text>
-        <Text style={styles(colors).headerSubtext}>Manage your account and preferences</Text>
+        <View style={styles(colors).headerTop}>
+          <Text style={styles(colors).headerTitle}>Settings</Text>
+          <View style={styles(colors).headerActions}>
+            <TouchableOpacity style={styles(colors).headerBtn} onPress={loadUserProfile}>
+              <Ionicons name="refresh" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles(colors).headerSubtext}>{userProfile.name || 'User'} - {userProfile.role || 'Parent'}</Text>
       </View>
 
       {/* Profile Section */}

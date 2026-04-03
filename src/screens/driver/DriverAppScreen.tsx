@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge, Divider } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Trip {
@@ -17,7 +17,7 @@ interface Trip {
   route_name: string;
 }
 
-interface Payment {
+interface PaymentRecord {
   id: string;
   amount: number;
   status: string;
@@ -30,13 +30,14 @@ interface DriverUser {
   phone?: string;
   email?: string;
   status?: string;
+  is_verified?: boolean;
 }
 
-interface PaymentRecord {
-  id: string;
-  amount: number;
-  status: string;
-  created_at: string;
+interface DashboardStat {
+  label: string;
+  value: string | number;
+  change?: string;
+  positive?: boolean;
 }
 
 export default function DriverAppScreen({ navigation }: any) {
@@ -44,10 +45,12 @@ export default function DriverAppScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [tripActive, setTripActive] = useState(false);
-  const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const [stats, setStats] = useState<DashboardStat[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [recentPayments, setRecentPayments] = useState<PaymentRecord[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
   const [currentUser, setCurrentUser] = useState<DriverUser | null>(null);
 
   const loadDriverData = async () => {
@@ -69,6 +72,7 @@ export default function DriverAppScreen({ navigation }: any) {
       setCurrentUser(driverData);
 
       if (driverData) {
+        // Today's trips
         const today = new Date().toISOString().split('T')[0];
         const { data: tripsData } = await supabase
           .from('trips')
@@ -76,23 +80,37 @@ export default function DriverAppScreen({ navigation }: any) {
           .eq('driver_id', driverData.id)
           .gte('scheduled_time', today)
           .order('scheduled_time', { ascending: true })
-          .limit(5);
+          .limit(10);
 
         setTrips(tripsData || []);
 
-        const activeTrip = tripsData?.find((t: Trip) => t.status === 'in_progress' || t.status === 'active');
-        setTripActive(!!activeTrip);
+        // All trips for stats
+        const { count: totalTrips } = await supabase
+          .from('trips')
+          .select('*', { count: 'exact', head: true })
+          .eq('driver_id', driverData.id);
 
+        // Active trip count
+        const { count: activeTrips } = await supabase
+          .from('trips')
+          .select('*', { count: 'exact', head: true })
+          .eq('driver_id', driverData.id)
+          .in('status', ['in_progress', 'active']);
+
+        // Payments
         const { data: paymentsData } = await supabase
           .from('payments')
           .select('*')
           .eq('driver_id', driverData.id)
           .order('created_at', { ascending: false })
-          .limit(5);
+          .limit(10);
 
+        setPayments(paymentsData || []);
+
+        // Calculate earnings
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-        const weekStart = new Date(now.setDate(now.getDate() - 7)).toISOString();
+        const weekStart = new Date(new Date().setDate(now.getDate() - 7)).toISOString();
 
         const todayEarnings = (paymentsData || [])
           .filter((p: any) => p.status === 'completed' && p.created_at >= todayStart)
@@ -112,16 +130,26 @@ export default function DriverAppScreen({ navigation }: any) {
           pending: pendingEarnings,
         });
 
-        const { data: parentPayments } = await supabase
-          .from('payments')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5);
+        const totalEarnings = (paymentsData || [])
+          .filter((p: any) => p.status === 'completed')
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
-        setRecentPayments(parentPayments || []);
+        // Set stats
+        setStats([
+          { label: 'Total Trips', value: totalTrips || 0, positive: true },
+          { label: 'Active', value: activeTrips || 0, positive: true },
+          { label: 'Today', value: `R${(todayEarnings / 100).toFixed(0)}`, positive: true },
+          { label: 'Total Earned', value: `R${(totalEarnings / 100).toFixed(0)}`, positive: true },
+        ]);
       }
     } catch (error) {
       console.error('Error loading driver data:', error);
+      setStats([
+        { label: 'Total Trips', value: 0 },
+        { label: 'Active', value: 0 },
+        { label: 'Today', value: 'R0' },
+        { label: 'Total Earned', value: 'R0' },
+      ]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -147,7 +175,7 @@ export default function DriverAppScreen({ navigation }: any) {
     ]);
   };
 
-  const getTripStatusVariant = (status: string) => {
+  const getTripStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
     switch (status) {
       case 'completed': return 'success';
       case 'in_progress': return 'warning';
@@ -168,57 +196,77 @@ export default function DriverAppScreen({ navigation }: any) {
     }
   };
 
+  const getPaymentVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
+    switch (status) {
+      case 'completed': case 'paid': return 'success';
+      case 'pending': return 'warning';
+      case 'failed': return 'error';
+      default: return 'neutral';
+    }
+  };
+
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h2, color: colors.textInverse, textAlign: 'center', position: 'absolute', left: 0, right: 0 },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xl, textAlign: 'center' },
-    headerActions: { flexDirection: 'row', alignItems: 'center', zIndex: 1 },
+    headerTitle: { ...typography.h2, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    headerActions: { flexDirection: 'row', alignItems: 'center' },
     headerBtn: { padding: spacing.xs, marginLeft: spacing.sm },
     section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
     sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    menuGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: spacing.sm },
-    menuCard: { width: '31%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
-    menuIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xs },
-    menuText: { ...typography.labelSmall, color: colors.text, textAlign: 'center' },
-    tripButton: { padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center' },
-    tripButtonActive: { backgroundColor: colors.error },
-    tripButtonInactive: { backgroundColor: colors.success },
-    tripButtonText: { ...typography.h3, color: colors.textInverse },
-    tripButtonSubtext: { ...typography.bodySmall, color: colors.textInverse, marginTop: spacing.xs },
-    earningsGrid: { flexDirection: 'row', gap: spacing.sm },
-    earningCard: { flex: 1, backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
-    earningLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    earningValue: { ...typography.h3, color: colors.accent, marginTop: spacing.xs },
-    tripCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
-    tripInfo: { flex: 1 },
-    tripTime: { ...typography.h4, color: colors.text },
-    tripRoute: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
-    paymentCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
-    paymentInfo: { flex: 1 },
-    paymentStatus: { ...typography.labelSmall, color: colors.textSecondary },
-    paymentAmount: { ...typography.h4, color: colors.accent },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
+    tabButtonActive: { backgroundColor: colors.primary },
+    tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
+    tabTextActive: { color: colors.textInverse },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
+    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
+    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    quickActionIcon: { marginBottom: spacing.xs },
+    quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
+    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    listInfo: { flex: 1, marginLeft: spacing.md },
+    listName: { ...typography.label, color: colors.text },
+    listMeta: { ...typography.bodySmall, color: colors.textSecondary },
+    amount: { ...typography.h4, color: colors.accent },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
   });
 
+  const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
+    <TouchableOpacity
+      style={[styles(colors).tabButton, activeTab === tab && styles(colors).tabButtonActive]}
+      onPress={() => setActiveTab(tab)}
+    >
+      <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
+      <Text style={[styles(colors).tabText, activeTab === tab && styles(colors).tabTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  const quickActions = [
+    { name: 'Start Trip', icon: 'play-circle', color: colors.success, route: 'DriverTrips' },
+    { name: 'My Trips', icon: 'bus', color: colors.primary, route: 'DriverTrips' },
+    { name: 'Manifest', icon: 'list', color: colors.warning, route: 'TripManifest' },
+    { name: 'Compliance', icon: 'document-text', color: colors.success, route: 'Compliance' },
+    { name: 'Vehicle', icon: 'car-sport', color: colors.accent, route: 'VehicleChecklist' },
+    { name: 'Chat', icon: 'chatbubbles', color: '#9C27B0', route: 'Chat' },
+    { name: 'History', icon: 'time', color: '#607D8B', route: 'History' },
+    { name: 'Settings', icon: 'settings', color: colors.textSecondary, route: 'Settings' },
+  ];
+
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <SkeletonDashboard />
+      <View style={[styles(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Card variant="elevated" padding="large">
+          <Text style={styles(colors).emptyText}>Loading dashboard...</Text>
+        </Card>
       </View>
     );
   }
-
-  const menuItems = [
-    { name: 'My Trips', icon: 'bus', color: colors.primary, route: 'DriverTrips' },
-    { name: 'Compliance', icon: 'document-text', color: colors.success, route: 'Compliance' },
-    { name: 'Vehicle Check', icon: 'car-sport', color: colors.warning, route: 'VehicleChecklist' },
-    { name: 'Messages', icon: 'chatbubbles', color: colors.accent, route: 'Chat' },
-    { name: 'Support', icon: 'help-circle', color: colors.error, route: 'Support' },
-    { name: 'History', icon: 'time', color: '#9C27B0', route: 'History' },
-    { name: 'Settings', icon: 'settings', color: '#607D8B', route: 'Settings' },
-  ];
 
   return (
     <ScrollView
@@ -235,127 +283,127 @@ export default function DriverAppScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles(colors).header}>
         <View style={styles(colors).headerTop}>
-          <TouchableOpacity onPress={onRefresh} style={styles(colors).headerBtn}>
-            <Ionicons name="refresh" size={22} color={colors.textInverse} />
-          </TouchableOpacity>
           <Text style={styles(colors).headerTitle}>Driver Dashboard</Text>
-          <TouchableOpacity onPress={handleLogout} style={styles(colors).headerBtn}>
-            <Ionicons name="log-out-outline" size={22} color={colors.textInverse} />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles(colors).headerSubtext}>Welcome back, {currentUser?.full_name || 'Driver'}!</Text>
-      </View>
-
-      {/* Menu Grid */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Menu</Text>
-        <View style={styles(colors).menuGrid}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles(colors).menuCard}
-              onPress={() => navigation?.navigate?.(item.route)}
-            >
-              <View style={[styles(colors).menuIcon, { backgroundColor: item.color + '20' }]}>
-                <Ionicons name={item.icon as any} size={22} color={item.color} />
-              </View>
-              <Text style={styles(colors).menuText}>{item.name}</Text>
+          <View style={styles(colors).headerActions}>
+            <TouchableOpacity onPress={onRefresh} style={styles(colors).headerBtn}>
+              <Ionicons name="refresh" size={20} color={colors.textInverse} />
             </TouchableOpacity>
-          ))}
+            <TouchableOpacity onPress={handleLogout} style={styles(colors).headerBtn}>
+              <Ionicons name="log-out-outline" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+          </View>
         </View>
+        <Text style={styles(colors).headerSubtext}>
+          {currentUser?.full_name || 'Driver'} {currentUser?.is_verified ? '✓' : '• Pending'}
+        </Text>
       </View>
 
-      {/* Trip Control */}
-      <View style={styles(colors).section}>
-        <Card variant="elevated" padding="large">
-          <TouchableOpacity
-            style={[styles(colors).tripButton, tripActive ? styles(colors).tripButtonActive : styles(colors).tripButtonInactive]}
-            onPress={() => setTripActive(!tripActive)}
-          >
-            <Text style={styles(colors).tripButtonText}>
-              {tripActive ? 'END TRIP' : 'START TRIP'}
-            </Text>
-            <Text style={styles(colors).tripButtonSubtext}>
-              {tripActive ? 'Currently on a trip' : 'Tap to start your day'}
-            </Text>
-          </TouchableOpacity>
-        </Card>
+      {/* Tabs */}
+      <View style={styles(colors).tabs}>
+        <TabButton tab="overview" label="Overview" icon="grid" />
+        <TabButton tab="trips" label="Trips" icon="bus" />
+        <TabButton tab="earnings" label="Earnings" icon="card" />
       </View>
 
-      {/* Earnings */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Earnings</Text>
-        <View style={styles(colors).earningsGrid}>
-          <Card variant="elevated" padding="medium">
-            <View style={styles(colors).earningCard}>
-              <Text style={styles(colors).earningLabel}>Today</Text>
-              <Text style={styles(colors).earningValue}>R{(earnings.today / 100).toFixed(0)}</Text>
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Stats Grid */}
+          <View style={styles(colors).section}>
+            <View style={styles(colors).statsGrid}>
+              {stats.map((stat, index) => (
+                <View key={index} style={styles(colors).statCard}>
+                  <Text style={styles(colors).statLabel}>{stat.label}</Text>
+                  <Text style={styles(colors).statValue}>{stat.value}</Text>
+                </View>
+              ))}
             </View>
-          </Card>
-          <Card variant="elevated" padding="medium">
-            <View style={styles(colors).earningCard}>
-              <Text style={styles(colors).earningLabel}>This Week</Text>
-              <Text style={styles(colors).earningValue}>R{(earnings.week / 100).toFixed(0)}</Text>
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles(colors).section}>
+            <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
+            <View style={styles(colors).quickActionsGrid}>
+              {quickActions.map((action, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles(colors).quickActionCard}
+                  onPress={() => navigation?.navigate?.(action.route)}
+                >
+                  <View style={styles(colors).quickActionIcon}>
+                    <Ionicons name={action.icon as any} size={24} color={action.color} />
+                  </View>
+                  <Text style={styles(colors).quickActionText}>{action.name}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          </Card>
-          <Card variant="elevated" padding="medium">
-            <View style={styles(colors).earningCard}>
-              <Text style={styles(colors).earningLabel}>Pending</Text>
-              <Text style={styles(colors).earningValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
-            </View>
-          </Card>
+          </View>
+        </>
+      )}
+
+      {/* Trips Tab */}
+      {activeTab === 'trips' && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>All Trips ({trips.length})</Text>
+          {trips.length === 0 ? (
+            <Card variant="outlined" padding="large">
+              <Text style={styles(colors).emptyText}>No trips found</Text>
+            </Card>
+          ) : (
+            trips.map((trip) => (
+              <Card key={trip.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Ionicons name="bus" size={20} color={colors.textInverse} />
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>{trip.route_name || 'Route'}</Text>
+                    <Text style={styles(colors).listMeta}>
+                      {new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </View>
+                  <Badge
+                    label={formatTripStatus(trip.status)}
+                    variant={getTripStatusVariant(trip.status)}
+                    size="small"
+                  />
+                </View>
+              </Card>
+            ))
+          )}
         </View>
-      </View>
+      )}
 
-      {/* Today's Trips */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Today's Trips</Text>
-        {trips.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No trips scheduled for today</Text>
-          </Card>
-        ) : (
-          trips.map((trip) => (
-            <Card key={trip.id} variant="elevated" padding="medium">
-              <View style={styles(colors).tripCard}>
-                <View style={styles(colors).tripInfo}>
-                  <Text style={styles(colors).tripTime}>
-                    {new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                  <Text style={styles(colors).tripRoute}>{trip.route_name || 'Route'}</Text>
-                </View>
-                <Badge
-                  label={formatTripStatus(trip.status)}
-                  variant={getTripStatusVariant(trip.status) as any}
-                  size="small"
-                />
-              </View>
+      {/* Earnings Tab */}
+      {activeTab === 'earnings' && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
+          {payments.length === 0 ? (
+            <Card variant="outlined" padding="large">
+              <Text style={styles(colors).emptyText}>No payments found</Text>
             </Card>
-          ))
-        )}
-      </View>
-
-      {/* Recent Payments */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
-        {recentPayments.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No recent payments</Text>
-          </Card>
-        ) : (
-          recentPayments.map((payment) => (
-            <Card key={payment.id} variant="elevated" padding="medium">
-              <View style={styles(colors).paymentCard}>
-                <View style={styles(colors).paymentInfo}>
-                  <Text style={styles(colors).tripTime}>Payment</Text>
-                  <Text style={styles(colors).paymentStatus}>{payment.status}</Text>
+          ) : (
+            payments.map((payment) => (
+              <Card key={payment.id} variant="elevated" padding="medium">
+                <View style={styles(colors).listItem}>
+                  <View style={styles(colors).listAvatar}>
+                    <Ionicons name="card" size={20} color={colors.textInverse} />
+                  </View>
+                  <View style={styles(colors).listInfo}>
+                    <Text style={styles(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
+                    <Badge
+                      label={payment.status}
+                      variant={getPaymentVariant(payment.status)}
+                      size="small"
+                    />
+                  </View>
+                  <Text style={styles(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
                 </View>
-                <Text style={styles(colors).paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-              </View>
-            </Card>
-          ))
-        )}
-      </View>
+              </Card>
+            ))
+          )}
+        </View>
+      )}
 
       <Spacer size="xl" />
     </ScrollView>

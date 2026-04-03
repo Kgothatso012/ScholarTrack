@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, FlatList, ActivityIndicator, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, ActivityIndicator, Image, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { documentService, DriverDocument, ParentDocument } from '../../lib/api';
@@ -31,6 +31,7 @@ const documentTypes = {
 export default function DocumentManagementScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('drivers');
   const [driverDocs, setDriverDocs] = useState<DriverDocument[]>([]);
   const [parentDocs, setParentDocs] = useState<ParentDocument[]>([]);
@@ -55,6 +56,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
       console.error('Error loading documents:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 

@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
@@ -26,6 +27,7 @@ interface NotificationSettings {
 
 export default function NotificationSettingsScreen({ navigation }: Props) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [settings, setSettings] = useState<NotificationSettings>({
@@ -88,7 +90,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
 
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 50 },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
     section: { padding: spacing.lg },
@@ -109,7 +111,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
       {/* Header */}
       <View style={styles(colors).header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: spacing.md }}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color={colors.textInverse} />
         </TouchableOpacity>
         <Text style={styles(colors).headerTitle}>Notifications</Text>
         <Text style={styles(colors).headerSub}>Configure push notifications</Text>
