@@ -9,20 +9,14 @@ import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParamList } from './src/navigation/types';
+
+type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
+
 const linking = {
   prefixes: ['scholartrack://', 'https://scholartrack.co.za'],
-  config: {
-    screens: {
-      Auth: {
-        screens: {
-          ResetPasswordConfirm: 'reset-password',
-          ForgotPassword: 'forgot-password',
-          Login: 'login',
-        },
-      },
-    },
-  },
-} as const;
+};
 
 function ThemedApp() {
   const { colors } = useTheme();
