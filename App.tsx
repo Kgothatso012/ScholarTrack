@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text, Linking } from 'react-native';
-import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -22,7 +22,7 @@ const linking = {
       },
     },
   },
-};
+} as const;
 
 function ThemedApp() {
   const { colors } = useTheme();
@@ -44,26 +44,23 @@ function AppContentWithTheme() {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigationRef = useNavigationContainerRef();
 
   useEffect(() => {
-    // Handle deep links
-    const handleDeepLink = (url: string) => {
-      if (url.includes('reset-password')) {
-        navigationRef.navigate('Auth', { screen: 'ResetPasswordConfirm' });
+    // Handle deep links for password reset
+    const handleDeepLink = (event: { url: string }) => {
+      const { url } = event;
+      if (url.includes('reset-password') || url.includes('token')) {
+        // Navigation will be handled by React Navigation deep linking
       }
     };
 
-    // Check for initial URL
-    Linking.getInitialURL().then(url => {
-      if (url) {
-        handleDeepLink(url);
-      }
-    });
+    const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    // Listen for deep links
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleDeepLink(url);
+    // Check initial URL
+    Linking.getInitialURL().then((url) => {
+      if (url && (url.includes('reset-password') || url.includes('token'))) {
+        // Initial deep link will be handled by navigation container
+      }
     });
 
     return () => subscription.remove();
