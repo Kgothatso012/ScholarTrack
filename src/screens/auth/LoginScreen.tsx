@@ -161,6 +161,12 @@ export default function LoginScreen({ navigation, onLogin }: any) {
     }
   };
 
+  const handleForgotPassword = () => {
+    if (navigation?.onForgotPassword) {
+      navigation.onForgotPassword();
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles(colors).container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
