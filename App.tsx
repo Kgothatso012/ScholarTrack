@@ -44,6 +44,30 @@ function AppContentWithTheme() {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigationRef = useNavigationContainerRef();
+
+  useEffect(() => {
+    // Handle deep links
+    const handleDeepLink = (url: string) => {
+      if (url.includes('reset-password')) {
+        navigationRef.navigate('Auth', { screen: 'ResetPasswordConfirm' });
+      }
+    };
+
+    // Check for initial URL
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    });
+
+    // Listen for deep links
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     init();
