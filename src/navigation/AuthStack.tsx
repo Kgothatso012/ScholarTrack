@@ -115,8 +115,8 @@ function OnboardingScreenWrapper({ onLogin }: { onLogin: (role: string) => void 
   return <OnboardingScreen onComplete={() => onLogin('')} />;
 }
 
-function ForgotPasswordScreenWrapper({ onGoBack }: { onGoBack: () => void }) {
-  return <ForgotPasswordScreen navigation={{ goBack: onGoBack, navigate: () => {} }} />;
+function ForgotPasswordScreenWrapper({ onGoBack, onNavigateToResetConfirm }: { onGoBack: () => void; onNavigateToResetConfirm: () => void }) {
+  return <ForgotPasswordScreen navigation={{ goBack: onGoBack, navigate: onNavigateToResetConfirm }} />;
 }
 
 function ResetPasswordConfirmScreenWrapper({ onGoBack }: { onGoBack: () => void }) {
