@@ -174,7 +174,7 @@ function AppContentWithTheme() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <RootNavigator
         userRole={userRole}
         isAuthenticated={isAuthenticated}
