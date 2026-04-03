@@ -271,7 +271,7 @@ export default function LoginScreen({ navigation, onLogin }: any) {
             title="Forgot Password?"
             variant="ghost"
             size="small"
-            onPress={() => setShowResetModal(true)}
+            onPress={handleForgotPassword}
             textStyle={{ color: colors.primary }}
           />
 

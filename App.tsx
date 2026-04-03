@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { View, ActivityIndicator, StyleSheet, Text, Linking } from 'react-native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -8,6 +8,21 @@ import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
+
+const linking = {
+  prefixes: ['scholartrack://', 'https://scholartrack.co.za'],
+  config: {
+    screens: {
+      Auth: {
+        screens: {
+          ResetPasswordConfirm: 'reset-password',
+          ForgotPassword: 'forgot-password',
+          Login: 'login',
+        },
+      },
+    },
+  },
+};
 
 function ThemedApp() {
   const { colors } = useTheme();
