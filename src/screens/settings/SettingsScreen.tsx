@@ -46,6 +46,9 @@ export default function SettingsScreen({ navigation }: any) {
     darkMode: themeMode === 'dark',
   });
 
+  const isDriver = userProfile.role === 'driver';
+  const isParent = userProfile.role === 'parent';
+
   useEffect(() => {
     loadUserProfile();
   }, []);
@@ -152,6 +155,23 @@ export default function SettingsScreen({ navigation }: any) {
         <Switch
           value={value}
           onValueChange={onValueChange}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor={colors.card}
+        />
+      </View>
+    </View>
+  );
+
+  const SettingRealTimeToggle = () => (
+    <View style={styles(colors).settingRow}>
+      <View style={styles(colors).settingInfo}>
+        <Text style={styles(colors).settingLabel}>Real-Time Tracking</Text>
+        <Text style={styles(colors).settingDesc}>Enable live location updates</Text>
+      </View>
+      <View style={styles(colors).settingAction}>
+        <Switch
+          value={privacy.shareLocation}
+          onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, shareLocation: v }))}
           trackColor={{ false: colors.border, true: colors.primary }}
           thumbColor={colors.card}
         />
@@ -274,6 +294,47 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Card>
       </View>
+
+      {/* Driver-specific Settings */}
+      {isDriver && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Driver Settings</Text>
+          <Card variant="elevated" padding="none">
+            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('VehicleChecklist')}>
+              <Text style={styles(colors).settingLabel}>Vehicle Checklist</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Compliance')}>
+              <Text style={styles(colors).settingLabel}>Compliance Documents</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <SettingRow
+              label="Accept Auto-Assigned Routes"
+              description="Automatically accept assigned routes"
+              value={appSettings.autoRefresh}
+              onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, autoRefresh: v }))}
+            />
+          </Card>
+        </View>
+      )}
+
+      {/* Parent-specific Settings */}
+      {isParent && (
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Parent Settings</Text>
+          <Card variant="elevated" padding="none">
+            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Children')}>
+              <Text style={styles(colors).settingLabel}>Manage Children</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('EmergencyContacts')}>
+              <Text style={styles(colors).settingLabel}>Emergency Contacts</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            <SettingRealTimeToggle />
+          </Card>
+        </View>
+      )}
 
       {/* Theme */}
       <View style={styles(colors).section}>
