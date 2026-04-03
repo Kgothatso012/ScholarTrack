@@ -8,6 +8,8 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 const LoginScreen = React.lazy(() => import('../screens/auth/LoginScreen'));
 const RegisterScreen = React.lazy(() => import('../screens/auth/RegisterScreen'));
 const OnboardingScreen = React.lazy(() => import('../screens/auth/OnboardingScreen'));
+const ForgotPasswordScreen = React.lazy(() => import('../screens/auth/ForgotPasswordScreen'));
+const ResetPasswordConfirmScreen = React.lazy(() => import('../screens/auth/ResetPasswordConfirmScreen'));
 
 interface AuthStackProps {
   onLogin: (role: string) => void;
@@ -38,7 +40,7 @@ export function AuthStack({ onLogin }: AuthStackProps) {
           <Stack.Screen name="Login">
             {() => (
               <React.Suspense fallback={<LoadingFallback />}>
-                <LoginScreenWrapper onLogin={onLogin} onNavigateToRegister={navigateToRegister} />
+                <LoginScreenWrapper onLogin={onLogin} onNavigateToRegister={navigateToRegister} onNavigateToForgotPassword={() => {}} />
               </React.Suspense>
             )}
           </Stack.Screen>
@@ -49,6 +51,20 @@ export function AuthStack({ onLogin }: AuthStackProps) {
               </React.Suspense>
             )}
           </Stack.Screen>
+          <Stack.Screen name="ForgotPassword">
+            {() => (
+              <React.Suspense fallback={<LoadingFallback />}>
+                <ForgotPasswordScreenWrapper />
+              </React.Suspense>
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="ResetPasswordConfirm">
+            {() => (
+              <React.Suspense fallback={<LoadingFallback />}>
+                <ResetPasswordConfirmScreenWrapper />
+              </React.Suspense>
+            )}
+          </Stack.Screen>
         </>
       )}
     </Stack.Navigator>
@@ -56,12 +72,13 @@ export function AuthStack({ onLogin }: AuthStackProps) {
 }
 
 // Wrapper components
-function LoginScreenWrapper({ onLogin, onNavigateToRegister }: { onLogin: (role: string) => void; onNavigateToRegister: () => void }) {
+function LoginScreenWrapper({ onLogin, onNavigateToRegister, onNavigateToForgotPassword }: { onLogin: (role: string) => void; onNavigateToRegister: () => void; onNavigateToForgotPassword: () => void }) {
   return (
     <LoginScreen
       onLogin={onLogin}
       navigation={{
         onRegister: onNavigateToRegister,
+        onForgotPassword: onNavigateToForgotPassword,
         navigate: () => {},
         goBack: () => {}
       }}
@@ -88,4 +105,12 @@ function RegisterScreenWrapper({ onLogin, onNavigateToLogin }: { onLogin: (role:
 
 function OnboardingScreenWrapper({ onLogin }: { onLogin: (role: string) => void }) {
   return <OnboardingScreen onComplete={() => onLogin('')} />;
+}
+
+function ForgotPasswordScreenWrapper() {
+  return <ForgotPasswordScreen navigation={{ goBack: () => {}, navigate: () => {} }} />;
+}
+
+function ResetPasswordConfirmScreenWrapper() {
+  return <ResetPasswordConfirmScreen navigation={{ goBack: () => {}, navigate: () => {} }} />;
 }

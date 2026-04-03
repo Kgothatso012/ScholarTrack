@@ -12,6 +12,8 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   Onboarding: { onComplete?: () => void };
+  ForgotPassword: undefined;
+  ResetPasswordConfirm: undefined;
 };
 
 export type ParentStackParamList = {
