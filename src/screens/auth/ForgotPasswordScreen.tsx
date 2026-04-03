@@ -46,7 +46,11 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
         return;
       }
 
+      // Navigate to ResetPasswordConfirm screen after sending
       setSent(true);
+      if (navigation.navigate) {
+        navigation.navigate('ResetPasswordConfirm');
+      }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'An unexpected error occurred');
     } finally {

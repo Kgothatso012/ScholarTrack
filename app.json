@@ -4,12 +4,9 @@
     "slug": "scholartrack-expo54",
     "version": "1.0.0",
     "scheme": "scholartrack",
-    " schemes": [
-      "scholartrack"
-    ],
     "linking": {
       "enabled": true,
-      " prefixes": [
+      "prefixes": [
         "scholartrack://",
         "https://scholartrack.co.za"
       ]
