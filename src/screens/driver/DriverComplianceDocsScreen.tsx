@@ -1,7 +1,7 @@
 // Driver Compliance Documents Screen
 // Required for South African Scholar Transport - National Land Transport Act
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -110,13 +110,26 @@ export default function DriverComplianceScreen({ navigation, setScreen }: any) {
   const requiredCount = docs.filter(d => d.required).length;
   const compliancePercent = Math.round((verifiedCount / requiredCount) * 100);
 
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // In production: fetch from Supabase here
+    // For now, simulate refresh with existing data
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setRefreshing(false);
+  }, []);
+
+  useEffect(() => {
+    // Initial data load
+  }, []);
+
   return (
     <ScrollView
       style={styles(colors).container}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => setRefreshing(true)}
+          onRefresh={onRefresh}
           colors={[colors.primary]}
           tintColor={colors.primary}
         />
