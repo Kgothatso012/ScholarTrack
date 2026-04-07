@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, Avatar, SearchBar, Pagination, DashboardSkeleton } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface DashboardStat {
@@ -46,6 +46,22 @@ export default function AdminDashboardScreen({ navigation }: any) {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [driverSearch, setDriverSearch] = useState('');
+  const [driverPage, setDriverPage] = useState(1);
+  const DRIVERS_PER_PAGE = 10;
+
+  // Filtered drivers based on search
+  const filteredDrivers = drivers.filter(driver =>
+    (driver.full_name || '').toLowerCase().includes(driverSearch.toLowerCase()) ||
+    (driver.phone || '').toLowerCase().includes(driverSearch.toLowerCase())
+  );
+
+  // Paginated drivers
+  const totalDriverPages = Math.ceil(filteredDrivers.length / DRIVERS_PER_PAGE);
+  const paginatedDrivers = filteredDrivers.slice(
+    (driverPage - 1) * DRIVERS_PER_PAGE,
+    driverPage * DRIVERS_PER_PAGE
+  );
 
   const loadDashboardData = async () => {
     try {
@@ -204,10 +220,8 @@ export default function AdminDashboardScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading dashboard...</Text>
-        </Card>
+      <View style={[styles(colors).container, { padding: spacing.lg }]}>
+        <DashboardSkeleton />
       </View>
     );
   }
@@ -287,32 +301,50 @@ export default function AdminDashboardScreen({ navigation }: any) {
       {/* Drivers Tab */}
       {activeTab === 'drivers' && (
         <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>All Drivers ({drivers.length})</Text>
-          {drivers.length === 0 ? (
+          <Text style={styles(colors).sectionTitle}>All Drivers ({filteredDrivers.length})</Text>
+          <SearchBar
+            value={driverSearch}
+            onChangeText={setDriverSearch}
+            placeholder="Search drivers..."
+          />
+          {filteredDrivers.length === 0 ? (
             <Card variant="outlined" padding="large">
-              <Text style={styles(colors).emptyText}>No drivers found</Text>
+              <Text style={styles(colors).emptyText}>
+                {driverSearch ? 'No drivers match your search' : 'No drivers found'}
+              </Text>
             </Card>
           ) : (
-            drivers.map((driver) => (
-              <Card key={driver.id} variant="elevated" padding="medium">
-                <View style={styles(colors).listItem}>
-                  <View style={styles(colors).listAvatar}>
-                    <Text style={{ color: colors.textInverse, fontWeight: 'bold', fontSize: 14 }}>
-                      {(driver.full_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </Text>
+            <>
+              {paginatedDrivers.map((driver) => (
+                <Card key={driver.id} variant="elevated" padding="medium">
+                  <View style={styles(colors).listItem}>
+                    <View style={styles(colors).listAvatar}>
+                      <Text style={{ color: colors.textInverse, fontWeight: 'bold', fontSize: 14 }}>
+                        {(driver.full_name || 'D').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles(colors).listInfo}>
+                      <Text style={styles(colors).listName}>{driver.full_name}</Text>
+                      <Text style={styles(colors).listMeta}>{driver.phone || 'No phone'}</Text>
+                    </View>
+                    <Badge
+                      label={getStatusText(driver.status, driver.is_verified)}
+                      variant={getStatusVariant(driver.status, driver.is_verified)}
+                      size="small"
+                    />
                   </View>
-                  <View style={styles(colors).listInfo}>
-                    <Text style={styles(colors).listName}>{driver.full_name}</Text>
-                    <Text style={styles(colors).listMeta}>{driver.phone || 'No phone'}</Text>
-                  </View>
-                  <Badge
-                    label={getStatusText(driver.status, driver.is_verified)}
-                    variant={getStatusVariant(driver.status, driver.is_verified)}
-                    size="small"
-                  />
-                </View>
-              </Card>
-            ))
+                </Card>
+              ))}
+              {totalDriverPages > 1 && (
+                <Pagination
+                  currentPage={driverPage}
+                  totalPages={totalDriverPages}
+                  onPageChange={setDriverPage}
+                  itemsPerPage={DRIVERS_PER_PAGE}
+                  totalItems={filteredDrivers.length}
+                />
+              )}
+            </>
           )}
         </View>
       )}

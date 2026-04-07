@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SearchBar, Pagination, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const AdminPaymentsScreen = ({ navigation }: any) => {
@@ -13,6 +13,9 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAYMENTS_PER_PAGE = 15;
 
   const fetchPayments = async () => {
     try {
@@ -64,7 +67,21 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
     }
   };
 
-  const filteredPayments = payments;
+  const filteredPayments = payments.filter(payment => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      payment.id?.toLowerCase().includes(query) ||
+      payment.status?.toLowerCase().includes(query)
+    );
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPayments.length / PAYMENTS_PER_PAGE);
+  const paginatedPayments = filteredPayments.slice(
+    (currentPage - 1) * PAYMENTS_PER_PAGE,
+    currentPage * PAYMENTS_PER_PAGE
+  );
   const totalAmount = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const pendingCount = payments.filter(p => p.status === 'pending').length;
 
@@ -91,9 +108,12 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
   if (loading) {
     return (
       <View style={styles(colors).container}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading payments...</Text>
-        </Card>
+        <View style={styles(colors).header}>
+          <Text style={styles(colors).headerTitle}>Payments</Text>
+        </View>
+        <View style={{ padding: spacing.lg }}>
+          {[1, 2, 3, 4, 5].map(i => <SkeletonListItem key={i} />)}
+        </View>
       </View>
     );
   }
@@ -128,13 +148,19 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
       {/* Payments List */}
       <View style={styles(colors).section}>
         <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by ID or status..."
+        />
 
         {filteredPayments.length === 0 ? (
           <Card variant="outlined" padding="large">
             <Text style={styles(colors).emptyText}>No payments found</Text>
           </Card>
         ) : (
-          filteredPayments.map((payment) => (
+          <>
+            {paginatedPayments.map((payment) => (
             <Card key={payment.id} variant="elevated" padding="medium">
               <TouchableOpacity onPress={() => processPayment(payment.id)}>
                 <View style={styles(colors).paymentCard}>
@@ -153,7 +179,17 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
                 </View>
               </TouchableOpacity>
             </Card>
-          ))
+          ))}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={PAYMENTS_PER_PAGE}
+              totalItems={filteredPayments.length}
+            />
+          )}
+          </>
         )}
       </View>
 

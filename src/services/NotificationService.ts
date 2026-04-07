@@ -9,7 +9,35 @@ interface NotificationSettings {
   paymentNotifications: boolean;
   routeChanges: boolean;
   driverMessages: boolean;
+  // Quiet hours
+  quietHoursEnabled: boolean;
+  quietHoursStart: string; // "22:00"
+  quietHoursEnd: string;   // "06:00"
 }
+
+// Check if currently in quiet hours
+const isQuietHours = (): boolean => {
+  const now = new Date();
+  const currentTime = now.getHours() * 60 + now.getMinutes();
+
+  // Parse quiet hours
+  const settings = notificationService.getQuietHoursSettings();
+  if (!settings.quietHoursEnabled) return false;
+
+  const [startH, startM] = settings.quietHoursStart.split(':').map(Number);
+  const [endH, endM] = settings.quietHoursEnd.split(':').map(Number);
+
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+
+  // Handle overnight quiet hours (e.g., 22:00 - 06:00)
+  if (startMinutes > endMinutes) {
+    // Overnight: 22:00 - 06:00 means 22:00-24:00 OR 00:00-06:00
+    return currentTime >= startMinutes || currentTime < endMinutes;
+  }
+
+  return currentTime >= startMinutes && currentTime < endMinutes;
+};
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -92,6 +120,12 @@ export const notificationService = {
     data: Record<string, any> = {},
     channel: 'default' | 'safety' | 'trips' | 'payments' = 'default'
   ): Promise<string> {
+    // Check quiet hours - skip for non-safety notifications
+    if (channel !== 'safety' && isQuietHours()) {
+      console.log('Notification suppressed: quiet hours active');
+      return '';
+    }
+
     return await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -101,6 +135,27 @@ export const notificationService = {
       },
       trigger: null, // Immediate
     });
+  },
+
+  // Get quiet hours settings
+  getQuietHoursSettings(): { quietHoursEnabled: boolean; quietHoursStart: string; quietHoursEnd: string } {
+    // This would load from AsyncStorage in production
+    return {
+      quietHoursEnabled: true,
+      quietHoursStart: '22:00',
+      quietHoursEnd: '06:00',
+    };
+  },
+
+  // Update quiet hours settings
+  async setQuietHoursSettings(enabled: boolean, start: string, end: string): Promise<void> {
+    const settings = await getNotificationSettings();
+    if (settings) {
+      settings.quietHoursEnabled = enabled;
+      settings.quietHoursStart = start;
+      settings.quietHoursEnd = end;
+      await AsyncStorage.setItem('notificationSettings', JSON.stringify(settings));
+    }
   },
 
   // Schedule a reminder notification

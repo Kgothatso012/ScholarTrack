@@ -27,6 +27,7 @@ export default function TrackChildScreen({ navigation }: any) {
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
 
+  // Multi-child: Track all children
   useEffect(() => {
     loadChildren();
   }, []);
@@ -42,6 +43,10 @@ export default function TrackChildScreen({ navigation }: any) {
       }
       const data = await childrenService.getChildren(userId);
       setChildren(data || []);
+      // Auto-select first child if none selected
+      if (data?.length > 0 && !selectedChild) {
+        setSelectedChild(data[0]);
+      }
     } catch (error) {
       console.error('Error loading children:', error);
       Alert.alert('Error', 'Failed to load children');
@@ -56,6 +61,15 @@ export default function TrackChildScreen({ navigation }: any) {
     headerTitle: { ...typography.h2, color: colors.textInverse },
     headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
     content: { flex: 1, padding: spacing.lg },
+    // Multi-child selector
+    childSelector: { marginBottom: spacing.lg },
+    childScroll: { flexDirection: 'row' },
+    childChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, marginRight: spacing.sm, flexDirection: 'row', alignItems: 'center' },
+    childChipSelected: { backgroundColor: colors.accent },
+    childChipUnselected: { backgroundColor: colors.card },
+    childChipText: { ...typography.labelSmall, marginLeft: spacing.xs },
+    childChipTextSelected: { color: colors.textInverse },
+    childChipTextUnselected: { color: colors.text },
     placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
     placeholderIcon: { marginBottom: spacing.md },
     placeholderTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.sm },
@@ -76,6 +90,44 @@ export default function TrackChildScreen({ navigation }: any) {
       </View>
 
       <View style={styles(colors).content}>
+        {/* Multi-Child Selector */}
+        {children.length > 1 && (
+          <View style={styles(colors).childSelector}>
+            <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.sm }}>
+              Select Child:
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {children.map((child) => {
+                const isSelected = selectedChild?.id === child.id;
+                return (
+                  <TouchableOpacity
+                    key={child.id}
+                    style={[
+                      styles(colors).childChip,
+                      isSelected ? styles(colors).childChipSelected : styles(colors).childChipUnselected,
+                    ]}
+                    onPress={() => setSelectedChild(child)}
+                  >
+                    <Ionicons
+                      name="person"
+                      size={16}
+                      color={isSelected ? colors.textInverse : colors.text}
+                    />
+                    <Text
+                      style={[
+                        styles(colors).childChipText,
+                        isSelected ? styles(colors).childChipTextSelected : styles(colors).childChipTextUnselected,
+                      ]}
+                    >
+                      {child.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
         {selectedChild ? (
           <>
             <Card variant="elevated" padding="large">

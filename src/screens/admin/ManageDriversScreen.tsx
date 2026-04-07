@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { driverService, Driver } from '../../lib/api';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SearchBar, Pagination, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 const ManageDriversScreen = ({ navigation }: any) => {
@@ -14,6 +14,8 @@ const ManageDriversScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const DRIVERS_PER_PAGE = 10;
 
   const fetchDrivers = async () => {
     try {
@@ -59,6 +61,13 @@ const ManageDriversScreen = ({ navigation }: any) => {
     );
   });
 
+  // Pagination
+  const totalPages = Math.ceil(filteredDrivers.length / DRIVERS_PER_PAGE);
+  const paginatedDrivers = filteredDrivers.slice(
+    (currentPage - 1) * DRIVERS_PER_PAGE,
+    currentPage * DRIVERS_PER_PAGE
+  );
+
   const activeDrivers = drivers.filter(d => d.is_available).length;
   const pendingDrivers = drivers.filter(d => !d.is_verified).length;
 
@@ -89,9 +98,12 @@ const ManageDriversScreen = ({ navigation }: any) => {
   if (loading) {
     return (
       <View style={styles(colors).container}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading drivers...</Text>
-        </Card>
+        <View style={styles(colors).header}>
+          <Text style={styles(colors).headerTitle}>Manage Drivers</Text>
+        </View>
+        <View style={{ padding: spacing.lg }}>
+          {[1, 2, 3, 4, 5].map(i => <SkeletonListItem key={i} />)}
+        </View>
       </View>
     );
   }
@@ -124,9 +136,12 @@ const ManageDriversScreen = ({ navigation }: any) => {
       </View>
 
       {/* Search */}
-      <View style={styles(colors).searchContainer}>
-        <Ionicons name="search" size={20} color={colors.textSecondary} />
-        <Text style={styles(colors).searchText}>Search by name or phone...</Text>
+      <View style={{ paddingHorizontal: spacing.lg }}>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search by name or phone..."
+        />
       </View>
 
       {/* Driver List */}
@@ -138,7 +153,8 @@ const ManageDriversScreen = ({ navigation }: any) => {
             <Text style={styles(colors).emptyText}>No drivers found</Text>
           </Card>
         ) : (
-          filteredDrivers.map((driver, index) => (
+          <>
+            {paginatedDrivers.map((driver, index) => (
             <Card key={index} variant="elevated" padding="medium">
               <TouchableOpacity>
                 <View style={styles(colors).driverCard}>
@@ -170,7 +186,17 @@ const ManageDriversScreen = ({ navigation }: any) => {
                 </View>
               </TouchableOpacity>
             </Card>
-          ))
+          ))}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={DRIVERS_PER_PAGE}
+              totalItems={filteredDrivers.length}
+            />
+          )}
+          </>
         )}
       </View>
 
