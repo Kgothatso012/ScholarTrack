@@ -1,10 +1,119 @@
 // Push Notifications Service for ScholarTrack
+// Unified typed notification system with event emitter
+
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
 
-// Configure notification handling
+// ============================================================================
+// TYPES - Typed notification payloads (from clawhip typed events pattern)
+// ============================================================================
+
+export type NotificationType =
+  | 'TRIP_STARTED'
+  | 'TRIP_COMPLETED'
+  | 'TRIP_DELAYED'
+  | 'PANIC_TRIGGERED'
+  | 'EMERGENCY'
+  | 'CHILD_PICKED_UP'
+  | 'CHILD_DROPPED_OFF'
+  | 'PAYMENT_RECEIVED'
+  | 'PAYMENT_DUE'
+  | 'ROUTE_UPDATE'
+  | 'DRIVER_ASSIGNED';
+
+export type NotificationChannel = 'default' | 'safety' | 'trips' | 'payments';
+
+export interface TripNotificationData {
+  tripId: string;
+  schoolName: string;
+  routeName?: string;
+  estimatedArrival?: string;
+}
+
+export interface SafetyNotificationData {
+  tripId: string;
+  location?: { latitude: number; longitude: number };
+  timestamp: string;
+  severity: 'high' | 'critical';
+}
+
+export interface PaymentNotificationData {
+  amount: number;
+  childName?: string;
+  dueDate?: string;
+  paymentId?: string;
+}
+
+export interface DriverNotificationData {
+  driverId: string;
+  driverName: string;
+  routeName?: string;
+  contactNumber?: string;
+}
+
+export type NotificationData =
+  | { type: 'TRIP_STARTED'; payload: TripNotificationData }
+  | { type: 'TRIP_COMPLETED'; payload: TripNotificationData }
+  | { type: 'TRIP_DELAYED'; payload: TripNotificationData & { delayMinutes: number } }
+  | { type: 'PANIC_TRIGGERED'; payload: SafetyNotificationData }
+  | { type: 'EMERGENCY'; payload: SafetyNotificationData & { message: string } }
+  | { type: 'CHILD_PICKED_UP'; payload: { childId: string; childName: string; driverName: string } }
+  | { type: 'CHILD_DROPPED_OFF'; payload: { childId: string; childName: string; destination: string } }
+  | { type: 'PAYMENT_RECEIVED'; payload: PaymentNotificationData }
+  | { type: 'PAYMENT_DUE'; payload: PaymentNotificationData }
+  | { type: 'ROUTE_UPDATE'; payload: { tripId: string; message: string } }
+  | { type: 'DRIVER_ASSIGNED'; payload: DriverNotificationData };
+
+// ============================================================================
+// EVENT EMITTER - Typed notification lifecycle events
+// ============================================================================
+
+type NotificationEventCallback = (data: any) => void;
+
+interface EventSubscription {
+  remove: () => void;
+}
+
+class NotificationEventEmitter {
+  private listeners: Map<string, NotificationEventCallback[]> = new Map();
+
+  addListener(event: string, callback: NotificationEventCallback): EventSubscription {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(callback);
+
+    return {
+      remove: () => {
+        const callbacks = this.listeners.get(event);
+        if (callbacks) {
+          const index = callbacks.indexOf(callback);
+          if (index > -1) callbacks.splice(index, 1);
+        }
+      },
+    };
+  }
+
+  emit(event: string, data: any): void {
+    const callbacks = this.listeners.get(event);
+    if (callbacks) {
+      callbacks.forEach(cb => cb(data));
+    }
+  }
+
+  removeAllListeners(): void {
+    this.listeners.clear();
+  }
+}
+
+export const notificationEmitter = new NotificationEventEmitter();
+
+// ============================================================================
+// CONFIGURE NOTIFICATION HANDLING
+// ============================================================================
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -12,8 +121,12 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
     shouldShowBanner: true,
     shouldShowList: true,
-  }),
+  } as Notifications.NotificationBehavior),
 });
+
+// ============================================================================
+// NOTIFICATION SERVICE
+// ============================================================================
 
 export const notificationService = {
   // Request permissions
@@ -146,3 +259,122 @@ export const notificationService = {
     );
   },
 };
+
+// ============================================================================
+// TYPED SEND APP NOTIFICATION (from clawhip typed events pattern)
+// ============================================================================
+
+const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (payload: any) => string }> = {
+  TRIP_STARTED: {
+    title: 'Bus Trip Started',
+    body: (p: TripNotificationData) => `Trip to ${p.schoolName || 'school'} has started`,
+  },
+  TRIP_COMPLETED: {
+    title: 'Trip Completed',
+    body: (p: TripNotificationData) => `Your child has arrived at ${p.schoolName || 'destination'}`,
+  },
+  TRIP_DELAYED: {
+    title: 'Trip Delayed',
+    body: (p: any) => `Trip is delayed by ${p.delayMinutes || 15} minutes`,
+  },
+  PANIC_TRIGGERED: {
+    title: 'PANIC ALERT',
+    body: () => 'Emergency! Panic button activated on route',
+  },
+  EMERGENCY: {
+    title: 'Emergency Alert',
+    body: (p: any) => p.message || 'Emergency alert triggered',
+  },
+  CHILD_PICKED_UP: {
+    title: 'Child Picked Up',
+    body: (p: any) => `${p.childName} has been picked up by driver`,
+  },
+  CHILD_DROPPED_OFF: {
+    title: 'Child Dropped Off',
+    body: (p: any) => `${p.childName} has arrived at ${p.destination}`,
+  },
+  PAYMENT_RECEIVED: {
+    title: 'Payment Received',
+    body: (p: PaymentNotificationData) => `Payment of R${p.amount} received successfully`,
+  },
+  PAYMENT_DUE: {
+    title: 'Payment Due',
+    body: (p: PaymentNotificationData) => `Payment of R${p.amount} is due for ${p.childName || 'your child'}`,
+  },
+  ROUTE_UPDATE: {
+    title: 'Route Update',
+    body: (p: any) => p.message || 'Route has been updated',
+  },
+  DRIVER_ASSIGNED: {
+    title: 'Driver Assigned',
+    body: (p: DriverNotificationData) => `${p.driverName} will be your driver`,
+  },
+};
+
+function getChannelForType(type: NotificationType): NotificationChannel {
+  if (type === 'PANIC_TRIGGERED' || type === 'EMERGENCY') return 'safety';
+  if (type.startsWith('TRIP') || type === 'CHILD_PICKED_UP' || type === 'CHILD_DROPPED_OFF') return 'trips';
+  if (type.startsWith('PAYMENT')) return 'payments';
+  return 'default';
+}
+
+export async function sendAppNotification(
+  type: NotificationType,
+  userId: string,
+  payload: any
+): Promise<void> {
+  const message = NOTIFICATION_MESSAGES[type];
+  if (!message) {
+    console.warn(`Unknown notification type: ${type}`);
+    return;
+  }
+
+  // Get user's push token
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('push_token')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.push_token) {
+    console.log(`No push token for user ${userId}`);
+    return;
+  }
+
+  const channel = getChannelForType(type);
+
+  // Emit event for notification lifecycle tracking
+  notificationEmitter.emit('notification_received', {
+    type,
+    payload,
+    channel,
+    timestamp: new Date().toISOString(),
+  } as any);
+
+  await notificationService.sendLocalNotification(
+    message.title,
+    message.body(payload),
+    { type, payload, channel }
+  );
+}
+
+// ============================================================================
+// LISTENER INTEGRATION - Hook Expo listeners to our emitter
+// ============================================================================
+
+export function initializeNotificationListeners(): () => void {
+  const receivedSub = Notifications.addNotificationReceivedListener(notification => {
+    notificationEmitter.emit('notification_received', notification);
+  });
+
+  const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
+    notificationEmitter.emit('notification_response', response);
+  });
+
+  // Return cleanup function
+  return () => {
+    receivedSub.remove();
+    responseSub.remove();
+    notificationEmitter.removeAllListeners();
+  };
+}
