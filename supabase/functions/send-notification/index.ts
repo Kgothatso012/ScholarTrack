@@ -3,16 +3,15 @@
 // Requires EXPO_ACCESS_TOKEN environment variable in Supabase
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const EXPO_ACCESS_TOKEN = Deno.env.get('EXPO_ACCESS_TOKEN');
-const EXPO_push_url = 'https://exp.host/--/api/v2/push/send';
+const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
 interface PushNotificationPayload {
-  to: string; // Expo push token
+  to: string;
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   sound?: 'default' | null;
   priority?: 'default' | 'normal' | 'high';
   channelId?: string;
@@ -45,7 +44,7 @@ serve(async (req: Request) => {
       priority: priority || 'normal',
     };
 
-    const expoResponse = await fetch(EXPO_push_url, {
+    const expoResponse = await fetch(EXPO_PUSH_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -28,6 +28,7 @@ export default function DriverTripScreen({ navigation }: any) {
   const [currentLocation, setCurrentLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [checkedInStudents, setCheckedInStudents] = useState<string[]>([]);
   const [geofenceZones, setGeofenceZones] = useState<GeofenceZone[]>([]);
+  const [geofenceAlert, setGeofenceAlert] = useState<{type: string; message: string} | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
@@ -123,10 +124,13 @@ export default function DriverTripScreen({ navigation }: any) {
         'safety'
       );
 
-      Alert.alert(
-        event.type === 'pickup_arrived' ? 'Pickup Zone' : 'Dropoff Zone',
-        message
-      );
+      // Show non-blocking in-screen banner
+      setGeofenceAlert({
+        type: event.type,
+        message,
+      });
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => setGeofenceAlert(null), 5000);
     }
   };
 
@@ -296,18 +300,46 @@ export default function DriverTripScreen({ navigation }: any) {
       <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
         <View style={styles(colors).headerTop}>
           <Text style={styles(colors).headerTitle}>🚐 My Trips</Text>
-          <TouchableOpacity
-            style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? colors.success : colors.danger }]}
-            onPress={toggleOnlineStatus}
-          >
-            <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={16} color="#fff" />
-            <Text style={styles(colors).onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <TouchableOpacity
+              style={[styles(colors).sosBtn, { backgroundColor: colors.danger }]}
+              onPress={() => {
+                Alert.alert(
+                  'Emergency SOS',
+                  'Calling emergency services...',
+                  [{ text: 'Cancel', style: 'cancel' }]
+                );
+              }}
+            >
+              <Ionicons name="warning" size={18} color="#fff" />
+              <Text style={styles(colors).sosBtnText}>SOS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? colors.success : colors.danger }]}
+              onPress={toggleOnlineStatus}
+            >
+              <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={16} color="#fff" />
+              <Text style={styles(colors).onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles(colors).headerSub}>
           {driver?.full_name || 'Driver'} • {driver?.vehicle_type || 'Vehicle'}
         </Text>
       </View>
+
+      {/* Non-blocking Geofence Alert Banner */}
+      {geofenceAlert && (
+        <TouchableOpacity
+          style={[styles(colors).geofenceBanner, { backgroundColor: colors.warning }]}
+          onPress={() => setGeofenceAlert(null)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="location" size={20} color="#fff" />
+          <Text style={styles(colors).geofenceBannerText}>{geofenceAlert.message}</Text>
+          <Ionicons name="close" size={16} color="#fff" />
+        </TouchableOpacity>
+      )}
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Active Trip Card */}
@@ -460,9 +492,13 @@ const styles = (colors: any) => StyleSheet.create({
   header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xxl },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { ...typography.h1, color: colors.textInverse },
+  sosBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
+  sosBtnText: { ...typography.labelSmall, color: colors.textInverse, fontWeight: '700' },
   onlineBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
   onlineBtnText: { ...typography.labelSmall, color: colors.textInverse },
   headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+  geofenceBanner: { flexDirection: 'row', alignItems: 'center', padding: spacing.md, gap: spacing.sm },
+  geofenceBannerText: { ...typography.label, color: colors.textInverse, flex: 1 },
   activeTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, borderWidth: 2, borderColor: colors.accent },
   activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },

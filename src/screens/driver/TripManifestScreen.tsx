@@ -88,28 +88,37 @@ export default function TripManifestScreen({ navigation, setScreen }: any) {
         />
       }
     >
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Trip Manifest</Text>
-        <Text style={styles(colors).headerSubtitle}>{manifest.route}</Text>
+      <View style={[styles(colors).header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+        <View>
+          <Text style={styles(colors).headerTitle}>Trip Manifest</Text>
+          <Text style={styles(colors).headerSubtitle}>{manifest.route}</Text>
+        </View>
+        <TouchableOpacity
+          style={{ backgroundColor: colors.danger, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 4 }}
+          onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...', [{ text: 'Cancel', style: 'cancel' }])}
+        >
+          <Ionicons name="warning" size={16} color="#fff" />
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>SOS</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Trip Info */}
       <View style={styles(colors).infoCard}>
         <View style={styles(colors).infoRow}>
           <View style={styles(colors).infoItem}>
-            <Ionicons name="calendar" size={20} color="#000000" />
+            <Ionicons name="calendar" size={20} color={colors.text} />
             <Text style={styles(colors).infoLabel}>Date</Text>
             <Text style={styles(colors).infoValue}>{manifest.date}</Text>
           </View>
           <View style={styles(colors).infoItem}>
-            <Ionicons name="bus" size={20} color="#000000" />
+            <Ionicons name="bus" size={20} color={colors.text} />
             <Text style={styles(colors).infoLabel}>Trip ID</Text>
             <Text style={styles(colors).infoValue}>{manifest.id}</Text>
           </View>
         </View>
         <View style={styles(colors).infoRow}>
           <View style={styles(colors).infoItem}>
-            <Ionicons name="person" size={20} color="#000000" />
+            <Ionicons name="person" size={20} color={colors.text} />
             <Text style={styles(colors).infoLabel}>Driver</Text>
             <Text style={styles(colors).infoValue}>{manifest.driver}</Text>
           </View>

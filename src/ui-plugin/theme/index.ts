@@ -2,77 +2,87 @@
 // Professional, trustworthy, safety-focused design for South African student transport
 
 export const colors = {
-  // Primary - SA Green (Trust, Safety)
-  primary: '#007749',
-  primaryLight: '#00995F',
-  primaryDark: '#005A37',
-  primaryMuted: '#E8F5EE',
+  // Primary - SA Warm Green (Trust, Safety, Warmth)
+  primary: '#2D7A4F',
+  primaryLight: '#4A9A6F',
+  primaryDark: '#1A5A38',
+  primaryMuted: '#E8F2EC',
 
-  // Secondary - SA Blue (Professionalism)
-  secondary: '#002395',
-  secondaryLight: '#0033C7',
-  secondaryDark: '#00196E',
+  // Secondary - SA Deep Blue (Professionalism, Trust)
+  secondary: '#1E408E',
+  secondaryLight: '#3A65B8',
+  secondaryDark: '#0F2A5A',
   secondaryMuted: '#E8ECF4',
 
-  // Accent - SA Gold (Excellence)
-  accent: '#FFB81C',
-  accentLight: '#FFCF5C',
-  accentDark: '#E6A600',
+  // Accent - SA Warm Gold (Excellence, Warmth, Sunshine)
+  accent: '#F5A623',
+  accentLight: '#FFBF5C',
+  accentDark: '#D4890F',
 
-  // Neutrals
-  background: '#F5F5F5',
-  backgroundAlt: '#EEEEEE',
+  // SA Warm Neutrals (Cream, Warm Grey, Terracotta tones)
+  warm: {
+    cream: '#FDF6EC',
+    terracotta: '#C65D3B',
+    terracottaLight: '#E07B5A',
+    sage: '#7D9B76',
+    sunset: '#E8A87C',
+    clay: '#B86B4C',
+  },
+
+  // Neutrals - warmer tones
+  background: '#FAF8F5',
+  backgroundAlt: '#F5F2ED',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
   card: '#FFFFFF',
-  inputBg: '#F8F8F8',
+  inputBg: '#F9F7F4',
 
-  // Text - Dark professional
-  text: '#1A1A2E',
-  textSecondary: '#4A4A68',
-  textMuted: '#8C8CA1',
+  // Text - Warm dark
+  text: '#2C2416',
+  textSecondary: '#5C5040',
+  textMuted: '#8C8472',
   textInverse: '#FFFFFF',
 
   // Semantic colors
-  success: '#007749',
-  successLight: '#E8F5EE',
-  successDark: '#005A37',
+  success: '#2D7A4F',
+  successLight: '#E8F2EC',
+  successDark: '#1A5A38',
 
-  warning: '#FFB81C',
-  warningLight: '#FFF5E0',
-  warningDark: '#E6A600',
+  warning: '#F5A623',
+  warningLight: '#FEF3E2',
+  warningDark: '#D4890F',
 
-  error: '#E03C31',
-  errorLight: '#FDEDED',
-  errorDark: '#C42B23',
+  error: '#C43D3D',
+  errorLight: '#FCEAEA',
+  errorDark: '#A62828',
 
-  info: '#002395',
+  info: '#1E408E',
   infoLight: '#E8ECF4',
-  infoDark: '#00196E',
+  infoDark: '#0F2A5A',
 
   // Border & Dividers
-  border: '#E0E0E0',
-  borderLight: '#EEEEEE',
-  divider: '#E0E0E0',
+  border: '#E8E4DD',
+  borderLight: '#F0EDE8',
+  divider: '#E8E4DD',
 
   // Interactive states
-  selected: '#00774920',
-  pressed: 'rgba(0,0,0,0.1)',
-  disabled: '#CCCCCC',
+  selected: '#2D7A4F20',
+  pressed: 'rgba(44, 36, 22, 0.08)',
+  disabled: '#C4BFB5',
 
   // Shadows
-  shadow: 'rgba(26, 26, 46, 0.08)',
-  shadowStrong: 'rgba(26, 26, 46, 0.15)',
+  shadow: 'rgba(44, 36, 22, 0.08)',
+  shadowStrong: 'rgba(44, 36, 22, 0.15)',
 
   // Overlay
-  overlay: 'rgba(26, 26, 46, 0.5)',
-  overlayLight: 'rgba(26, 26, 46, 0.25)',
+  overlay: 'rgba(44, 36, 22, 0.5)',
+  overlayLight: 'rgba(44, 36, 22, 0.25)',
 
   // Status colors for trips
-  tripActive: '#007749',
-  tripPending: '#FFB81C',
-  tripCompleted: '#002395',
-  tripCancelled: '#E03C31',
+  tripActive: '#2D7A4F',
+  tripPending: '#F5A623',
+  tripCompleted: '#1E408E',
+  tripCancelled: '#C43D3D',
 };
 
 export const spacing = {

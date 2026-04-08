@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { getMenuForRole, MenuItem } from '../config/menu';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../context/ThemeContext';
 
 interface DrawerItemProps {
   item: MenuItem;
@@ -47,20 +48,9 @@ const DrawerItem: React.FC<DrawerItemProps> = ({ item, isActive, onPress, colors
 export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   const { navigation, state } = props;
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [userName, setUserName] = React.useState('');
   const [userRole, setUserRole] = React.useState<string | null>(null);
-
-  const colors = {
-    background: '#FFFFFF',
-    card: '#F8F9FA',
-    primary: '#007749',
-    secondary: '#002395',
-    accent: '#FFB81C',
-    text: '#1A1A1A',
-    textSecondary: '#666666',
-    border: '#E5E5EA',
-    error: '#E03C31',
-  };
 
   React.useEffect(() => {
     loadUserInfo();
@@ -103,6 +93,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       'History': 'History',
       // Admin
       'AdminDashboard': 'AdminDashboard',
+      'Drivers': 'Drivers',
       'FleetTracking': 'FleetTracking',
       'VehicleManage': 'VehicleManage',
       'AttendanceReports': 'AttendanceReports',
@@ -129,8 +120,8 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
             await supabase.auth.signOut();
             await AsyncStorage.clear();
             navigation.closeDrawer();
-            // Navigate to auth
-            (window as any).logout?.();
+            // Navigate to auth - use reset to clear nav stack
+            navigation.navigate('Auth');
           },
         },
       ]
@@ -148,10 +139,10 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 
   const getRoleColor = (role: string | null) => {
     switch (role) {
-      case 'parent': return colors.primary;
-      case 'driver': return colors.secondary;
-      case 'admin': return colors.accent;
-      default: return colors.textSecondary;
+      case 'parent': return colors.primary || '#007749';
+      case 'driver': return colors.secondary || '#002395';
+      case 'admin': return colors.accent || '#FFB81C';
+      default: return colors.textSecondary || '#666666';
     }
   };
 
@@ -160,7 +151,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       {/* Header */}
       <View style={[styles(colors).header, { paddingTop: insets.top + 20 }]}>
         <View style={[styles(colors).avatar, { backgroundColor: colors.primary }]}>
-          <Ionicons name="person" size={30} color="#fff" />
+          <Ionicons name="person" size={30} color={colors.textInverse || '#fff'} />
         </View>
         <Text style={styles(colors).userName}>{userName}</Text>
         <View style={[styles(colors).roleBadge, { backgroundColor: getRoleColor(userRole) + '20' }]}>
@@ -205,13 +196,11 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 };
 
 const styles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.border || '#E5E5EA',
     alignItems: 'center',
   },
   avatar: {
@@ -221,11 +210,12 @@ const styles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: colors.primary || '#007749',
   },
   userName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: colors.text || '#1A1A1A',
     marginBottom: 6,
   },
   roleBadge: {
@@ -264,7 +254,7 @@ const styles = (colors: any) => StyleSheet.create({
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
+    borderTopColor: colors.border || '#E5E5EA',
     paddingTop: 15,
     paddingHorizontal: 20,
   },

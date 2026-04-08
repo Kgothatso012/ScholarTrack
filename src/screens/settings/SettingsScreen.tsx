@@ -1,6 +1,6 @@
 // Comprehensive Settings Screen for All User Roles
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking, RefreshControl, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, ThemeMode } from '../../context/ThemeContext';
@@ -104,7 +104,10 @@ export default function SettingsScreen({ navigation }: any) {
         onPress: async () => {
           await supabase.auth.signOut();
           await AsyncStorage.clear();
-          (window as any).logout?.();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Auth' }],
+          });
         }
       }
     ]);
@@ -403,6 +406,27 @@ export default function SettingsScreen({ navigation }: any) {
               <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ position: 'absolute', top: spacing.md, right: spacing.md }}>
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
+              <View style={{ marginBottom: spacing.md }}>
+                <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.xs }}>Name</Text>
+                <TextInput
+                  style={styles(colors).input}
+                  value={editProfile.name}
+                  onChangeText={(text) => setEditProfile(prev => ({ ...prev, name: text }))}
+                  placeholder="Enter your name"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+              <View style={{ marginBottom: spacing.lg }}>
+                <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.xs }}>Phone</Text>
+                <TextInput
+                  style={styles(colors).input}
+                  value={editProfile.phone}
+                  onChangeText={(text) => setEditProfile(prev => ({ ...prev, phone: text }))}
+                  placeholder="Enter your phone"
+                  placeholderTextColor={colors.textSecondary}
+                  keyboardType="phone-pad"
+                />
+              </View>
               <Button title="Save" onPress={handleSaveProfile} variant="primary" fullWidth />
             </View>
           </Card>

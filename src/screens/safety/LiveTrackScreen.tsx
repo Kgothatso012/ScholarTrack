@@ -10,7 +10,7 @@ import { notificationService } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonCard, SkeletonMap } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface DriverLocation {
@@ -480,17 +480,95 @@ export default function LiveTrackScreen({ navigation }: any) {
     ratingStars: { flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.lg },
   });
 
-  return (
-    <View style={[styles(colors).container, isFullscreenMap && styles(colors).fullscreenContainer]}>
-      {isFullscreenMap && (
-        <TouchableOpacity
-          style={styles(colors).closeFullscreenHeader}
-          onPress={() => setIsFullscreenMap(false)}
+  // Fullscreen map renders without Card wrapper
+  if (isFullscreenMap) {
+    return (
+      <View style={[styles(colors).fullscreenContainer, { backgroundColor: colors.background }]}>
+        <View style={styles(colors).closeFullscreenHeader}>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.md }}
+            onPress={() => setIsFullscreenMap(false)}
+          >
+            <Ionicons name="close" size={28} color={colors.text} />
+            <Text style={[styles(colors).headerTitle, { marginLeft: spacing.md, color: colors.text }]}>Live Map</Text>
+          </TouchableOpacity>
+        </View>
+        <MapView
+          ref={mapRef}
+          style={styles(colors).fullscreenMapInner}
+          initialRegion={region}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+          showsCompass={true}
         >
-          <Ionicons name="close" size={28} color={colors.text} />
-          <Text style={[styles(colors).headerTitle, { marginLeft: spacing.md }]}>Live Map</Text>
-        </TouchableOpacity>
-      )}
+          {driverLocation && (
+            <Marker
+              coordinate={{
+                latitude: driverLocation.latitude || DEFAULT_REGION.latitude,
+                longitude: driverLocation.longitude || DEFAULT_REGION.longitude,
+              }}
+              title="School Bus"
+              description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
+              anchor={{ x: 0.5, y: 0.5 }}
+            >
+              <View style={styles(colors).busMarker}>
+                <Ionicons name="bus" size={24} color="#fff" />
+              </View>
+            </Marker>
+          )}
+          <Polyline
+            coordinates={routeCoordinates}
+            strokeColor={colors.primary}
+            strokeWidth={4}
+            lineDashPattern={[1]}
+          />
+          {tripHistory.length > 1 && (
+            <Polyline
+              coordinates={tripHistory.map(p => ({ latitude: p.lat, longitude: p.lng }))}
+              strokeColor={colors.accent}
+              strokeWidth={3}
+              lineCap="round"
+            />
+          )}
+          <Circle
+            center={schoolLocation}
+            radius={GEOFENCE_RADIUS}
+            fillColor={colors.success + '30'}
+            strokeColor={colors.success}
+            strokeWidth={2}
+          />
+          {routeCoordinates.map((coord, index) => (
+            <Marker
+              key={index}
+              coordinate={coord}
+              title={`Stop ${index + 1}`}
+              pinColor={index === routeCoordinates.length - 1 ? colors.success : colors.accent}
+            />
+          ))}
+        </MapView>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles(colors).container}>
+        <View style={styles(colors).header}>
+          <View style={styles(colors).headerTop}>
+            <Text style={styles(colors).headerTitle}>Live Tracking</Text>
+            <Text style={styles(colors).headerSubtext}>Real-time bus location</Text>
+          </View>
+        </View>
+        <SkeletonMap />
+        <SkeletonCard />
+        <SkeletonCard />
+        <View style={{ height: 100 }} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles(colors).container}>
       {/* Header */}
       <View style={styles(colors).header}>
         <View style={styles(colors).headerTop}>
@@ -505,17 +583,9 @@ export default function LiveTrackScreen({ navigation }: any) {
         </View>
       </View>
 
-      {/* Map View - Fullscreen Toggle */}
-      <View style={isFullscreenMap ? styles(colors).fullscreenMap : styles(colors).mapContainer}>
+      {/* Map View - Normal Mode */}
+      <View style={styles(colors).mapContainer}>
         <Card variant="elevated" padding="none">
-          {isFullscreenMap && (
-            <TouchableOpacity
-              style={styles(colors).closeFullscreen}
-              onPress={() => setIsFullscreenMap(false)}
-            >
-              <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-          )}
           <MapView
             ref={mapRef}
             style={isFullscreenMap ? styles(colors).fullscreenMapInner : styles(colors).map}

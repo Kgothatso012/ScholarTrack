@@ -225,9 +225,18 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
   if (existingCompliance?.status === 'pending_review') {
     return (
       <ScrollView style={styles(colors).container}>
-        <View style={styles(colors).header}>
-          <Text style={styles(colors).headerTitle}>Compliance</Text>
-          <Text style={styles(colors).headerSubtext}>Driver Documents</Text>
+        <View style={[styles(colors).header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+          <View>
+            <Text style={styles(colors).headerTitle}>Compliance</Text>
+            <Text style={styles(colors).headerSubtext}>Driver Documents</Text>
+          </View>
+          <TouchableOpacity
+            style={{ backgroundColor: colors.danger, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 4 }}
+            onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...', [{ text: 'Cancel', style: 'cancel' }])}
+          >
+            <Ionicons name="warning" size={16} color="#fff" />
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>SOS</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles(colors).successCard}>

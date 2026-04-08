@@ -103,15 +103,24 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
         />
       }
     >
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Vehicle Safety Checklist</Text>
-        <Text style={styles(colors).headerSubtitle}>Daily Pre-Trip Inspection</Text>
+      <View style={[styles(colors).header, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+        <View>
+          <Text style={styles(colors).headerTitle}>Vehicle Safety Checklist</Text>
+          <Text style={styles(colors).headerSubtitle}>Daily Pre-Trip Inspection</Text>
+        </View>
+        <TouchableOpacity
+          style={{ backgroundColor: colors.danger, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 4 }}
+          onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...', [{ text: 'Cancel', style: 'cancel' }])}
+        >
+          <Ionicons name="warning" size={16} color="#fff" />
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>SOS</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Progress */}
       <View style={styles(colors).progressCard}>
         <View style={styles(colors).progressBar}>
-          <View style={[styles(colors).progressFill, { width: (progress * 2.5) }]} />
+          <View style={[styles(colors).progressFill, { width: `${progress}%` }]} />
         </View>
         <Text style={styles(colors).progressText}>{checkedCount}/{requiredCount} Required Checks Complete ({progress}%)</Text>
       </View>

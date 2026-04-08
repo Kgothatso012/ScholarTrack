@@ -11,7 +11,7 @@ import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonTrackingCard, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Child {
@@ -228,6 +228,23 @@ export default function TrackChildScreen({ navigation }: any) {
       }, 500);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles(colors).container}>
+        <View style={styles(colors).header}>
+          <Text style={styles(colors).headerTitle}>Track Child</Text>
+          <Text style={styles(colors).headerSubtext}>Real-time location tracking</Text>
+        </View>
+        <ScrollView style={styles(colors).content}>
+          <View style={styles(colors).contentPad}>
+            <SkeletonTrackingCard />
+            <SkeletonCard />
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles(colors).container}>

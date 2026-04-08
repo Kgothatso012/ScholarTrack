@@ -18,6 +18,10 @@ import ChatScreen from '../screens/ChatScreen';
 import ReviewDriverScreen from '../screens/parent/ReviewDriverScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ParentDocumentUpload from '../screens/parent/ParentDocumentsScreen';
+import PanicScreen from '../screens/safety/PanicScreen';
+import IncidentReportScreen from '../screens/safety/IncidentReportScreen';
+import SafetyTipsScreen from '../screens/support/SafetyTipsScreen';
+import DriverVerificationScreen from '../screens/safety/DriverVerificationScreen';
 
 const Stack = createNativeStackNavigator<ParentStackParamList>();
 
@@ -37,6 +41,10 @@ export function ParentStack() {
       <Stack.Screen name="LiveTrack" component={LiveTrackScreen} />
       <Stack.Screen name="History" component={TripHistoryScreen} options={{ title: 'Trip History' }} />
       <Stack.Screen name="Emergency" component={EmergencyScreen} />
+      <Stack.Screen name="Panic" component={PanicScreen} />
+      <Stack.Screen name="IncidentReport" component={IncidentReportScreen} />
+      <Stack.Screen name="SafetyTips" component={SafetyTipsScreen} />
+      <Stack.Screen name="DriverVerification" component={DriverVerificationScreen} />
       <Stack.Screen name="HireDriver" component={HireDriverScreen} />
       <Stack.Screen name="Payments" component={PaymentDetailsScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />

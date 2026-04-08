@@ -16,6 +16,8 @@ import SupportScreen from '../screens/support/SupportScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import PaymentDetailsScreen from '../screens/payments/PaymentDetailsScreen';
 import EarningsScreen from '../screens/driver/EarningsScreen';
+import PanicScreen from '../screens/safety/PanicScreen';
+import IncidentReportScreen from '../screens/safety/IncidentReportScreen';
 
 const Stack = createNativeStackNavigator<DriverStackParamList>();
 
@@ -60,6 +62,16 @@ export function DriverStack() {
         name="RegulatoryDisplay"
         component={RegulatoryDisplayScreen}
         options={{ title: 'Regulatory Display' }}
+      />
+      <Stack.Screen
+        name="Panic"
+        component={PanicScreen}
+        options={{ title: 'Emergency', headerShown: false }}
+      />
+      <Stack.Screen
+        name="IncidentReport"
+        component={IncidentReportScreen}
+        options={{ title: 'Report Incident' }}
       />
       <Stack.Screen
         name="Payments"

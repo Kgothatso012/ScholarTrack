@@ -16,6 +16,7 @@ import TripHistoryScreen from '../screens/safety/TripHistoryScreen';
 import PaymentDetailsScreen from '../screens/payments/PaymentDetailsScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import SupportScreen from '../screens/support/SupportScreen';
+import IncidentReportScreen from '../screens/safety/IncidentReportScreen';
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 
@@ -34,6 +35,7 @@ export function AdminStack() {
       <Stack.Screen name="EnhancedReports" component={EnhancedReportsScreen} />
       <Stack.Screen name="Documents" component={DocumentManagementScreen} />
       <Stack.Screen name="Drivers" component={ManageDriversScreen} />
+      <Stack.Screen name="IncidentReport" component={IncidentReportScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="History" component={TripHistoryScreen} />
       <Stack.Screen name="Payments" component={PaymentDetailsScreen} />

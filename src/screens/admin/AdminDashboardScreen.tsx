@@ -48,19 +48,42 @@ export default function AdminDashboardScreen({ navigation }: any) {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [driverSearch, setDriverSearch] = useState('');
   const [driverPage, setDriverPage] = useState(1);
+  const [driverSortBy, setDriverSortBy] = useState<'name' | 'status' | 'date'>('date');
+  const [driverSortAsc, setDriverSortAsc] = useState(false);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'pending' | 'completed' | 'failed'>('all');
+  const [paymentPage, setPaymentPage] = useState(1);
   const DRIVERS_PER_PAGE = 10;
+  const PAYMENTS_PER_PAGE = 10;
 
-  // Filtered drivers based on search
-  const filteredDrivers = drivers.filter(driver =>
-    (driver.full_name || '').toLowerCase().includes(driverSearch.toLowerCase()) ||
-    (driver.phone || '').toLowerCase().includes(driverSearch.toLowerCase())
-  );
+  // Filtered and sorted drivers
+  const filteredDrivers = drivers
+    .filter(driver =>
+      (driver.full_name || '').toLowerCase().includes(driverSearch.toLowerCase()) ||
+      (driver.phone || '').toLowerCase().includes(driverSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      let cmp = 0;
+      if (driverSortBy === 'name') cmp = (a.full_name || '').localeCompare(b.full_name || '');
+      else if (driverSortBy === 'status') cmp = (a.status || '').localeCompare(b.status || '');
+      else cmp = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+      return driverSortAsc ? cmp : -cmp;
+    });
 
   // Paginated drivers
   const totalDriverPages = Math.ceil(filteredDrivers.length / DRIVERS_PER_PAGE);
   const paginatedDrivers = filteredDrivers.slice(
     (driverPage - 1) * DRIVERS_PER_PAGE,
     driverPage * DRIVERS_PER_PAGE
+  );
+
+  // Filtered and paginated payments
+  const filteredPayments = payments.filter(p =>
+    paymentFilter === 'all' || p.status === paymentFilter
+  );
+  const totalPaymentPages = Math.ceil(filteredPayments.length / PAYMENTS_PER_PAGE);
+  const paginatedPayments = filteredPayments.slice(
+    (paymentPage - 1) * PAYMENTS_PER_PAGE,
+    paymentPage * PAYMENTS_PER_PAGE
   );
 
   const loadDashboardData = async () => {
@@ -307,6 +330,36 @@ export default function AdminDashboardScreen({ navigation }: any) {
             onChangeText={setDriverSearch}
             placeholder="Search drivers..."
           />
+          {/* Sort Options */}
+          <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.sm }}>
+            {(['name', 'status', 'date'] as const).map(sort => (
+              <TouchableOpacity
+                key={sort}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.xs,
+                  borderRadius: borderRadius.full,
+                  backgroundColor: driverSortBy === sort ? colors.primary : colors.card,
+                  borderWidth: 1,
+                  borderColor: driverSortBy === sort ? colors.primary : colors.border,
+                  gap: 4,
+                }}
+                onPress={() => {
+                  if (driverSortBy === sort) setDriverSortAsc(!driverSortAsc);
+                  else { setDriverSortBy(sort); setDriverSortAsc(false); }
+                }}
+              >
+                <Text style={{ ...typography.labelSmall, color: driverSortBy === sort ? colors.textInverse : colors.text }}>
+                  {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                </Text>
+                {driverSortBy === sort && (
+                  <Ionicons name={driverSortAsc ? 'arrow-up' : 'arrow-down'} size={12} color={colors.textInverse} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
           {filteredDrivers.length === 0 ? (
             <Card variant="outlined" padding="large">
               <Text style={styles(colors).emptyText}>
@@ -352,30 +405,62 @@ export default function AdminDashboardScreen({ navigation }: any) {
       {/* Payments Tab */}
       {activeTab === 'parents' && (
         <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
-          {payments.length === 0 ? (
+          <Text style={styles(colors).sectionTitle}>Recent Payments ({filteredPayments.length})</Text>
+          {/* Payment Filter Chips */}
+          <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
+            {(['all', 'pending', 'completed', 'failed'] as const).map(filter => (
+              <TouchableOpacity
+                key={filter}
+                style={{
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.xs,
+                  borderRadius: borderRadius.full,
+                  backgroundColor: paymentFilter === filter ? colors.primary : colors.card,
+                  borderWidth: 1,
+                  borderColor: paymentFilter === filter ? colors.primary : colors.border,
+                }}
+                onPress={() => { setPaymentFilter(filter); setPaymentPage(1); }}
+              >
+                <Text style={{ ...typography.labelSmall, color: paymentFilter === filter ? colors.textInverse : colors.text }}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {filteredPayments.length === 0 ? (
             <Card variant="outlined" padding="large">
-              <Text style={styles(colors).emptyText}>No payments found</Text>
+              <Text style={styles(colors).emptyText}>No {paymentFilter === 'all' ? '' : paymentFilter} payments found</Text>
             </Card>
           ) : (
-            payments.map((payment) => (
-              <Card key={payment.id} variant="elevated" padding="medium">
-                <View style={styles(colors).listItem}>
-                  <View style={styles(colors).listAvatar}>
-                    <Ionicons name="card" size={20} color={colors.textInverse} />
+            <>
+              {paginatedPayments.map((payment) => (
+                <Card key={payment.id} variant="elevated" padding="medium">
+                  <View style={styles(colors).listItem}>
+                    <View style={styles(colors).listAvatar}>
+                      <Ionicons name="card" size={20} color={colors.textInverse} />
+                    </View>
+                    <View style={styles(colors).listInfo}>
+                      <Text style={styles(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
+                      <Badge
+                        label={payment.status}
+                        variant={getPaymentVariant(payment.status)}
+                        size="small"
+                      />
+                    </View>
+                    <Text style={styles(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
                   </View>
-                  <View style={styles(colors).listInfo}>
-                    <Text style={styles(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
-                    <Badge
-                      label={payment.status}
-                      variant={getPaymentVariant(payment.status)}
-                      size="small"
-                    />
-                  </View>
-                  <Text style={styles(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-                </View>
-              </Card>
-            ))
+                </Card>
+              ))}
+              {totalPaymentPages > 1 && (
+                <Pagination
+                  currentPage={paymentPage}
+                  totalPages={totalPaymentPages}
+                  onPageChange={setPaymentPage}
+                  itemsPerPage={PAYMENTS_PER_PAGE}
+                  totalItems={filteredPayments.length}
+                />
+              )}
+            </>
           )}
         </View>
       )}

@@ -26,6 +26,10 @@ export type ParentStackParamList = {
   LiveTrack: undefined;
   History: undefined;
   Emergency: undefined;
+  Panic: undefined;
+  IncidentReport: undefined;
+  SafetyTips: undefined;
+  DriverVerification: { driverId?: string };
   Chat: undefined;
   HireDriver: undefined;
   Payments: undefined;
@@ -41,6 +45,8 @@ export type DriverStackParamList = {
   VehicleChecklist: undefined;
   Compliance: undefined;
   RegulatoryDisplay: undefined;
+  Panic: undefined;
+  IncidentReport: undefined;
   Chat: undefined;
   History: undefined;
   Payments: undefined;
@@ -58,6 +64,7 @@ export type AdminStackParamList = {
   EnhancedReports: undefined;
   Documents: undefined;
   Drivers: undefined;
+  IncidentReport: undefined;
   Chat: undefined;
   History: undefined;
   Payments: undefined;

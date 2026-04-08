@@ -54,7 +54,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   return (
     <Animated.View
-      style={[styles.skeleton, skeletonStyle, style]}
+      style={[skeletonStyle, style]}
     />
   );
 };
@@ -87,8 +87,9 @@ export const SkeletonStatCard: React.FC = () => {
 
 // Skeleton for the entire dashboard
 export const DashboardSkeleton: React.FC = () => {
+  const { colors } = useTheme();
   return (
-    <View style={styles.dashboard}>
+    <View style={[styles.dashboard, { backgroundColor: colors.background }]}>
       {/* Stats Grid */}
       <View style={styles.statsGrid}>
         {[1, 2, 3, 4].map(i => (
@@ -103,10 +104,57 @@ export const DashboardSkeleton: React.FC = () => {
   );
 };
 
+// Skeleton for card content
+export const SkeletonCard: React.FC = () => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.card, { backgroundColor: colors.card }]}>
+      <Skeleton width="30%" height={16} style={{ marginBottom: 12 }} />
+      <Skeleton width="70%" height={14} style={{ marginBottom: 8 }} />
+      <Skeleton width="50%" height={14} style={{ marginBottom: 16 }} />
+      <Skeleton width="40%" height={20} borderRadius={8} />
+    </View>
+  );
+};
+
+// Skeleton for map placeholder
+export const SkeletonMap: React.FC = () => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.mapContainer, { backgroundColor: colors.card }]}>
+      <View style={styles.mapPlaceholder}>
+        <Skeleton width={60} height={60} borderRadius={30} />
+        <Skeleton width="40%" height={14} style={{ marginTop: 12 }} />
+      </View>
+    </View>
+  );
+};
+
+// Skeleton for child tracking card
+export const SkeletonTrackingCard: React.FC = () => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.trackingCard, { backgroundColor: colors.card }]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <Skeleton width={50} height={50} borderRadius={25} />
+        <View style={{ marginLeft: 12, flex: 1 }}>
+          <Skeleton width="60%" height={16} style={{ marginBottom: 6 }} />
+          <Skeleton width="40%" height={12} />
+        </View>
+        <Skeleton width={70} height={24} borderRadius={12} />
+      </View>
+      <Skeleton width="100%" height={120} borderRadius={12} style={{ marginBottom: 12 }} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Skeleton width="23%" height={60} borderRadius={8} />
+        <Skeleton width="23%" height={60} borderRadius={8} />
+        <Skeleton width="23%" height={60} borderRadius={8} />
+        <Skeleton width="23%" height={60} borderRadius={8} />
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
-  skeleton: {
-    backgroundColor: '#e0e0e0',
-  },
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -131,6 +179,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  card: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  mapContainer: {
+    height: 250,
+    borderRadius: 12,
+    margin: 16,
+    overflow: 'hidden',
+  },
+  mapPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trackingCard: {
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: -20,
   },
 });
 
