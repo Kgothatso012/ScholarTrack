@@ -7,17 +7,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { notificationService } from '../../services/NotificationService';
+import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface DriverLocation {
+  driver_id?: string;
   latitude: number;
   longitude: number;
-  speed: number;
-  heading: number;
-  updated_at: string;
+  speed?: number;
+  heading?: number;
+  updated_at?: string;
+  last_updated?: string;
 }
 
 export default function LiveTrackScreen({ navigation }: any) {
@@ -42,7 +45,7 @@ export default function LiveTrackScreen({ navigation }: any) {
   const [isFullscreenMap, setIsFullscreenMap] = useState(false);
   const mapRef = useRef<MapView>(null);
 
-  // Map configuration
+  // Map configuration - will be updated from real data
   const DEFAULT_REGION = {
     latitude: -25.7479, // Pretoria area
     longitude: 28.2292,
@@ -52,18 +55,22 @@ export default function LiveTrackScreen({ navigation }: any) {
 
   const [region, setRegion] = useState(DEFAULT_REGION);
 
-  // Route coordinates (polyline)
-  const routeCoordinates = [
+  // Route coordinates (loaded from real trip/route data)
+  const [routeCoordinates, setRouteCoordinates] = useState<{latitude: number; longitude: number}[]>([
     { latitude: -25.7300, longitude: 28.2100 },
     { latitude: -25.7350, longitude: 28.2150 },
     { latitude: -25.7400, longitude: 28.2200 },
     { latitude: -25.7450, longitude: 28.2250 },
     { latitude: -25.7500, longitude: 28.2300 },
-  ];
+  ]);
 
-  // Geofence (school area)
-  const schoolLocation = { latitude: -25.7500, longitude: 28.2300 };
+  // Geofence (school area) - loaded from real data
+  const [schoolLocation, setSchoolLocation] = useState({ latitude: -25.7500, longitude: 28.2300 });
   const GEOFENCE_RADIUS = 200; // meters
+
+  // Current trip and route stops from Supabase
+  const [currentTrip, setCurrentTrip] = useState<any>(null);
+  const [routeStops, setRouteStops] = useState<any[]>([]);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -188,6 +195,9 @@ export default function LiveTrackScreen({ navigation }: any) {
       }
 
       setDriverLocation(location);
+
+      // Load current active trip and route stops
+      await loadCurrentTrip(driverId);
     } catch (error) {
       console.error('Error loading driver location:', error);
     } finally {
@@ -195,12 +205,139 @@ export default function LiveTrackScreen({ navigation }: any) {
     }
   };
 
+  const loadCurrentTrip = async (driverId: string) => {
+    try {
+      // Get today's in-progress trip for this driver
+      const today = new Date().toISOString().split('T')[0];
+      const { data: trips } = await supabase
+        .from('trips')
+        .select(`
+          *,
+          children:child_id(full_name, school:school_id(name)),
+          schools:school_id(name, address)
+        `)
+        .eq('driver_id', driverId)
+        .eq('status', 'in_progress')
+        .gte('created_at', today)
+        .limit(1);
+
+      if (trips && trips.length > 0) {
+        const trip = trips[0];
+        setCurrentTrip(trip);
+
+        // Set school location from trip dropoff coords
+        if (trip.dropoff_location_lat && trip.dropoff_location_lng) {
+          setSchoolLocation({
+            latitude: trip.dropoff_location_lat,
+            longitude: trip.dropoff_location_lng
+          });
+        }
+
+        // Load route stops for this trip
+        await loadRouteStops(trip.id);
+
+        // Update region to center on trip area
+        if (trip.pickup_location_lat && trip.pickup_location_lng) {
+          setRegion({
+            latitude: (trip.pickup_location_lat + (trip.dropoff_location_lat || trip.pickup_location_lat)) / 2,
+            longitude: (trip.pickup_location_lng + (trip.dropoff_location_lng || trip.pickup_location_lng)) / 2,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading current trip:', error);
+    }
+  };
+
+  const loadRouteStops = async (tripId: string) => {
+    try {
+      // Get route assignments for this trip with child info
+      const { data: assignments } = await supabase
+        .from('route_assignments')
+        .select(`
+          *,
+          children:child_id(full_name, pickup_address, dropoff_address),
+          routes:route_id(id, name)
+        `)
+        .eq('trip_id', tripId)
+        .eq('status', 'active');
+
+      if (assignments && assignments.length > 0) {
+        // Get route stops for the route
+        const routeId = assignments[0]?.route_id;
+        if (routeId) {
+          const { data: stops } = await supabase
+            .from('route_stops')
+            .select('*')
+            .eq('route_id', routeId)
+            .order('order', { ascending: true });
+
+          if (stops && stops.length > 0) {
+            setRouteStops(stops);
+            // Build route coordinates from stops
+            const coords = stops
+              .filter((s: any) => s.latitude && s.longitude)
+              .map((s: any) => ({ latitude: s.latitude, longitude: s.longitude }));
+            if (coords.length > 0) {
+              setRouteCoordinates(coords);
+            }
+          }
+        }
+
+        // If no route stops, build from child pickup addresses
+        if (!stops || stops.length === 0) {
+          const coords: {latitude: number; longitude: number}[] = [];
+          for (const assignment of assignments) {
+            if (assignment.children?.pickup_address) {
+              // For now, use dummy coords - in production would geocode addresses
+              // This is a placeholder until address geocoding is implemented
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading route stops:', error);
+    }
+  };
+
   useEffect(() => {
     loadDriverLocation();
-    // Poll for location updates every 5 seconds
-    const interval = setInterval(loadDriverLocation, 5000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Subscribe to real-time driver location updates
+    const driverId = driverLocation?.driver_id;
+    if (!driverId) return;
+
+    const channel = supabase
+      .channel('driver-location-' + driverId)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'driver_tracking',
+          filter: 'driver_id=eq.' + driverId,
+        },
+        (payload) => {
+          const newLocation = payload.new as DriverLocation;
+          if (newLocation.latitude && newLocation.longitude) {
+            setDriverLocation(newLocation);
+            setTripHistory(prev => {
+              const newHistory = [...prev, { lat: newLocation.latitude, lng: newLocation.longitude }];
+              return newHistory.slice(-20);
+            });
+            const nextStopInfo = getNextStopInfo();
+            checkNearStopAlert(nextStopInfo);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [driverLocation?.driver_id]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -209,30 +346,39 @@ export default function LiveTrackScreen({ navigation }: any) {
   };
 
   const tripInfo = {
-    route: 'Mamelodi Morning Route',
-    school: 'Mamelodi High',
+    route: currentTrip?.routes?.name || 'Morning Route',
+    school: currentTrip?.schools?.name || currentTrip?.children?.school?.name || 'School',
     eta: getNextStopInfo()?.eta || '07:15 AM',
-    studentsOnboard: 8,
-    stops: 4,
+    studentsOnboard: routeStops.length || 8,
+    stops: routeStops.length || 4,
     stopsCompleted: 2,
-    speed: driverLocation?.speed || 0,
-    distanceToNext: getNextStopInfo()?.distanceMeters || 0,
+    speed: driverLocation?.speed ?? 0,
+    distanceToNext: getNextStopInfo()?.distanceMeters ?? 0,
     nextStop: getNextStopInfo()?.stopNumber || 1,
   };
 
   const getStatus = () => {
     if (!driverLocation) return 'Offline';
-    if (driverLocation.speed === 0) return 'Stationary';
-    if (driverLocation.speed > 0) return 'Moving';
+    const speed = driverLocation.speed ?? 0;
+    if (speed === 0) return 'Stationary';
+    if (speed > 0) return 'Moving';
     return 'Unknown';
   };
 
-  const stops = [
-    { id: 1, name: '123 Main St', time: '06:30', status: 'completed', students: 2 },
-    { id: 2, name: '45 Church St', time: '06:45', status: 'completed', students: 3 },
-    { id: 3, name: '78 School Ave', time: '07:00', status: 'current', students: 3 },
-    { id: 4, name: 'Mamelodi High', time: '07:15', status: 'pending', students: 8 },
-  ];
+  const stops = routeStops.length > 0
+    ? routeStops.map((stop: any, index: number) => ({
+        id: stop.id || index,
+        name: stop.name || stop.address || `Stop ${index + 1}`,
+        time: stop.scheduled_time || '',
+        status: index < 2 ? 'completed' : index === 2 ? 'current' : 'pending',
+        students: 1,
+      }))
+    : [
+        { id: 1, name: '123 Main St', time: '06:30', status: 'completed', students: 2 },
+        { id: 2, name: '45 Church St', time: '06:45', status: 'completed', students: 3 },
+        { id: 3, name: '78 School Ave', time: '07:00', status: 'current', students: 3 },
+        { id: 4, name: 'Mamelodi High', time: '07:15', status: 'pending', students: 8 },
+      ];
 
   const toggleTracking = () => {
     setTrackingEnabled(!trackingEnabled);

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
+import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
+import { notificationService } from '../../services/NotificationService';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
@@ -25,10 +27,17 @@ export default function DriverTripScreen({ navigation }: any) {
   const [isOnline, setIsOnline] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [checkedInStudents, setCheckedInStudents] = useState<string[]>([]);
+  const [geofenceZones, setGeofenceZones] = useState<GeofenceZone[]>([]);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
     loadData();
     requestLocation();
+    return () => {
+      if (locationSubscription.current) {
+        locationSubscription.current.remove();
+      }
+    };
   }, []);
 
   const requestLocation = async () => {
@@ -46,7 +55,7 @@ export default function DriverTripScreen({ navigation }: any) {
       });
 
       // Start watching location
-      await Location.watchPositionAsync(
+      locationSubscription.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
           timeInterval: 10000,
@@ -86,8 +95,47 @@ export default function DriverTripScreen({ navigation }: any) {
         current_longitude: lng,
         last_location_update: new Date().toISOString()
       }).eq('id', driver.id);
+
+      // Check geofence zones if trip is active
+      if (activeTrip && geofenceZones.length > 0) {
+        await checkGeofenceZones(lat, lng);
+      }
     } catch (error) {
       console.error('Location update error:', error);
+    }
+  };
+
+  const checkGeofenceZones = async (lat: number, lng: number) => {
+    if (!activeTrip) return;
+
+    const events = await geofenceService.checkZones(lat, lng, geofenceZones);
+
+    for (const event of events) {
+      // Send notification for pickup/dropoff
+      const message = event.type === 'pickup_arrived'
+        ? `Arrived at pickup location for ${event.zone.childName}`
+        : `Arrived at dropoff location for ${event.zone.childName}`;
+
+      await notificationService.scheduleNotification(
+        'Geofence Alert',
+        message,
+        { type: event.type, tripId: activeTrip.id, childId: event.zone.childId },
+        'safety'
+      );
+
+      Alert.alert(
+        event.type === 'pickup_arrived' ? 'Pickup Zone' : 'Dropoff Zone',
+        message
+      );
+    }
+  };
+
+  const loadGeofenceZones = async (tripId: string) => {
+    try {
+      const zones = await geofenceService.getZonesForTrip(tripId);
+      setGeofenceZones(zones);
+    } catch (error) {
+      console.error('Error loading geofence zones:', error);
     }
   };
 
@@ -165,8 +213,15 @@ export default function DriverTripScreen({ navigation }: any) {
 
     try {
       await tripServiceEnhanced.startTrip(tripId);
-      setActiveTrip(trips.find(t => t.id === tripId) || null);
+      const trip = trips.find(t => t.id === tripId) || null;
+      setActiveTrip(trip);
       setCheckedInStudents([]);
+
+      // Load geofence zones for this trip
+      if (trip) {
+        await loadGeofenceZones(tripId);
+      }
+
       Alert.alert('Success', 'Trip started! Remember to check in each student.');
       loadData();
     } catch (error) {

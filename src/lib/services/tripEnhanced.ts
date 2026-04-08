@@ -36,14 +36,15 @@ export const tripServiceEnhanced = {
 export const driverTrackingService = {
   async updateLocation(driverId: string, latitude: number, longitude: number, speed?: number, heading?: number) {
     const { data, error } = await supabase
-      .from('driver_locations')
-      .upsert({
+      .from('driver_tracking')
+      .insert({
         driver_id: driverId,
         latitude,
         longitude,
         speed: speed ?? null,
         heading: heading ?? null,
-        updated_at: new Date().toISOString()
+        last_updated: new Date().toISOString(),
+        status: 'active'
       })
       .select()
       .single();
@@ -52,9 +53,11 @@ export const driverTrackingService = {
   },
   async getDriverLocation(driverId: string) {
     const { data, error } = await supabase
-      .from('driver_locations')
+      .from('driver_tracking')
       .select('*')
       .eq('driver_id', driverId)
+      .order('last_updated', { ascending: false })
+      .limit(1)
       .single();
     if (error) return null;
     return data;

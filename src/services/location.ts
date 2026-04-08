@@ -6,7 +6,7 @@ export interface DriverLocation {
   driver_id: string;
   latitude: number;
   longitude: number;
-  timestamp: number;
+  last_updated: number;
   accuracy: number;
   speed?: number;
 }
@@ -73,14 +73,14 @@ export const locationService = {
   ): Promise<void> {
     try {
       const { latitude, longitude, accuracy, speed } = location.coords;
-      const timestamp = Date.now();
+      const last_updated = new Date().toISOString();
 
-      // Save to driver_locations table
-      await supabase.from('driver_locations').insert({
+      // Save to driver_tracking table
+      await supabase.from('driver_tracking').insert({
         driver_id: driverId,
         latitude,
         longitude,
-        timestamp,
+        last_updated,
         accuracy,
         speed: speed || null,
       });
@@ -103,10 +103,10 @@ export const locationService = {
   async getDriverLocation(driverId: string): Promise<DriverLocation | null> {
     try {
       const { data, error } = await supabase
-        .from('driver_locations')
+        .from('driver_tracking')
         .select('*')
         .eq('driver_id', driverId)
-        .order('timestamp', { ascending: false })
+        .order('last_updated', { ascending: false })
         .limit(1)
         .single();
 
@@ -133,7 +133,7 @@ export const locationService = {
         driver_id: driver.id,
         latitude: driver.current_latitude,
         longitude: driver.current_longitude,
-        timestamp: new Date(driver.last_location_update).getTime(),
+        last_updated: new Date(driver.last_location_update).getTime(),
         accuracy: 10, // Default accuracy
       }));
     } catch (error) {
