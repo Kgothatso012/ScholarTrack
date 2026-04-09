@@ -59,6 +59,24 @@ const HireDriverScreen = ({ navigation }: any) => {
     Alert.alert('Request Sent', `Request sent to ${driverName}. They will contact you shortly.`);
   };
 
+  // Render 5-star visual rating
+  const renderStarRating = (rating: number, maxStars: number = 5, starSize: number = 12) => {
+    const stars = [];
+    for (let i = 1; i <= maxStars; i++) {
+      const filled = i <= Math.round(rating);
+      stars.push(
+        <Ionicons
+          key={i}
+          name={filled ? 'star' : 'star-outline'}
+          size={starSize}
+          color={colors.accent}
+          style={{ marginRight: 2 }}
+        />
+      );
+    }
+    return stars;
+  };
+
   const styles = (colors: any) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
@@ -138,9 +156,11 @@ const HireDriverScreen = ({ navigation }: any) => {
                     <Text style={styles(colors).driverName}>{driver.full_name || 'Driver'}</Text>
                     <Text style={styles(colors).driverVehicle}>{driver.vehicle_type || 'Vehicle'}</Text>
                     <View style={styles(colors).driverRating}>
-                      <Ionicons name="star" size={14} color={colors.accent} />
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {renderStarRating(driver.rating_summary?.average_rating || 0)}
+                      </View>
                       <Text style={styles(colors).ratingText}>
-                        {driver.rating_summary?.average_rating?.toFixed(1) || '0.0'} ({driver.rating_summary?.total_reviews || 0} trips)
+                        {driver.rating_summary?.average_rating?.toFixed(1) || '0.0'} ({driver.rating_summary?.total_reviews || 0} reviews)
                       </Text>
                     </View>
                   </View>
