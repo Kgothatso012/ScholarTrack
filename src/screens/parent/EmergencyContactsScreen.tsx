@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase, emergencyContactService, EmergencyContact } from '../../lib/api';
 
 // UI Plugin components
@@ -64,7 +65,7 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     ]);
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },

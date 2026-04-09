@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
@@ -51,14 +52,14 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
       if (navigation.navigate) {
         navigation.navigate('ResetPasswordConfirm');
       }
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'An unexpected error occurred');
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     keyboardView: { flex: 1 },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 50 },

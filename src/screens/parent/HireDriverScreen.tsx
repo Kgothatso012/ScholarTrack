@@ -3,13 +3,18 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { driverService, ratingService, Driver } from '../../lib/api';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-const HireDriverScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const HireDriverScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +82,7 @@ const HireDriverScreen = ({ navigation }: any) => {
     return stars;
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },

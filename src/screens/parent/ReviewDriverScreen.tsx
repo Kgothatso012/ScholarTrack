@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIn
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { ratingService } from '../../lib/services';
 
@@ -24,12 +25,16 @@ interface Driver {
   monthly_rate: number;
 }
 
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const ReviewDriverScreen = ({ navigation }: any) => {
+const ReviewDriverScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -153,9 +158,9 @@ const ReviewDriverScreen = ({ navigation }: any) => {
       setComment('');
       setCanReview(false);
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting review:', error);
-      Alert.alert('Error', error.message || 'Failed to submit review. Please try again.');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to submit review. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -335,7 +340,7 @@ const ReviewDriverScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },

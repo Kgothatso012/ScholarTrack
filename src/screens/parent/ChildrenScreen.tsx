@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { childrenService } from '../../lib/api';
 
@@ -18,7 +19,11 @@ interface Child {
   status: 'active' | 'inactive';
 }
 
-export default function ChildrenScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function ChildrenScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,7 +44,7 @@ export default function ChildrenScreen({ navigation }: any) {
 
       const data = await childrenService.getChildren(user.id);
       if (data && data.length > 0) {
-        setChildren(data.map((c: any) => ({
+        setChildren(data.map((c) => ({
           id: c.id,
           name: c.full_name,
           school: c.school?.name || 'Unknown School',
@@ -78,7 +83,7 @@ export default function ChildrenScreen({ navigation }: any) {
 
   const getInitials = (name: string) => name.substring(0, 1).toUpperCase();
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
     headerTitle: { ...typography.h2, color: colors.textInverse },
