@@ -14,12 +14,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-export default function RegisterScreen({ navigation, onLogin }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void };
+  onLogin?: (role: string) => void;
+}
+
+export default function RegisterScreen({ navigation, onLogin }: Props) {
   const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -127,9 +133,9 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
         setPendingPhone(formattedPhone);
         setStep('otp');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('OTP send error:', error);
-      Alert.alert('Error', error.message || 'Failed to send verification code.');
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to send verification code.');
     } finally {
       setLoading(false);
     }
@@ -192,9 +198,9 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           }
         }}
       ]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
-      const errorMsg = error?.message || error?.error_description || '';
+      const errorMsg = error instanceof Error ? error.message : (error as any)?.error_description || '';
 
       // Check for specific error cases
       if (errorMsg.toLowerCase().includes('already registered') ||
@@ -242,7 +248,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
           }
         }}
       ]);
-    } catch (error: any) {
+    } catch (error) {
       Alert.alert('Error', 'Invalid verification code. Please try again.');
     } finally {
       setLoading(false);
@@ -258,7 +264,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
 
       if (error) throw error;
       Alert.alert('OTP Resent', 'A new verification code has been sent');
-    } catch (error: any) {
+    } catch (error) {
       Alert.alert('Error', 'Failed to resend code.');
     }
   };
@@ -502,7 +508,7 @@ export default function RegisterScreen({ navigation, onLogin }: any) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface || '#1a1a1a',
