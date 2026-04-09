@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-export default function SupportScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function SupportScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
@@ -29,7 +34,7 @@ export default function SupportScreen({ navigation }: any) {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
     headerTitle: { ...typography.h2, color: colors.textInverse },
