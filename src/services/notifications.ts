@@ -273,6 +273,7 @@ export const notificationService = {
 // TYPED SEND APP NOTIFICATION (from clawhip typed events pattern)
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (payload: any) => string }> = {
   TRIP_STARTED: {
     title: 'Bus Trip Started',
