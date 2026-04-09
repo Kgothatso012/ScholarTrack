@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
@@ -10,15 +11,20 @@ import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Payment {
   id: string;
-  date: string;
-  amount: string;
-  status: 'paid' | 'pending' | 'failed';
-  method: string;
-  driver: string;
-  description: string;
+  created_at?: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'failed' | 'completed';
+  method?: string;
+  driver?: string;
+  description?: string;
+  month?: string;
 }
 
-export default function PaymentDetailsScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function PaymentDetailsScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('card');
@@ -114,8 +120,8 @@ export default function PaymentDetailsScreen({ navigation }: any) {
                 'Your payment has been initiated. You will be redirected to the payment gateway.',
                 [{ text: 'OK', onPress: () => navigation.goBack() }]
               );
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to process payment');
+            } catch (error) {
+              Alert.alert('Error', error instanceof Error ? error.message : 'Failed to process payment');
             } finally {
               setProcessing(false);
             }
@@ -125,7 +131,7 @@ export default function PaymentDetailsScreen({ navigation }: any) {
     );
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
@@ -201,11 +207,11 @@ export default function PaymentDetailsScreen({ navigation }: any) {
                 <View style={styles(colors).paymentInfo}>
                   <Text style={styles(colors).paymentDesc}>{payment.description || 'Payment'}</Text>
                   <Text style={styles(colors).paymentDate}>
-                    {(payment as any).created_at ? new Date((payment as any).created_at).toLocaleDateString('en-ZA') : 'Date unknown'}
+                    {payment.created_at ? new Date(payment.created_at).toLocaleDateString('en-ZA') : 'Date unknown'}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={styles(colors).paymentAmount}>R{((payment.amount as any || 0) / 100).toFixed(2)}</Text>
+                  <Text style={styles(colors).paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
                   <Badge label={payment.status || 'unknown'} variant={getStatusVariant(payment.status)} size="small" />
                 </View>
               </View>
