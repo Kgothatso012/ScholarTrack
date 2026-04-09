@@ -19,7 +19,11 @@ interface UserProfile {
   role: string;
 }
 
-export default function SettingsScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void; reset: (state: object) => void };
+}
+
+export default function SettingsScreen({ navigation }: Props) {
   const { colors, themeMode, setThemeMode } = useTheme();
   const insets = useSafeAreaInsets();
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', email: '', phone: '', role: 'parent' });

@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { colors } from '../../ui-plugin/theme';
+import { colors as themeColors } from '../../ui-plugin/theme';
 
 // UI Plugin components - Soft & Friendly theme
 import { Button } from '../../ui-plugin/components/Button';
@@ -13,7 +13,12 @@ import { Card } from '../../ui-plugin/components/Card';
 import { Spacer } from '../../ui-plugin/components/Spacer';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-export default function LoginScreen({ navigation, onLogin }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void; onForgotPassword?: () => void };
+  onLogin?: (role: string) => void;
+}
+
+export default function LoginScreen({ navigation, onLogin }: Props) {
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +29,8 @@ export default function LoginScreen({ navigation, onLogin }: any) {
   const [resetLoading, setResetLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  // Demo login - bypass Supabase
+  // Use ui-plugin theme colors directly
+  const colors = themeColors;
   const handleDemoLogin = async (role: string) => {
     setLoading(true);
     try {
@@ -341,7 +347,8 @@ export default function LoginScreen({ navigation, onLogin }: any) {
 }
 
 // Styles using Soft & Friendly theme
-const styles = (colors: any) => StyleSheet.create({
+type UIColors = typeof themeColors;
+const styles = (colors: UIColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

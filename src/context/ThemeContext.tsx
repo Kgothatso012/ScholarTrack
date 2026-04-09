@@ -38,6 +38,16 @@ export type ThemeColors = {
   disabled: string;
   pressed: string;
   selected: string;
+
+  // Additional colors (used by ui-plugin theme)
+  shadow: string;
+  shadowStrong: string;
+  overlay: string;
+  overlayLight: string;
+  primaryLight: string;
+  primaryDark: string;
+  secondaryLight: string;
+  secondaryDark: string;
 };
 
 export type ThemeMode = 'dark' | 'blue' | 'light';
@@ -72,6 +82,15 @@ const darkColors: ThemeColors = {
   disabled: '#333333',
   pressed: '#ffffff15',
   selected: '#00774930',
+
+  shadow: 'rgba(0,0,0,0.3)',
+  shadowStrong: 'rgba(0,0,0,0.5)',
+  overlay: 'rgba(0,0,0,0.5)',
+  overlayLight: 'rgba(0,0,0,0.25)',
+  primaryLight: '#007749',
+  primaryDark: '#005533',
+  secondaryLight: '#FFB81C',
+  secondaryDark: '#CC9600',
 };
 
 // Blue theme (SA Blue/Yellow)
@@ -104,6 +123,15 @@ const blueColors: ThemeColors = {
   disabled: '#cccccc',
   pressed: 'rgba(0,0,0,0.1)',
   selected: '#00239520',
+
+  shadow: 'rgba(0,0,0,0.15)',
+  shadowStrong: 'rgba(0,0,0,0.25)',
+  overlay: 'rgba(0,0,0,0.5)',
+  overlayLight: 'rgba(0,0,0,0.25)',
+  primaryLight: '#002395',
+  primaryDark: '#001870',
+  secondaryLight: '#007749',
+  secondaryDark: '#005533',
 };
 
 // Light theme
@@ -136,6 +164,15 @@ const lightColors: ThemeColors = {
   disabled: '#cccccc',
   pressed: 'rgba(0,0,0,0.1)',
   selected: '#00000010',
+
+  shadow: 'rgba(0,0,0,0.1)',
+  shadowStrong: 'rgba(0,0,0,0.2)',
+  overlay: 'rgba(0,0,0,0.5)',
+  overlayLight: 'rgba(0,0,0,0.25)',
+  primaryLight: '#ffffff',
+  primaryDark: '#cccccc',
+  secondaryLight: '#007749',
+  secondaryDark: '#005533',
 };
 
 // Theme context type
