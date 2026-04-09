@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -33,7 +34,12 @@ interface ComplianceStatus {
   reviewedBy?: string;
 }
 
-export default function ComplianceScreen({ navigation, setScreen }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+  setScreen?: (s: string) => void;
+}
+
+export default function ComplianceScreen({ navigation, setScreen }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -380,7 +386,7 @@ export default function ComplianceScreen({ navigation, setScreen }: any) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },
   loadingText: { marginTop: 10, fontSize: 16, color: colors.textSecondary },
