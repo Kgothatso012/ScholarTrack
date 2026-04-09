@@ -72,6 +72,7 @@ export default function LiveTrackScreen({ navigation }: any) {
   // Current trip and route stops from Supabase
   const [currentTrip, setCurrentTrip] = useState<any>(null);
   const [routeStops, setRouteStops] = useState<any[]>([]);
+  const [driverRatingSummary, setDriverRatingSummary] = useState<{average_rating: number; total_reviews: number} | null>(null);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -124,6 +125,24 @@ export default function LiveTrackScreen({ navigation }: any) {
       eta,
       stopNumber: nextStopIndex + 1,
     };
+  };
+
+  // Render 5-star visual rating
+  const renderStarRating = (rating: number, maxStars: number = 5, starSize: number = 14) => {
+    const stars = [];
+    for (let i = 1; i <= maxStars; i++) {
+      const filled = i <= Math.round(rating);
+      stars.push(
+        <Ionicons
+          key={i}
+          name={filled ? 'star' : 'star-outline'}
+          size={starSize}
+          color={colors.accent}
+          style={{ marginRight: 2 }}
+        />
+      );
+    }
+    return stars;
   };
 
   // Check for near-stop alert + push notification
@@ -237,6 +256,9 @@ export default function LiveTrackScreen({ navigation }: any) {
         // Load route stops for this trip
         await loadRouteStops(trip.id);
 
+        // Load driver rating summary
+        await loadDriverRatingSummary(driverId);
+
         // Update region to center on trip area
         if (trip.pickup_location_lat && trip.pickup_location_lng) {
           setRegion({
@@ -303,6 +325,17 @@ export default function LiveTrackScreen({ navigation }: any) {
     }
   };
 
+  const loadDriverRatingSummary = async (driverId: string) => {
+    try {
+      const summary = await ratingService.getDriverRatingSummary(driverId);
+      if (summary) {
+        setDriverRatingSummary(summary);
+      }
+    } catch (error) {
+      console.error('Error loading driver rating summary:', error);
+    }
+  };
+
   useEffect(() => {
     loadDriverLocation();
 
@@ -356,6 +389,8 @@ export default function LiveTrackScreen({ navigation }: any) {
     speed: driverLocation?.speed ?? 0,
     distanceToNext: getNextStopInfo()?.distanceMeters ?? 0,
     nextStop: getNextStopInfo()?.stopNumber || 1,
+    driverRating: driverRatingSummary?.average_rating || 0,
+    driverReviewsCount: driverRatingSummary?.total_reviews || 0,
   };
 
   const getStatus = () => {
@@ -701,6 +736,18 @@ export default function LiveTrackScreen({ navigation }: any) {
           <Ionicons name="people" size={18} color={colors.primary} />
           <Text style={styles(colors).tripLabel}>Students:</Text>
           <Text style={styles(colors).tripValue}>{tripInfo.studentsOnboard} onboard</Text>
+        </View>
+
+        <View style={styles(colors).tripRow}>
+          <Ionicons name="star" size={18} color={colors.accent} />
+          <Text style={styles(colors).tripLabel}>Driver:</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {renderStarRating(tripInfo.driverRating || 0)}
+            <Text style={[styles(colors).tripValue, { marginLeft: spacing.sm }]}>
+              {tripInfo.driverRating ? tripInfo.driverRating.toFixed(1) : 'N/A'}
+              {tripInfo.driverReviewsCount ? ` (${tripInfo.driverReviewsCount} reviews)` : ''}
+            </Text>
+          </View>
         </View>
       </Card>
 
