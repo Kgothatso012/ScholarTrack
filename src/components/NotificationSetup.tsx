@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { Ionicons } from '@expo/vector-icons';
-import { notificationService } from '../services/notifications';
+import { notificationService } from '../services/NotificationService';
 import { colors } from '../lib/theme';
 
 interface NotificationSetupProps {

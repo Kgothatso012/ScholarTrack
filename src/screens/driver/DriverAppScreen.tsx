@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 // UI Plugin components
@@ -52,6 +53,7 @@ export default function DriverAppScreen({ navigation }: any) {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
   const [currentUser, setCurrentUser] = useState<DriverUser | null>(null);
+  const [ratingSummary, setRatingSummary] = useState<DriverRatingSummary | null>(null);
 
   const loadDriverData = async () => {
     try {
@@ -141,6 +143,10 @@ export default function DriverAppScreen({ navigation }: any) {
           { label: 'Today', value: `R${(todayEarnings / 100).toFixed(0)}`, positive: true },
           { label: 'Total Earned', value: `R${(totalEarnings / 100).toFixed(0)}`, positive: true },
         ]);
+
+        // Fetch driver rating summary
+        const rating = await ratingService.getDriverRatingSummary(driverData.id);
+        setRatingSummary(rating);
       }
     } catch (error) {
       console.error('Error loading driver data:', error);
@@ -319,6 +325,42 @@ export default function DriverAppScreen({ navigation }: any) {
               ))}
             </View>
           </View>
+
+          {/* Driver Rating Card */}
+          {ratingSummary && (
+            <View style={styles(colors).section}>
+              <Text style={styles(colors).sectionTitle}>My Rating</Text>
+              <Card variant="elevated" padding="large">
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name="star" size={32} color={colors.accent} />
+                    <View style={{ marginLeft: spacing.md }}>
+                      <Text style={{ ...typography.h2, color: colors.text }}>
+                        {ratingSummary.average_rating.toFixed(1)}
+                      </Text>
+                      <Text style={{ ...typography.bodySmall, color: colors.textSecondary }}>
+                        {ratingSummary.total_reviews} total reviews
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs }}>
+                      <Ionicons name="thumbs-up" size={16} color={colors.success} />
+                      <Text style={{ ...typography.bodySmall, color: colors.success, marginLeft: spacing.xs }}>
+                        {ratingSummary.positive_reviews} positive
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="thumbs-down" size={16} color={colors.danger} />
+                      <Text style={{ ...typography.bodySmall, color: colors.danger, marginLeft: spacing.xs }}>
+                        {ratingSummary.negative_reviews} needs improvement
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </Card>
+            </View>
+          )}
 
           {/* Quick Actions */}
           <View style={styles(colors).section}>

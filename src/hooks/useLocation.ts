@@ -97,7 +97,7 @@ export function useLocation(driverId?: string) {
 }
 
 // useNotifications Hook - Easy notification handling
-import { notificationService } from '../services/notifications';
+import { notificationService } from '../services/NotificationService';
 
 export function useNotifications(userId?: string) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
