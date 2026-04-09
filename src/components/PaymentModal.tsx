@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ThemeColors } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import { payStackService, paymentHelper } from '../lib/paystack';
 
@@ -168,7 +168,7 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

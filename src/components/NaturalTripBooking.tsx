@@ -14,7 +14,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { aiService } from '../services/ai';
 import { supabase } from '../lib/api';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
+
+type ThemeColors = typeof themeColors;
 
 interface TripDetails {
   pickup?: string;
@@ -127,19 +129,19 @@ export default function NaturalTripBooking({
   ];
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: COLORS.bg }]}>
-      <View style={[styles(colors).header, { backgroundColor: COLORS.primary }]}>
+    <View style={[styles(themeColors).container, { backgroundColor: COLORS.bg }]}>
+      <View style={[styles(themeColors).header, { backgroundColor: COLORS.primary }]}>
         <Ionicons name="calendar" size={24} color="#fff" />
-        <Text style={styles(colors).headerText}>Book a Trip</Text>
+        <Text style={styles(themeColors).headerText}>Book a Trip</Text>
       </View>
 
-      <View style={[styles(colors).inputCard, { backgroundColor: COLORS.card }]}>
-        <Text style={[styles(colors).label, { color: COLORS.text }]}>
+      <View style={[styles(themeColors).inputCard, { backgroundColor: COLORS.card }]}>
+        <Text style={[styles(themeColors).label, { color: COLORS.text }]}>
           Describe your trip in plain English:
         </Text>
-        
+
         <TextInput
-          style={[styles(colors).input, { backgroundColor: COLORS.bg, color: COLORS.text, borderColor: COLORS.textSec }]}
+          style={[styles(themeColors).input, { backgroundColor: COLORS.bg, color: COLORS.text, borderColor: COLORS.textSec }]}
           placeholder="e.g., Pick up my child from school at 2pm"
           placeholderTextColor={COLORS.textSec}
           value={inputText}
@@ -151,7 +153,7 @@ export default function NaturalTripBooking({
         />
 
         <TouchableOpacity
-          style={[styles(colors).button, { backgroundColor: COLORS.primary }]}
+          style={[styles(themeColors).button, { backgroundColor: COLORS.primary }]}
           onPress={processBooking}
           disabled={loading || !inputText.trim()}
           accessibilityLabel="Book trip"
@@ -161,15 +163,15 @@ export default function NaturalTripBooking({
           ) : (
             <>
               <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles(colors).buttonText}>Book Trip</Text>
+              <Text style={styles(themeColors).buttonText}>Book Trip</Text>
             </>
           )}
         </TouchableOpacity>
       </View>
 
       {extractedDetails && (
-        <View style={[styles(colors).preview, { backgroundColor: COLORS.card }]}>
-          <Text style={[styles(colors).previewTitle, { color: COLORS.text }]}>Detected:</Text>
+        <View style={[styles(themeColors).preview, { backgroundColor: COLORS.card }]}>
+          <Text style={[styles(themeColors).previewTitle, { color: COLORS.text }]}>Detected:</Text>
           {extractedDetails.pickup && (
             <Text style={{ color: COLORS.textSec }}><Ionicons name="location" size={14} color={COLORS.textSec} /> Pickup: {extractedDetails.pickup}</Text>
           )}
@@ -185,13 +187,13 @@ export default function NaturalTripBooking({
         </View>
       )}
 
-      <View style={styles(colors).examples}>
-        <Text style={[styles(colors).examplesTitle, { color: COLORS.textSec }]}>Try saying:</Text>
+      <View style={styles(themeColors).examples}>
+        <Text style={[styles(themeColors).examplesTitle, { color: COLORS.textSec }]}>Try saying:</Text>
         {examples.map((example, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => setInputText(example)}
-            style={[styles(colors).exampleChip, { backgroundColor: COLORS.card }]}
+            style={[styles(themeColors).exampleChip, { backgroundColor: COLORS.card }]}
           >
             <Text style={{ color: COLORS.primary, fontSize: 12 }}>{example}</Text>
           </TouchableOpacity>
@@ -201,7 +203,7 @@ export default function NaturalTripBooking({
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },

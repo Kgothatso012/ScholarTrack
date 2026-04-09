@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
+
+type ThemeColors = typeof themeColors;
 
 export default function OfflineIndicator() {
   const [isConnected, setIsConnected] = useState(true);
@@ -18,14 +20,14 @@ export default function OfflineIndicator() {
   if (isConnected) return null;
 
   return (
-    <View style={styles(colors).container}>
+    <View style={styles(themeColors).container}>
       <Ionicons name="cloud-offline" size={16} color="#fff" />
-      <Text style={styles(colors).text}>No internet connection</Text>
+      <Text style={styles(themeColors).text}>No internet connection</Text>
     </View>
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     backgroundColor: '#d32f2f',
     flexDirection: 'row',

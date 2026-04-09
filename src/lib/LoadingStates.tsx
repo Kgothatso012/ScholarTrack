@@ -4,7 +4,9 @@
 import React, { ReactNode } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from './theme';
+import { colors as themeColors } from './theme';
+
+type ThemeColors = typeof themeColors;
 
 interface LoadingProps {
   message?: string;
@@ -37,47 +39,47 @@ interface StateWrapperProps {
 
 export function Loading({ message = 'Loading...' }: LoadingProps) {
   return (
-    <View style={styles(colors).center}>
-      <ActivityIndicator size="large" color={colors.accent} />
-      <Text style={styles(colors).loadingText}>{message}</Text>
+    <View style={styles(themeColors).center}>
+      <ActivityIndicator size="large" color={themeColors.accent} />
+      <Text style={styles(themeColors).loadingText}>{message}</Text>
     </View>
   );
 }
 
-export function Empty({ 
-  title, 
-  message, 
-  icon = '📭', 
-  actionLabel, 
-  onAction 
+export function Empty({
+  title,
+  message,
+  icon = '📭',
+  actionLabel,
+  onAction
 }: EmptyProps) {
   return (
-    <View style={styles(colors).center}>
-      <Text style={styles(colors).emptyIcon}>{icon}</Text>
-      <Text style={styles(colors).emptyTitle}>{title}</Text>
-      {message && <Text style={styles(colors).emptyMessage}>{message}</Text>}
+    <View style={styles(themeColors).center}>
+      <Text style={styles(themeColors).emptyIcon}>{icon}</Text>
+      <Text style={styles(themeColors).emptyTitle}>{title}</Text>
+      {message && <Text style={styles(themeColors).emptyMessage}>{message}</Text>}
       {actionLabel && onAction && (
-        <TouchableOpacity style={styles(colors).actionButton} onPress={onAction}>
-          <Text style={styles(colors).actionText}>{actionLabel}</Text>
+        <TouchableOpacity style={styles(themeColors).actionButton} onPress={onAction}>
+          <Text style={styles(themeColors).actionText}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 }
 
-export function Error({ 
-  title = 'Oops!', 
-  message = 'Something went wrong', 
-  onRetry 
+export function Error({
+  title = 'Oops!',
+  message = 'Something went wrong',
+  onRetry
 }: ErrorProps) {
   return (
-    <View style={styles(colors).center}>
+    <View style={styles(themeColors).center}>
       <Ionicons name="warning" size={32} color="#f59e0b" />
-      <Text style={styles(colors).errorTitle}>{title}</Text>
-      <Text style={styles(colors).errorMessage}>{message}</Text>
+      <Text style={styles(themeColors).errorTitle}>{title}</Text>
+      <Text style={styles(themeColors).errorMessage}>{message}</Text>
       {onRetry && (
-        <TouchableOpacity style={styles(colors).retryButton} onPress={onRetry}>
-          <Text style={styles(colors).retryText}>Try Again</Text>
+        <TouchableOpacity style={styles(themeColors).retryButton} onPress={onRetry}>
+          <Text style={styles(themeColors).retryText}>Try Again</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -115,7 +117,7 @@ export function StateWrapper({
   return <>{children}</>;
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   center: {
     flex: 1,
     justifyContent: 'center',

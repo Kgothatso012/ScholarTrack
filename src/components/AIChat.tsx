@@ -1,7 +1,7 @@
 // AI Support Chat Component
 // Connects to OpenClaw gateway for AI support
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { aiService } from '../services/ai';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
+
+type ThemeColors = typeof themeColors;
 
 interface Message {
   id: string;
@@ -61,16 +63,16 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
 
     try {
       const response = await aiService.getSupportResponse(userMessage.content);
-      
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response,
         timestamp: new Date(),
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -86,7 +88,7 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
   const renderMessage = ({ item }: { item: Message }) => (
     <View
       style={[
-        styles(colors).messageBubble,
+        styles(themeColors).messageBubble,
         item.role === 'user'
           ? { alignSelf: 'flex-end', backgroundColor: COLORS.primary }
           : { alignSelf: 'flex-start', backgroundColor: COLORS.card },
@@ -94,7 +96,7 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
     >
       <Text
         style={[
-          styles(colors).messageText,
+          styles(themeColors).messageText,
           { color: item.role === 'user' ? '#fff' : COLORS.text },
         ]}
       >
@@ -102,7 +104,7 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
       </Text>
       <Text
         style={[
-          styles(colors).timestamp,
+          styles(themeColors).timestamp,
           { color: item.role === 'user' ? '#fff8' : COLORS.textSec },
         ]}
       >
@@ -113,12 +115,12 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles(colors).container, { backgroundColor: COLORS.bg }]}
+      style={[styles(themeColors).container, { backgroundColor: COLORS.bg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles(colors).header, { backgroundColor: COLORS.primary }]}>
+      <View style={[styles(themeColors).header, { backgroundColor: COLORS.primary }]}>
         <Ionicons name="chatbubbles" size={24} color="#fff" />
-        <Text style={styles(colors).headerText}>AI Support</Text>
+        <Text style={styles(themeColors).headerText}>AI Support</Text>
       </View>
 
       <FlatList
@@ -126,20 +128,20 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
         data={messages}
         renderItem={renderMessage}
         keyExtractor={item => item.id}
-        contentContainerStyle={styles(colors).messageList}
+        contentContainerStyle={styles(themeColors).messageList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
       />
 
       {loading && (
-        <View style={styles(colors).loadingContainer}>
+        <View style={styles(themeColors).loadingContainer}>
           <ActivityIndicator size="small" color={COLORS.primary} />
-          <Text style={[styles(colors).loadingText, { color: COLORS.textSec }]}>Thinking...</Text>
+          <Text style={[styles(themeColors).loadingText, { color: COLORS.textSec }]}>Thinking...</Text>
         </View>
       )}
 
-      <View style={[styles(colors).inputContainer, { backgroundColor: COLORS.card }]}>
+      <View style={[styles(themeColors).inputContainer, { backgroundColor: COLORS.card }]}>
         <TextInput
-          style={[styles(colors).input, { backgroundColor: COLORS.input, color: COLORS.text }]}
+          style={[styles(themeColors).input, { backgroundColor: COLORS.input, color: COLORS.text }]}
           placeholder="Type your message..."
           placeholderTextColor={COLORS.textSec}
           value={inputText}
@@ -150,7 +152,7 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
           accessibilityHint="Type your question for AI support"
         />
         <TouchableOpacity
-          style={[styles(colors).sendButton, { backgroundColor: COLORS.primary }]}
+          style={[styles(themeColors).sendButton, { backgroundColor: COLORS.primary }]}
           onPress={sendMessage}
           disabled={loading || !inputText.trim()}
           accessibilityLabel="Send message"
@@ -162,7 +164,7 @@ export default function AIChat({ darkMode = false }: AIChatProps) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },

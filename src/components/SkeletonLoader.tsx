@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ThemeColors } from '../context/ThemeContext';
 
 interface SkeletonProps {
   width?: DimensionValue;
@@ -47,7 +47,7 @@ export function SkeletonDashboard() {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   skeleton: {
     backgroundColor: '#333',
   },

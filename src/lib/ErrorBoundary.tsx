@@ -3,7 +3,9 @@
 
 import React, { Component, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
+
+type ThemeColors = typeof themeColors;
 
 interface Props {
   children: ReactNode;
@@ -41,13 +43,13 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <View style={styles(colors).container}>
-          <Text style={styles(colors).title}>Something went wrong</Text>
-          <Text style={styles(colors).message}>
+        <View style={styles(themeColors).container}>
+          <Text style={styles(themeColors).title}>Something went wrong</Text>
+          <Text style={styles(themeColors).message}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
-          <TouchableOpacity style={styles(colors).button} onPress={this.handleRetry}>
-            <Text style={styles(colors).buttonText}>Try Again</Text>
+          <TouchableOpacity style={styles(themeColors).button} onPress={this.handleRetry}>
+            <Text style={styles(themeColors).buttonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -57,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

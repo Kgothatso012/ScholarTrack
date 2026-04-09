@@ -8,7 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { locationService } from '../services/location';
 import { notificationService } from '../services/NotificationService';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
+
+type ThemeColors = typeof themeColors;
 
 interface LocationTrackerProps {
   driverId: string;
@@ -94,28 +96,28 @@ export default function LiveLocationTracker({ driverId, isDriver = false }: Loca
   // Parent view - see driver's location
   if (!isDriver) {
     return (
-      <View style={styles(colors).container}>
-        <View style={styles(colors).header}>
+      <View style={styles(themeColors).container}>
+        <View style={styles(themeColors).header}>
           <Ionicons name="locate" size={24} color="#000000" />
-          <Text style={styles(colors).headerText}>Live Location</Text>
+          <Text style={styles(themeColors).headerText}>Live Location</Text>
         </View>
-        
+
         {currentLocation ? (
-          <View style={styles(colors).locationInfo}>
-            <Text style={styles(colors).latLng}>
+          <View style={styles(themeColors).locationInfo}>
+            <Text style={styles(themeColors).latLng}>
               <Ionicons name="location" size={14} color="#666" /> {currentLocation.coords.latitude.toFixed(4)}, {currentLocation.coords.longitude.toFixed(4)}
             </Text>
-            <Text style={styles(colors).timestamp}>
+            <Text style={styles(themeColors).timestamp}>
               Updated: {new Date(currentLocation.timestamp).toLocaleTimeString()}
             </Text>
           </View>
         ) : (
-          <Text style={styles(colors).noData}>Loading location...</Text>
+          <Text style={styles(themeColors).noData}>Loading location...</Text>
         )}
 
-        <TouchableOpacity style={styles(colors).refreshBtn} onPress={getLocation}>
+        <TouchableOpacity style={styles(themeColors).refreshBtn} onPress={getLocation}>
           <Ionicons name="refresh" size={20} color="#fff" />
-          <Text style={styles(colors).refreshText}>Refresh</Text>
+          <Text style={styles(themeColors).refreshText}>Refresh</Text>
         </TouchableOpacity>
       </View>
     );
@@ -123,38 +125,38 @@ export default function LiveLocationTracker({ driverId, isDriver = false }: Loca
 
   // Driver view - share location
   return (
-    <View style={styles(colors).driverContainer}>
-      <View style={styles(colors).header}>
-        <Ionicons 
-          name={isTracking ? "locate" : "locate-outline"} 
-          size={24} 
-          color={isTracking ? "#007749" : "#666"} 
+    <View style={styles(themeColors).driverContainer}>
+      <View style={styles(themeColors).header}>
+        <Ionicons
+          name={isTracking ? "locate" : "locate-outline"}
+          size={24}
+          color={isTracking ? "#007749" : "#666"}
         />
-        <Text style={[styles(colors).headerText, isTracking && styles(colors).trackingActive]}>
+        <Text style={[styles(themeColors).headerText, isTracking && styles(themeColors).trackingActive]}>
           {isTracking ? 'Location Sharing Active' : 'Share Location'}
         </Text>
       </View>
 
       {errorMsg && (
-        <View style={styles(colors).errorContainer}>
+        <View style={styles(themeColors).errorContainer}>
           <Ionicons name="warning" size={20} color="#d32f2f" />
-          <Text style={styles(colors).errorText}>{errorMsg}</Text>
+          <Text style={styles(themeColors).errorText}>{errorMsg}</Text>
         </View>
       )}
 
       {currentLocation && isTracking && (
-        <View style={styles(colors).locationInfo}>
-          <Text style={styles(colors).latLng}>
+        <View style={styles(themeColors).locationInfo}>
+          <Text style={styles(themeColors).latLng}>
             Location  {currentLocation.coords.latitude.toFixed(4)}, {currentLocation.coords.longitude.toFixed(4)}
           </Text>
-          <Text style={styles(colors).accuracy}>
+          <Text style={styles(themeColors).accuracy}>
             Accuracy: ±{Math.round(currentLocation.coords.accuracy ?? 0)}m
           </Text>
         </View>
       )}
 
       <TouchableOpacity
-        style={[styles(colors).trackBtn, isTracking ? styles(colors).stopBtn : styles(colors).startBtn]}
+        style={[styles(themeColors).trackBtn, isTracking ? styles(themeColors).stopBtn : styles(themeColors).startBtn]}
         onPress={isTracking ? stopTracking : startTracking}
       >
         <Ionicons
@@ -162,21 +164,21 @@ export default function LiveLocationTracker({ driverId, isDriver = false }: Loca
           size={24}
           color="#fff"
         />
-        <Text style={styles(colors).trackBtnText}>
+        <Text style={styles(themeColors).trackBtnText}>
           {isTracking ? 'Stop Sharing' : 'Start Sharing'}
         </Text>
       </TouchableOpacity>
 
-      <Text style={styles(colors).hint}>
-        {isTracking 
-          ? 'Your location is visible to parents in real-time' 
+      <Text style={styles(themeColors).hint}>
+        {isTracking
+          ? 'Your location is visible to parents in real-time'
           : 'Enable to let parents track your route'}
       </Text>
     </View>
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     borderRadius: 12,

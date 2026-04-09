@@ -1,14 +1,13 @@
 // AnimatedCard - Smooth card animations using Reanimated
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { colors } from '../lib/theme';
+import { colors as themeColors } from '../lib/theme';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
+
+type ThemeColors = typeof themeColors;
 
 interface AnimatedCardProps {
   children: React.ReactNode;
@@ -21,14 +20,14 @@ export function AnimatedCard({ children, style, index = 0 }: AnimatedCardProps) 
     <Animated.View
       entering={FadeIn.delay(index * 50).springify()}
       exiting={FadeOut}
-      style={[styles(colors).card, style]}
+      style={[styles(themeColors).card, style]}
     >
       {children}
     </Animated.View>
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
