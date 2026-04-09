@@ -1,6 +1,11 @@
 // Children Service
 import { supabase } from './supabase';
-import { Child } from './types';
+import { Child, DriverAssignment } from './types';
+
+type ChildWithRelations = Child & {
+  driver_assignments?: DriverAssignment[];
+  school?: { name: string };
+};
 
 export const childrenService = {
   async getChildren(parentId: string) {
@@ -19,8 +24,8 @@ export const childrenService = {
     if (!data || data.length === 0) return [];
 
     // Transform to extract driver from assignments
-    return data.map((c: any) => {
-      const activeAssignment = c.driver_assignments?.find((a: any) => a.status === 'active');
+    return (data as ChildWithRelations[]).map((c) => {
+      const activeAssignment = c.driver_assignments?.find((a: DriverAssignment) => a.status === 'active');
       return {
         ...c,
         driver: activeAssignment?.driver || null,

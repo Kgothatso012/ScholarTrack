@@ -66,11 +66,20 @@ export type NotificationData =
   | { type: 'ROUTE_UPDATE'; payload: { tripId: string; message: string } }
   | { type: 'DRIVER_ASSIGNED'; payload: DriverNotificationData };
 
+
+// Lifecycle event type (for internal emitter use)
+type NotificationLifecycleEvent = {
+  type: string;
+  payload: unknown;
+  channel?: NotificationChannel;
+  timestamp?: string;
+};
+
 // ============================================================================
 // EVENT EMITTER - Typed notification lifecycle events
 // ============================================================================
 
-type NotificationEventCallback = (data: any) => void;
+type NotificationEventCallback = (data: NotificationLifecycleEvent) => void;
 
 interface EventSubscription {
   remove: () => void;
@@ -96,7 +105,7 @@ class NotificationEventEmitter {
     };
   }
 
-  emit(event: string, data: any): void {
+  emit(event: string, data: NotificationLifecycleEvent): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
       callbacks.forEach(cb => cb(data));
@@ -275,7 +284,7 @@ const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (pa
   },
   TRIP_DELAYED: {
     title: 'Trip Delayed',
-    body: (p: any) => `Trip is delayed by ${p.delayMinutes || 15} minutes`,
+    body: (p: TripNotificationData & { delayMinutes?: number }) => `Trip is delayed by ${p.delayMinutes || 15} minutes`,
   },
   PANIC_TRIGGERED: {
     title: 'PANIC ALERT',
@@ -283,15 +292,15 @@ const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (pa
   },
   EMERGENCY: {
     title: 'Emergency Alert',
-    body: (p: any) => p.message || 'Emergency alert triggered',
+    body: (p: SafetyNotificationData & { message?: string }) => p.message || 'Emergency alert triggered',
   },
   CHILD_PICKED_UP: {
     title: 'Child Picked Up',
-    body: (p: any) => `${p.childName} has been picked up by driver`,
+    body: (p: { childId: string; childName: string; driverName: string }) => `${p.childName} has been picked up by driver`,
   },
   CHILD_DROPPED_OFF: {
     title: 'Child Dropped Off',
-    body: (p: any) => `${p.childName} has arrived at ${p.destination}`,
+    body: (p: { childId: string; childName: string; destination: string }) => `${p.childName} has arrived at ${p.destination}`,
   },
   PAYMENT_RECEIVED: {
     title: 'Payment Received',
@@ -303,7 +312,7 @@ const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (pa
   },
   ROUTE_UPDATE: {
     title: 'Route Update',
-    body: (p: any) => p.message || 'Route has been updated',
+    body: (p: { tripId: string; message?: string }) => p.message || 'Route has been updated',
   },
   DRIVER_ASSIGNED: {
     title: 'Driver Assigned',
@@ -321,7 +330,7 @@ function getChannelForType(type: NotificationType): NotificationChannel {
 export async function sendAppNotification(
   type: NotificationType,
   userId: string,
-  payload: any
+  payload: NotificationData['payload']
 ): Promise<void> {
   const message = NOTIFICATION_MESSAGES[type];
   if (!message) {
@@ -343,16 +352,17 @@ export async function sendAppNotification(
   const channel = getChannelForType(type);
 
   // Emit event for notification lifecycle tracking
-  notificationEmitter.emit('notification_received', {
+  notificationEmitter.emit('notification_sent', {
     type,
     payload,
     channel,
     timestamp: new Date().toISOString(),
-  } as any);
+  });
 
   await notificationService.sendLocalNotification(
     message.title,
-    message.body(payload),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message.body(payload as any),
     { type, payload, channel }
   );
 }
@@ -363,11 +373,13 @@ export async function sendAppNotification(
 
 export function initializeNotificationListeners(): () => void {
   const receivedSub = Notifications.addNotificationReceivedListener(notification => {
-    notificationEmitter.emit('notification_received', notification);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    notificationEmitter.emit('notification_received', notification as any);
   });
 
   const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
-    notificationEmitter.emit('notification_response', response);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    notificationEmitter.emit('notification_response', response as any);
   });
 
   // Return cleanup function

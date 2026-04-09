@@ -11,7 +11,7 @@ import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 interface Child {
-  id: number;
+  id: string;
   name: string;
   school: string;
   grade: string;
@@ -36,8 +36,8 @@ export default function ChildrenScreen({ navigation }: Props) {
       if (!user) {
         // Use mock data for demo
         setChildren([
-          { id: 1, name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
-          { id: 2, name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
+          { id: '1', name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
+          { id: '2', name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
         ]);
         return;
       }
@@ -59,8 +59,8 @@ export default function ChildrenScreen({ navigation }: Props) {
       console.error('Error fetching children:', error);
       // Fallback to mock data
       setChildren([
-        { id: 1, name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
-        { id: 2, name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
+        { id: '1', name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
+        { id: '2', name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
       ]);
     } finally {
       setLoading(false);

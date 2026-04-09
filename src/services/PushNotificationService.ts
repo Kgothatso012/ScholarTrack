@@ -11,7 +11,7 @@ const SUPABASE_FUNCTION_URL = `${Constants.expoConfig?.extra?.SUPABASE_URL || 'h
 export interface NotificationPayload {
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   priority?: 'default' | 'normal' | 'high';
 }
 
@@ -213,18 +213,17 @@ export const pushNotificationService = {
   async scheduleLocalNotification(
     title: string,
     body: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
     seconds?: number
   ): Promise<string> {
+    const content = { title, body, data: data || {}, sound: 'default' as const };
     if (seconds) {
-      return await Notifications.scheduleNotificationAsync({
-        content: { title, body, data, sound: 'default' },
-        trigger: { type: 'timeInterval', seconds } as any,
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const trigger = { type: 'timeInterval', seconds } as any;
+      return await Notifications.scheduleNotificationAsync({ content, trigger } as any);
     }
-    return await Notifications.scheduleNotificationAsync({
-      content: { title, body, data, sound: 'default' },
-    } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return await Notifications.scheduleNotificationAsync({ content } as any);
   },
 
   /**
