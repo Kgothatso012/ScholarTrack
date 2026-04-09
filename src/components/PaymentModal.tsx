@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
 import { payStackService, paymentHelper } from '../lib/paystack';
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 
 export default function PaymentModal({ visible, onClose, amount, description, paymentType, childId, onSuccess, onFailure }: Props) {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [step, setStep] = useState<'email' | 'processing'>('email');
@@ -27,50 +30,65 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
       return;
     }
 
+    const userId = user?.id || '';
+
     try {
       setLoading(true);
       setStep('processing');
 
-      // Initialize PayStack payment
+      // Initialize Paystack payment
       const { authorization_url, reference } = await payStackService.initializePayment({
         email,
         amount: paymentHelper.randToKobo(amount),
         paymentType,
         metadata: {
-          user_id: '', // Will be set from auth
+          user_id: userId,
           child_id: childId,
           payment_type: paymentType,
           description,
         },
       });
 
-      // In production, use in-app browser for card entry
-      // For demo, show success
-      Alert.alert(
-        'Payment Initiated',
-        `Payment reference: ${reference}\n\nIn production, this would open a secure card entry page.`,
-        [
-          {
-            text: 'Simulate Success',
-            onPress: () => {
-              onSuccess(reference);
-              setStep('email');
-              onClose();
-            },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              setStep('email');
-              setLoading(false);
-            },
-          },
-        ]
-      );
+      // Open Paystack checkout in-app browser
+      await WebBrowser.openBrowserAsync(authorization_url, {
+        toolbarColor: '#007749',
+        controlsColor: '#FFFFFF',
+      });
+
+      // After browser closes, verify the payment
+      const verified = await payStackService.verifyTransaction(reference);
+      if (verified.status === 'success') {
+        await paymentHelper.savePaymentRecord(
+          userId,
+          amount,
+          reference,
+          'paid',
+          paymentType,
+          childId
+        );
+        onSuccess(reference);
+        setStep('email');
+        onClose();
+      } else {
+        await paymentHelper.savePaymentRecord(
+          userId,
+          amount,
+          reference,
+          'failed',
+          paymentType,
+          childId
+        );
+        onFailure(`Payment was ${verified.status}`);
+        setStep('email');
+      }
     } catch (error: any) {
-      Alert.alert('Payment Error', error.message || 'Failed to initiate payment');
-      onFailure(error.message);
+      if (error.message?.includes('user cancelled') || error.message?.includes('cancelled') || error.message?.includes('cancelle')) {
+        setStep('email');
+      } else {
+        Alert.alert('Payment Error', error.message || 'Failed to initiate payment');
+        onFailure(error.message);
+        setStep('email');
+      }
     } finally {
       setLoading(false);
     }

@@ -240,7 +240,7 @@ export const paymentHelper = {
     userId: string,
     amount: number,
     reference: string,
-    status: 'pending' | 'success' | 'failed',
+    status: 'pending' | 'paid' | 'failed',
     paymentType: string,
     childId?: string
   ) {
@@ -251,9 +251,10 @@ export const paymentHelper = {
         amount,
         reference,
         status,
+        child_id: childId || null,
         payment_type: paymentType,
-        child_id: childId,
-        created_at: new Date().toISOString(),
+        month: new Date().toISOString().slice(0, 7), // YYYY-MM format
+        paid_at: status === 'paid' ? new Date().toISOString() : null,
       })
       .select()
       .single();
