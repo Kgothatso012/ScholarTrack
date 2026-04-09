@@ -1,6 +1,6 @@
 // Linking Service
 import { supabase } from './supabase';
-import type { School } from './types';
+import type { School, Child } from './types';
 
 export const linkingService = {
   async getSchools() {
@@ -43,7 +43,7 @@ export const linkingService = {
     if (error) throw error;
     return data;
   },
-  async createChild(parentId: string, childData: any) {
+  async createChild(parentId: string, childData: Partial<Child>) {
     const { data, error } = await supabase
       .from('children')
       .insert({ ...childData, parent_id: parentId })

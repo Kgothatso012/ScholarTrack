@@ -67,8 +67,8 @@ export default function RouteManagementScreen({ navigation }: Props) {
       setShowModal(false);
       setNewRoute({ name: '', driver_id: '' });
       loadData();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+    } catch (error: unknown) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Route operation failed');
     } finally {
       setLoading(false);
     }
@@ -83,8 +83,8 @@ export default function RouteManagementScreen({ navigation }: Props) {
       await routeService.assignChildToRoute(routeId, childId, route.driver_id);
       Alert.alert('Success', 'Child assigned to route');
       loadData();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+    } catch (error: unknown) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Route operation failed');
     } finally {
       setLoading(false);
     }

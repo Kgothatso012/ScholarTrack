@@ -132,8 +132,8 @@ const EarningsScreen = ({ navigation }: Props) => {
                 'Your withdrawal request has been submitted. Funds will be processed within 2-3 business days.',
                 [{ text: 'OK' }]
               );
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to process withdrawal');
+            } catch (error: unknown) {
+              Alert.alert('Error', error instanceof Error ? error.message || 'Failed to process withdrawal' : 'Failed to process withdrawal');
             } finally {
               setProcessing(false);
             }

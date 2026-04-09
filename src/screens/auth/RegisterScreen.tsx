@@ -200,7 +200,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       ]);
     } catch (error) {
       console.error('Registration error:', error);
-      const errorMsg = error instanceof Error ? error.message : (error as any)?.error_description || '';
+      const errorMsg = error instanceof Error ? error.message : (error as { error_description?: string })?.error_description || '';
 
       // Check for specific error cases
       if (errorMsg.toLowerCase().includes('already registered') ||

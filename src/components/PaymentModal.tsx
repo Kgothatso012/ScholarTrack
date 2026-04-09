@@ -81,12 +81,12 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
         onFailure(`Payment was ${verified.status}`);
         setStep('email');
       }
-    } catch (error: any) {
-      if (error.message?.includes('user cancelled') || error.message?.includes('cancelled') || error.message?.includes('cancelle')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && (error.message?.includes('user cancelled') || error.message?.includes('cancelled') || error.message?.includes('cancelle'))) {
         setStep('email');
       } else {
-        Alert.alert('Payment Error', error.message || 'Failed to initiate payment');
-        onFailure(error.message);
+        Alert.alert('Payment Error', error instanceof Error ? error.message || 'Failed to initiate payment' : 'Failed to initiate payment');
+        onFailure(error instanceof Error ? error.message : 'Payment failed');
         setStep('email');
       }
     } finally {

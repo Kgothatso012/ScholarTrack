@@ -29,6 +29,20 @@ interface DriverCompliance {
   };
 }
 
+interface RawDriverDocument {
+  driver_id: string;
+  document_type: string;
+  status: string;
+  expiry_date?: string;
+  drivers?: { full_name: string } | { full_name: string }[];
+}
+
+interface DriverMapEntry {
+  id: string;
+  driver_name: string;
+  documents: Record<string, { status: string; expiry_date?: string }>;
+}
+
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
@@ -70,9 +84,10 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       if (error) throw error;
 
       // Process documents to get compliance status per driver
-      const driverMap = new Map();
+      const driverMap = new Map<string, { id: string; driver_name: string; documents: Record<string, { status: string; expiry_date?: string }> }>();
 
-      documents?.forEach((doc: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (documents as any[])?.forEach((doc) => {
         const driverId = doc.driver_id;
         const driverName = doc.drivers?.full_name || 'Unknown';
 
@@ -84,7 +99,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
           });
         }
 
-        const driver = driverMap.get(driverId);
+        const driver = driverMap.get(driverId)!;
         driver.documents[doc.document_type] = {
           status: doc.status,
           expiry_date: doc.expiry_date,
@@ -92,7 +107,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       });
 
       const driverList = Array.from(driverMap.values());
-      setDrivers(driverList);
+      setDrivers(driverList as DriverCompliance[]);
 
       // Calculate stats
       let compliant = 0;
@@ -103,8 +118,9 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       const today = new Date();
       const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-      driverList.forEach((driver: any) => {
-        const docs = driver.documents;
+      driverList.forEach((driver) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const docs = driver.documents as any;
         const requiredDocs = ['pdp_certificate', 'roadworthy', 'drivers_license', 'insurance', 'operating_license'];
         const hasAllDocs = requiredDocs.every(docType => docs[docType]?.status === 'approved');
 
@@ -156,8 +172,9 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     }
   };
 
-  const getDriverStatus = (driver: any) => {
-    const docs = driver.documents;
+  const getDriverStatus = (driver: DriverCompliance) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docs = driver.documents as any;
     const requiredDocs = ['pdp_certificate', 'roadworthy', 'drivers_license', 'insurance', 'operating_license'];
     const hasAllDocs = requiredDocs.every(docType => docs[docType]?.status === 'approved');
 

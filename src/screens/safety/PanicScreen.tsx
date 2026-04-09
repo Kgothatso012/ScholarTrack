@@ -108,9 +108,9 @@ export default function PanicScreen() {
       }
 
       setSosActive(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('SOS Error:', error);
-      Alert.alert('SOS Failed', error.message || 'Failed to send emergency alert');
+      Alert.alert('SOS Failed', error instanceof Error ? error.message || 'Failed to send emergency alert' : 'Failed to send emergency alert');
     } finally {
       setSending(false);
     }

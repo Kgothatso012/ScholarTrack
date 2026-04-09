@@ -84,9 +84,9 @@ export default function EmergencyScreen() {
         `Emergency alert sent to ${contacts.length} contact(s)${locationStr ? ' with your location' : ''}`,
         [{ text: 'OK' }]
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('SOS Error:', error);
-      Alert.alert('SOS Failed', error.message || 'Failed to send emergency alert');
+      Alert.alert('SOS Failed', error instanceof Error ? error.message || 'Failed to send emergency alert' : 'Failed to send emergency alert');
     } finally {
       setSendingSos(false);
     }
