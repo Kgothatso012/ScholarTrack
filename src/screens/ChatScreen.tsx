@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { supabase, Profile, Driver } from '../lib/api';
+import { supabase, Profile, Driver, Child } from '../lib/api';
+import { ThemeColors } from '../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../ui-plugin/components';
@@ -87,7 +88,7 @@ export default function ChatScreen({ navigation }: Props) {
       // Group by conversation partner
       const convMap = new Map<string, ChatConversation>();
 
-      (messages || []).forEach((msg: any) => {
+      (messages || []).forEach((msg: Message) => {
         const partnerId = msg.sender_id === currentUser.id ? msg.receiver_id : msg.sender_id;
 
         if (!convMap.has(partnerId)) {
@@ -122,7 +123,7 @@ export default function ChatScreen({ navigation }: Props) {
           .select('driver_id')
           .eq('parent_id', currentUser.id);
 
-        const driverIds = [...new Set((children || []).map((c: any) => c.driver_id).filter(Boolean))];
+        const driverIds = (children || []).map((c: { driver_id?: string }) => c.driver_id).filter((id): id is string => !!id);
 
         for (const driverId of driverIds) {
           if (!convMap.has(driverId)) {
@@ -344,7 +345,7 @@ export default function ChatScreen({ navigation }: Props) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },

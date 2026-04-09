@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { linkingService, Child, School } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
@@ -80,20 +81,20 @@ export default function LinkChildScreen({ navigation }: Props) {
       setShowAddModal(false);
       setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
       loadData();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditChild = (child: any) => {
+  const handleEditChild = (child: Child) => {
     setSelectedChild(child);
     setNewChild({
       full_name: child.full_name,
       grade: child.grade || '',
       pickup_address: child.pickup_address || '',
-      school_id: child.school_id
+      school_id: child.school_id || ''
     });
     setShowEditModal(true);
   };
@@ -123,14 +124,14 @@ export default function LinkChildScreen({ navigation }: Props) {
       setSelectedChild(null);
       setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
       loadData();
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteChild = (child: any) => {
+  const handleDeleteChild = (child: Child) => {
     Alert.alert(
       'Remove Child',
       `Are you sure you want to remove ${child.full_name}?`,
@@ -151,8 +152,8 @@ export default function LinkChildScreen({ navigation }: Props) {
 
               Alert.alert('Success', 'Child removed successfully');
               loadData();
-            } catch (error: any) {
-              Alert.alert('Error', error.message);
+            } catch (error) {
+              Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error');
             } finally {
               setLoading(false);
             }
@@ -162,7 +163,7 @@ export default function LinkChildScreen({ navigation }: Props) {
     );
   };
 
-  const renderChild = ({ item }: { item: any }) => (
+  const renderChild = ({ item }: { item: Child }) => (
     <View style={[styles(colors).childCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={styles(colors).childHeader}>
         <View style={[styles(colors).avatar, { backgroundColor: colors.primary }]}>
@@ -385,7 +386,7 @@ export default function LinkChildScreen({ navigation }: Props) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },
