@@ -121,8 +121,8 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
       } else {
         Alert.alert('Error', 'User profile not found.');
       }
-    } catch (error: any) {
-      const errorMessage = error?.message?.toLowerCase() || '';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message?.toLowerCase() || '' : '';
       if (errorMessage.includes('email not confirmed')) {
         Alert.alert('Email Not Confirmed', 'Please check your email and click the confirmation link.');
       } else if (errorMessage.includes('invalid login credentials')) {
@@ -160,8 +160,8 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
       Alert.alert('Check Your Email', 'Password reset link has been sent.');
       setShowResetModal(false);
       setResetEmail('');
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send reset email');
+    } catch (error: unknown) {
+      Alert.alert('Error', error instanceof Error ? error.message || 'Failed to send reset email' : 'Failed to send reset email');
     } finally {
       setResetLoading(false);
     }
