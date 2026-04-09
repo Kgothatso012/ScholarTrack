@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
@@ -19,7 +20,12 @@ interface CheckItem {
   required: boolean;
 }
 
-export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+  setScreen?: (s: string) => void;
+}
+
+export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: Props) {
   const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [checks, setChecks] = useState<CheckItem[]>([
@@ -175,7 +181,7 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface || '#1a1a1a' },
   header: { backgroundColor: colors.surface || '#1a1a1a', padding: 20, paddingTop: 50 },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: colors.text || '#fff' },

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
@@ -18,7 +19,11 @@ interface EarningsData {
   rating: number;
 }
 
-const EarningsScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const EarningsScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -138,7 +143,7 @@ const EarningsScreen = ({ navigation }: any) => {
     );
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
