@@ -65,7 +65,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
   return content;
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',

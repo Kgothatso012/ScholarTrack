@@ -162,7 +162,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   container: {
     position: 'relative',
   },

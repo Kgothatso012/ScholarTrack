@@ -85,7 +85,7 @@ export const Divider: React.FC<DividerProps> = ({
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   horizontal: {
     width: '100%',
   },

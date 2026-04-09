@@ -95,7 +95,7 @@ export const Card: React.FC<CardProps> = ({
   return cardContent;
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   base: {
     borderRadius: borderRadius.xl,
     overflow: 'hidden',

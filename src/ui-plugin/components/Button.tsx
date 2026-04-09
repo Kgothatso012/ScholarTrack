@@ -182,7 +182,7 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',

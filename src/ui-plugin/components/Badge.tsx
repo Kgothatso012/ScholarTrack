@@ -160,7 +160,7 @@ export const Badge: React.FC<BadgeProps> = ({
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',

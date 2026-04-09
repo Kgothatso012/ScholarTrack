@@ -147,7 +147,6 @@ export const geocodingService = {
       }
 
       if (!stops || stops.length === 0) {
-        console.log('No stops need geocoding for route:', routeId);
         return 0;
       }
 
@@ -168,7 +167,7 @@ export const geocodingService = {
             .eq('id', stop.id);
 
           geocodedCount++;
-          console.log(`Geocoded: ${stop.name} -> ${result.latitude}, ${result.longitude}`);
+          // Geocoded successfully
         }
       }
 

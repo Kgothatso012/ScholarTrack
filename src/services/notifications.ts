@@ -337,7 +337,6 @@ export async function sendAppNotification(
     .single();
 
   if (!profile?.push_token) {
-    console.log(`No push token for user ${userId}`);
     return;
   }
 

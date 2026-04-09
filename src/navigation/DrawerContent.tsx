@@ -7,13 +7,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { getMenuForRole, MenuItem } from '../config/menu';
 import { supabase } from '../lib/supabase';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ThemeColors } from '../context/ThemeContext';
 
 interface DrawerItemProps {
   item: MenuItem;
   isActive: boolean;
   onPress: () => void;
-  colors: any;
+  colors: ThemeColors;
 }
 
 const DrawerItem: React.FC<DrawerItemProps> = ({ item, isActive, onPress, colors }) => (
@@ -195,7 +195,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   header: {
     padding: 20,

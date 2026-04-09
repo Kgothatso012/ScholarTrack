@@ -130,7 +130,6 @@ export const pushNotificationService = {
       const token = await this.getUserPushToken(userId);
 
       if (!token) {
-        console.log('No push token for user:', userId);
         return false;
       }
 
@@ -198,7 +197,6 @@ export const pushNotificationService = {
         .single();
 
       if (!child?.parent_id) {
-        console.log('No parent found for child:', childId);
         return false;
       }
 
@@ -238,7 +236,6 @@ export const pushNotificationService = {
 
       if (token && userId) {
         await this.savePushToken(userId, token);
-        console.log('Push token saved for user:', userId);
       }
     } catch (error) {
       console.error('Error registering for remote notifications:', error);
