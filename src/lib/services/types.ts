@@ -133,3 +133,5 @@ export interface DriverAssignment {
   monthly_rate?: number;
   created_at?: string;
 }
+
+// Driver Review - exported from rating.ts

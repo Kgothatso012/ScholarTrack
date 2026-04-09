@@ -11,6 +11,7 @@ export * from './emergency';
 export * from './linking';
 export * from './route';
 export * from './tripEnhanced';
+export * from './rating';
 
 // Service objects re-exports
 export { authService } from './auth';
@@ -23,3 +24,4 @@ export { emergencyContactService, panicAlertService } from './emergency';
 export { linkingService } from './linking';
 export { routeService } from './route';
 export { tripServiceEnhanced, driverTrackingService, profileService } from './tripEnhanced';
+export { ratingService } from './rating';
