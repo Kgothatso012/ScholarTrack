@@ -67,7 +67,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
         // Update documents with uploaded status
         const uploadedDocs = compliance.documents || [];
         setDocuments(prev => prev.map(doc => {
-          const uploaded = uploadedDocs.find((d: any) => d.id === doc.id);
+          const uploaded = uploadedDocs.find((d: { id: string }) => d.id === doc.id);
           return uploaded ? { ...doc, document: { uri: uploaded.name, name: uploaded.name, type: 'image', uploadedAt: new Date(uploaded.uploadedAt) } } : doc;
         }));
 
@@ -90,10 +90,10 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
     setRefreshing(false);
   };
 
-  const updateComplianceStatus = (docs: any[]) => {
-    const uploadedCount = docs.filter((d: any) => d.document).length;
+  const updateComplianceStatus = (docs: ComplianceDocument[]) => {
+    const uploadedCount = docs.filter((d: ComplianceDocument) => d.document).length;
     const requiredDocs = documents.filter(d => d.required);
-    const uploadedRequired = requiredDocs.filter(d => docs.some((d2: any) => d2.id === d.id && d2.name)).length;
+    const uploadedRequired = requiredDocs.filter(d => docs.some((d2: ComplianceDocument & { name?: string }) => d2.id === d.id && d2.name)).length;
 
     if (uploadedRequired === requiredDocs.length && requiredDocs.length > 0) {
       setComplianceStatus('complete');

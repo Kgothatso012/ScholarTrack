@@ -127,18 +127,18 @@ export const notificationEmitter = new NotificationEventEmitter();
 // NOTIFICATION MESSAGES - Typed message generators
 // ============================================================================
 
-const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (payload: any) => string }> = {
+const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (payload: unknown) => string }> = {
   TRIP_STARTED: {
     title: 'Bus Trip Started',
-    body: (p: TripNotificationData) => `Trip to ${p.schoolName || 'school'} has started`,
+    body: (p: unknown) => `Trip to ${(p as TripNotificationData).schoolName || 'school'} has started`,
   },
   TRIP_COMPLETED: {
     title: 'Trip Completed',
-    body: (p: TripNotificationData) => `Your child has arrived at ${p.schoolName || 'destination'}`,
+    body: (p: unknown) => `Your child has arrived at ${(p as TripNotificationData).schoolName || 'destination'}`,
   },
   TRIP_DELAYED: {
     title: 'Trip Delayed',
-    body: (p: any) => `Trip is delayed by ${p.delayMinutes || 15} minutes`,
+    body: (p: unknown) => `Trip is delayed by ${(p as { delayMinutes?: number }).delayMinutes || 15} minutes`,
   },
   PANIC_TRIGGERED: {
     title: 'PANIC ALERT',
@@ -146,31 +146,31 @@ const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (pa
   },
   EMERGENCY: {
     title: 'Emergency Alert',
-    body: (p: any) => p.message || 'Emergency alert triggered',
+    body: (p: unknown) => (p as { message?: string }).message || 'Emergency alert triggered',
   },
   CHILD_PICKED_UP: {
     title: 'Child Picked Up',
-    body: (p: any) => `${p.childName} has been picked up by driver`,
+    body: (p: unknown) => `${(p as { childName: string }).childName} has been picked up by driver`,
   },
   CHILD_DROPPED_OFF: {
     title: 'Child Dropped Off',
-    body: (p: any) => `${p.childName} has arrived at ${p.destination}`,
+    body: (p: unknown) => `${(p as { childName: string; destination: string }).childName} has arrived at ${(p as { destination: string }).destination}`,
   },
   PAYMENT_RECEIVED: {
     title: 'Payment Received',
-    body: (p: PaymentNotificationData) => `Payment of R${p.amount} received successfully`,
+    body: (p: unknown) => `Payment of R${(p as PaymentNotificationData).amount} received successfully`,
   },
   PAYMENT_DUE: {
     title: 'Payment Due',
-    body: (p: PaymentNotificationData) => `Payment of R${p.amount} is due for ${p.childName || 'your child'}`,
+    body: (p: unknown) => `Payment of R${(p as PaymentNotificationData).amount} is due for ${(p as PaymentNotificationData).childName || 'your child'}`,
   },
   ROUTE_UPDATE: {
     title: 'Route Update',
-    body: (p: any) => p.message || 'Route has been updated',
+    body: (p: unknown) => (p as { message?: string }).message || 'Route has been updated',
   },
   DRIVER_ASSIGNED: {
     title: 'Driver Assigned',
-    body: (p: DriverNotificationData) => `${p.driverName} will be your driver`,
+    body: (p: unknown) => `${(p as DriverNotificationData).driverName} will be your driver`,
   },
 };
 

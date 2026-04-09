@@ -25,6 +25,14 @@ interface DriverLocation {
   last_updated: string;
 }
 
+interface DriverTrackingPayload {
+  driver_id: string;
+  latitude: number;
+  longitude: number;
+  speed?: number;
+  last_updated?: string;
+}
+
 export default function FleetTrackingScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -61,7 +69,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
           table: 'driver_tracking',
         },
         async (payload) => {
-          const newLoc = payload.new as any;
+          const newLoc = payload.new as DriverTrackingPayload;
           // Update the driver location in our list
           setDriverLocations(prev =>
             prev.map(d => {
@@ -71,7 +79,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
                   latitude: newLoc.latitude,
                   longitude: newLoc.longitude,
                   speed: newLoc.speed || 0,
-                  last_updated: newLoc.last_updated,
+                  last_updated: newLoc.last_updated || d.last_updated,
                 };
               }
               return d;

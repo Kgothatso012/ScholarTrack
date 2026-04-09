@@ -205,7 +205,7 @@ export const notificationService = {
   },
 
   // Send local notification
-  async sendLocalNotification(title: string, body: string, data?: any): Promise<void> {
+  async sendLocalNotification(title: string, body: string, data?: Record<string, unknown>): Promise<void> {
     await Notifications.scheduleNotificationAsync({
       content: {
         title,

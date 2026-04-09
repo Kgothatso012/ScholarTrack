@@ -19,16 +19,6 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-interface Child {
-  id: string;
-  name: string;
-  school_id: string;
-  home_address: string;
-  school?: { name: string; };
-  driver?: { id: string; name: string; vehicle_plate: string; phone?: string };
-  driver_id?: string;
-}
-
 interface DriverLocation {
   driver_id: string;
   latitude: number;
@@ -37,12 +27,37 @@ interface DriverLocation {
   last_updated: string;
 }
 
+interface ChildFromService {
+  id: string;
+  full_name: string;
+  school_id?: string;
+  grade?: string;
+  pickup_address?: string;
+  status: 'active' | 'inactive';
+  school?: { name: string };
+  driver?: { id: string; full_name: string; phone?: string };
+}
+
+interface EnrichedChild {
+  id: string;
+  name: string;
+  full_name: string;
+  school_id?: string;
+  home_address: string;
+  grade?: string;
+  pickup_address?: string;
+  status: 'active' | 'inactive';
+  school?: { name: string };
+  driver?: { id: string; name: string; vehicle_plate: string; phone?: string };
+  driver_id?: string;
+}
+
 export default function TrackChildScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
-  const [children, setChildren] = useState<Child[]>([]);
-  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const [children, setChildren] = useState<EnrichedChild[]>([]);
+  const [selectedChild, setSelectedChild] = useState<EnrichedChild | null>(null);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const mapRef = useRef<MapView>(null);
@@ -96,7 +111,8 @@ export default function TrackChildScreen({ navigation }: Props) {
       const data = await childrenService.getChildren(userId);
 
       // Enrich with driver info from driver_assignments
-      const enrichedChildren = await Promise.all(
+      const enrichedChildren: EnrichedChild[] = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data || []).map(async (child: any) => {
           try {
             // Get driver assignment for this child
@@ -108,10 +124,12 @@ export default function TrackChildScreen({ navigation }: Props) {
               .limit(1);
 
             if (assignment && assignment.length > 0) {
-              const driverData = (assignment[0] as any).driver;
+              const driverData = assignment[0].driver as unknown as { id: string; full_name: string; phone?: string; vehicle_type?: string } | undefined;
               if (driverData) {
-                return {
+                const enriched: EnrichedChild = {
                   ...child,
+                  name: child.full_name,
+                  home_address: child.pickup_address || '',
                   driver_id: driverData.id,
                   driver: {
                     id: driverData.id,
@@ -120,12 +138,13 @@ export default function TrackChildScreen({ navigation }: Props) {
                     vehicle_plate: driverData.vehicle_type || 'N/A',
                   },
                 };
+                return enriched;
               }
             }
           } catch (e) {
             console.error('Error loading driver for child:', e);
           }
-          return child;
+          return { ...child, name: child.full_name, home_address: child.pickup_address || '' } as EnrichedChild;
         })
       );
 

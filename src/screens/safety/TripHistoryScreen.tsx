@@ -22,7 +22,7 @@ export default function TripHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
-  const [trips, setTrips] = useState<any[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
 
   const loadTrips = async () => {
     try {
@@ -35,7 +35,7 @@ export default function TripHistoryScreen() {
         .select('id')
         .eq('parent_id', user.id);
 
-      const childIds = children?.map((c: any) => c.id) || [];
+      const childIds = children?.map((c: { id: string }) => c.id) || [];
       if (childIds.length === 0) {
         setTrips([]);
         return;
@@ -96,7 +96,7 @@ export default function TripHistoryScreen() {
     return new Date(dateStr).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const filteredTrips = filter === 'all' ? trips : trips.filter((t: any) => t.status === filter);
+  const filteredTrips = filter === 'all' ? trips : trips.filter((t: Trip) => t.status === filter);
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
