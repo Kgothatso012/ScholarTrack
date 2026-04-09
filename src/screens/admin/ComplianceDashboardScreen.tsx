@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
@@ -28,7 +29,11 @@ interface DriverCompliance {
   };
 }
 
-export default function ComplianceDashboardScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function ComplianceDashboardScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -283,7 +288,7 @@ export default function ComplianceDashboardScreen({ navigation }: any) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',

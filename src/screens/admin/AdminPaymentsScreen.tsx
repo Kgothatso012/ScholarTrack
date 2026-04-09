@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, SearchBar, Pagination, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-const AdminPaymentsScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const AdminPaymentsScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +90,7 @@ const AdminPaymentsScreen = ({ navigation }: any) => {
   const totalAmount = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const pendingCount = payments.filter(p => p.status === 'pending').length;
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },

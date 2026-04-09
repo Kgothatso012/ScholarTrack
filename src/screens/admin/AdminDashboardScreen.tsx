@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -34,7 +35,11 @@ interface Payment {
   created_at: string;
 }
 
-export default function AdminDashboardScreen({ navigation }: any) {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function AdminDashboardScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -192,7 +197,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
     }
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 40 },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

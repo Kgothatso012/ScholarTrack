@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { driverService, Driver } from '../../lib/api';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, SearchBar, Pagination, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-const ManageDriversScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const ManageDriversScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +76,7 @@ const ManageDriversScreen = ({ navigation }: any) => {
   const activeDrivers = drivers.filter(d => d.is_available).length;
   const pendingDrivers = drivers.filter(d => !d.is_verified).length;
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
