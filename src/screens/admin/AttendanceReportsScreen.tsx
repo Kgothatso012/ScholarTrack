@@ -84,7 +84,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       if (error) throw error;
 
       // Get child names
-      const attendanceWithNames = (data || []).map((att: any) => {
+      const attendanceWithNames = (data || []).map((att: AttendanceRecord) => {
         const child = children.find(c => c.id === att.child_id);
         return {
           ...att,

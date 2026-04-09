@@ -171,7 +171,7 @@ export default function DriverTripScreen({ navigation }: Props) {
         setTrips(tripData || []);
 
         // Check for active trip
-        const active = tripData?.find((t: any) => t.status === 'in_progress');
+        const active = tripData?.find((t: Trip) => t.status === 'in_progress');
         setActiveTrip(active);
 
         // Load checked in students
@@ -181,7 +181,7 @@ export default function DriverTripScreen({ navigation }: Props) {
             .select('child_id')
             .eq('trip_id', active.id);
 
-          setCheckedInStudents(checkins?.map((c: any) => c.child_id) || []);
+          setCheckedInStudents((checkins || []).map((c: { child_id: string }) => c.child_id));
         }
       }
     } catch (error) {
@@ -426,7 +426,7 @@ export default function DriverTripScreen({ navigation }: Props) {
               </Text>
             </View>
           ) : (
-            trips.map((trip: any) => (
+            trips.map((trip: Trip) => (
               <View key={trip.id} style={[styles(colors).tripCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={styles(colors).tripHeader}>
                   <View style={[styles(colors).tripTimeBox, { backgroundColor: colors.selected }]}>
