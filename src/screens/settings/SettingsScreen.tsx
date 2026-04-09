@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Mo
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, ThemeMode } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 
@@ -117,7 +118,7 @@ export default function SettingsScreen({ navigation }: any) {
     Linking.openURL(url).catch(() => Alert.alert('Error', 'Cannot open link'));
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -142,7 +143,7 @@ export default function SettingsScreen({ navigation }: any) {
     divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
     dangerBtn: { backgroundColor: colors.danger, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginTop: spacing.lg },
     dangerBtnText: { ...typography.button, color: colors.textInverse },
-    modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
     modalContent: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, width: '85%' },
     modalTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.lg },
     input: { backgroundColor: colors.background, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text, borderWidth: 1, borderColor: colors.border },

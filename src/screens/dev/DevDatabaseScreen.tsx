@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
-const DevDatabaseScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const DevDatabaseScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
 
@@ -113,7 +118,7 @@ const DevDatabaseScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
