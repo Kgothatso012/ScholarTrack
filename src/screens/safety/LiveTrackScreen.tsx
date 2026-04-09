@@ -6,6 +6,7 @@ import MapView, { Marker, Polyline, Circle, PROVIDER_GOOGLE } from 'react-native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { driverTrackingService } from '../../lib/services/tripEnhanced';
+import { ratingService } from '../../lib/services';
 import { notificationService } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 
@@ -796,8 +797,36 @@ export default function LiveTrackScreen({ navigation }: any) {
               ))}
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Button title="Cancel" onPress={() => setShowRating(false)} variant="outline" style={{ flex: 1, marginRight: spacing.sm }} />
-              <Button title="Submit" onPress={() => { Alert.alert('Thanks!', 'Rating submitted successfully'); setShowRating(false); }} variant="primary" style={{ flex: 1 }} />
+              <Button title="Cancel" onPress={() => { setRating(0); setShowRating(false); }} variant="outline" style={{ flex: 1, marginRight: spacing.sm }} />
+              <Button
+                title="Submit"
+                onPress={async () => {
+                  if (rating === 0) {
+                    Alert.alert('Rating Required', 'Please select a star rating before submitting.');
+                    return;
+                  }
+                  try {
+                    const parentId = await AsyncStorage.getItem('userId');
+                    const driverId = driverLocation?.driver_id;
+                    if (!parentId || !driverId) {
+                      Alert.alert('Error', 'Unable to submit rating. Please try again.');
+                      return;
+                    }
+                    const now = new Date();
+                    const month = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+                    await ratingService.submitReview(parentId, driverId, rating, '', month);
+                    Alert.alert('Thanks!', 'Your rating has been submitted successfully.');
+                    setRating(0);
+                    setShowRating(false);
+                  } catch (error) {
+                    console.error('Error submitting rating:', error);
+                    Alert.alert('Error', 'Failed to submit rating. Please try again.');
+                  }
+                }}
+                variant="primary"
+                style={{ flex: 1 }}
+                disabled={loading}
+              />
             </View>
           </Card>
         </View>
