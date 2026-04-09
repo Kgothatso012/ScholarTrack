@@ -15,6 +15,7 @@ export * from './services/emergency';
 export * from './services/linking';
 export * from './services/route';
 export * from './services/tripEnhanced';
+export * from './services/rating';
 
 // Re-export types
 export * from './services/types';

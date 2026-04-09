@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { driverService, Driver } from '../../lib/api';
+import { driverService, ratingService, Driver } from '../../lib/api';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
@@ -15,12 +15,19 @@ const HireDriverScreen = ({ navigation }: any) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [drivers, setDrivers] = useState<(Driver & { rating_summary?: { average_rating: number; total_reviews: number } | null })[]>([]);
 
   const fetchDrivers = async () => {
     try {
       const data = await driverService.getDrivers(true);
-      setDrivers(data || []);
+      // Fetch rating summaries for each driver
+      const driversWithRatings = await Promise.all(
+        (data || []).map(async (driver: Driver) => {
+          const summary = await ratingService.getDriverRatingSummary(driver.id);
+          return { ...driver, rating_summary: summary };
+        })
+      );
+      setDrivers(driversWithRatings || []);
     } catch (error) {
       console.error('Error fetching drivers:', error);
       setDrivers([]);
@@ -132,7 +139,9 @@ const HireDriverScreen = ({ navigation }: any) => {
                     <Text style={styles(colors).driverVehicle}>{driver.vehicle_type || 'Vehicle'}</Text>
                     <View style={styles(colors).driverRating}>
                       <Ionicons name="star" size={14} color={colors.accent} />
-                      <Text style={styles(colors).ratingText}>4.8 (120 trips)</Text>
+                      <Text style={styles(colors).ratingText}>
+                        {driver.rating_summary?.average_rating?.toFixed(1) || '0.0'} ({driver.rating_summary?.total_reviews || 0} trips)
+                      </Text>
                     </View>
                   </View>
                   <Badge label={driver.is_verified ? 'Verified' : 'Pending'} variant={driver.is_verified ? 'success' : 'warning'} size="small" />

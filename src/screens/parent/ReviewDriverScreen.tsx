@@ -4,11 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { ratingService } from '../../lib/services';
 
 interface Review {
   id: string;
   rating: number;
-  comment: string;
+  comment?: string;
   month: string;
   created_at: string;
   driver_id?: string;
@@ -61,18 +62,13 @@ const ReviewDriverScreen = ({ navigation }: any) => {
         setDriver(childData.driver);
       }
 
-      // Get reviews for this driver-parent relationship
-      const { data: reviewsData } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('parent_id', userId)
-        .order('created_at', { ascending: false });
-
+      // Get reviews using ratingService
+      const reviewsData = await ratingService.getParentReviews(userId);
       setReviews(reviewsData || []);
 
       // Check if already reviewed this month
-      const thisMonthReview = (reviewsData || []).find(
-        (r: Review) => r.month === `${currentMonth} ${currentYear}`
+      const thisMonthReview = reviewsData.find(
+        (r) => r.month === `${currentMonth} ${currentYear}`
       );
       setCanReview(!thisMonthReview);
     } catch (error) {
@@ -103,21 +99,14 @@ const ReviewDriverScreen = ({ navigation }: any) => {
       const userId = await AsyncStorage.getItem('userId');
       if (!userId) throw new Error('Not logged in');
 
-      // Save review to database
-      const { data: reviewData, error: reviewError } = await supabase
-        .from('reviews')
-        .insert({
-          parent_id: userId,
-          driver_id: driver.id,
-          rating: rating,
-          comment: comment,
-          month: `${currentMonth} ${currentYear}`,
-          status: rating >= 4 ? 'approved' : 'flagged',
-        })
-        .select()
-        .single();
-
-      if (reviewError) throw reviewError;
+      // Submit review using ratingService
+      await ratingService.submitReview(
+        userId,
+        driver.id,
+        rating,
+        comment,
+        `${currentMonth} ${currentYear}`
+      );
 
       // If rating < 4, flag payment for admin review
       if (rating < 4) {
