@@ -9,6 +9,8 @@ import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { ratingService } from '../../lib/services';
 import { notificationService } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
+import { Trip } from '../../lib/services/types';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, SkeletonCard, SkeletonMap } from '../../ui-plugin/components';
@@ -24,7 +26,33 @@ interface DriverLocation {
   last_updated?: string;
 }
 
-export default function LiveTrackScreen({ navigation }: any) {
+interface RouteStop {
+  id?: string;
+  latitude: number;
+  longitude: number;
+  name?: string;
+  address?: string;
+  scheduled_time?: string;
+}
+
+interface NextStopInfo {
+  stop: { latitude: number; longitude: number };
+  distanceKm: number;
+  distanceMeters: number;
+  eta: string;
+  stopNumber: number;
+}
+
+interface TripWithRelations extends Trip {
+  routes?: { name: string };
+  schools?: { name: string };
+}
+
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+export default function LiveTrackScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [trackingEnabled, setTrackingEnabled] = useState(true);
@@ -70,8 +98,8 @@ export default function LiveTrackScreen({ navigation }: any) {
   const GEOFENCE_RADIUS = 200; // meters
 
   // Current trip and route stops from Supabase
-  const [currentTrip, setCurrentTrip] = useState<any>(null);
-  const [routeStops, setRouteStops] = useState<any[]>([]);
+  const [currentTrip, setCurrentTrip] = useState<TripWithRelations | null>(null);
+  const [routeStops, setRouteStops] = useState<RouteStop[]>([]);
   const [driverRatingSummary, setDriverRatingSummary] = useState<{average_rating: number; total_reviews: number} | null>(null);
 
   // Calculate distance between two coordinates (Haversine formula)
@@ -146,7 +174,7 @@ export default function LiveTrackScreen({ navigation }: any) {
   };
 
   // Check for near-stop alert + push notification
-  const checkNearStopAlert = async (nextStopInfo: any) => {
+  const checkNearStopAlert = async (nextStopInfo: NextStopInfo) => {
     if (!nextStopInfo) return;
     const { distanceMeters, stopNumber } = nextStopInfo;
 
@@ -211,7 +239,7 @@ export default function LiveTrackScreen({ navigation }: any) {
 
         // Check for near-stop alert
         const nextStopInfo = getNextStopInfo();
-        checkNearStopAlert(nextStopInfo);
+        if (nextStopInfo) checkNearStopAlert(nextStopInfo);
       }
 
       setDriverLocation(location);
@@ -301,8 +329,8 @@ export default function LiveTrackScreen({ navigation }: any) {
             setRouteStops(stops);
             // Build route coordinates from stops
             const coords = stops
-              .filter((s: any) => s.latitude && s.longitude)
-              .map((s: any) => ({ latitude: s.latitude, longitude: s.longitude }));
+              .filter((s: RouteStop) => s.latitude && s.longitude)
+              .map((s: RouteStop) => ({ latitude: s.latitude, longitude: s.longitude }));
             if (coords.length > 0) {
               setRouteCoordinates(coords);
             }
@@ -362,7 +390,7 @@ export default function LiveTrackScreen({ navigation }: any) {
               return newHistory.slice(-20);
             });
             const nextStopInfo = getNextStopInfo();
-            checkNearStopAlert(nextStopInfo);
+            if (nextStopInfo) checkNearStopAlert(nextStopInfo);
           }
         }
       )
@@ -402,7 +430,7 @@ export default function LiveTrackScreen({ navigation }: any) {
   };
 
   const stops = routeStops.length > 0
-    ? routeStops.map((stop: any, index: number) => ({
+    ? routeStops.map((stop: RouteStop, index: number) => ({
         id: stop.id || index,
         name: stop.name || stop.address || `Stop ${index + 1}`,
         time: stop.scheduled_time || '',
@@ -459,7 +487,7 @@ export default function LiveTrackScreen({ navigation }: any) {
     });
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -510,7 +538,7 @@ export default function LiveTrackScreen({ navigation }: any) {
     logLocation: { ...typography.caption, color: colors.textSecondary },
     logTime: { ...typography.caption, color: colors.textSecondary },
     // Rating modal
-    ratingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
+    ratingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
     ratingTitle: { ...typography.h3, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
     ratingSubtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
     ratingStars: { flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.lg },

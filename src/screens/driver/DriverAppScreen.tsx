@@ -10,6 +10,11 @@ import { SkeletonDashboard } from '../../components/SkeletonLoader';
 // UI Plugin components
 import { Card, Button, Spacer, Badge, Avatar } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { ThemeColors } from '../../context/ThemeContext';
+
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
 
 interface Trip {
   id: string;
@@ -41,7 +46,7 @@ interface DashboardStat {
   positive?: boolean;
 }
 
-export default function DriverAppScreen({ navigation }: any) {
+export default function DriverAppScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -115,16 +120,16 @@ export default function DriverAppScreen({ navigation }: any) {
         const weekStart = new Date(new Date().setDate(now.getDate() - 7)).toISOString();
 
         const todayEarnings = (paymentsData || [])
-          .filter((p: any) => p.status === 'completed' && p.created_at >= todayStart)
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+          .filter((p: PaymentRecord) => p.status === 'completed' && p.created_at >= todayStart)
+          .reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
 
         const weekEarnings = (paymentsData || [])
-          .filter((p: any) => p.status === 'completed' && p.created_at >= weekStart)
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+          .filter((p: PaymentRecord) => p.status === 'completed' && p.created_at >= weekStart)
+          .reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
 
         const pendingEarnings = (paymentsData || [])
-          .filter((p: any) => p.status === 'pending')
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+          .filter((p: PaymentRecord) => p.status === 'pending')
+          .reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
 
         setEarnings({
           today: todayEarnings,
@@ -133,8 +138,8 @@ export default function DriverAppScreen({ navigation }: any) {
         });
 
         const totalEarnings = (paymentsData || [])
-          .filter((p: any) => p.status === 'completed')
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+          .filter((p: PaymentRecord) => p.status === 'completed')
+          .reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
 
         // Set stats
         setStats([
@@ -211,7 +216,7 @@ export default function DriverAppScreen({ navigation }: any) {
     }
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

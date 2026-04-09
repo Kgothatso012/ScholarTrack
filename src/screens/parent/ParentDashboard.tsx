@@ -7,6 +7,7 @@ import { supabase, Child, Trip } from '../../lib/supabase';
 import { useTheme } from '../../context/ThemeContext';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
 import { cacheService } from '../../lib/cache';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Divider, Badge, Avatar } from '../../ui-plugin/components';
@@ -28,7 +29,11 @@ interface PaymentRecord {
   created_at: string;
 }
 
-const ParentDashboard = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const ParentDashboard = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -79,7 +84,7 @@ const ParentDashboard = ({ navigation }: any) => {
 
       // Fetch fresh data
       await fetchFreshData(user.id, true);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading data:', error);
       setStats([
         { label: 'Children', value: 0 },
@@ -215,7 +220,7 @@ const ParentDashboard = ({ navigation }: any) => {
     return date.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

@@ -7,8 +7,13 @@ import { supabase } from '../../lib/supabase';
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { ThemeColors } from '../../context/ThemeContext';
 
-const AdminReportsScreen = ({ navigation }: any) => {
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
+
+const AdminReportsScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -77,7 +82,7 @@ const AdminReportsScreen = ({ navigation }: any) => {
 
   const exportReport = async (type: string) => {
     try {
-      let data: any[] = [];
+      let data: Record<string, unknown>[] = [];
       let description = '';
 
       switch (type) {
@@ -109,8 +114,8 @@ const AdminReportsScreen = ({ navigation }: any) => {
         `${type} report prepared with ${description}.\n\nIn production, this would download as a CSV file.`,
         [{ text: 'OK' }]
       );
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to export report');
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to export report');
     }
   };
 
@@ -121,7 +126,7 @@ const AdminReportsScreen = ({ navigation }: any) => {
     { name: 'Trip Report', icon: 'bus', color: colors.secondary, action: () => exportReport('Trip') },
   ];
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },
