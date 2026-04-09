@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, A
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { emergencyContactService, panicAlertService } from '../../lib/services/emergency';
 import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
@@ -118,7 +119,7 @@ export default function EmergencyScreen() {
     { icon: 'shield-checkmark', text: 'All contacts verified through ScholarTrack' },
   ];
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTitle: { ...typography.h2, color: colors.textInverse },

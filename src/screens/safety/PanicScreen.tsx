@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { panicAlertService } from '../../lib/services/emergency';
 import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
@@ -140,7 +141,7 @@ export default function PanicScreen() {
     });
   };
 
-  const styles = (colors: any) =>
+  const styles = (colors: ThemeColors) =>
     StyleSheet.create({
       container: { flex: 1, backgroundColor: colors.background },
       header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },

@@ -9,10 +9,15 @@ import { useTheme } from '../../context/ThemeContext';
 import { childrenService } from '../../lib/services/children';
 import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { supabase } from '../../lib/supabase';
+import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, SkeletonTrackingCard, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
+interface Props {
+  navigation: { goBack: () => void; navigate: (s: string) => void };
+}
 
 interface Child {
   id: string;
@@ -32,7 +37,7 @@ interface DriverLocation {
   last_updated: string;
 }
 
-export default function TrackChildScreen({ navigation }: any) {
+export default function TrackChildScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
@@ -160,7 +165,7 @@ export default function TrackChildScreen({ navigation }: any) {
     }
   };
 
-  const styles = (colors: any) => StyleSheet.create({
+  const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
     headerTitle: { ...typography.h2, color: colors.textInverse },
