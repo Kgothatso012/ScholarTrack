@@ -101,8 +101,9 @@ export default function FleetTrackingScreen({ navigation }: Props) {
       if (error) throw error;
 
       // Get latest location for each driver from driver_tracking
+      interface DriverBasic { id: string; full_name: string; vehicle_type?: string; status: string };
       const driversWithLocations = await Promise.all(
-        (drivers || []).map(async (driver: any) => {
+        (drivers as DriverBasic[] || []).map(async (driver) => {
           try {
             const { data: tracking } = await supabase
               .from('driver_tracking')
