@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeColors } from '../../context/ThemeContext';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
 import { notificationService } from '../../services/NotificationService';
@@ -16,7 +17,7 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-export default function DriverTripScreen({ navigation }: any) {
+export default function DriverTripScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -472,11 +473,11 @@ export default function DriverTripScreen({ navigation }: any) {
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
           </View>
           <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: colors.success }]}>{trips.filter((t: any) => t.status === 'completed').length}</Text>
+            <Text style={[styles(colors).statNumber, { color: colors.success }]}>{trips.filter((t) => t.status === 'completed').length}</Text>
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Done</Text>
           </View>
           <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: colors.warning }]}>{trips.filter((t: any) => t.status === 'in_progress').length}</Text>
+            <Text style={[styles(colors).statNumber, { color: colors.warning }]}>{trips.filter((t) => t.status === 'in_progress').length}</Text>
             <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Active</Text>
           </View>
         </View>
@@ -487,7 +488,7 @@ export default function DriverTripScreen({ navigation }: any) {
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xxl },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
