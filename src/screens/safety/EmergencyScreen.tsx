@@ -10,9 +10,9 @@ import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 
-// UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { RSA_EMERGENCY } from '../../constants/app';
 
 export default function EmergencyScreen() {
   const { colors } = useTheme();
@@ -108,9 +108,9 @@ export default function EmergencyScreen() {
   };
 
   const quickDials = [
-    { name: 'Police', phone: '10111', emoji: '🚔', color: colors.primary },
-    { name: 'Ambulance', phone: '10177', emoji: '🚑', color: colors.error },
-    { name: 'Fire', phone: '10177', emoji: '🚒', color: colors.warning },
+    { name: 'Police', phone: RSA_EMERGENCY.POLICE, emoji: '🚔', color: colors.primary },
+    { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, emoji: '🚑', color: colors.error },
+    { name: 'Fire', phone: RSA_EMERGENCY.FIRE, emoji: '🚒', color: colors.warning },
   ];
 
   const tips = [

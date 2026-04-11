@@ -26,30 +26,36 @@ const USER_ID_KEY = 'userId';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     init();
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const profile = await authService.getCurrentUser();
-        if (profile) {
-          setUser({
-            id: profile.id,
-            email: profile.email,
-            role: profile.role,
-            full_name: profile.full_name,
-            phone: profile.phone
-          });
-        }
-      } else {
+      if (!session?.user) {
+        // Sign-out event: clear user state
         setUser(null);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      // Skip duplicate fetch if init() already handled this session
+      if (initialized) {
+        return;
+      }
+      const profile = await authService.getCurrentUser();
+      if (profile) {
+        setUser({
+          id: profile.id,
+          email: profile.email,
+          role: profile.role,
+          full_name: profile.full_name,
+          phone: profile.phone
+        });
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialized]);
 
   const init = async () => {
     try {
@@ -70,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Auth init error:', error);
     } finally {
+      setInitialized(true);
       setLoading(false);
     }
   };
@@ -104,11 +111,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const validateSAPhone = (phone: string): boolean => {
+    const cleaned = phone.replace(/\s/g, '');
+    // SA cell: 10 digits starting with 0, or +27 prefix
+    return /^(\+27|0)[6-8][0-9]{8}$/.test(cleaned);
+  };
+
   const signUp = async (email: string, password: string, role: UserRole, fullName: string, phone?: string) => {
     try {
       setLoading(true);
-      
-      // Sign up with Supabase Auth
+
+      // Validate SA phone format if provided
+      if (phone && !validateSAPhone(phone)) {
+        return { success: false, error: 'Invalid SA phone. Use 0821234567 or +27821234567' };
+      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

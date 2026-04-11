@@ -29,3 +29,10 @@ export const API = {
   SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL || '',
   SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '',
 } as const;
+
+// RSA Emergency Numbers
+export const RSA_EMERGENCY = {
+  POLICE: '10111',
+  AMBULANCE: '10177',
+  FIRE: '10177',
+} as const;

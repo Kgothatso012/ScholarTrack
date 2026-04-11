@@ -131,18 +131,18 @@ function AppContentWithTheme() {
   };
 
   const handleLogin = async (role: string) => {
-    console.log('handleLogin called with role:', role);
+
     setUserRole(role);
     setIsAuthenticated(true);
     await AsyncStorage.setItem('userRole', role);
-    console.log('State updated - role:', role, 'isAuthenticated:', true);
+
   };
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.log('Logout error:', error);
+
     }
     await AsyncStorage.removeItem('userRole');
     setUserRole(null);

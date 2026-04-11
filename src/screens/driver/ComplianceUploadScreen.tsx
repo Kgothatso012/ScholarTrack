@@ -440,7 +440,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   // ============ SHOW DOCUMENT OPTIONS ============
 
   const showDocumentOptions = (docId: string) => {
-    // DEBUG: console.log('showDocumentOptions called for:', docId);
+
     Alert.alert(
       'Add Document',
       'Choose how to add the document',
@@ -448,14 +448,14 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         {
           text: 'Take Photo',
           onPress: () => {
-            // DEBUG: console.log('Take Photo pressed for:', docId);
+
             takePhoto(docId);
           },
         },
         {
           text: 'Choose from Files',
           onPress: () => {
-            // DEBUG: console.log('Choose File pressed for:', docId);
+
             pickDocument(docId);
           },
         },
@@ -535,7 +535,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         return;
       }
 
-      // DEBUG: console.log('Submitting compliance data:', {
+      // DEBUG: submit removed
       //   ...data,
       //   documents: documents.map((d) => ({
       //     id: d.id,
@@ -956,7 +956,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                   <TouchableOpacity
                     style={styles(colors).uploadButton}
                     onPress={() => {
-                      // DEBUG: console.log('Upload button pressed for:', doc.id);
+
                       // Directly call takePhoto for test mode
                       takePhoto(doc.id);
                     }}
@@ -969,7 +969,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                   <TouchableOpacity
                     style={[styles(colors).uploadButton, { marginTop: 8, backgroundColor: '#E8F5E9' }]}
                     onPress={() => {
-                      // DEBUG: console.log('Pick button pressed for:', doc.id);
+
                       pickDocument(doc.id);
                     }}
                   >
