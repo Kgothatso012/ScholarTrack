@@ -160,3 +160,47 @@ See `CLAUDE.md` for production-grade overrides including:
 - Forced verification (tsc check after every edit)
 - Phased execution (max 5 files per phase)
 - Senior dev standard (fix architecture, not just symptoms)
+---
+
+## Memory & Obsidian Notes
+
+When working on ScholarTrack, CC must update these after each session or major milestone:
+
+### Daily Memory
+Append to `~/.openclaw/workspace/memory/YYYY-MM-DD.md` (or create if missing):
+- What was changed and why
+- Decisions made
+- Problems found and how they were solved
+- Any incomplete work or follow-ups
+
+### Obsidian Session Notes
+After a significant work session, create or update:
+- `~/obsidian/Projects/ScholarTrack/YYYY-MM-DD-session.md` — session summary
+  - Decisions made
+  - Files changed
+  - Issues resolved
+  - Follow-up work needed
+
+### What to Capture
+- Design decisions (why a color, spacing, component choice was made)
+- Technical architecture choices
+- Bugs found and fixed
+- UX patterns implemented
+- Incomplete work / known issues
+
+### Example Session Note Header
+\`\`\`markdown
+---
+tags: [scholartrack, session, YYYY-MM-DD]
+---
+
+# ScholarTrack Session — YYYY-MM-DD
+
+## What was done
+- ...
+
+## Decisions made
+- ...
+
+## Follow-up
+- ...

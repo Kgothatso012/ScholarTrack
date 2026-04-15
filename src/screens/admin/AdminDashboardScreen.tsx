@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Animated, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,7 +9,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge, Avatar, SearchBar, Pagination, DashboardSkeleton } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, shadows } from '../../ui-plugin/theme';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface DashboardStat {
   label: string;
@@ -199,34 +204,66 @@ export default function AdminDashboardScreen({ navigation }: Props) {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: 40 },
+    header: { backgroundColor: colors.secondary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: colors.textInverse, fontWeight: '700' },
+    headerSubtext: { ...typography.bodySmall, color: colors.primaryLight, marginTop: spacing.xs },
     headerActions: { flexDirection: 'row' },
-    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: borderRadius.md, marginLeft: spacing.xs },
+    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: borderRadius.xxl, marginLeft: spacing.xs },
     section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
-    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
-    tabButtonActive: { backgroundColor: colors.primary },
+    sectionTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.md, fontWeight: '600', letterSpacing: 0.2 },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.xxl, ...shadows.md },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.xxl },
+    tabButtonActive: { backgroundColor: colors.secondary },
     tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
     tabTextActive: { color: colors.textInverse },
+    // Asymmetric stats grid: first row 55/45, second row 65/35
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
-    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    statCard: {
+      backgroundColor: colors.card,
+      marginBottom: spacing.sm,
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.xxl,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.md,
+    },
+    statLabel: { ...typography.labelSmall, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
+    statValue: { ...typography.h2, color: colors.primary, marginTop: spacing.xs, fontWeight: '700' },
     quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    quickActionCard: {
+      width: '47%',
+      backgroundColor: colors.card,
+      padding: spacing.lg,
+      borderRadius: borderRadius.xxl,
+      alignItems: 'flex-start',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.md,
+    },
     quickActionIcon: { marginBottom: spacing.xs },
-    quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
-    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    quickActionText: { ...typography.label, color: colors.text, textAlign: 'left' },
+    listItem: {
+      borderRadius: borderRadius.xxl,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.sm,
+    },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.secondary, justifyContent: 'center', alignItems: 'center' },
     listInfo: { flex: 1, marginLeft: spacing.md },
-    listName: { ...typography.label, color: colors.text },
+    listName: { ...typography.label, color: colors.text, fontWeight: '600' },
     listMeta: { ...typography.bodySmall, color: colors.textSecondary },
-    amount: { ...typography.h4, color: colors.accent },
+    amount: { ...typography.h4, color: colors.primary, fontWeight: '700' },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
+    emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xxl },
+    emptyIcon: { marginBottom: spacing.md, opacity: 0.4 },
+    emptyTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.xs, textAlign: 'center' },
   });
 
   const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
@@ -295,10 +332,13 @@ export default function AdminDashboardScreen({ navigation }: Props) {
       {/* Overview Tab */}
       {activeTab === 'overview' && (
         <>
-          {/* Stats Grid */}
+          {/* Stats Grid - asymmetric widths */}
           <View style={styles(colors).statsGrid}>
             {stats.map((stat, index) => (
-              <View key={index} style={styles(colors).statCard}>
+              <View
+                key={index}
+                style={[styles(colors).statCard, { width: index < 2 ? '55%' : '43%' }]}
+              >
                 <Text style={styles(colors).statLabel}>{stat.label}</Text>
                 <Text style={styles(colors).statValue}>{stat.value}</Text>
               </View>
@@ -367,9 +407,15 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           </View>
           {filteredDrivers.length === 0 ? (
             <Card variant="outlined" padding="large">
-              <Text style={styles(colors).emptyText}>
-                {driverSearch ? 'No drivers match your search' : 'No drivers found'}
-              </Text>
+              <View style={styles(colors).emptyContainer}>
+                <Ionicons name="car-outline" size={48} color={colors.textMuted} style={styles(colors).emptyIcon} />
+                <Text style={styles(colors).emptyTitle}>
+                  {driverSearch ? 'No drivers match your search' : 'No drivers yet'}
+                </Text>
+                <Text style={styles(colors).emptyText}>
+                  {driverSearch ? 'Try a different search term' : 'Add your first driver to get started'}
+                </Text>
+              </View>
             </Card>
           ) : (
             <>
@@ -434,7 +480,11 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           </View>
           {filteredPayments.length === 0 ? (
             <Card variant="outlined" padding="large">
-              <Text style={styles(colors).emptyText}>No {paymentFilter === 'all' ? '' : paymentFilter} payments found</Text>
+              <View style={styles(colors).emptyContainer}>
+                <Ionicons name="card-outline" size={48} color={colors.textMuted} style={styles(colors).emptyIcon} />
+                <Text style={styles(colors).emptyTitle}>No {paymentFilter === 'all' ? '' : paymentFilter} payments</Text>
+                <Text style={styles(colors).emptyText}>Payments will appear here once recorded</Text>
+              </View>
             </Card>
           ) : (
             <>

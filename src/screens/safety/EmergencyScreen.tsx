@@ -10,7 +10,7 @@ import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonCard, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { RSA_EMERGENCY } from '../../constants/app';
 
@@ -108,9 +108,9 @@ export default function EmergencyScreen() {
   };
 
   const quickDials = [
-    { name: 'Police', phone: RSA_EMERGENCY.POLICE, emoji: '🚔', color: colors.primary },
-    { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, emoji: '🚑', color: colors.error },
-    { name: 'Fire', phone: RSA_EMERGENCY.FIRE, emoji: '🚒', color: colors.warning },
+    { name: 'Police', phone: RSA_EMERGENCY.POLICE, icon: 'shield', color: colors.primary },
+    { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, icon: 'medkit', color: colors.error },
+    { name: 'Fire', phone: RSA_EMERGENCY.FIRE, icon: 'flame', color: colors.warning },
   ];
 
   const tips = [
@@ -121,19 +121,25 @@ export default function EmergencyScreen() {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg, borderBottomWidth: 4, borderBottomColor: colors.accent },
+    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+    headerSub: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
     sosButton: {
       backgroundColor: colors.error,
       margin: spacing.lg,
       padding: spacing.xl,
-      borderRadius: borderRadius.xl,
+      borderRadius: borderRadius.card,
       alignItems: 'center',
-      elevation: 10,
+      borderTopWidth: 4,
+      borderTopColor: 'rgba(255,255,255,0.3)',
+      shadowColor: colors.error,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 24,
+      elevation: 8,
     },
     sosIcon: { marginBottom: spacing.sm },
-    sosText: { ...typography.h3, color: colors.textInverse },
+    sosText: { ...typography.displaySmall, color: colors.textInverse },
     sosSub: { ...typography.bodySmall, color: colors.textInverse, opacity: 0.8, marginTop: spacing.xs },
     sosLoading: { marginTop: spacing.md },
     section: { padding: spacing.lg },
@@ -145,10 +151,15 @@ export default function EmergencyScreen() {
       marginBottom: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      elevation: 2,
+      borderTopWidth: 2,
+      borderTopColor: colors.accent,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 1,
     },
     dialIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-    dialEmoji: { fontSize: 24 },
     dialInfo: { flex: 1, marginLeft: spacing.md },
     dialName: { ...typography.label, color: colors.text },
     dialNumber: { ...typography.h4, color: colors.success },
@@ -159,7 +170,13 @@ export default function EmergencyScreen() {
       marginBottom: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      elevation: 2,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.accent,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 1,
     },
     contactAvatar: {
       width: 45,
@@ -182,7 +199,13 @@ export default function EmergencyScreen() {
       marginBottom: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      elevation: 2,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.accent,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 1,
     },
     tipText: { flex: 1, marginLeft: spacing.md, ...typography.body, color: colors.text },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
@@ -223,8 +246,8 @@ export default function EmergencyScreen() {
               style={styles(colors).quickDialCard}
               onPress={() => callNumber(item.phone)}
             >
-              <View style={[styles(colors).dialIcon, { backgroundColor: item.color + '20' }]}>
-                <Text style={styles(colors).dialEmoji}>{item.emoji}</Text>
+              <View style={[styles(colors).dialIcon, { backgroundColor: colors.primaryMuted }]}>
+                <Ionicons name={item.icon as any} size={24} color={item.color} />
               </View>
               <View style={styles(colors).dialInfo}>
                 <Text style={styles(colors).dialName}>{item.name}</Text>
@@ -242,9 +265,11 @@ export default function EmergencyScreen() {
       <View style={styles(colors).section}>
         <Text style={styles(colors).sectionTitle}>Emergency Contacts ({contacts.length})</Text>
         {loading ? (
-          <Card variant="outlined" padding="large">
-            <ActivityIndicator color={colors.primary} />
-          </Card>
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
         ) : contacts.length === 0 ? (
           <Card variant="outlined" padding="large">
             <Text style={styles(colors).emptyText}>No emergency contacts added</Text>

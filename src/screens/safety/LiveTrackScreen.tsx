@@ -1,4 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Animated, LayoutAnimation, UIManager } from 'react-native';
+
+// Enable LayoutAnimation on Android
+if (UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -489,17 +495,44 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
+    header: {
+      backgroundColor: colors.primary,
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      borderBottomWidth: 4,
+      borderBottomColor: colors.accent,
+    },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    trackingToggle: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full },
+    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
+    trackingToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.full,
+    },
     toggleDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.textSecondary, marginRight: spacing.xs },
     toggleOn: { backgroundColor: colors.success },
     toggleText: { ...typography.labelSmall, color: colors.textInverse },
     mapContainer: { padding: spacing.lg, height: 300 },
-    map: { height: 220, borderRadius: borderRadius.lg },
-    mapPlaceholder: { height: 200, backgroundColor: colors.card, borderRadius: borderRadius.lg, justifyContent: 'center', alignItems: 'center' },
+    map: {
+      height: 220,
+      borderRadius: borderRadius.card,
+      borderTopWidth: 3,
+      borderTopColor: colors.accent,
+      overflow: 'hidden',
+    },
+    mapPlaceholder: {
+      height: 200,
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.card,
+      borderTopWidth: 3,
+      borderTopColor: colors.accent,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     mapText: { ...typography.h4, color: colors.primary, marginTop: spacing.sm },
     mapSubtext: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
     busMarker: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#fff' },
@@ -513,13 +546,40 @@ export default function LiveTrackScreen({ navigation }: Props) {
     legendItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.md },
     legendDot: { width: 10, height: 10, borderRadius: 5, marginRight: spacing.xs },
     legendText: { ...typography.caption, color: colors.textSecondary },
-    tripCard: { backgroundColor: colors.card, margin: spacing.lg, marginTop: 0, padding: spacing.lg, borderRadius: borderRadius.lg, elevation: 3 },
+    tripCard: {
+      backgroundColor: colors.card,
+      margin: spacing.lg,
+      marginTop: 0,
+      padding: spacing.lg,
+      borderRadius: borderRadius.card,
+      borderTopWidth: 3,
+      borderTopColor: colors.accent,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 16,
+      elevation: 3,
+    },
     tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-    tripTitle: { ...typography.h4, color: colors.text, flex: 1 },
+    tripTitle: { ...typography.h4, color: colors.text, flex: 1, fontWeight: '700' },
     tripRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
     tripLabel: { ...typography.body, color: colors.textSecondary, width: 70, marginLeft: spacing.sm },
     tripValue: { ...typography.label, color: colors.text },
-    quickActions: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: colors.card, marginHorizontal: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, elevation: 2 },
+    quickActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      backgroundColor: colors.card,
+      marginHorizontal: spacing.lg,
+      padding: spacing.md,
+      borderRadius: borderRadius.card,
+      borderTopWidth: 2,
+      borderTopColor: colors.accent,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
     actionBtn: { alignItems: 'center', padding: spacing.sm },
     actionIcon: { marginBottom: spacing.xs },
     actionText: { ...typography.labelSmall, color: colors.text },
@@ -527,24 +587,31 @@ export default function LiveTrackScreen({ navigation }: Props) {
     stopItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
     stopDot: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
     stopInfo: { flex: 1, marginLeft: spacing.md },
-    stopName: { ...typography.label, color: colors.text },
+    stopName: { ...typography.label, color: colors.text, fontWeight: '600' },
     stopTime: { ...typography.bodySmall, color: colors.textSecondary },
     stopStatus: { ...typography.labelSmall, color: colors.textSecondary },
     // Pickup/Dropoff logs
     logItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
     logDot: { width: 8, height: 8, borderRadius: 4 },
     logInfo: { flex: 1, marginLeft: spacing.md },
-    logType: { ...typography.label, color: colors.text },
+    logType: { ...typography.label, color: colors.text, fontWeight: '600' },
     logLocation: { ...typography.caption, color: colors.textSecondary },
     logTime: { ...typography.caption, color: colors.textSecondary },
     // Rating modal
-    ratingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
-    ratingTitle: { ...typography.h3, color: colors.text, textAlign: 'center', marginBottom: spacing.xs },
+    ratingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.overlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.lg,
+    },
+    ratingTitle: { ...typography.h3, color: colors.text, textAlign: 'center', marginBottom: spacing.xs, fontWeight: '700' },
     ratingSubtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
     ratingStars: { flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.lg },
   });
 
-  // Fullscreen map renders without Card wrapper
+
+  // Fullscreen map renders without Card wrapperapper
   if (isFullscreenMap) {
     return (
       <View style={[styles(colors).fullscreenContainer, { backgroundColor: colors.background }]}>

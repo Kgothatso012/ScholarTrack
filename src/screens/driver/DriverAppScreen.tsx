@@ -1,5 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Animated, LayoutAnimation, UIManager } from 'react-native';
+
+// Enable LayoutAnimation on Android
+if (UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -51,7 +57,14 @@ export default function DriverAppScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const fadeAnims = useRef<Animated.Value[]>([]);
+  const listFadeAnim = useRef(new Animated.Value(0)).current;
+  const [activeTab, setTab] = useState('overview');
+
+  const switchTab = (tab: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setTab(tab);
+  };
 
   const [stats, setStats] = useState<DashboardStat[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -176,6 +189,8 @@ export default function DriverAppScreen({ navigation }: Props) {
     await loadDriverData();
   }, []);
 
+
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
@@ -218,40 +233,40 @@ export default function DriverAppScreen({ navigation }: Props) {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg, borderBottomWidth: 4, borderBottomColor: colors.accent },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    headerActions: { flexDirection: 'row', alignItems: 'center' },
-    headerBtn: { padding: spacing.xs, marginLeft: spacing.sm },
-    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
+    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
+    headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: borderRadius.md },
+    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
+    sectionTitle: { ...typography.h3, color: colors.text, fontWeight: '700', marginBottom: spacing.lg, paddingLeft: spacing.xs },
+    tabs: { flexDirection: 'row', backgroundColor: colors.backgroundAlt, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.card, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: colors.border },
     tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
     tabButtonActive: { backgroundColor: colors.primary },
     tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
     tabTextActive: { color: colors.textInverse },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
+    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.lg, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
     statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    statValue: { ...typography.displayMedium, color: colors.accent, marginTop: spacing.xs },
     quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.card, alignItems: 'center', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 },
     quickActionIcon: { marginBottom: spacing.xs },
     quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
-    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
+    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 3, borderLeftColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 },
     listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
     listInfo: { flex: 1, marginLeft: spacing.md },
     listName: { ...typography.label, color: colors.text },
     listMeta: { ...typography.bodySmall, color: colors.textSecondary },
-    amount: { ...typography.h4, color: colors.accent },
+    amount: { ...typography.h4, color: colors.accent, fontWeight: '700' },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
   });
 
   const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
     <TouchableOpacity
       style={[styles(colors).tabButton, activeTab === tab && styles(colors).tabButtonActive]}
-      onPress={() => setActiveTab(tab)}
+      onPress={() => switchTab(tab)}
     >
       <Ionicons name={icon as any} size={18} color={activeTab === tab ? colors.textInverse : colors.textSecondary} />
       <Text style={[styles(colors).tabText, activeTab === tab && styles(colors).tabTextActive]}>{label}</Text>
@@ -264,18 +279,44 @@ export default function DriverAppScreen({ navigation }: Props) {
     { name: 'Manifest', icon: 'list', color: colors.warning, route: 'TripManifest' },
     { name: 'Compliance', icon: 'document-text', color: colors.success, route: 'Compliance' },
     { name: 'Vehicle', icon: 'car-sport', color: colors.accent, route: 'VehicleChecklist' },
-    { name: 'Chat', icon: 'chatbubbles', color: '#9C27B0', route: 'Chat' },
-    { name: 'History', icon: 'time', color: '#607D8B', route: 'History' },
+    { name: 'Chat', icon: 'chatbubbles', color: colors.primary, route: 'Chat' },
+    { name: 'History', icon: 'time', color: colors.secondaryLight, route: 'History' },
     { name: 'Settings', icon: 'settings', color: colors.textSecondary, route: 'Settings' },
   ];
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading dashboard...</Text>
-        </Card>
-      </View>
+      <ScrollView style={styles(colors).container}>
+        <View style={styles(colors).header}>
+          <View style={styles(colors).headerTop}>
+            <Text style={styles(colors).headerTitle}>Driver Dashboard</Text>
+          </View>
+          <Text style={styles(colors).headerSubtext}>Loading your dashboard...</Text>
+        </View>
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Overview</Text>
+          <View style={styles(colors).statsGrid}>
+            {[1,2,3,4].map((i) => (
+              <View key={i} style={styles(colors).statCard}>
+                <View style={{ height: 12, width: '50%', backgroundColor: colors.border, borderRadius: 4 }} />
+                <View style={{ height: 28, width: '70%', backgroundColor: colors.border, borderRadius: 6, marginTop: 8 }} />
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={styles(colors).section}>
+          <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
+          <View style={styles(colors).quickActionsGrid}>
+            {[1,2,3,4,5,6,7,8].map((i) => (
+              <View key={i} style={[styles(colors).quickActionCard, { opacity: 0.5 }]}>
+                <View style={{ height: 32, width: 32, backgroundColor: colors.border, borderRadius: 16 }} />
+                <View style={{ height: 12, width: 60, backgroundColor: colors.border, borderRadius: 4, marginTop: 8 }} />
+              </View>
+            ))}
+          </View>
+        </View>
+        <Spacer size="xl" />
+      </ScrollView>
     );
   }
 

@@ -91,11 +91,13 @@ export const Button: React.FC<ButtonProps> = ({
       case 'secondary':
         return {
           backgroundColor: colors.secondary,
+          borderWidth: 1,
+          borderColor: 'rgba(24, 24, 27, 0.08)',
         };
       case 'outline':
         return {
           backgroundColor: 'transparent',
-          borderWidth: 2,
+          borderWidth: 1.5,
           borderColor: colors.primary,
         };
       case 'ghost':
@@ -105,10 +107,16 @@ export const Button: React.FC<ButtonProps> = ({
       case 'danger':
         return {
           backgroundColor: colors.error,
+          borderWidth: 1,
+          borderColor: 'rgba(220, 38, 38, 0.2)',
         };
       default:
+        // Primary: solid with subtle top inner highlight
         return {
           backgroundColor: colors.primary,
+          borderWidth: 1,
+          borderTopColor: 'rgba(255, 255, 255, 0.15)',
+          borderTopWidth: 1,
         };
     }
   };
@@ -140,7 +148,7 @@ export const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
+      activeOpacity={0.65}
       style={[
         styles(colors).base,
         getSizeStyles(),

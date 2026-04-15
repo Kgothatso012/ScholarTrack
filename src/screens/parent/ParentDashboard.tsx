@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Animated, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,7 +11,12 @@ import { ThemeColors } from '../../context/ThemeContext';
 
 // UI Plugin components
 import { Card, Button, Spacer, Divider, Badge, Avatar } from '../../ui-plugin/components';
-import { colors as uiColors, spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { colors as uiColors, spacing, typography, borderRadius, shadows } from '../../ui-plugin/theme';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes cache
 
@@ -47,8 +52,67 @@ const ParentDashboard = ({ navigation }: Props) => {
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
 
+  // Staggered fade-in animation refs - initialized lazily
+  const fadeAnims = useRef<Animated.Value[]>([]);
+  const quickActionAnims = useRef<Animated.Value[]>([]);
+  const listItemAnims = useRef<Animated.Value[]>([]);
+
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Initialize and trigger staggered animations when data loads
+  useEffect(() => {
+    if (stats.length > 0 && fadeAnims.current.length !== stats.length) {
+      fadeAnims.current = stats.map(() => new Animated.Value(0));
+    }
+    if (quickActionAnims.current.length !== quickActions.length) {
+      quickActionAnims.current = quickActions.map(() => new Animated.Value(0));
+    }
+    // Run stat animations
+    fadeAnims.current.forEach((anim, i) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 400,
+        delay: i * 80,
+        useNativeDriver: true,
+      }).start();
+    });
+    // Run quick action animations
+    quickActionAnims.current.forEach((anim, i) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 400,
+        delay: 200 + i * 60,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [stats.length, activeTab]);
+
+  // Staggered entrance animations
+  const runStaggeredAnimation = useCallback((anims: Animated.Value[], duration = 400) => {
+    anims.forEach((anim, i) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration,
+        delay: i * 80,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, []);
+
+  // Trigger list item animations when trips/children change
+  const triggerListAnimations = useCallback((count: number) => {
+    const newAnims = Array.from({ length: count }, () => new Animated.Value(0));
+    listItemAnims.current = newAnims;
+    newAnims.forEach((anim, i) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 350,
+        delay: i * 60,
+        useNativeDriver: true,
+      }).start();
+    });
   }, []);
 
   const loadData = async (forceRefresh = false) => {
@@ -222,39 +286,83 @@ const ParentDashboard = ({ navigation }: Props) => {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
+    header: { backgroundColor: colors.secondary, padding: spacing.lg, paddingTop: insets.top + spacing.lg },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: colors.textInverse, fontWeight: '700' },
+    headerSubtext: { ...typography.bodySmall, color: colors.primaryLight, marginTop: spacing.xs },
     headerActions: { flexDirection: 'row', alignItems: 'center' },
     headerBtn: { padding: spacing.xs, marginLeft: spacing.sm },
     section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
-    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.md },
-    tabButtonActive: { backgroundColor: colors.primary },
+    sectionTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.md, fontWeight: '600', letterSpacing: 0.2 },
+    tabs: { flexDirection: 'row', backgroundColor: colors.card, padding: spacing.xs, marginHorizontal: spacing.lg, marginTop: -spacing.md, borderRadius: borderRadius.xxl, ...shadows.md },
+    tabButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.sm, borderRadius: borderRadius.xxl },
+    tabButtonActive: { backgroundColor: colors.secondary },
     tabText: { ...typography.labelSmall, color: colors.textSecondary, marginLeft: spacing.xs },
     tabTextActive: { color: colors.textInverse },
+    // Stats: 2-col asymmetric (left-heavy: 55/45 split)
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, elevation: 2 },
-    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.h2, color: colors.accent, marginVertical: spacing.xs },
+    statCard: {
+      backgroundColor: colors.card,
+      marginBottom: spacing.sm,
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.md,
+      borderRadius: borderRadius.xxl,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.md,
+    },
+    statLabel: { ...typography.labelSmall, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
+    statValue: { ...typography.h2, color: colors.primary, marginTop: spacing.xs, fontWeight: '700' },
     quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
+    quickActionCard: {
+      width: '47%',
+      backgroundColor: colors.card,
+      padding: spacing.lg,
+      borderRadius: borderRadius.xxl,
+      alignItems: 'flex-start',
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.md,
+    },
     quickActionIcon: { marginBottom: spacing.xs },
-    quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
-    listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+    quickActionText: { ...typography.label, color: colors.text, textAlign: 'left' },
+    listItem: {
+      borderRadius: borderRadius.xxl,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.sm,
+    },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.secondary, justifyContent: 'center', alignItems: 'center' },
     listInfo: { flex: 1, marginLeft: spacing.md },
-    listName: { ...typography.label, color: colors.text },
+    listName: { ...typography.label, color: colors.text, fontWeight: '600' },
     listMeta: { ...typography.bodySmall, color: colors.textSecondary },
-    amount: { ...typography.h4, color: colors.accent },
-    childCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, elevation: 2 },
+    amount: { ...typography.h4, color: colors.primary, fontWeight: '700' },
+    childCard: {
+      backgroundColor: colors.card,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderRadius: borderRadius.xxl,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(24, 24, 27, 0.04)',
+      ...shadows.sm,
+    },
     childInfo: { flex: 1 },
     childName: { ...typography.h4, color: colors.text },
     childSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
     childStatus: { marginLeft: spacing.sm },
     emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.lg },
+    // Beautified empty state
+    emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xxl },
+    emptyIcon: { marginBottom: spacing.md, opacity: 0.4 },
+    emptyTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.xs, textAlign: 'center' },
   });
 
   const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
@@ -332,15 +440,32 @@ const ParentDashboard = ({ navigation }: Props) => {
       {/* Overview Tab */}
       {activeTab === 'overview' && (
         <>
-          {/* Stats Grid */}
+          {/* Stats Grid - asymmetric: first two larger */}
           <View style={styles(colors).section}>
             <View style={styles(colors).statsGrid}>
-              {stats.map((stat, index) => (
-                <View key={index} style={styles(colors).statCard}>
+              {stats.map((stat, index) => {
+                const anim = fadeAnims.current[index];
+                return (
+                <Animated.View
+                  key={index}
+                  style={[
+                    styles(colors).statCard,
+                    { width: index < 2 ? '55%' : '43%' },
+                    {
+                      opacity: anim ? anim : new Animated.Value(1),
+                      transform: [{
+                        translateY: anim?.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [12, 0],
+                        }) || 0,
+                      }],
+                    },
+                  ]}
+                >
                   <Text style={styles(colors).statLabel}>{stat.label}</Text>
                   <Text style={styles(colors).statValue}>{stat.value}</Text>
-                </View>
-              ))}
+                </Animated.View>
+              )})}
             </View>
           </View>
 
@@ -348,18 +473,34 @@ const ParentDashboard = ({ navigation }: Props) => {
           <View style={styles(colors).section}>
             <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
             <View style={styles(colors).quickActionsGrid}>
-              {quickActions.map((action, index) => (
-                <TouchableOpacity
+              {quickActions.map((action, index) => {
+                const anim = quickActionAnims.current[index];
+                return (
+                <Animated.View
                   key={index}
-                  style={styles(colors).quickActionCard}
-                  onPress={() => navigation?.navigate?.(action.route)}
+                  style={{
+                    width: '47%',
+                    opacity: anim ? anim : new Animated.Value(1),
+                    transform: [{
+                      scale: anim?.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }) || 1,
+                    }],
+                  }}
                 >
-                  <View style={styles(colors).quickActionIcon}>
-                    <Ionicons name={action.icon as any} size={24} color={action.color} />
-                  </View>
-                  <Text style={styles(colors).quickActionText}>{action.name}</Text>
-                </TouchableOpacity>
-              ))}
+                  <TouchableOpacity
+                    style={styles(colors).quickActionCard}
+                    onPress={() => navigation?.navigate?.(action.route)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles(colors).quickActionIcon}>
+                      <Ionicons name={action.icon as any} size={24} color={action.color} />
+                    </View>
+                    <Text style={styles(colors).quickActionText}>{action.name}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              )})}
             </View>
           </View>
 
@@ -368,7 +509,11 @@ const ParentDashboard = ({ navigation }: Props) => {
             <Text style={styles(colors).sectionTitle}>Recent Trips</Text>
             {trips.length === 0 ? (
               <Card variant="outlined" padding="large">
-                <Text style={styles(colors).emptyText}>No upcoming trips</Text>
+                <View style={styles(colors).emptyContainer}>
+                  <Ionicons name="bus-outline" size={48} color={colors.textMuted} style={styles(colors).emptyIcon} />
+                  <Text style={styles(colors).emptyTitle}>No upcoming trips</Text>
+                  <Text style={styles(colors).emptyText}>Your children's trips will appear here</Text>
+                </View>
               </Card>
             ) : (
               trips.slice(0, 3).map((trip) => (
@@ -404,8 +549,10 @@ const ParentDashboard = ({ navigation }: Props) => {
           <Text style={styles(colors).sectionTitle}>My Children ({children.length})</Text>
           {children.length === 0 ? (
             <Card variant="outlined" padding="large">
-              <View style={{ alignItems: 'center' }}>
-                <Text style={styles(colors).emptyText}>No children added yet</Text>
+              <View style={styles(colors).emptyContainer}>
+                <Ionicons name="people-outline" size={48} color={colors.textMuted} style={styles(colors).emptyIcon} />
+                <Text style={styles(colors).emptyTitle}>No children added yet</Text>
+                <Text style={styles(colors).emptyText}>Add your first child to get started</Text>
                 <Spacer size="md" />
                 <Button title="Add Child" onPress={() => navigation.navigate('Children')} variant="primary" size="medium" />
               </View>

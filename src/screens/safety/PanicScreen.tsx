@@ -11,7 +11,7 @@ import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 
 export const PanicButton = ({
@@ -23,6 +23,7 @@ export const PanicButton = ({
   size?: number;
   onActivate?: () => void;
 }) => {
+  const { colors } = useTheme();
   const [pressed, setPressed] = useState(false);
 
   return (
@@ -32,7 +33,7 @@ export const PanicButton = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: '#E91E63',
+          backgroundColor: colors.error,
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -43,7 +44,7 @@ export const PanicButton = ({
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <Ionicons name="warning" size={size * 0.5} color="#fff" />
+      <Ionicons name="warning" size={size * 0.5} color={colors.textInverse} />
     </TouchableOpacity>
   );
 };
@@ -144,18 +145,24 @@ export default function PanicScreen() {
   const styles = (colors: ThemeColors) =>
     StyleSheet.create({
       container: { flex: 1, backgroundColor: colors.background },
-      header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
-      headerTitle: { ...typography.h2, color: colors.textInverse },
-      headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+      header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md, borderBottomWidth: 4, borderBottomColor: colors.accent },
+      headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+      headerSub: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
       sosCard: {
         backgroundColor: colors.error,
         margin: spacing.lg,
         padding: spacing.xl,
-        borderRadius: borderRadius.xl,
+        borderRadius: borderRadius.card,
         alignItems: 'center',
-        elevation: 5,
+        borderTopWidth: 4,
+        borderTopColor: 'rgba(255,255,255,0.3)',
+        shadowColor: colors.error,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 24,
+        elevation: 6,
       },
-      sosText: { ...typography.h1, color: colors.textInverse, marginBottom: spacing.sm },
+      sosText: { ...typography.displayMedium, color: colors.textInverse, marginBottom: spacing.sm },
       sosSub: { ...typography.body, color: colors.textInverse, opacity: 0.8 },
       sosLoading: { marginTop: spacing.md },
       section: { padding: spacing.lg },
@@ -167,13 +174,19 @@ export default function PanicScreen() {
         marginBottom: spacing.sm,
         flexDirection: 'row',
         alignItems: 'center',
-        elevation: 2,
+        borderLeftWidth: 3,
+        borderLeftColor: colors.accent,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 1,
       },
       contactIcon: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryMuted,
         justifyContent: 'center',
         alignItems: 'center',
       },
@@ -229,9 +242,11 @@ export default function PanicScreen() {
       <View style={styles(colors).section}>
         <Text style={styles(colors).sectionTitle}>Emergency Contacts ({contacts.length})</Text>
         {loading ? (
-          <Card variant="outlined" padding="large">
-            <ActivityIndicator color={colors.primary} />
-          </Card>
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
         ) : contacts.length === 0 ? (
           <Card variant="outlined" padding="large">
             <Text style={styles(colors).emptyText}>No emergency contacts added</Text>

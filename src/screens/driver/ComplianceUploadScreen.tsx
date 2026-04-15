@@ -289,10 +289,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   // Get expiry status color
   const getExpiryStatusColor = (date?: Date) => {
     const days = getDaysUntilExpiry(date);
-    if (days === null) return '#999';
-    if (days < 0) return '#E03C31'; // Red - expired
-    if (days <= 30) return '#FFB81C'; // Yellow - expiring soon
-    return '#007749'; // Green - valid
+    if (days === null) return colors.textMuted;
+    if (days < 0) return colors.error; // Red - expired
+    if (days <= 30) return colors.warning; // Yellow - expiring soon
+    return colors.success; // Green - valid
   };
 
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
@@ -652,8 +652,8 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.surface || '#1a1a1a' }]}>
-        <ActivityIndicator size="large" color="#FFB81C" />
+      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
         <Text style={styles(colors).loadingText}>Loading compliance status...</Text>
       </View>
     );
@@ -662,19 +662,19 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   // Show existing compliance status if already submitted
   if (existingCompliance && existingCompliance.status === 'pending_review') {
     return (
-      <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
-        <View style={[styles(colors).header, { backgroundColor: '#002395' }]}>
+      <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
+        <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
           <Text style={styles(colors).headerTitle}>Driver Compliance</Text>
           <Text style={styles(colors).headerSubtitle}>Submitted for review</Text>
         </View>
         <View style={styles(colors).section}>
-          <View style={[styles(colors).successCard, { backgroundColor: '#1a1a1a' }]}>
-            <Ionicons name="checkmark-circle" size={80} color="#007749" />
-            <Text style={[styles(colors).successTitle, { color: '#ffffff' }]}>Submitted Successfully!</Text>
-            <Text style={[styles(colors).successText, { color: '#888888' }]}>
+          <View style={[styles(colors).successCard, { backgroundColor: colors.card }]}>
+            <Ionicons name="checkmark-circle" size={80} color={colors.success} />
+            <Text style={[styles(colors).successTitle, { color: colors.text }]}>Submitted Successfully!</Text>
+            <Text style={[styles(colors).successText, { color: colors.textSecondary }]}>
               Your compliance documents have been submitted for review. This typically takes 1-2 business days.
             </Text>
-            <Text style={[styles(colors).submittedDate, { color: '#888888' }]}>
+            <Text style={[styles(colors).submittedDate, { color: colors.textSecondary }]}>
               Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}
             </Text>
           </View>
@@ -695,7 +695,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
+    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles(colors).header}>
         <View>
@@ -705,7 +705,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           </Text>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles(colors).logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+          <Ionicons name="log-out-outline" size={24} color={colors.error} />
         </TouchableOpacity>
       </View>
 
@@ -754,7 +754,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[styles(colors).input, errors.fullName && styles(colors).inputError]}
                   placeholder="e.g., John Sipho Moyo"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
@@ -783,7 +783,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[styles(colors).input, errors.idNumber && styles(colors).inputError]}
                   placeholder="e.g., 8501011234567"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
@@ -803,7 +803,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           {/* Phone Number */}
           <View style={styles(colors).inputGroup}>
             <View style={styles(colors).labelRow}>
-              <Ionicons name="call" size={16} color="#666" />
+              <Ionicons name="call" size={16} color={colors.textSecondary} />
               <Text style={styles(colors).label}> Cell Number</Text>
             </View>
             <Controller
@@ -819,7 +819,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[styles(colors).input, errors.phoneNumber && styles(colors).inputError]}
                   placeholder="e.g., 0821234567"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
@@ -844,7 +844,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[styles(colors).input, errors.email && styles(colors).inputError]}
                   placeholder="e.g., john@example.com"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
@@ -881,7 +881,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[styles(colors).input, errors.pdpNumber && styles(colors).inputError]}
                   placeholder="e.g., PDP12345678"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={(text) => onChange(text.toUpperCase())}
                   value={value}
@@ -920,11 +920,11 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 </View>
                 {doc.document ? (
                   <View style={styles(colors).uploadedBadge}>
-                    <Ionicons name="checkmark-circle" size={24} color="#34C759" />
+                    <Ionicons name="checkmark-circle" size={24} color={colors.success} />
                   </View>
                 ) : (
                   <View style={styles(colors).pendingBadge}>
-                    <Ionicons name="time-outline" size={20} color="#FF9500" />
+                    <Ionicons name="time-outline" size={20} color={colors.warning} />
                   </View>
                 )}
               </View>
@@ -948,7 +948,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                     style={styles(colors).removeButton}
                     onPress={() => removeDocument(doc.id)}
                   >
-                    <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                    <Ionicons name="trash-outline" size={20} color={colors.error} />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -961,7 +961,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                       takePhoto(doc.id);
                     }}
                   >
-                    <Ionicons name="cloud-upload-outline" size={24} color="#007749" />
+                    <Ionicons name="cloud-upload-outline" size={24} color={colors.success} />
                     <Text style={styles(colors).uploadButtonText}>
                       Take Photo or Choose File
                     </Text>
@@ -973,7 +973,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                       pickDocument(doc.id);
                     }}
                   >
-                    <Ionicons name="folder-outline" size={24} color="#007749" />
+                    <Ionicons name="folder-outline" size={24} color={colors.success} />
                     <Text style={styles(colors).uploadButtonText}>
                       Test: Add File
                     </Text>
@@ -1090,7 +1090,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
         {/* Legal Disclaimer */}
         <View style={styles(colors).disclaimer}>
-          <Ionicons name="shield-checkmark-outline" size={20} color="#666" />
+          <Ionicons name="shield-checkmark-outline" size={20} color={colors.textSecondary} />
           <Text style={styles(colors).disclaimerText}>
             By submitting, I confirm all documents are authentic and valid. I
             understand that providing false information is a criminal offence
@@ -1126,408 +1126,177 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 // ============ STYLES ============
 
 const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface || '#1a1a1a',
-  },
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
     paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: '#007749',
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.primary,
+    borderBottomWidth: 4,
+    borderBottomColor: colors.accent,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
-  },
-  logoutButton: {
-    padding: 8,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 8,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  progressContainer: {
-    padding: 20,
-    backgroundColor: '#1a1a1a',
-    marginBottom: 10,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E5E5EA',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#34C759',
-    borderRadius: 4,
-  },
-  progressText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#888888',
-    textAlign: 'center',
-  },
+  headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+  headerSubtitle: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
+  logoutButton: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: borderRadius.md },
+  scrollView: { flex: 1 },
+  progressContainer: { padding: spacing.lg, backgroundColor: colors.backgroundAlt, marginBottom: spacing.md },
+  progressBar: { height: 8, backgroundColor: colors.border, borderRadius: borderRadius.sm, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.success, borderRadius: borderRadius.sm },
+  progressText: { marginTop: spacing.sm, ...typography.bodySmall, color: colors.textSecondary, textAlign: 'center' },
   section: {
-    backgroundColor: '#1a1a1a',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: colors.card,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.xl,
+    borderRadius: borderRadius.card,
+    borderTopWidth: 3,
+    borderTopColor: colors.accent,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 16,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#888888',
-    marginTop: -8,
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#ffffff',
-    marginBottom: 8,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
+  sectionTitle: { ...typography.h3, color: colors.text, fontWeight: '700', marginBottom: spacing.lg },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg },
+  sectionSubtitle: { ...typography.bodySmall, color: colors.textSecondary, marginTop: -spacing.xs, marginBottom: spacing.lg },
+  inputGroup: { marginBottom: spacing.lg },
+  label: { ...typography.label, color: colors.text, marginBottom: spacing.sm },
+  labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   input: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    color: '#ffffff',
+    backgroundColor: colors.inputBg,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    ...typography.body,
+    color: colors.text,
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: colors.border,
   },
-  inputError: {
-    borderColor: '#FF3B30',
-    backgroundColor: '#FFF5F5',
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  helperText: {
-    color: '#999',
-    fontSize: 12,
-    marginTop: 4,
-  },
+  inputError: { borderColor: colors.error, backgroundColor: colors.danger },
+  errorText: { color: colors.error, ...typography.caption, marginTop: spacing.xs },
+  helperText: { color: colors.textSecondary, ...typography.caption, marginTop: spacing.xs },
   documentCard: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#333333',
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderTopWidth: 2,
+    borderTopColor: colors.accent,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 1,
   },
-  documentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  documentInfo: {
-    flex: 1,
-  },
-  documentLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  required: {
-    color: '#FF3B30',
-  },
-  documentDescription: {
-    fontSize: 13,
-    color: '#888888',
-    marginTop: 2,
-  },
-  uploadedBadge: {
-    marginLeft: 10,
-  },
-  pendingBadge: {
-    marginLeft: 10,
-  },
+  documentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  documentInfo: { flex: 1 },
+  documentLabel: { ...typography.label, color: colors.text, fontWeight: '600' },
+  required: { color: colors.error },
+  documentDescription: { ...typography.bodySmall, color: colors.textSecondary, marginTop: 2 },
+  uploadedBadge: { marginLeft: spacing.sm },
+  pendingBadge: { marginLeft: spacing.sm },
   uploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E8F5E9',
-    borderRadius: 10,
-    padding: 16,
-    marginTop: 12,
+    backgroundColor: colors.success,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginTop: spacing.md,
     borderWidth: 1,
-    borderColor: '#007749',
+    borderColor: colors.success,
     borderStyle: 'dashed',
   },
-  uploadButtonText: {
-    marginLeft: 10,
-    color: '#007749',
-    fontWeight: '500',
-  },
+  uploadButtonText: { marginLeft: spacing.sm, color: colors.success, ...typography.label },
   uploadedPreview: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
-    backgroundColor: '#1a1a1a',
-    borderRadius: 8,
-    padding: 8,
+    marginTop: spacing.md,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
   },
-  previewImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
-    backgroundColor: '#E5E5EA',
-  },
-  previewInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  previewName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#ffffff',
-  },
-  previewDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  removeButton: {
-    padding: 8,
-  },
-  uploadProgress: {
-    height: 4,
-    backgroundColor: '#E5E5EA',
-    borderRadius: 2,
-    marginTop: 12,
-    overflow: 'hidden',
-  },
-  uploadProgressBar: {
-    height: '100%',
-    backgroundColor: '#007749',
-  },
-  expiryContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-  },
-  expiryLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#ffffff',
-    marginBottom: 8,
-  },
+  previewImage: { width: 60, height: 60, borderRadius: borderRadius.sm, backgroundColor: colors.border },
+  previewInfo: { flex: 1, marginLeft: spacing.md },
+  previewName: { ...typography.label, color: colors.text },
+  previewDate: { ...typography.caption, color: colors.textSecondary, marginTop: 2 },
+  removeButton: { padding: spacing.sm },
+  uploadProgress: { height: 4, backgroundColor: colors.border, borderRadius: 2, marginTop: spacing.md, overflow: 'hidden' },
+  uploadProgressBar: { height: '100%', backgroundColor: colors.success },
+  expiryContainer: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  expiryLabel: { ...typography.label, color: colors.text, marginBottom: spacing.sm },
   expiryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.inputBg,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     borderWidth: 1,
+    borderColor: colors.border,
   },
-  expiryButtonText: {
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  expiryStatus: {
-    marginTop: 8,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 16,
-    padding: 20,
-    width: '85%',
-    maxHeight: '60%',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  pickerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 200,
-  },
-  pickerColumn: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  pickerLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  pickerScroll: {
-    height: 160,
-  },
-  pickerItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  pickerItemSelected: {
-    backgroundColor: '#007749',
-  },
-  pickerItemText: {
-    fontSize: 16,
-    color: '#ffffff',
-  },
-  pickerItemTextSelected: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  modalButtonCancel: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: '#1a1a1a',
-    marginRight: 8,
-  },
-  modalButtonCancelText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  modalButtonConfirm: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: '#007749',
-    marginLeft: 8,
-  },
-  modalButtonConfirmText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  expiryStatusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  expiryButtonText: { marginLeft: spacing.sm, ...typography.body },
+  expiryStatus: { marginTop: spacing.sm },
+  modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.xl, width: '85%', maxHeight: '60%' },
+  modalTitle: { ...typography.h3, color: colors.text, textAlign: 'center', marginBottom: spacing.lg, fontWeight: '700' },
+  pickerRow: { flexDirection: 'row', justifyContent: 'space-between', height: 200 },
+  pickerColumn: { flex: 1, marginHorizontal: 4 },
+  pickerLabel: { ...typography.caption, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.sm },
+  pickerScroll: { height: 160 },
+  pickerItem: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm, alignItems: 'center', borderRadius: borderRadius.md },
+  pickerItemSelected: { backgroundColor: colors.primary },
+  pickerItemText: { ...typography.body, color: colors.text },
+  pickerItemTextSelected: { color: colors.textInverse, fontWeight: '600' },
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xl },
+  modalButtonCancel: { flex: 1, padding: spacing.md, borderRadius: borderRadius.md, backgroundColor: colors.backgroundAlt, marginRight: spacing.sm },
+  modalButtonCancelText: { color: colors.textSecondary, ...typography.button, textAlign: 'center' },
+  modalButtonConfirm: { flex: 1, padding: spacing.md, borderRadius: borderRadius.md, backgroundColor: colors.primary, marginLeft: spacing.sm },
+  modalButtonConfirmText: { color: colors.textInverse, ...typography.button, textAlign: 'center' },
+  expiryStatusText: { ...typography.caption, fontWeight: '600' },
   disclaimer: {
     flexDirection: 'row',
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#FFF9E6',
-    borderRadius: 10,
+    padding: spacing.lg,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.warning,
+    borderRadius: borderRadius.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#FF9500',
+    borderLeftColor: colors.warning,
   },
-  disclaimerText: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 12,
-    color: '#888888',
-    lineHeight: 18,
-  },
+  disclaimerText: { flex: 1, marginLeft: spacing.md, ...typography.caption, color: colors.textSecondary, lineHeight: 18 },
   submitButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007749',
-    marginHorizontal: 16,
-    padding: 18,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: colors.primary,
+    marginHorizontal: spacing.lg,
+    padding: spacing.xl,
+    borderRadius: borderRadius.card,
+    marginBottom: spacing.lg,
   },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    marginLeft: 10,
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  bottomPadding: {
-    height: 40,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#888888',
-    marginTop: 10,
-    fontSize: 16,
-  },
+  submitButtonDisabled: { opacity: 0.6 },
+  submitButtonText: { marginLeft: spacing.sm, color: colors.textInverse, ...typography.button },
+  bottomPadding: { height: spacing.xxl },
+  loadingContainer: { justifyContent: 'center', alignItems: 'center' },
+  loadingText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
   successCard: {
-    margin: 16,
-    padding: 30,
-    borderRadius: 12,
+    margin: spacing.lg,
+    padding: spacing.xxl,
+    borderRadius: borderRadius.card,
     alignItems: 'center',
+    backgroundColor: colors.card,
+    borderTopWidth: 3,
+    borderTopColor: colors.success,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  successTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  successText: {
-    fontSize: 14,
-    color: '#888888',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 15,
-  },
-  submittedDate: {
-    fontSize: 12,
-    color: '#888888',
-  },
+  successTitle: { ...typography.h2, color: colors.text, marginTop: spacing.lg, marginBottom: spacing.md, fontWeight: '700' },
+  successText: { ...typography.bodySmall, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+  submittedDate: { ...typography.caption, color: colors.textSecondary },
 });

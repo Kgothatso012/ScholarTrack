@@ -56,8 +56,11 @@ export const Card: React.FC<CardProps> = ({
           backgroundColor: colors.selected,
         };
       default:
+        // Elevated: card with shadow + subtle inner top border tint
         return {
           backgroundColor: colors.card,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(24, 24, 27, 0.04)',
           ...shadows.md,
         };
     }
@@ -97,11 +100,11 @@ export const Card: React.FC<CardProps> = ({
 
 const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
   base: {
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.xxl, // larger radius (24px) for premium feel
     overflow: 'hidden',
   },
   touchable: {
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.xxl,
   },
 });
 

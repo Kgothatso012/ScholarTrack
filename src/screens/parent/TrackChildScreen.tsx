@@ -186,9 +186,9 @@ export default function TrackChildScreen({ navigation }: Props) {
 
   const styles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl, borderBottomWidth: 4, borderBottomColor: colors.accent },
+    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
+    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
     content: { flex: 1 },
     contentPad: { padding: spacing.lg },
     childSelector: { marginBottom: spacing.lg },
@@ -203,18 +203,18 @@ export default function TrackChildScreen({ navigation }: Props) {
     placeholderIcon: { marginBottom: spacing.md },
     placeholderTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.sm },
     placeholderText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
-    infoCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md },
+    infoCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
     infoTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.sm },
     infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
     infoLabel: { ...typography.bodySmall, color: colors.textSecondary, width: 100 },
     infoValue: { ...typography.body, color: colors.text, flex: 1 },
     mapContainer: { height: 280, marginBottom: spacing.md },
-    map: { flex: 1, borderRadius: borderRadius.lg },
+    map: { flex: 1, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent },
     mapOverlay: { position: 'absolute', top: spacing.md, left: spacing.md, right: spacing.md },
     liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, alignSelf: 'flex-start' },
-    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff', marginRight: spacing.xs },
-    liveText: { ...typography.labelSmall, color: '#fff' },
-    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md },
+    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.textInverse, marginRight: spacing.xs },
+    liveText: { ...typography.labelSmall, color: colors.textInverse },
+    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
     driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
     driverAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
     driverInitial: { ...typography.h3, color: colors.accent },
@@ -224,13 +224,13 @@ export default function TrackChildScreen({ navigation }: Props) {
     driverActions: { flexDirection: 'row', justifyContent: 'space-around', marginTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
     actionBtn: { alignItems: 'center' },
     actionText: { ...typography.labelSmall, color: colors.primary, marginTop: spacing.xs },
-    statusCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md },
+    statusCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 },
     statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.success, marginRight: spacing.sm },
     statusText: { ...typography.label, color: colors.text },
-    etaText: { ...typography.h4, color: colors.primary },
+    etaText: { ...typography.h4, color: colors.accent },
     etaLabel: { ...typography.bodySmall, color: colors.textSecondary },
-    quickActions: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, justifyContent: 'space-around' },
+    quickActions: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.md, justifyContent: 'space-around', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 },
     quickBtn: { alignItems: 'center', flex: 1 },
     quickBtnText: { ...typography.labelSmall, color: colors.text, marginTop: spacing.xs, textAlign: 'center' },
   });
@@ -425,7 +425,7 @@ export default function TrackChildScreen({ navigation }: Props) {
               {/* Quick Actions */}
               <View style={styles(colors).quickActions}>
                 <TouchableOpacity style={styles(colors).quickBtn} onPress={() => Alert.alert('SOS', 'Emergency services will be notified')}>
-                  <Ionicons name="warning" size={24} color={colors.danger} />
+                  <Ionicons name="warning" size={24} color={colors.error} />
                   <Text style={styles(colors).quickBtnText}>Emergency</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles(colors).quickBtn} onPress={() => navigation?.navigate?.('LiveTrack')}>

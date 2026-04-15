@@ -223,22 +223,23 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
               variant="primary"
               size="small"
               onPress={() => handleDemoLogin('parent')}
-              style={{ backgroundColor: '#007749', flex: 1 }}
+              style={{ flex: 1 }}
             />
             <Button
               title="Driver"
-              variant="primary"
+              variant="secondary"
               size="small"
               onPress={() => handleDemoLogin('driver')}
-              style={{ backgroundColor: '#002395', flex: 1 }}
+              style={{ flex: 1 }}
+              textStyle={{ color: colors.textInverse }}
             />
             <Button
               title="Admin"
-              variant="primary"
+              variant="outline"
               size="small"
               onPress={() => handleDemoLogin('admin')}
-              style={{ backgroundColor: colors.accent, flex: 1 }}
-              textStyle={{ color: colors.text }}
+              style={{ flex: 1 }}
+              textStyle={{ color: colors.primary }}
             />
           </View>
 
@@ -358,27 +359,32 @@ const styles = (colors: UIColors) => StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
+  // Logo: asymmetric left-aligned composition
   logoContainer: {
     alignItems: 'center',
     marginBottom: spacing.xxl,
   },
   logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary,
+    width: 72,
+    height: 72,
+    borderRadius: borderRadius.xxl,
+    backgroundColor: colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.md,
-    shadowColor: colors.shadow,
+    // Inner top highlight for premium feel
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: colors.shadowStrong,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowRadius: 12,
+    elevation: 6,
   },
   appTitle: {
     ...typography.displayMedium,
     color: colors.text,
+    letterSpacing: -0.5,
   },
   appSubtitle: {
     ...typography.body,
@@ -388,6 +394,14 @@ const styles = (colors: UIColors) => StyleSheet.create({
   formCard: {
     backgroundColor: colors.card,
     padding: spacing.xl,
+    borderRadius: borderRadius.xxl,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(24, 24, 27, 0.04)',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   welcomeText: {
     ...typography.h1,
@@ -400,10 +414,12 @@ const styles = (colors: UIColors) => StyleSheet.create({
     marginBottom: spacing.lg,
   },
   demoTitle: {
-    ...typography.label,
+    ...typography.labelSmall,
     color: colors.textMuted,
     textAlign: 'center',
     marginBottom: spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   demoButtons: {
     flexDirection: 'row',
@@ -412,7 +428,7 @@ const styles = (colors: UIColors) => StyleSheet.create({
   },
   infoBox: {
     backgroundColor: colors.primaryMuted,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.sm,
     borderLeftWidth: 3,
@@ -440,7 +456,15 @@ const styles = (colors: UIColors) => StyleSheet.create({
     padding: spacing.xl,
     width: '100%',
     maxWidth: 400,
+    borderRadius: borderRadius.xxl,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(24, 24, 27, 0.04)',
     position: 'relative',
+    shadowColor: colors.shadowStrong,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 10,
   },
   modalClose: {
     position: 'absolute',
