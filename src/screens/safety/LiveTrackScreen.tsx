@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Animated, LayoutAnimation, UIManager } from 'react-native';
+import { LayoutAnimation, UIManager } from 'react-native';
 
 // Enable LayoutAnimation on Android
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking, ActivityIndicator, RefreshControl } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, Polyline, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -79,6 +80,36 @@ export default function LiveTrackScreen({ navigation }: Props) {
   const [rating, setRating] = useState(0);
   const [isFullscreenMap, setIsFullscreenMap] = useState(false);
   const mapRef = useRef<MapView>(null);
+
+  // Animated values for pulsing bus marker
+  const busScale = useSharedValue(1);
+  const busOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    // Pulsing animation for bus marker
+    busScale.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 1200 }),
+        withTiming(1, { duration: 1200 })
+      ),
+      -1,
+      false
+    );
+    busOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 1200 }),
+        withTiming(1, { duration: 1200 })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  // Animated bus marker style
+  const busMarkerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: busScale.value }],
+    opacity: busOpacity.value,
+  }));
 
   // Map configuration - will be updated from real data
   const DEFAULT_REGION = {
@@ -523,6 +554,11 @@ export default function LiveTrackScreen({ navigation }: Props) {
       borderTopWidth: 3,
       borderTopColor: colors.accent,
       overflow: 'hidden',
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 16,
+      elevation: 2,
     },
     mapPlaceholder: {
       height: 200,
@@ -642,9 +678,9 @@ export default function LiveTrackScreen({ navigation }: Props) {
               description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
               anchor={{ x: 0.5, y: 0.5 }}
             >
-              <View style={styles(colors).busMarker}>
+              <Animated.View style={[styles(colors).busMarker, busMarkerAnimatedStyle]}>
                 <Ionicons name="bus" size={24} color="#fff" />
-              </View>
+              </Animated.View>
             </Marker>
           )}
           <Polyline
@@ -736,9 +772,9 @@ export default function LiveTrackScreen({ navigation }: Props) {
                 description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
-                <View style={styles(colors).busMarker}>
+                <Animated.View style={[styles(colors).busMarker, busMarkerAnimatedStyle]}>
                   <Ionicons name="bus" size={24} color="#fff" />
-                </View>
+                </Animated.View>
               </Marker>
             )}
 

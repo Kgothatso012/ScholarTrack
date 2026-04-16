@@ -49,16 +49,19 @@ const ParentDashboard = ({ navigation }: Props) => {
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
 
-  // Animation values initialized lazily
-  const fadeAnims = useRef<Animated.Value[]>([]);
-  const quickActionAnims = useRef<Animated.Value[]>([]);
-
-  const getAnim = (arr: Animated.Value[], index: number, total: number) => {
-    if (arr.length !== total) {
-      arr.current = Array.from({ length: total }, () => new Animated.Value(0));
-    }
-    return arr.current[index];
-  };
+  // Animation values initialized once
+  const statAnims = [
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+  ];
+  const quickAnims = [
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+    useRef<Animated.Value>(new Animated.Value(0)),
+  ];
 
   const loadData = async (forceRefresh = false) => {
     try {
@@ -82,7 +85,7 @@ const ParentDashboard = ({ navigation }: Props) => {
           return;
         }
       }
-      await fetchFreshData(user.id, true);
+      await fetchFreshData(user.id);
     } catch (error) {
       console.error('Error loading data:', error);
       setStats([
@@ -156,17 +159,6 @@ const ParentDashboard = ({ navigation }: Props) => {
   useEffect(() => { loadData(); }, []);
 
   // Stagger entrance animations when data loads
-  useEffect(() => {
-    if (stats.length === 0) return;
-    const total = stats.length + quickActions.length;
-    if (fadeAnims.current.length !== total) {
-      fadeAnims.current = Array.from({ length: total }, () => new Animated.Value(0));
-    }
-    fadeAnims.current.forEach((anim, i) => {
-      Animated.timing(anim, { toValue: 1, duration: 400, delay: i * 70, useNativeDriver: true }).start();
-    });
-  }, [stats.length]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadData();
@@ -321,7 +313,6 @@ const ParentDashboard = ({ navigation }: Props) => {
     );
   }
 
-  const activeAnim = fadeAnims.current[0] || new Animated.Value(1);
   const isLive = trips.some(t => t.status === 'in_progress');
 
   return (
@@ -385,12 +376,10 @@ const ParentDashboard = ({ navigation }: Props) => {
           {/* Stats — asymmetric bento 55/45 */}
           <View style={s(colors).statsGrid}>
             {stats.map((stat, index) => {
-              const anim = fadeAnims.current[index] || new Animated.Value(1);
               const wide = index < 2;
               return (
-                <Animated.View
+                <View
                   key={index}
-                  entering={FadeInCustom(anim)}
                   style={{ width: wide ? '55%' : '43%', paddingHorizontal: 4, paddingVertical: 4 }}
                 >
                   <View style={s(colors).glass}>
@@ -402,13 +391,13 @@ const ParentDashboard = ({ navigation }: Props) => {
                       <Text style={s(colors).statValue}>{stat.value}</Text>
                     </View>
                   </View>
-                </Animated.View>
+                </View>
               );
             })}
           </View>
 
           {/* Live Track Hero */}
-          <Animated.View entering={FadeInCustom(fadeAnims.current[stats.length] || new Animated.Value(1))} style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.sm }}>
+          <View style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.sm }}>
             <View style={s(colors).glass}>
               <View style={s(colors).glassRefraction} />
               <View style={s(colors).heroGlass}>
@@ -430,22 +419,17 @@ const ParentDashboard = ({ navigation }: Props) => {
                 </TouchableOpacity>
               </View>
             </View>
-          </Animated.View>
+          </View>
 
           {/* Quick Actions — 2-col bento */}
           <View style={{ paddingHorizontal: spacing.xs, paddingTop: spacing.sm }}>
             <Text style={s(colors).sectionLabel}>Quick Actions</Text>
             <View style={s(colors).quickGrid}>
-              {quickActions.slice(0, 4).map((action, index) => {
-                const anim = fadeAnims.current[stats.length + 1 + index] || new Animated.Value(1);
-                return (
-                  <Animated.View key={index} entering={FadeInCustom(anim)} style={s(colors).quickCard}>
+              {quickActions.slice(0, 4).map((action, index) => (
+                  <View key={index} style={s(colors).quickCard}>
                     <TouchableOpacity
                       activeOpacity={0.8}
                       onPress={() => navigation?.navigate?.(action.route)}
-                      onPressIn={(e) => {
-                        // Subtle press feedback
-                      }}
                       style={s(colors).quickCardInner}
                     >
                       <View style={[s(colors).quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
@@ -453,9 +437,8 @@ const ParentDashboard = ({ navigation }: Props) => {
                       </View>
                       <Text style={s(colors).quickText}>{action.name}</Text>
                     </TouchableOpacity>
-                  </Animated.View>
-                );
-              })}
+                  </View>
+                ))}
             </View>
           </View>
 
