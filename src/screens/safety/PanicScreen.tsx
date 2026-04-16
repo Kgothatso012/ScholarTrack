@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeColors } from '../../context/ThemeContext';
@@ -19,7 +19,7 @@ export const PanicButton = ({
   size = 60,
   onActivate,
 }: {
-  style?: any;
+  style?: StyleProp<ViewStyle>;
   size?: number;
   onActivate?: () => void;
 }) => {

@@ -71,7 +71,7 @@ export default function SupportScreen({ navigation }: Props) {
             <Card variant="elevated" padding="medium">
               <View style={styles(colors).contactCard}>
                 <View style={[styles(colors).contactIcon, { backgroundColor: option.color + '20' }]}>
-                  <Ionicons name={option.icon as any} size={24} color={option.color} />
+                  <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={24} color={option.color} />
                 </View>
                 <View style={styles(colors).contactInfo}>
                   <Text style={styles(colors).contactTitle}>{option.title}</Text>

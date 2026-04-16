@@ -252,7 +252,7 @@ const EmergencyScreen = () => {
         {quickDials.map((item, index) => (
           <TouchableOpacity key={index} onPress={() => callNumber(item.phone)} style={s(colors).quickDialItem}>
             <View style={[s(colors).dialIcon, { backgroundColor: `${item.color}20`, borderColor: `${item.color}40` }]}>
-              <Ionicons name={item.icon as any} size={24} color={item.color} />
+              <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
             </View>
             <View style={s(colors).dialInfo}>
               <Text style={s(colors).dialName}>{item.name}</Text>
@@ -304,7 +304,7 @@ const EmergencyScreen = () => {
         <Text style={s(colors).sectionTitle}>Safety Tips</Text>
         {tips.map((tip, index) => (
           <View key={index} style={s(colors).tipCard}>
-            <Ionicons name={tip.icon as any} size={20} color="#FFB81C" />
+            <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color="#FFB81C" />
             <Text style={s(colors).tipText}>{tip.text}</Text>
           </View>
         ))}

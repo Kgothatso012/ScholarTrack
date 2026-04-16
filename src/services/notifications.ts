@@ -25,48 +25,6 @@ export type NotificationType =
 
 export type NotificationChannel = 'default' | 'safety' | 'trips' | 'payments';
 
-export interface TripNotificationData {
-  tripId: string;
-  schoolName: string;
-  routeName?: string;
-  estimatedArrival?: string;
-}
-
-export interface SafetyNotificationData {
-  tripId: string;
-  location?: { latitude: number; longitude: number };
-  timestamp: string;
-  severity: 'high' | 'critical';
-}
-
-export interface PaymentNotificationData {
-  amount: number;
-  childName?: string;
-  dueDate?: string;
-  paymentId?: string;
-}
-
-export interface DriverNotificationData {
-  driverId: string;
-  driverName: string;
-  routeName?: string;
-  contactNumber?: string;
-}
-
-export type NotificationData =
-  | { type: 'TRIP_STARTED'; payload: TripNotificationData }
-  | { type: 'TRIP_COMPLETED'; payload: TripNotificationData }
-  | { type: 'TRIP_DELAYED'; payload: TripNotificationData & { delayMinutes: number } }
-  | { type: 'PANIC_TRIGGERED'; payload: SafetyNotificationData }
-  | { type: 'EMERGENCY'; payload: SafetyNotificationData & { message: string } }
-  | { type: 'CHILD_PICKED_UP'; payload: { childId: string; childName: string; driverName: string } }
-  | { type: 'CHILD_DROPPED_OFF'; payload: { childId: string; childName: string; destination: string } }
-  | { type: 'PAYMENT_RECEIVED'; payload: PaymentNotificationData }
-  | { type: 'PAYMENT_DUE'; payload: PaymentNotificationData }
-  | { type: 'ROUTE_UPDATE'; payload: { tripId: string; message: string } }
-  | { type: 'DRIVER_ASSIGNED'; payload: DriverNotificationData };
-
-
 // Lifecycle event type (for internal emitter use)
 type NotificationLifecycleEvent = {
   type: string;
@@ -273,52 +231,48 @@ export const notificationService = {
 // TYPED SEND APP NOTIFICATION (from clawhip typed events pattern)
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (payload: any) => string }> = {
-  TRIP_STARTED: {
-    title: 'Bus Trip Started',
-    body: (p: TripNotificationData) => `Trip to ${p.schoolName || 'school'} has started`,
-  },
-  TRIP_COMPLETED: {
-    title: 'Trip Completed',
-    body: (p: TripNotificationData) => `Your child has arrived at ${p.schoolName || 'destination'}`,
-  },
-  TRIP_DELAYED: {
-    title: 'Trip Delayed',
-    body: (p: TripNotificationData & { delayMinutes?: number }) => `Trip is delayed by ${p.delayMinutes || 15} minutes`,
-  },
-  PANIC_TRIGGERED: {
-    title: 'PANIC ALERT',
-    body: () => 'Emergency! Panic button activated on route',
-  },
-  EMERGENCY: {
-    title: 'Emergency Alert',
-    body: (p: SafetyNotificationData & { message?: string }) => p.message || 'Emergency alert triggered',
-  },
-  CHILD_PICKED_UP: {
-    title: 'Child Picked Up',
-    body: (p: { childId: string; childName: string; driverName: string }) => `${p.childName} has been picked up by driver`,
-  },
-  CHILD_DROPPED_OFF: {
-    title: 'Child Dropped Off',
-    body: (p: { childId: string; childName: string; destination: string }) => `${p.childName} has arrived at ${p.destination}`,
-  },
-  PAYMENT_RECEIVED: {
-    title: 'Payment Received',
-    body: (p: PaymentNotificationData) => `Payment of R${p.amount} received successfully`,
-  },
-  PAYMENT_DUE: {
-    title: 'Payment Due',
-    body: (p: PaymentNotificationData) => `Payment of R${p.amount} is due for ${p.childName || 'your child'}`,
-  },
-  ROUTE_UPDATE: {
-    title: 'Route Update',
-    body: (p: { tripId: string; message?: string }) => p.message || 'Route has been updated',
-  },
-  DRIVER_ASSIGNED: {
-    title: 'Driver Assigned',
-    body: (p: DriverNotificationData) => `${p.driverName} will be your driver`,
-  },
+// Simplified typed notification data union — each variant carries its own payload shape
+export type AppNotificationData =
+  | { type: 'TRIP_STARTED'; schoolName?: string; routeName?: string; estimatedArrival?: string }
+  | { type: 'TRIP_COMPLETED'; schoolName?: string; routeName?: string; estimatedArrival?: string }
+  | { type: 'TRIP_DELAYED'; schoolName?: string; routeName?: string; estimatedArrival?: string; delayMinutes: number }
+  | { type: 'PANIC_TRIGGERED'; location?: { latitude: number; longitude: number }; timestamp: string }
+  | { type: 'EMERGENCY'; location?: { latitude: number; longitude: number }; timestamp: string; message: string }
+  | { type: 'CHILD_PICKED_UP'; childId: string; childName: string; driverName: string }
+  | { type: 'CHILD_DROPPED_OFF'; childId: string; childName: string; destination: string }
+  | { type: 'PAYMENT_RECEIVED'; amount: number; childName?: string }
+  | { type: 'PAYMENT_DUE'; amount: number; childName?: string; dueDate?: string }
+  | { type: 'ROUTE_UPDATE'; tripId: string; message: string }
+  | { type: 'DRIVER_ASSIGNED'; driverId: string; driverName: string; routeName?: string };
+
+function getNotificationBody(data: AppNotificationData): string {
+  switch (data.type) {
+    case 'TRIP_STARTED': return `Trip to ${data.schoolName || 'school'} has started`;
+    case 'TRIP_COMPLETED': return `Your child has arrived at ${data.schoolName || 'destination'}`;
+    case 'TRIP_DELAYED': return `Trip is delayed by ${data.delayMinutes || 15} minutes`;
+    case 'PANIC_TRIGGERED': return 'Emergency! Panic button activated on route';
+    case 'EMERGENCY': return data.message || 'Emergency alert triggered';
+    case 'CHILD_PICKED_UP': return `${data.childName} has been picked up by driver`;
+    case 'CHILD_DROPPED_OFF': return `${data.childName} has arrived at ${data.destination}`;
+    case 'PAYMENT_RECEIVED': return `Payment of R${data.amount} received successfully`;
+    case 'PAYMENT_DUE': return `Payment of R${data.amount} is due for ${data.childName || 'your child'}`;
+    case 'ROUTE_UPDATE': return data.message || 'Route has been updated';
+    case 'DRIVER_ASSIGNED': return `${data.driverName} will be your driver`;
+  }
+}
+
+const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: string }> = {
+  TRIP_STARTED: { title: 'Bus Trip Started', body: 'Trip to school has started' },
+  TRIP_COMPLETED: { title: 'Trip Completed', body: 'Your child has arrived safely' },
+  TRIP_DELAYED: { title: 'Trip Delayed', body: 'Trip is running behind schedule' },
+  PANIC_TRIGGERED: { title: 'PANIC ALERT', body: 'Emergency! Panic button activated on route' },
+  EMERGENCY: { title: 'Emergency Alert', body: 'Emergency alert triggered' },
+  CHILD_PICKED_UP: { title: 'Child Picked Up', body: 'Your child has been picked up' },
+  CHILD_DROPPED_OFF: { title: 'Child Dropped Off', body: 'Your child has arrived at destination' },
+  PAYMENT_RECEIVED: { title: 'Payment Received', body: 'Payment received successfully' },
+  PAYMENT_DUE: { title: 'Payment Due', body: 'A payment is due' },
+  ROUTE_UPDATE: { title: 'Route Update', body: 'Route has been updated' },
+  DRIVER_ASSIGNED: { title: 'Driver Assigned', body: 'A driver has been assigned' },
 };
 
 function getChannelForType(type: NotificationType): NotificationChannel {
@@ -331,7 +285,7 @@ function getChannelForType(type: NotificationType): NotificationChannel {
 export async function sendAppNotification(
   type: NotificationType,
   userId: string,
-  payload: NotificationData['payload']
+  payload: AppNotificationData
 ): Promise<void> {
   const message = NOTIFICATION_MESSAGES[type];
   if (!message) {
@@ -362,9 +316,8 @@ export async function sendAppNotification(
 
   await notificationService.sendLocalNotification(
     message.title,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    message.body(payload as any),
-    { type, payload, channel }
+    getNotificationBody(payload),
+    { type, channel }
   );
 }
 
@@ -374,13 +327,19 @@ export async function sendAppNotification(
 
 export function initializeNotificationListeners(): () => void {
   const receivedSub = Notifications.addNotificationReceivedListener(notification => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    notificationEmitter.emit('notification_received', notification as any);
+    notificationEmitter.emit('notification_received', {
+      type: notification.request.content.title || 'UNKNOWN',
+      payload: notification.request.content.data || {},
+      timestamp: new Date(notification.date * 1000).toISOString(),
+    });
   });
 
   const responseSub = Notifications.addNotificationResponseReceivedListener(response => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    notificationEmitter.emit('notification_response', response as any);
+    notificationEmitter.emit('notification_response', {
+      type: response.notification.request.content.title || 'UNKNOWN',
+      payload: response.notification.request.content.data || {},
+      timestamp: new Date(response.notification.date * 1000).toISOString(),
+    });
   });
 
   // Return cleanup function

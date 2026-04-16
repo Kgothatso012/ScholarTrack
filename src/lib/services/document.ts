@@ -10,6 +10,7 @@ export interface DriverDocument {
   status: 'pending' | 'approved' | 'rejected';
   uploaded_at: string;
   expiry_date?: string;
+  driver?: { full_name?: string };
 }
 
 export interface ParentDocument {
@@ -20,6 +21,8 @@ export interface ParentDocument {
   file_name?: string;
   status: 'pending' | 'approved' | 'rejected';
   uploaded_at: string;
+  parent?: { full_name?: string };
+  child?: { full_name?: string };
 }
 
 export const documentService = {

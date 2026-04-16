@@ -130,7 +130,7 @@ export default function IncidentReportScreen() {
                 </Text>
               </View>
               <View style={[styles(colors).statusBadge, { backgroundColor: getStatusColor(incident.status) }]}>
-                <Ionicons name={getStatusIcon(incident.status) as any} size={12} color="#fff" />
+                <Ionicons name={getStatusIcon(incident.status) as keyof typeof Ionicons.glyphMap} size={12} color="#fff" />
                 <Text style={styles(colors).statusText}>{incident.status}</Text>
               </View>
             </View>
@@ -212,7 +212,7 @@ export default function IncidentReportScreen() {
                     ]}
                     onPress={() => setIncidentType(type.id)}
                   >
-                    <Ionicons name={type.icon as any} size={20} color={incidentType === type.id ? '#fff' : type.color} />
+                    <Ionicons name={type.icon as keyof typeof Ionicons.glyphMap} size={20} color={incidentType === type.id ? '#fff' : type.color} />
                     <Text style={[
                       styles(colors).typeText,
                       incidentType === type.id && styles(colors).typeTextSelected

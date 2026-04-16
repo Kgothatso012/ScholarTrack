@@ -170,7 +170,9 @@ const ParentDashboard = ({ navigation }: Props) => {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', style: 'destructive', onPress: async () => {
         await supabase.auth.signOut();
-        (window as any).logout();
+        await AsyncStorage.removeItem('userRole');
+        await AsyncStorage.removeItem('userEmail');
+        await AsyncStorage.removeItem('userName');
       }}
     ]);
   };
@@ -336,7 +338,7 @@ const ParentDashboard = ({ navigation }: Props) => {
               { icon: 'log-out-outline', onPress: handleLogout },
             ].map((btn, i) => (
               <TouchableOpacity key={i} onPress={btn.onPress} style={s(colors).headerBtn}>
-                <Ionicons name={btn.icon as any} size={18} color={colors.textInverse} />
+                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.textInverse} />
               </TouchableOpacity>
             ))}
           </View>
@@ -364,7 +366,7 @@ const ParentDashboard = ({ navigation }: Props) => {
             onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setActiveTab(tab.key); }}
             style={[s(colors).tabBtn, activeTab === tab.key && s(colors).tabBtnActive]}
           >
-            <Ionicons name={tab.icon as any} size={15} color={activeTab === tab.key ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
+            <Ionicons name={tab.icon as keyof typeof Ionicons.glyphMap} size={15} color={activeTab === tab.key ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
             <Text style={activeTab === tab.key ? s(colors).tabTextActive : s(colors).tabText}>{tab.label}</Text>
           </TouchableOpacity>
         ))}
@@ -433,7 +435,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                       style={s(colors).quickCardInner}
                     >
                       <View style={[s(colors).quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
-                        <Ionicons name={action.icon as any} size={20} color={action.color} />
+                        <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.color} />
                       </View>
                       <Text style={s(colors).quickText}>{action.name}</Text>
                     </TouchableOpacity>
@@ -447,7 +449,7 @@ const ParentDashboard = ({ navigation }: Props) => {
             <Text style={s(colors).sectionLabel}>Recent Trips</Text>
             {trips.length === 0 ? (
               <View style={[s(colors).glass, s(colors).emptyGlass]}>
-                <Ionicons name="bus-outline" size={40} style={s(colors).emptyIcon as any} />
+                <Ionicons name="bus-outline" size={40} style={s(colors).emptyIcon} />
                 <Text style={s(colors).emptyText}>No upcoming trips</Text>
               </View>
             ) : (
@@ -480,7 +482,7 @@ const ParentDashboard = ({ navigation }: Props) => {
           <Text style={s(colors).sectionLabel}>My Children ({children.length})</Text>
           {children.length === 0 ? (
             <View style={[s(colors).glass, s(colors).emptyGlass]}>
-              <Ionicons name="people-outline" size={40} style={s(colors).emptyIcon as any} />
+              <Ionicons name="people-outline" size={40} style={s(colors).emptyIcon} />
               <Text style={s(colors).emptyText}>No children added yet</Text>
               <Spacer size="md" />
               <TouchableOpacity
@@ -515,7 +517,7 @@ const ParentDashboard = ({ navigation }: Props) => {
           <Text style={s(colors).sectionLabel}>All Trips ({trips.length})</Text>
           {trips.length === 0 ? (
             <View style={[s(colors).glass, s(colors).emptyGlass]}>
-              <Ionicons name="bus-outline" size={40} style={s(colors).emptyIcon as any} />
+              <Ionicons name="bus-outline" size={40} style={s(colors).emptyIcon} />
               <Text style={s(colors).emptyText}>No trips found</Text>
             </View>
           ) : (

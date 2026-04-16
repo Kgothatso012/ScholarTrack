@@ -1,11 +1,11 @@
 // Skeleton Loader Component - Animated placeholder for loading states
 
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet, ViewStyle } from 'react-native';
+import { View, Animated, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 
 interface SkeletonProps {
-  width?: number | string;
+  width?: DimensionValue;
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;
@@ -44,17 +44,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     outputRange: [0.3, 0.7],
   });
 
-  const skeletonStyle: any = {
-    width: typeof width === 'number' ? width : width,
-    height,
-    borderRadius,
-    backgroundColor: colors.border,
-    opacity,
-  };
-
   return (
     <Animated.View
-      style={[skeletonStyle, style]}
+      style={[{ width, height, borderRadius, backgroundColor: colors.border, opacity }, style]}
     />
   );
 };

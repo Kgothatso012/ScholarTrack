@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeColors } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
@@ -20,8 +21,8 @@ const DevDashboard = ({ navigation }: Props) => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', style: 'destructive', onPress: async () => {
-        (window as any).logout();
-        (window as any).logout();
+        await supabase.auth.signOut();
+        await AsyncStorage.multiRemove(['userRole', 'userName', 'userEmail', 'userId']);
       }}
     ]);
   };

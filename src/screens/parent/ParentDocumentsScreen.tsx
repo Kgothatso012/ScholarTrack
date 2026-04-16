@@ -14,6 +14,23 @@ interface Props {
   navigation: { goBack: () => void };
 }
 
+interface Child {
+  id: string;
+  full_name: string;
+  grade?: string;
+  status: string;
+  parent_id: string;
+}
+
+interface ParentDocument {
+  id: string;
+  parent_id: string;
+  document_type: string;
+  file_url?: string;
+  status: string;
+  created_at: string;
+}
+
 type DocType = 'id_card' | 'proof_of_residence' | 'birth_certificate' | 'consent_form';
 
 const documentTypes = [
@@ -26,9 +43,9 @@ const documentTypes = [
 export default function ParentDocumentUpload({ navigation }: Props) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
-  const [children, setChildren] = useState<any[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<string>('');
-  const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
+  const [uploadedDocs, setUploadedDocs] = useState<ParentDocument[]>([]);
 
   useEffect(() => {
     loadData();
@@ -126,7 +143,7 @@ export default function ParentDocumentUpload({ navigation }: Props) {
               <Card variant={isUploaded ? 'elevated' : 'outlined'} padding="medium">
                 <View style={styles(colors).docCard}>
                   <View style={[styles(colors).docIcon, { backgroundColor: isUploaded ? colors.success + '20' : colors.textSecondary + '20' }]}>
-                    <Ionicons name={doc.icon as any} size={24} color={isUploaded ? colors.success : colors.textSecondary} />
+                    <Ionicons name={doc.icon as keyof typeof Ionicons.glyphMap} size={24} color={isUploaded ? colors.success : colors.textSecondary} />
                   </View>
                   <View style={styles(colors).docInfo}>
                     <Text style={styles(colors).docLabel}>{doc.label}</Text>

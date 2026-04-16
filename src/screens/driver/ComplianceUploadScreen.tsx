@@ -553,9 +553,13 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           try {
             // Upload to Supabase Storage
             const fileName = `driver/${user.id}/${doc.id}_${Date.now()}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
               .from('documents')
-              .upload(fileName, doc.document as any);
+              .upload(fileName, {
+                uri: doc.document.uri,
+                name: doc.document.name,
+                type: doc.document.type,
+              } as unknown as string);
 
             if (uploadError) throw uploadError;
 
@@ -565,7 +569,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
               .getPublicUrl(fileName);
 
             // Map doc.id to document_type
-            const docTypeMap: Record<string, any> = {
+            const docTypeMap: Record<string, string> = {
               'pdp': 'pdp_certificate',
               'roadworthy': 'roadworthy',
               'driversLicense': 'drivers_license',
@@ -641,7 +645,8 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         {
           text: 'Logout',
           onPress: async () => {
-            (window as any).logout();
+            await supabase.auth.signOut();
+            await AsyncStorage.multiRemove(['driverCompliance', 'userRole', 'userName', 'userEmail']);
           },
         },
       ],

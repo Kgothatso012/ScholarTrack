@@ -62,7 +62,7 @@ export default function SafetyTipsScreen() {
           <Card key={index} variant="elevated" padding="medium">
             <View style={styles(colors).tipCard}>
               <View style={[styles(colors).tipIcon, { backgroundColor: tip.color + '20' }]}>
-                <Ionicons name={tip.icon as any} size={24} color={tip.color} />
+                <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={24} color={tip.color} />
               </View>
               <View style={styles(colors).tipInfo}>
                 <Text style={styles(colors).tipTitle}>{tip.title}</Text>

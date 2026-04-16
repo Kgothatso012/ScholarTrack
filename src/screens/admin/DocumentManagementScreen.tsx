@@ -76,7 +76,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     }
   };
 
-  const renderDriverDoc = ({ item }: { item: any }) => (
+  const renderDriverDoc = ({ item }: { item: DriverDocument }) => (
     <TouchableOpacity
       style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => setSelectedDoc(item)}
@@ -122,7 +122,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     </TouchableOpacity>
   );
 
-  const renderParentDoc = ({ item }: { item: any }) => (
+  const renderParentDoc = ({ item }: { item: ParentDocument }) => (
     <TouchableOpacity
       style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => setSelectedDoc(item)}
@@ -214,8 +214,8 @@ export default function DocumentManagementScreen({ navigation }: Props) {
         <View style={styles(colors).loading}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
-          data={activeTab === 'drivers' ? driverDocs : parentDocs}
-          renderItem={activeTab === 'drivers' ? renderDriverDoc : renderParentDoc}
+          data={(activeTab === 'drivers' ? driverDocs : parentDocs) as (DriverDocument | ParentDocument)[]}
+          renderItem={activeTab === 'drivers' ? (renderDriverDoc as ({ item }: { item: DriverDocument | ParentDocument }) => React.ReactElement) : (renderParentDoc as ({ item }: { item: DriverDocument | ParentDocument }) => React.ReactElement)}
           keyExtractor={item => item.id}
           contentContainerStyle={styles(colors).list}
           ListEmptyComponent={

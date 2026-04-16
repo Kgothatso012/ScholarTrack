@@ -153,7 +153,7 @@ export default function SettingsScreen({ navigation }: Props) {
     input: { backgroundColor: colors.background, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text, borderWidth: 1, borderColor: colors.border },
   });
 
-  const SettingRow = ({ label, description, value, onValueChange, icon }: any) => (
+  const SettingRow = ({ label, description, value, onValueChange }: { label: string; description?: string; value: boolean; onValueChange: (v: boolean) => void }) => (
     <View style={styles(colors).settingRow}>
       <View style={styles(colors).settingInfo}>
         <Text style={styles(colors).settingLabel}>{label}</Text>

@@ -290,7 +290,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={(el: any) => otpInputRefs.current[index] = el}
+                  ref={(el: TextInput | null) => { otpInputRefs.current[index] = el; }}
                   style={styles(colors).otpInput}
                   value={digit}
                   onChangeText={(value) => {
@@ -374,7 +374,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
                   selectedRole === role.id && styles(colors).roleIconSelected
                 ]}>
                   <Ionicons
-                    name={role.icon as any}
+                    name={role.icon as keyof typeof Ionicons.glyphMap}
                     size={24}
                     color={selectedRole === role.id ? '#fff' : '#002395'}
                   />

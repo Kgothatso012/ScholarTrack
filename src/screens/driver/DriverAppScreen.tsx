@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, LayoutAnimation, UIManager, Dimensions } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -171,7 +172,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
         style: 'destructive',
         onPress: async () => {
           await supabase.auth.signOut();
-          (window as any).logout?.();
+          await AsyncStorage.multiRemove(['driverCompliance', 'userRole', 'userName', 'userEmail']);
         },
       },
     ]);
@@ -432,7 +433,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
             style={[s(colors).tabBtn, activeTab === t.key && s(colors).tabBtnActive]}
           >
             <Ionicons
-              name={t.icon as any}
+              name={t.icon as keyof typeof Ionicons.glyphMap}
               size={18}
               color={activeTab === t.key ? colors.textInverse : 'rgba(255,255,255,0.45)'}
             />
@@ -525,7 +526,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
                   style={s(colors).actionPill}
                 >
                   <View style={[s(colors).actionPillIcon, { backgroundColor: `${action.color}20` }]}>
-                    <Ionicons name={action.icon as any} size={15} color={action.color} />
+                    <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={15} color={action.color} />
                   </View>
                   <Text style={s(colors).actionPillText}>{action.name}</Text>
                 </TouchableOpacity>

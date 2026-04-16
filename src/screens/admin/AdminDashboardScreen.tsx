@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, StyleProp, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -15,11 +15,11 @@ import { SearchBar, Pagination } from '../../ui-plugin/components';
 const SA_GOLD = '#FFB81C';
 
 // Shimmer skeleton rect — same pattern as DriverAppScreen SkeletonRect
-const SkeletonRect = ({ width, height, style }: { width: number | string; height: number; style?: any }) => {
+const SkeletonRect = ({ width, height, style }: { width: number | string; height: number; style?: object }) => {
   const shimmer = useSharedValue(0);
   useEffect(() => { shimmer.value = withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 900 })), -1, false); }, []);
   const animStyle = useAnimatedStyle(() => ({ opacity: 0.15 + interpolate(shimmer.value, [0, 1], [0, 0.55]) }));
-  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: borderRadius.lg }, style, { width, height }, animStyle]} />;
+  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: borderRadius.lg, width, height }, style, animStyle]} />;
 };
 
 interface DashboardStat {
@@ -250,7 +250,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
           <View style={{ flexDirection: 'row' }}>
             {[{ icon: 'location', route: 'FleetTracking' }, { icon: 'settings-outline', route: 'Settings' }, { icon: 'refresh', action: 'refresh' }].map((btn, i) => (
               <TouchableOpacity key={i} style={s(colors).headerBtn} onPress={() => btn.action === 'refresh' ? onRefresh() : navigation?.navigate?.(btn.route as string)}>
-                <Ionicons name={btn.icon as any} size={20} color={colors.textInverse} />
+                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={20} color={colors.textInverse} />
               </TouchableOpacity>
             ))}
           </View>
@@ -261,7 +261,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
       <View style={s(colors).tabsOuter}>
         {[{ tab: 'overview', label: 'Overview', icon: 'grid' }, { tab: 'drivers', label: 'Drivers', icon: 'car' }, { tab: 'payments', label: 'Payments', icon: 'card' }].map(t => (
           <TouchableOpacity key={t.tab} onPress={() => switchTab(t.tab)} style={[s(colors).tabBtn, activeTab === t.tab && s(colors).tabBtnActive]}>
-            <Ionicons name={t.icon as any} size={18} color={activeTab === t.tab ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
+            <Ionicons name={t.icon as keyof typeof Ionicons.glyphMap} size={18} color={activeTab === t.tab ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
             <Text style={activeTab === t.tab ? s(colors).tabTextActive : s(colors).tabText}>{t.label}</Text>
           </TouchableOpacity>
         ))}
@@ -295,7 +295,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
               <View style={{ width: '52%', paddingHorizontal: 4, paddingVertical: 4 }}>
                 <TouchableOpacity activeOpacity={0.8} onPress={() => navigation?.navigate?.(quickActions[0].route)} style={s(colors).quickCardInner}>
                   <View style={[s(colors).quickIconWrap, { backgroundColor: `${quickActions[0].color}20`, borderColor: `${quickActions[0].color}40` }]}>
-                    <Ionicons name={quickActions[0].icon as any} size={22} color={quickActions[0].color} />
+                    <Ionicons name={quickActions[0].icon as keyof typeof Ionicons.glyphMap} size={22} color={quickActions[0].color} />
                   </View>
                   <Text style={s(colors).quickText}>{quickActions[0].name}</Text>
                 </TouchableOpacity>
@@ -304,7 +304,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
                 <View key={index} style={{ width: '48%', paddingHorizontal: 4, paddingVertical: 4 }}>
                   <TouchableOpacity activeOpacity={0.8} onPress={() => navigation?.navigate?.(action.route)} style={s(colors).quickCardInner}>
                     <View style={[s(colors).quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
-                      <Ionicons name={action.icon as any} size={22} color={action.color} />
+                      <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={action.color} />
                     </View>
                     <Text style={s(colors).quickText}>{action.name}</Text>
                   </TouchableOpacity>

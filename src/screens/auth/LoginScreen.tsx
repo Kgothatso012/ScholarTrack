@@ -63,8 +63,6 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
 
       if (onLogin) {
         onLogin(userRole);
-      } else if (typeof window !== 'undefined' && (window as any).__handleLogin) {
-        (window as any).__handleLogin(userRole);
       }
     } catch (error) {
       Alert.alert('Error', 'Demo login failed');
