@@ -1,19 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Animated, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, interpolate } from 'react-native-reanimated';
 
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+const SA_GOLD = '#FFB81C';
+
+// Shimmer skeleton rect — same pattern as DriverAppScreen SkeletonRect
+const SkeletonRect = ({ width, height, style }: { width: number | string; height: number; style?: any }) => {
+  const shimmer = useSharedValue(0);
+  useEffect(() => { shimmer.value = withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 900 })), -1, false); }, []);
+  const animStyle = useAnimatedStyle(() => ({ opacity: 0.15 + interpolate(shimmer.value, [0, 1], [0, 0.55]) }));
+  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: borderRadius.lg }, style, { width, height }, animStyle]} />;
+};
 
 interface DashboardStat {
   label: string;
@@ -115,7 +122,10 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
 
   const onRefresh = useCallback(async () => { setRefreshing(true); await loadDashboardData(); }, []);
 
-  const switchTab = (tab: string) => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setActiveTab(tab); };
+  const switchTab = (tab: string) => {
+    // Spring tab transition — Reanimated worklets handle the animation thread
+    setActiveTab(tab);
+  };
 
   const getStatusVariant = (status: string, verified: boolean): 'success' | 'warning' | 'error' | 'neutral' => {
     if (!verified) return 'warning';
@@ -169,8 +179,6 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
     emptyGlass: { padding: spacing.xl, alignItems: 'center' },
     emptyText: { ...typography.body, color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
     emptyTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.xs, textAlign: 'center' },
-    loadingContainer: { flex: 1, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center' },
-    loadingGlass: { width: '80%', padding: spacing.xl, alignItems: 'center' },
   });
 
   const quickActions = [
@@ -182,10 +190,48 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
 
   if (loading) {
     return (
-      <View style={[s(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={[s(colors).glass, s(colors).loadingGlass]}>
-          <Text style={{ ...typography.body, color: 'rgba(255,255,255,0.5)' }}>Loading dashboard...</Text>
+      <View style={s(colors).container}>
+        {/* Header skeleton */}
+        <View style={s(colors).header}>
+          <View style={s(colors).headerGlow1} />
+          <View style={s(colors).headerGlow2} />
+          <View style={s(colors).headerRow}>
+            <View>
+              <SkeletonRect width={160} height={24} style={{ marginBottom: 8 }} />
+              <SkeletonRect width={120} height={14} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {[0, 1, 2].map(i => <SkeletonRect key={i} width={36} height={36} style={{ borderRadius: 12 }} />)}
+            </View>
+          </View>
         </View>
+        {/* Tabs skeleton */}
+        <View style={s(colors).tabsOuter}>
+          {[0, 1, 2].map(i => <SkeletonRect key={i} width={'33%'} height={36} style={{ borderRadius: borderRadius.xxl }} />)}
+        </View>
+        {/* Stats skeleton */}
+        <View style={s(colors).statsGrid}>
+          {[0, 1, 2, 3].map(i => (
+            <View key={i} style={{ width: i < 2 ? '55%' : '43%', paddingHorizontal: 4, paddingVertical: 4 }}>
+              <View style={s(colors).glass}>
+                <View style={s(colors).glassRefraction} />
+                <View style={[s(colors).statLeftBar, { backgroundColor: 'rgba(255,184,28,0.3)' }]} />
+                <View style={s(colors).statCard}>
+                  <SkeletonRect width={80} height={10} style={{ marginBottom: 8 }} />
+                  <SkeletonRect width={100} height={28} />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+        {/* Quick actions skeleton */}
+        <View style={s(colors).section}>
+          <SkeletonRect width={120} height={18} style={{ marginBottom: 12 }} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {[0, 1, 2, 3].map(i => <SkeletonRect key={i} width={'24%'} height={72} style={{ borderRadius: borderRadius.xxl }} />)}
+          </View>
+        </View>
+        <Spacer size="xl" />
       </View>
     );
   }
