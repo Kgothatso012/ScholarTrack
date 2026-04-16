@@ -8,6 +8,7 @@ import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
+import SplashScreen from './src/components/SplashScreen';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './src/navigation/types';
@@ -156,12 +157,7 @@ function AppContentWithTheme() {
   }
 
   if (loading) {
-    return (
-      <View style={[styles.splash, { backgroundColor: '#002395' }]}>
-        <Text style={styles.splashText}>ScholarTrack</Text>
-        <ActivityIndicator size="small" color="#FFB81C" style={{ marginTop: 20 }} />
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (
@@ -185,15 +181,3 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  splashText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFB81C',
-  },
-});
