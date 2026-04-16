@@ -248,6 +248,8 @@ export default function DriverAppScreen({ navigation }: Props) {
     tabTextActive: { color: colors.textInverse },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
     statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.lg, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
+    statCardWide: { width: '60%', backgroundColor: colors.card, margin: '1%', padding: spacing.lg, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
+    statCardNarrow: { width: '36%', backgroundColor: colors.card, margin: '1%', padding: spacing.lg, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
     statLabel: { ...typography.labelSmall, color: colors.textSecondary },
     statValue: { ...typography.displayMedium, color: colors.accent, marginTop: spacing.xs },
     quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
@@ -362,9 +364,14 @@ export default function DriverAppScreen({ navigation }: Props) {
         <>
           {/* Stats Grid */}
           <View style={styles(colors).section}>
+            <Text style={styles(colors).sectionTitle}>Overview</Text>
             <View style={styles(colors).statsGrid}>
               {stats.map((stat, index) => (
-                <View key={index} style={styles(colors).statCard}>
+                <View key={index} style={[
+                  styles(colors).statCard,
+                  index === 0 && styles(colors).statCardWide,
+                  index === 3 && styles(colors).statCardNarrow,
+                ]}>
                   <Text style={styles(colors).statLabel}>{stat.label}</Text>
                   <Text style={styles(colors).statValue}>{stat.value}</Text>
                 </View>
