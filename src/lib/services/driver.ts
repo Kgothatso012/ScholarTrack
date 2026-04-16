@@ -29,6 +29,20 @@ export const driverService = {
     return data as Driver;
   },
 
+  async getDriverByUserId(userId: string): Promise<Driver | null> {
+    const { data, error } = await supabase
+      .from('drivers')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw error;
+    }
+    return data as Driver;
+  },
+
   async updateAvailability(driverId: string, isAvailable: boolean) {
     const { data, error } = await supabase
       .from('drivers')

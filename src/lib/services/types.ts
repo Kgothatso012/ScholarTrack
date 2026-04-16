@@ -53,7 +53,7 @@ export interface Trip {
   id: string;
   driver_id?: string;
   child_id?: string;
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'active';
   scheduled_time?: string;
   pickup_time?: string;
   dropoff_time?: string;
@@ -71,7 +71,7 @@ export interface Payment {
   parent_id?: string;
   driver_id?: string;
   amount: number;
-  status: 'pending' | 'paid' | 'failed';
+  status: 'pending' | 'paid' | 'failed' | 'completed';
   month?: string;
   paid_at?: string;
   created_at?: string;

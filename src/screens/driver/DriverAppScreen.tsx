@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Animated, LayoutAnimation, UIManager, Dimensions } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, LayoutAnimation, UIManager, Dimensions } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { driverService } from '../../lib/services/driver';
+import { tripService } from '../../lib/services/trip';
+import { paymentService } from '../../lib/services/payment';
 import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
-
+import { Driver, Trip, Payment } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { ThemeColors } from '../../context/ThemeContext';
@@ -20,97 +24,127 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-interface Trip {
-  id: string;
-  scheduled_time: string;
-  status: string;
-  route_name: string;
-}
+type TabKey = 'overview' | 'trips' | 'earnings';
 
-interface PaymentRecord {
-  id: string;
-  amount: number;
-  status: string;
-  created_at: string;
-}
+// ─── Skeleton shimmer component ─────────────────────────────────────────────
+const SkeletonRect: React.FC<{ w: number | string; h: number; radius?: number }> = ({ w, h, radius = borderRadius.lg }) => {
+  const opacity = useSharedValue(0.3);
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 900, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      true
+    );
+  }, []);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return (
+    <Animated.View
+      style={[
+        {
+          width: w as number,
+          height: h,
+          borderRadius: radius,
+          backgroundColor: 'rgba(255,255,255,0.08)',
+        },
+        style,
+      ]}
+    />
+  );
+};
 
-interface DriverUser {
-  id: string;
-  full_name?: string;
-  phone?: string;
-  email?: string;
-  status?: string;
-  is_verified?: boolean;
-}
-
-interface DashboardStat {
-  label: string;
-  value: string | number;
-  positive?: boolean;
-}
-
+// ─── Main Screen ────────────────────────────────────────────────────────────
 const DriverAppScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const [loading, setLoading] = useState(true);
+
+  const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setTab] = useState('overview');
-  const [stats, setStats] = useState<DashboardStat[]>([]);
+
+  // Real data state
+  const [driver, setDriver] = useState<Driver | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const [earnings, setEarnings] = useState({ today: 0, week: 0, pending: 0 });
-  const [currentUser, setCurrentUser] = useState<DriverUser | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [ratingSummary, setRatingSummary] = useState<DriverRatingSummary | null>(null);
 
-  const switchTab = (tab: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setTab(tab);
-  };
+  // Loading / error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Derived stats — computed from real data, not hardcoded
+  const [stats, setStats] = useState<{ label: string; value: string; positive: boolean }[]>([]);
+
+  // ─── Data loading ──────────────────────────────────────────────────────────
   const loadDriverData = async () => {
     try {
-      setLoading(true);
+      setError(null);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { Alert.alert('Error', 'Please login first'); return; }
+      if (!user) {
+        Alert.alert('Error', 'Please login first');
+        return;
+      }
 
-      const { data: driverData } = await supabase.from('drivers').select('*').eq('user_id', user.id).single();
-      setCurrentUser(driverData);
+      // 1. Driver profile via service
+      const driverData = await driverService.getDriverByUserId(user.id);
+      if (!driverData) {
+        setError('Driver profile not found. Please complete registration.');
+        setLoading(false);
+        return;
+      }
+      setDriver(driverData);
 
-      if (driverData) {
-        const today = new Date().toISOString().split('T')[0];
-        const { data: tripsData } = await supabase.from('trips').select('*').eq('driver_id', driverData.id).gte('scheduled_time', today).order('scheduled_time', { ascending: true }).limit(10);
-        setTrips(tripsData || []);
+      // 2. Today's trips for this driver via service
+      const today = new Date().toISOString().split('T')[0];
+      const allTrips = await tripService.getTripsForDriver(driverData.id);
+      const todayTrips = (allTrips || []).filter((t: Trip) =>
+        t.scheduled_time && t.scheduled_time.startsWith(today)
+      );
+      const activeTripCount = (allTrips || []).filter((t: Trip) =>
+        t.status === 'in_progress' || t.status === 'scheduled'
+      ).length;
+      setTrips(todayTrips);
 
-        const { count: totalTrips } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('driver_id', driverData.id);
-        const { count: activeTrips } = await supabase.from('trips').select('*', { count: 'exact', head: true }).eq('driver_id', driverData.id).in('status', ['in_progress', 'active']);
+      // 3. Payments for driver via service
+      const paymentsData = await paymentService.getPaymentsForDriver(driverData.id);
+      setPayments(paymentsData || []);
 
-        const { data: paymentsData } = await supabase.from('payments').select('*').eq('driver_id', driverData.id).order('created_at', { ascending: false }).limit(10);
-        setPayments(paymentsData || []);
+      // 4. Compute earnings from real payment data
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const weekStart = new Date(now.setDate(now.getDate() - 7)).toISOString();
+      const completedPayments = (paymentsData || []).filter((p: Payment) => p.status === 'paid' || p.status === 'completed');
+      const todayEarnings = completedPayments
+        .filter((p: Payment) => p.created_at && p.created_at >= todayStart)
+        .reduce((sum: number, p: Payment) => sum + (p.amount || 0), 0);
+      const weekEarnings = completedPayments
+        .filter((p: Payment) => p.created_at && p.created_at >= weekStart)
+        .reduce((sum: number, p: Payment) => sum + (p.amount || 0), 0);
+      const pendingEarnings = (paymentsData || [])
+        .filter((p: Payment) => p.status === 'pending')
+        .reduce((sum: number, p: Payment) => sum + (p.amount || 0), 0);
+      const totalEarnings = completedPayments.reduce((sum: number, p: Payment) => sum + (p.amount || 0), 0);
 
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-        const weekStart = new Date(new Date().setDate(now.getDate() - 7)).toISOString();
+      setStats([
+        { label: 'Total Trips', value: String(allTrips?.length || 0), positive: true },
+        { label: 'Active', value: String(activeTripCount), positive: true },
+        { label: 'Today', value: `R${(todayEarnings / 100).toFixed(0)}`, positive: true },
+        { label: 'Pending', value: `R${(pendingEarnings / 100).toFixed(0)}`, positive: false },
+        { label: 'This Week', value: `R${(weekEarnings / 100).toFixed(0)}`, positive: true },
+      ]);
 
-        const todayEarnings = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'completed' && p.created_at >= todayStart).reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
-        const weekEarnings = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'completed' && p.created_at >= weekStart).reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
-        const pendingEarnings = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'pending').reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
-        setEarnings({ today: todayEarnings, week: weekEarnings, pending: pendingEarnings });
-
-        const totalEarnings = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'completed').reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0);
-
-        setStats([
-          { label: 'Total Trips', value: totalTrips || 0, positive: true },
-          { label: 'Active', value: activeTrips || 0, positive: true },
-          { label: 'Today', value: `R${(todayEarnings / 100).toFixed(0)}`, positive: true },
-          { label: 'Total Earned', value: `R${(totalEarnings / 100).toFixed(0)}`, positive: true },
-        ]);
-
+      // 5. Rating via service
+      try {
         const rating = await ratingService.getDriverRatingSummary(driverData.id);
         setRatingSummary(rating);
+      } catch {
+        // Rating is non-critical — silently skip
       }
-    } catch (error) {
-      console.error('Error loading driver data:', error);
-      setStats([{ label: 'Total Trips', value: 0 }, { label: 'Active', value: 0 }, { label: 'Today', value: 'R0' }, { label: 'Total Earned', value: 'R0' }]);
+
+    } catch (err: unknown) {
+      console.error('Error loading driver data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -119,28 +153,61 @@ const DriverAppScreen = ({ navigation }: Props) => {
 
   useEffect(() => { loadDriverData(); }, []);
 
-  const onRefresh = useCallback(async () => { setRefreshing(true); await loadDriverData(); }, []);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDriverData();
+  }, []);
+
+  const switchTab = (tab: TabKey) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setActiveTab(tab);
+  };
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: async () => { await supabase.auth.signOut(); (window as any).logout?.(); }}
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await supabase.auth.signOut();
+          (window as any).logout?.();
+        },
+      },
     ]);
   };
 
+  // ─── Helpers ────────────────────────────────────────────────────────────────
   const getTripStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
-    switch (status) { case 'completed': return 'success'; case 'in_progress': case 'active': return 'warning'; case 'cancelled': return 'error'; default: return 'neutral'; }
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in_progress': case 'active': return 'warning';
+      case 'cancelled': return 'error';
+      default: return 'neutral';
+    }
   };
 
   const formatTripStatus = (status: string) => {
-    switch (status) { case 'in_progress': return 'In Progress'; case 'active': return 'Active'; case 'scheduled': return 'Scheduled'; case 'completed': return 'Completed'; case 'cancelled': return 'Cancelled'; default: return status; }
+    switch (status) {
+      case 'in_progress': return 'In Progress';
+      case 'active': return 'Active';
+      case 'scheduled': return 'Scheduled';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return status;
+    }
   };
 
   const getPaymentVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
-    switch (status) { case 'completed': case 'paid': return 'success'; case 'pending': return 'warning'; case 'failed': return 'error'; default: return 'neutral'; }
+    switch (status) {
+      case 'completed': case 'paid': return 'success';
+      case 'pending': return 'warning';
+      case 'failed': return 'error';
+      default: return 'neutral';
+    }
   };
 
-  // ─── Styles ───
+  // ─── Styles ────────────────────────────────────────────────────────────────
   const s = (c: ThemeColors) => StyleSheet.create({
     container: { flex: 1, backgroundColor: c.background },
     // HEADER
@@ -169,7 +236,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     // GLASS
     glass: { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.12)', borderRadius: borderRadius.xxl, overflow: 'hidden' },
     glassRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,184,28,0.2)' },
-    // STATS TICKER — horizontal scrolling carousel
+    // STATS TICKER
     statsSection: { paddingTop: spacing.md },
     statsTickerLabel: { ...typography.labelSmall, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginLeft: spacing.lg, marginBottom: spacing.sm },
     statsTicker: { paddingLeft: spacing.md },
@@ -178,6 +245,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     statsTickerLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2 },
     statsTickerLabel2: { ...typography.labelSmall, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 },
     statsTickerValue: { ...typography.h3, color: '#FFB81C', marginTop: spacing.xs, fontWeight: '700' },
+    statsTickerValueNegative: { ...typography.h3, color: '#E03C31', marginTop: spacing.xs, fontWeight: '700' },
     // RATING CARD
     ratingSection: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
     ratingSectionTitle: { ...typography.labelSmall, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: spacing.sm },
@@ -189,7 +257,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     ratingMeta: { ...typography.bodySmall, color: 'rgba(255,255,255,0.45)', marginLeft: spacing.md },
     ratingRight: { alignItems: 'flex-end' },
     ratingStatRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs },
-    // QUICK ACTIONS — horizontal scrollable pill dock
+    // QUICK ACTIONS
     actionsSection: { paddingTop: spacing.md },
     actionsLabel: { ...typography.labelSmall, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginLeft: spacing.lg, marginBottom: spacing.sm },
     actionsDock: { paddingLeft: spacing.md },
@@ -199,18 +267,23 @@ const DriverAppScreen = ({ navigation }: Props) => {
     // SECTION
     section: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
     sectionTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.md, fontWeight: '600', letterSpacing: 0.2 },
-    // LIST ITEMS — glassmorphism
+    // LIST ITEMS
     listItem: { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.12)', borderRadius: borderRadius.xxl, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
     listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,35,149,0.25)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,0.3)' },
     listInfo: { flex: 1 },
     listName: { ...typography.label, color: colors.text },
     listMeta: { ...typography.bodySmall, color: 'rgba(255,255,255,0.45)' },
     amount: { ...typography.h4, color: '#FFB81C', fontWeight: '700' },
-    emptyText: { ...typography.body, color: 'rgba(255,255,255,0.45)', textAlign: 'center', padding: spacing.lg },
-    loadingWrap: { flex: 1, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center' },
-    loadingGlass: { width: '80%', padding: spacing.xl, alignItems: 'center' },
+    emptyWrap: { backgroundColor: 'rgba(255,255,255,0.03)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.08)', borderRadius: borderRadius.xxl, padding: spacing.xl, alignItems: 'center' },
+    emptyText: { ...typography.body, color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginTop: spacing.sm },
+    errorWrap: { backgroundColor: 'rgba(224,60,49,0.1)', borderWidth: 1, borderColor: 'rgba(224,60,49,0.25)', borderRadius: borderRadius.xxl, padding: spacing.lg, marginHorizontal: spacing.md, marginTop: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    errorText: { ...typography.bodySmall, color: '#E03C31', flex: 1 },
+    // SKELETON
+    skeletonSection: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
+    skeletonRow: { flexDirection: 'row', gap: spacing.sm },
   });
 
+  // ─── Quick Actions — all wired to real routes ─────────────────────────────
   const quickActions = [
     { name: 'Start Trip', icon: 'play-circle', color: '#007749', route: 'DriverTrips' },
     { name: 'My Trips', icon: 'bus', color: '#002395', route: 'DriverTrips' },
@@ -222,18 +295,93 @@ const DriverAppScreen = ({ navigation }: Props) => {
     { name: 'Settings', icon: 'settings', color: '#607D8B', route: 'Settings' },
   ];
 
+  // ─── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
-      <View style={[s(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={[s(colors).glass, s(colors).loadingGlass]}>
-          <Text style={{ ...typography.body, color: 'rgba(255,255,255,0.5)' }}>Loading dashboard...</Text>
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        {/* Header skeleton */}
+        <View style={s(colors).header}>
+          <View style={s(colors).headerGlow} />
+          <View style={s(colors).headerRow}>
+            <View style={{ gap: spacing.xs }}>
+              <SkeletonRect w={160} h={24} />
+              <SkeletonRect w={120} h={14} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <SkeletonRect w={36} h={36} />
+              <SkeletonRect w={36} h={36} />
+            </View>
+          </View>
+        </View>
+
+        {/* Tabs skeleton */}
+        <View style={{ marginHorizontal: spacing.md, marginTop: spacing.md }}>
+          <SkeletonRect w="100%" h={44} />
+        </View>
+
+        {/* Stats ticker skeleton */}
+        <View style={s(colors).skeletonSection}>
+          <SkeletonRect w={80} h={10} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: spacing.sm }} contentContainerStyle={{ paddingLeft: spacing.md, gap: spacing.sm }}>
+            {[1,2,3,4].map(i => <SkeletonRect key={i} w={120} h={90} />)}
+          </ScrollView>
+        </View>
+
+        {/* Rating skeleton */}
+        <View style={s(colors).skeletonSection}>
+          <SkeletonRect w={80} h={10} />
+          <View style={{ marginTop: spacing.sm }}>
+            <SkeletonRect w="100%" h={90} />
+          </View>
+        </View>
+
+        {/* Quick actions skeleton */}
+        <View style={s(colors).skeletonSection}>
+          <SkeletonRect w={100} h={10} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: spacing.sm }} contentContainerStyle={{ paddingLeft: spacing.md, gap: spacing.sm }}>
+            {[1,2,3,4,5].map(i => <SkeletonRect key={i} w={110} h={50} />)}
+          </ScrollView>
+        </View>
+      </View>
+    );
+  }
+
+  // ─── Error state ────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        <View style={s(colors).header}>
+          <View style={s(colors).headerGlow} />
+          <View style={s(colors).headerRow}>
+            <Text style={s(colors).headerTitle}>Driver Dashboard</Text>
+          </View>
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', padding: spacing.lg }}>
+          <View style={s(colors).errorWrap}>
+            <Ionicons name="alert-circle" size={24} color="#E03C31" />
+            <Text style={s(colors).errorText}>{error}</Text>
+          </View>
+          <Spacer size="lg" />
+          <TouchableOpacity onPress={loadDriverData} style={{ alignItems: 'center' }}>
+            <Text style={{ ...typography.label, color: '#FFB81C' }}>Try Again</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
   }
 
   return (
-    <ScrollView style={s(colors).container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFB81C']} tintColor={'#FFB81C'} />}>
+    <ScrollView
+      style={s(colors).container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#FFB81C']}
+          tintColor="#FFB81C"
+        />
+      }
+    >
       {/* HEADER */}
       <View style={s(colors).header}>
         <View style={s(colors).headerGlow} />
@@ -241,14 +389,22 @@ const DriverAppScreen = ({ navigation }: Props) => {
         <View style={s(colors).headerRow}>
           <View>
             <Text style={s(colors).headerTitle}>Driver Dashboard</Text>
-            <Text style={s(colors).headerSubtext}>{currentUser?.full_name || 'Driver'} {currentUser?.is_verified ? '' : ''}</Text>
+            <Text style={s(colors).headerSubtext}>
+              {driver?.full_name || 'Driver'}{' '}
+              {driver?.vehicle_type ? `· ${driver.vehicle_type}` : ''}
+            </Text>
           </View>
           <View style={s(colors).headerActions}>
-            <TouchableOpacity onPress={onRefresh} style={s(colors).headerBtn}><Ionicons name="refresh" size={20} color={colors.textInverse} /></TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout} style={s(colors).headerBtn}><Ionicons name="log-out-outline" size={20} color={colors.textInverse} /></TouchableOpacity>
+            <TouchableOpacity onPress={onRefresh} style={s(colors).headerBtn}>
+              <Ionicons name="refresh" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={s(colors).headerBtn}>
+              <Ionicons name="log-out-outline" size={20} color={colors.textInverse} />
+            </TouchableOpacity>
           </View>
         </View>
-        {currentUser?.is_verified ? (
+
+        {driver?.is_verified ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, gap: 6, position: 'relative', zIndex: 1 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#007749' }} />
             <Text style={{ ...typography.labelSmall, color: 'rgba(255,255,255,0.6)' }}>Verified driver</Text>
@@ -263,34 +419,58 @@ const DriverAppScreen = ({ navigation }: Props) => {
 
       {/* TABS */}
       <View style={s(colors).tabsOuter}>
-        {[{ key: 'overview', label: 'Overview', icon: 'grid' }, { key: 'trips', label: 'Trips', icon: 'bus' }, { key: 'earnings', label: 'Earnings', icon: 'card' }].map(t => (
-          <TouchableOpacity key={t.key} onPress={() => switchTab(t.key)} style={[s(colors).tabBtn, activeTab === t.key && s(colors).tabBtnActive]}>
-            <Ionicons name={t.icon as any} size={18} color={activeTab === t.key ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
-            <Text style={activeTab === t.key ? s(colors).tabTextActive : s(colors).tabText}>{t.label}</Text>
+        {(
+          [
+            { key: 'overview' as TabKey, label: 'Overview', icon: 'grid' },
+            { key: 'trips' as TabKey, label: 'Trips', icon: 'bus' },
+            { key: 'earnings' as TabKey, label: 'Earnings', icon: 'card' },
+          ]
+        ).map(t => (
+          <TouchableOpacity
+            key={t.key}
+            onPress={() => switchTab(t.key)}
+            style={[s(colors).tabBtn, activeTab === t.key && s(colors).tabBtnActive]}
+          >
+            <Ionicons
+              name={t.icon as any}
+              size={18}
+              color={activeTab === t.key ? colors.textInverse : 'rgba(255,255,255,0.45)'}
+            />
+            <Text style={activeTab === t.key ? s(colors).tabTextActive : s(colors).tabText}>
+              {t.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* ── OVERVIEW ── */}
+      {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
       {activeTab === 'overview' && (
         <>
-          {/* Stats — horizontal ticker carousel */}
+          {/* Stats ticker */}
           <View style={s(colors).statsSection}>
             <Text style={s(colors).statsTickerLabel}>Overview</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s(colors).statsTicker}>
-              {stats.map((stat, index) => (
-                <View key={index} style={s(colors).statsTickerItem}>
-                  <View style={s(colors).statsTickerRefraction} />
-                  <View style={[s(colors).statsTickerLeftBar, { backgroundColor: 'rgba(255,184,28,0.6)' }]} />
-                  <Text style={s(colors).statsTickerLabel2}>{stat.label}</Text>
-                  <Text style={s(colors).statsTickerValue}>{stat.value}</Text>
+              {stats.length === 0 ? (
+                <View style={[s(colors).statsTickerItem, { minWidth: 200, alignItems: 'center' }]}>
+                  <Text style={{ ...typography.bodySmall, color: 'rgba(255,255,255,0.3)' }}>No data yet</Text>
                 </View>
-              ))}
+              ) : (
+                stats.map((stat, index) => (
+                  <View key={index} style={s(colors).statsTickerItem}>
+                    <View style={s(colors).statsTickerRefraction} />
+                    <View style={[s(colors).statsTickerLeftBar, { backgroundColor: stat.positive ? 'rgba(255,184,28,0.6)' : 'rgba(224,60,49,0.6)' }]} />
+                    <Text style={s(colors).statsTickerLabel2}>{stat.label}</Text>
+                    <Text style={stat.positive ? s(colors).statsTickerValue : s(colors).statsTickerValueNegative}>
+                      {stat.value}
+                    </Text>
+                  </View>
+                ))
+              )}
             </ScrollView>
           </View>
 
           {/* Rating Card */}
-          {ratingSummary && (
+          {ratingSummary ? (
             <View style={s(colors).ratingSection}>
               <Text style={s(colors).ratingSectionTitle}>My Rating</Text>
               <View style={s(colors).glass}>
@@ -309,25 +489,41 @@ const DriverAppScreen = ({ navigation }: Props) => {
                     <View style={s(colors).ratingRight}>
                       <View style={s(colors).ratingStatRow}>
                         <Ionicons name="thumbs-up" size={14} color="#007749" />
-                        <Text style={{ ...typography.bodySmall, color: '#007749', marginLeft: 4 }}>{ratingSummary.positive_reviews} positive</Text>
+                        <Text style={{ ...typography.bodySmall, color: '#007749', marginLeft: 4 }}>
+                          {ratingSummary.positive_reviews} positive
+                        </Text>
                       </View>
                       <View style={s(colors).ratingStatRow}>
                         <Ionicons name="thumbs-down" size={14} color="#E03C31" />
-                        <Text style={{ ...typography.bodySmall, color: '#E03C31', marginLeft: 4 }}>{ratingSummary.negative_reviews} needs work</Text>
+                        <Text style={{ ...typography.bodySmall, color: '#E03C31', marginLeft: 4 }}>
+                          {ratingSummary.negative_reviews} needs work
+                        </Text>
                       </View>
                     </View>
                   </View>
                 </View>
               </View>
             </View>
+          ) : (
+            <View style={[s(colors).ratingSection]}>
+              <Text style={s(colors).ratingSectionTitle}>My Rating</Text>
+              <View style={[s(colors).glass, s(colors).emptyWrap]}>
+                <Ionicons name="star-outline" size={32} color="rgba(255,255,255,0.2)" />
+                <Text style={s(colors).emptyText}>No ratings yet</Text>
+              </View>
+            </View>
           )}
 
-          {/* Quick Actions — horizontal pill dock */}
+          {/* Quick Actions */}
           <View style={s(colors).actionsSection}>
             <Text style={s(colors).actionsLabel}>Quick Actions</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s(colors).actionsDock}>
               {quickActions.map((action, index) => (
-                <TouchableOpacity key={index} onPress={() => navigation?.navigate?.(action.route)} style={s(colors).actionPill}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => navigation?.navigate?.(action.route)}
+                  style={s(colors).actionPill}
+                >
                   <View style={[s(colors).actionPillIcon, { backgroundColor: `${action.color}20` }]}>
                     <Ionicons name={action.icon as any} size={15} color={action.color} />
                   </View>
@@ -339,40 +535,49 @@ const DriverAppScreen = ({ navigation }: Props) => {
         </>
       )}
 
-      {/* ── TRIPS ── */}
+      {/* ── TRIPS ─────────────────────────────────────────────────────────── */}
       {activeTab === 'trips' && (
         <View style={s(colors).section}>
-          <Text style={s(colors).sectionTitle}>All Trips ({trips.length})</Text>
+          <Text style={s(colors).sectionTitle}>Today's Trips ({trips.length})</Text>
           {trips.length === 0 ? (
-            <View style={[s(colors).glass, { padding: spacing.xl, alignItems: 'center' }]}>
-              <Ionicons name="bus-outline" size={40} color="rgba(255,255,255,0.2)" />
-              <Text style={s(colors).emptyText}>No trips found</Text>
+            <View style={[s(colors).glass, s(colors).emptyWrap]}>
+              <Ionicons name="bus-outline" size={40} color="rgba(255,255,255,0.15)" />
+              <Text style={s(colors).emptyText}>No trips scheduled for today.{'\n'}Pull down to refresh.</Text>
             </View>
           ) : (
             trips.map(trip => (
-              <View key={trip.id} style={s(colors).listItem}>
+              <TouchableOpacity
+                key={trip.id}
+                style={s(colors).listItem}
+                onPress={() => navigation?.navigate?.('DriverTrips')}
+              >
                 <View style={s(colors).listAvatar}>
                   <Ionicons name="bus" size={20} color="#002395" />
                 </View>
                 <View style={s(colors).listInfo}>
-                  <Text style={s(colors).listName}>{trip.route_name || 'Route'}</Text>
-                  <Text style={s(colors).listMeta}>{new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                  <Text style={s(colors).listName}>{trip.pickup_location || trip.dropoff_location || 'Route'}</Text>
+                  <Text style={s(colors).listMeta}>
+                    {trip.scheduled_time
+                      ? new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : 'No time set'}
+                    {trip.pickup_location ? ` · ${trip.pickup_location}` : ''}
+                  </Text>
                 </View>
                 <Badge label={formatTripStatus(trip.status)} variant={getTripStatusVariant(trip.status)} size="small" />
-              </View>
+              </TouchableOpacity>
             ))
           )}
         </View>
       )}
 
-      {/* ── EARNINGS ── */}
+      {/* ── EARNINGS ─────────────────────────────────────────────────────── */}
       {activeTab === 'earnings' && (
         <View style={s(colors).section}>
-          <Text style={s(colors).sectionTitle}>Recent Payments</Text>
+          <Text style={s(colors).sectionTitle}>Recent Payments ({payments.length})</Text>
           {payments.length === 0 ? (
-            <View style={[s(colors).glass, { padding: spacing.xl, alignItems: 'center' }]}>
-              <Ionicons name="card-outline" size={40} color="rgba(255,255,255,0.2)" />
-              <Text style={s(colors).emptyText}>No payments found</Text>
+            <View style={[s(colors).glass, s(colors).emptyWrap]}>
+              <Ionicons name="card-outline" size={40} color="rgba(255,255,255,0.15)" />
+              <Text style={s(colors).emptyText}>No payments yet.{'\n'}Pull down to refresh.</Text>
             </View>
           ) : (
             payments.map(payment => (
@@ -381,10 +586,16 @@ const DriverAppScreen = ({ navigation }: Props) => {
                   <Ionicons name="card" size={20} color="#007749" />
                 </View>
                 <View style={s(colors).listInfo}>
-                  <Text style={s(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
-                  <Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" />
+                  <Text style={s(colors).listName}>
+                    Payment · {payment.month || new Date(payment.created_at!).toLocaleDateString()}
+                  </Text>
+                  <View style={{ marginTop: 4 }}>
+                    <Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" />
+                  </View>
                 </View>
-                <Text style={s(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+                <Text style={s(colors).amount}>
+                  R{((payment.amount || 0) / 100).toFixed(2)}
+                </Text>
               </View>
             ))
           )}
