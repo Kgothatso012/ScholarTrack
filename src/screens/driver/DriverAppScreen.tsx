@@ -253,7 +253,7 @@ export default function DriverAppScreen({ navigation }: Props) {
     statLabel: { ...typography.labelSmall, color: colors.textSecondary },
     statValue: { ...typography.displayMedium, color: colors.accent, marginTop: spacing.xs },
     quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.card, alignItems: 'center', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 1 },
+    quickActionCard: { width: '47%', backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.card, alignItems: 'center', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
     quickActionIcon: { marginBottom: spacing.xs },
     quickActionText: { ...typography.label, color: colors.text, textAlign: 'center' },
     listItem: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', borderLeftWidth: 3, borderLeftColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 1 },

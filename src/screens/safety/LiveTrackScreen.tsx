@@ -577,7 +577,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       shadowColor: colors.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1,
-      shadowRadius: 8,
+      shadowRadius: 16,
       elevation: 2,
     },
     actionBtn: { alignItems: 'center', padding: spacing.sm },
