@@ -152,6 +152,16 @@ CREATE TABLE IF NOT EXISTS public.driver_locations (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS public.driver_reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  driver_id UUID REFERENCES drivers(id) ON DELETE CASCADE,
+  parent_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT,
+  month TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- RLS Policies
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE schools ENABLE ROW LEVEL SECURITY;
@@ -162,6 +172,7 @@ ALTER TABLE trips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE driver_locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE driver_reviews ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -194,6 +205,13 @@ CREATE POLICY "Drivers can view own trips" ON trips FOR SELECT USING (driver_id 
 -- Payments policies
 CREATE POLICY "Parents can view own payments" ON payments FOR SELECT USING (parent_id = auth.uid());
 CREATE POLICY "Drivers can view own payments" ON payments FOR SELECT USING (driver_id IN (SELECT id FROM drivers WHERE user_id = auth.uid()));
+
+CREATE POLICY "Authenticated users can view driver locations" ON driver_locations FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Drivers can update own location" ON driver_locations FOR UPDATE USING (auth.uid() = driver_id);
+CREATE POLICY "Drivers can insert own location" ON driver_locations FOR INSERT WITH CHECK (auth.uid() = driver_id);
+
+CREATE POLICY "Anyone can view driver reviews" ON driver_reviews FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Parents can insert own reviews" ON driver_reviews FOR INSERT WITH CHECK (auth.uid() = parent_id);
 
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
