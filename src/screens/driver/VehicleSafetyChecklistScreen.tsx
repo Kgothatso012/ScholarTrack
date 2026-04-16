@@ -146,7 +146,7 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
                 size={24}
                 color={item.checked ? '#007749' : '#999'}
               />
-              <Ionicons name={item.icon as any} size={20} color="#666" style={styles(colors).itemIcon} />
+              <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color="#666" style={styles(colors).itemIcon} />
               <Text style={[styles(colors).itemText, item.checked && styles(colors).itemTextChecked]}>
                 {item.name}
               </Text>

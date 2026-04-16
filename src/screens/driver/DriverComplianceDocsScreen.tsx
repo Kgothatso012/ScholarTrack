@@ -180,7 +180,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
             onPress={() => handleVerifyDoc(doc.id)}
           >
             <View style={[styles(colors).docIcon, { backgroundColor: getStatusColor(doc.verified, doc.required) + '20' }]}>
-              <Ionicons name={doc.icon as any} size={24} color={getStatusColor(doc.verified, doc.required)} />
+              <Ionicons name={doc.icon as keyof typeof Ionicons.glyphMap} size={24} color={getStatusColor(doc.verified, doc.required)} />
             </View>
             <View style={styles(colors).docInfo}>
               <View style={styles(colors).docHeader}>
