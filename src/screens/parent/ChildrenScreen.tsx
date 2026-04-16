@@ -34,11 +34,7 @@ export default function ChildrenScreen({ navigation }: Props) {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Use mock data for demo
-        setChildren([
-          { id: '1', name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
-          { id: '2', name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
-        ]);
+        setChildren([]);
         return;
       }
 
@@ -57,11 +53,7 @@ export default function ChildrenScreen({ navigation }: Props) {
       }
     } catch (error) {
       console.error('Error fetching children:', error);
-      // Fallback to mock data
-      setChildren([
-        { id: '1', name: 'Thato', school: 'Mamelodi High', grade: 'Grade 10', driver: 'Mr. John Molaba', status: 'active' },
-        { id: '2', name: 'Lesego', school: 'St. Martins Primary', grade: 'Grade 5', driver: 'Pending', status: 'inactive' },
-      ]);
+      setChildren([]);
     } finally {
       setLoading(false);
     }

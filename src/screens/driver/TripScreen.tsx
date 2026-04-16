@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
 import { useTheme, ThemeColors } from '../../context/ThemeContext';
 
@@ -270,18 +271,25 @@ const TripScreen = ({ navigation }: Props) => {
       <View style={styles(colors).section}>
         <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Quick Actions</Text>
         <View style={styles(colors).quickActions}>
-          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => {
-            // Open maps with current location (demo coordinates - Pretoria)
-            const pickupLat = -25.7461;
-            const pickupLng = 28.1881;
-            Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${pickupLat},${pickupLng}`);
+          <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={async () => {
+            try {
+              const { status } = await Location.requestForegroundPermissionsAsync();
+              if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Location permission is required for navigation.');
+                return;
+              }
+              const position = await Location.getCurrentPositionAsync({});
+              const { latitude, longitude } = position.coords;
+              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`);
+            } catch (err) {
+              Alert.alert('Location Error', 'Could not get current location. Please enable GPS.');
+            }
           }}>
             <Ionicons name="navigate" size={24} color={colors.primary} />
             <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Navigate</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles(colors).quickAction, { backgroundColor: colors.card }]} onPress={() => {
-            // Call emergency contact or parent
-            Linking.openURL('tel:0800123456');
+            Alert.alert('No Parent Linked', 'No parent contact is linked to this trip yet.');
           }}>
             <Ionicons name="call" size={24} color="#007749" />
             <Text style={[styles(colors).quickActionText, { color: colors.text }]}>Call Parent</Text>

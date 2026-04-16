@@ -31,53 +31,9 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
 
   // Use ui-plugin theme colors directly
   const colors = themeColors;
-  const handleDemoLogin = async (role: string) => {
-    setLoading(true);
-    try {
-      let userRole = role;
-      let userName = '';
-      let userEmail = '';
 
-      switch (role) {
-        case 'parent':
-          userName = 'Motswadi M';
-          userEmail = 'parent@demo.com';
-          break;
-        case 'driver':
-          userName = 'Tshiamo K';
-          userEmail = 'driver@demo.com';
-          break;
-        case 'admin':
-          userName = 'Kgothatso M';
-          userEmail = 'admin@demo.com';
-          break;
-        default:
-          userName = 'User';
-          userEmail = 'demo@test.com';
-      }
-
-      await AsyncStorage.setItem('userRole', userRole);
-      await AsyncStorage.setItem('userEmail', userEmail);
-      await AsyncStorage.setItem('userName', userName);
-      await AsyncStorage.setItem('userId', `demo-${role}-${Date.now()}`);
-
-      if (onLogin) {
-        onLogin(userRole);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Demo login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async () => {
-    if (email === 'parent@demo.com' || email === 'driver@demo.com' || email === 'admin@demo.com') {
-      const role = email.split('@')[0];
-      await handleDemoLogin(role);
-      return;
-    }
-
     if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password');
       return;
@@ -210,36 +166,6 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
               <Text style={styles(colors).infoText}>• View payments & history</Text>
             </View>
           )}
-
-          <Spacer size="md" />
-
-          {/* Demo Login */}
-          <Text style={styles(colors).demoTitle}>Quick Demo Login</Text>
-          <View style={styles(colors).demoButtons}>
-            <Button
-              title="Parent"
-              variant="primary"
-              size="small"
-              onPress={() => handleDemoLogin('parent')}
-              style={{ flex: 1 }}
-            />
-            <Button
-              title="Driver"
-              variant="secondary"
-              size="small"
-              onPress={() => handleDemoLogin('driver')}
-              style={{ flex: 1 }}
-              textStyle={{ color: colors.textInverse }}
-            />
-            <Button
-              title="Admin"
-              variant="outline"
-              size="small"
-              onPress={() => handleDemoLogin('admin')}
-              style={{ flex: 1 }}
-              textStyle={{ color: colors.primary }}
-            />
-          </View>
 
           <Spacer size="lg" />
 
@@ -411,19 +337,7 @@ const styles = (colors: UIColors) => StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: spacing.lg,
   },
-  demoTitle: {
-    ...typography.labelSmall,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  demoButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
+
   infoBox: {
     backgroundColor: colors.primaryMuted,
     borderRadius: borderRadius.lg,
