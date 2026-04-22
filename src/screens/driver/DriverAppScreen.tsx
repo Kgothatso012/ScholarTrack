@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, LayoutAnimation, UIManager, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, Easing } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { driverService } from '../../lib/services/driver';
 import { tripService } from '../../lib/services/trip';
 import { paymentService } from '../../lib/services/payment';
 import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
+import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
@@ -20,12 +21,13 @@ if (UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SPRING = { damping: 15, stiffness: 150 };
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-type TabKey = 'overview' | 'trips' | 'earnings';
+type TabKey = 'overview' | 'trips' | 'requests' | 'earnings';
 
 // ─── Skeleton shimmer component ─────────────────────────────────────────────
 const SkeletonRect: React.FC<{ w: number | string; h: number; radius?: number }> = ({ w, h, radius = borderRadius.lg }) => {
@@ -56,6 +58,25 @@ const SkeletonRect: React.FC<{ w: number | string; h: number; radius?: number }>
   );
 };
 
+// Spring press wrapper
+const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 // ─── Main Screen ────────────────────────────────────────────────────────────
 const DriverAppScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
@@ -69,6 +90,8 @@ const DriverAppScreen = ({ navigation }: Props) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [ratingSummary, setRatingSummary] = useState<DriverRatingSummary | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
 
   // Loading / error state
   const [loading, setLoading] = useState(true);
@@ -143,6 +166,17 @@ const DriverAppScreen = ({ navigation }: Props) => {
         // Rating is non-critical — silently skip
       }
 
+      // 6. Pending driver requests
+      setLoadingRequests(true);
+      try {
+        const requests = await linkingService.getDriverRequestsForDriver(user.id);
+        setPendingRequests(requests || []);
+      } catch {
+        setPendingRequests([]);
+      } finally {
+        setLoadingRequests(false);
+      }
+
     } catch (err: unknown) {
       console.error('Error loading driver data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load dashboard');
@@ -176,6 +210,25 @@ const DriverAppScreen = ({ navigation }: Props) => {
         },
       },
     ]);
+  };
+
+  const handleAcceptRequest = async (assignmentId: string) => {
+    try {
+      await linkingService.respondToDriverRequest(assignmentId, true);
+      setPendingRequests(prev => prev.filter((r: any) => r.id !== assignmentId));
+      Alert.alert('Accepted', 'You are now assigned to this child.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to accept request');
+    }
+  };
+
+  const handleRejectRequest = async (assignmentId: string) => {
+    try {
+      await linkingService.respondToDriverRequest(assignmentId, false);
+      setPendingRequests(prev => prev.filter((r: any) => r.id !== assignmentId));
+    } catch (error) {
+      Alert.alert('Error', 'Failed to decline request');
+    }
   };
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -424,6 +477,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
           [
             { key: 'overview' as TabKey, label: 'Overview', icon: 'grid' },
             { key: 'trips' as TabKey, label: 'Trips', icon: 'bus' },
+            { key: 'requests' as TabKey, label: `Requests${pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ''}`, icon: 'person-add' },
             { key: 'earnings' as TabKey, label: 'Earnings', icon: 'card' },
           ]
         ).map(t => (
@@ -443,6 +497,59 @@ const DriverAppScreen = ({ navigation }: Props) => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* ── REQUESTS ────────────────────────────────────────────────────────── */}
+      {activeTab === 'requests' && (
+        <View style={s(colors).section}>
+          <Text style={s(colors).sectionTitle}>Hiring Requests</Text>
+          {!loadingRequests && pendingRequests.length === 0 ? (
+            <View style={[s(colors).glass, s(colors).emptyWrap]}>
+              <Ionicons name="person-add-outline" size={40} color="rgba(255,255,255,0.15)" />
+              <Text style={s(colors).emptyText}>No pending requests.{'\n'}Parents will appear here when they request you.</Text>
+            </View>
+          ) : (
+            pendingRequests.map((req: any) => (
+              <View key={req.id} style={[s(colors).glass, { marginBottom: 12, overflow: 'hidden' }]}>
+                <View style={s(colors).glassRefraction} />
+                <View style={{ padding: spacing.lg }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>
+                        {req.child?.full_name || 'Child'}
+                      </Text>
+                      {req.child?.grade && (
+                        <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginTop: 2 }}>
+                          {req.child.grade} • {req.child?.school?.name || 'School'}
+                        </Text>
+                      )}
+                      {req.child?.pickup_address && (
+                        <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 4 }}>
+                          {req.child.pickup_address}
+                        </Text>
+                      )}
+                    </View>
+                    <Badge label="Pending" variant="warning" size="small" />
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <TouchableOpacity
+                      style={{ flex: 1, backgroundColor: '#007749', borderRadius: borderRadius.lg, paddingVertical: 12, alignItems: 'center' }}
+                      onPress={() => handleAcceptRequest(req.id)}
+                    >
+                      <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Accept</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flex: 1, backgroundColor: 'rgba(224,60,49,0.15)', borderRadius: borderRadius.lg, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(224,60,49,0.3)' }}
+                      onPress={() => handleRejectRequest(req.id)}
+                    >
+                      <Text style={{ color: '#E03C31', fontWeight: '700', fontSize: 15 }}>Decline</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+      )}
 
       {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
       {activeTab === 'overview' && (
@@ -520,16 +627,20 @@ const DriverAppScreen = ({ navigation }: Props) => {
             <Text style={s(colors).actionsLabel}>Quick Actions</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s(colors).actionsDock}>
               {quickActions.map((action, index) => (
-                <TouchableOpacity
+                <Animated.View
                   key={index}
-                  onPress={() => navigation?.navigate?.(action.route)}
-                  style={s(colors).actionPill}
+                  entering={FadeIn.delay(index * 50).springify()}
                 >
-                  <View style={[s(colors).actionPillIcon, { backgroundColor: `${action.color}20` }]}>
-                    <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={15} color={action.color} />
-                  </View>
-                  <Text style={s(colors).actionPillText}>{action.name}</Text>
-                </TouchableOpacity>
+                  <SpringTouchable
+                    onPress={() => navigation?.navigate?.(action.route)}
+                    style={s(colors).actionPill}
+                  >
+                    <View style={[s(colors).actionPillIcon, { backgroundColor: `${action.color}20` }]}>
+                      <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={15} color={action.color} />
+                    </View>
+                    <Text style={s(colors).actionPillText}>{action.name}</Text>
+                  </SpringTouchable>
+                </Animated.View>
               ))}
             </ScrollView>
           </View>
@@ -546,26 +657,30 @@ const DriverAppScreen = ({ navigation }: Props) => {
               <Text style={s(colors).emptyText}>No trips scheduled for today.{'\n'}Pull down to refresh.</Text>
             </View>
           ) : (
-            trips.map(trip => (
-              <TouchableOpacity
+            trips.map((trip, index) => (
+              <Animated.View
                 key={trip.id}
-                style={s(colors).listItem}
-                onPress={() => navigation?.navigate?.('DriverTrips')}
+                entering={FadeIn.delay(index * 70).springify()}
               >
-                <View style={s(colors).listAvatar}>
-                  <Ionicons name="bus" size={20} color="#002395" />
-                </View>
-                <View style={s(colors).listInfo}>
-                  <Text style={s(colors).listName}>{trip.pickup_location || trip.dropoff_location || 'Route'}</Text>
-                  <Text style={s(colors).listMeta}>
-                    {trip.scheduled_time
-                      ? new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                      : 'No time set'}
-                    {trip.pickup_location ? ` · ${trip.pickup_location}` : ''}
-                  </Text>
-                </View>
-                <Badge label={formatTripStatus(trip.status)} variant={getTripStatusVariant(trip.status)} size="small" />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={s(colors).listItem}
+                  onPress={() => navigation?.navigate?.('DriverTrips')}
+                >
+                  <View style={s(colors).listAvatar}>
+                    <Ionicons name="bus" size={20} color="#002395" />
+                  </View>
+                  <View style={s(colors).listInfo}>
+                    <Text style={s(colors).listName}>{trip.pickup_location || trip.dropoff_location || 'Route'}</Text>
+                    <Text style={s(colors).listMeta}>
+                      {trip.scheduled_time
+                        ? new Date(trip.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : 'No time set'}
+                      {trip.pickup_location ? ` · ${trip.pickup_location}` : ''}
+                    </Text>
+                  </View>
+                  <Badge label={formatTripStatus(trip.status)} variant={getTripStatusVariant(trip.status)} size="small" />
+                </TouchableOpacity>
+              </Animated.View>
             ))
           )}
         </View>
@@ -581,8 +696,12 @@ const DriverAppScreen = ({ navigation }: Props) => {
               <Text style={s(colors).emptyText}>No payments yet.{'\n'}Pull down to refresh.</Text>
             </View>
           ) : (
-            payments.map(payment => (
-              <View key={payment.id} style={s(colors).listItem}>
+            payments.map((payment, index) => (
+              <Animated.View
+                key={payment.id}
+                entering={FadeIn.delay(index * 70).springify()}
+                style={s(colors).listItem}
+              >
                 <View style={[s(colors).listAvatar, { backgroundColor: 'rgba(0,119,73,0.25)', borderColor: 'rgba(0,119,73,0.3)' }]}>
                   <Ionicons name="card" size={20} color="#007749" />
                 </View>
@@ -597,7 +716,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
                 <Text style={s(colors).amount}>
                   R{((payment.amount || 0) / 100).toFixed(2)}
                 </Text>
-              </View>
+              </Animated.View>
             ))
           )}
         </View>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, Linking } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, ActivityIndicator, StyleSheet, Text, Linking, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { DeepLinkContext, DeepLinkProvider } from './src/context/DeepLinkContext';
 import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
@@ -13,48 +14,72 @@ import SplashScreen from './src/components/SplashScreen';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './src/navigation/types';
 
-type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
-
 const linking = {
   prefixes: ['scholartrack://', 'https://scholartrack.co.za'],
+  getStateFromPath(path: string) {
+    if (path.startsWith('confirm')) {
+      const url = new URL('scholartrack://' + path);
+      const errorDescription = url.searchParams.get('error_description');
+      const errorCode = url.searchParams.get('error_code');
+      const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
+      return {
+        routes: [{
+          name: 'Auth',
+          state: {
+            routes: [{ name: 'Login', params: { confirmationError: error } }],
+          },
+        }],
+      };
+    }
+    return undefined;
+  },
 };
 
 function ThemedApp() {
   const { colors } = useTheme();
 
   return (
-    <ErrorBoundary>
-      <SafeAreaProvider>
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-          <AppContentWithTheme />
-        </View>
-      </SafeAreaProvider>
-    </ErrorBoundary>
+    <DeepLinkProvider>
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <View style={{ flex: 1, backgroundColor: colors.background }}>
+            <AppContentWithTheme />
+          </View>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    </DeepLinkProvider>
   );
 }
 
 function AppContentWithTheme() {
   const { colors } = useTheme();
+  const { setConfirmationError } = React.useContext(DeepLinkContext);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Handle deep links for password reset
     const handleDeepLink = (event: { url: string }) => {
       const { url } = event;
-      if (url.includes('reset-password') || url.includes('token')) {
-        // Navigation will be handled by React Navigation deep linking
+      if (url.includes('confirm') && (url.includes('error=') || url.includes('error_code='))) {
+        const parsed = new URL(url);
+        const errorDescription = parsed.searchParams.get('error_description');
+        const errorCode = parsed.searchParams.get('error_code');
+        const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
+        setConfirmationError(error);
       }
     };
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    // Check initial URL
     Linking.getInitialURL().then((url) => {
-      if (url && (url.includes('reset-password') || url.includes('token'))) {
-        // Initial deep link will be handled by navigation container
+      if (url && url.includes('confirm') && (url.includes('error=') || url.includes('error_code='))) {
+        const parsed = new URL(url);
+        const errorDescription = parsed.searchParams.get('error_description');
+        const errorCode = parsed.searchParams.get('error_code');
+        const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
+        setConfirmationError(error);
       }
     });
 

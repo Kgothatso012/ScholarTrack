@@ -25,3 +25,4 @@ export { linkingService } from './linking';
 export { routeService } from './route';
 export { tripServiceEnhanced, driverTrackingService, profileService } from './tripEnhanced';
 export { ratingService } from './rating';
+export { placesService, createPlacesAutocomplete } from '../../services/PlacesService';

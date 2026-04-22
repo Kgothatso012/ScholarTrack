@@ -11,7 +11,7 @@ export interface GeofenceZone {
   longitude: number;
   radius: number; // meters
   type: 'pickup' | 'dropoff';
-  childId: string;
+  childId: string | null;
   tripId: string;
   childName?: string;
   triggered?: boolean;
@@ -40,8 +40,10 @@ export const geofenceService = {
         .from('trips')
         .select(`
           id,
-          child_id,
-          children:child_id(full_name),
+          driver_id,
+          student_name,
+          pickup_address,
+          dropoff_address,
           pickup_location_lat,
           pickup_location_lng,
           dropoff_location_lat,
@@ -56,8 +58,7 @@ export const geofenceService = {
       }
 
       const zones: GeofenceZone[] = [];
-      const childData = trip.children as { full_name?: string } | null;
-      const childName = childData?.full_name || 'Your child';
+      const childName = trip.student_name || 'Student';
 
       // Pickup zone
       if (trip.pickup_location_lat && trip.pickup_location_lng) {
@@ -67,7 +68,7 @@ export const geofenceService = {
           longitude: trip.pickup_location_lng,
           radius: DEFAULT_RADIUS_METERS,
           type: 'pickup',
-          childId: trip.child_id,
+          childId: null,
           tripId: trip.id,
           childName,
           triggered: false,
@@ -82,7 +83,7 @@ export const geofenceService = {
           longitude: trip.dropoff_location_lng,
           radius: DEFAULT_RADIUS_METERS,
           type: 'dropoff',
-          childId: trip.child_id,
+          childId: null,
           tripId: trip.id,
           childName,
           triggered: false,
@@ -184,6 +185,9 @@ export const geofenceService = {
     longitude: number
   ): Promise<void> {
     try {
+      // Only trigger if we have a childId (trips with no FK won't have geofence DB alerts)
+      if (!zone.childId) return;
+
       // Create alert in database
       await panicAlertService.triggerGeofenceAlert(
         zone.childId,

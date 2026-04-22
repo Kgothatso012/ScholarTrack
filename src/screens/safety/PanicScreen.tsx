@@ -90,9 +90,9 @@ export default function PanicScreen() {
       }
 
       // Get location
-      const location = await locationService.getCurrentLocation();
-      const locationStr = location
-        ? `${location.coords.latitude},${location.coords.longitude}`
+      const result = await locationService.getCurrentLocation();
+      const locationStr = result.location
+        ? `${result.location.coords.latitude},${result.location.coords.longitude}`
         : undefined;
 
       // Create panic alert

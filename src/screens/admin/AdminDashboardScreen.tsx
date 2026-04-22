@@ -1,25 +1,54 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, StyleProp, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, interpolate } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate,
+  withSpring,
+  FadeIn,
+} from 'react-native-reanimated';
 
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
 
 const SA_GOLD = '#FFB81C';
+const SPRING = { damping: 15, stiffness: 150 };
 
-// Shimmer skeleton rect — same pattern as DriverAppScreen SkeletonRect
+// Shimmer skeleton rect
 const SkeletonRect = ({ width, height, style }: { width: number | string; height: number; style?: object }) => {
   const shimmer = useSharedValue(0);
   useEffect(() => { shimmer.value = withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 900 })), -1, false); }, []);
   const animStyle = useAnimatedStyle(() => ({ opacity: 0.15 + interpolate(shimmer.value, [0, 1], [0, 0.55]) }));
   return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: borderRadius.lg, width, height }, style, animStyle]} />;
+};
+
+// Spring press wrapper
+const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
 };
 
 interface DashboardStat {
@@ -293,22 +322,26 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
             <Text style={s(colors).sectionTitle}>Quick Actions</Text>
             <View style={s(colors).quickGrid}>
               <View style={{ width: '52%', paddingHorizontal: 4, paddingVertical: 4 }}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => navigation?.navigate?.(quickActions[0].route)} style={s(colors).quickCardInner}>
+                <SpringTouchable onPress={() => navigation?.navigate?.(quickActions[0].route)} style={s(colors).quickCardInner}>
                   <View style={[s(colors).quickIconWrap, { backgroundColor: `${quickActions[0].color}20`, borderColor: `${quickActions[0].color}40` }]}>
                     <Ionicons name={quickActions[0].icon as keyof typeof Ionicons.glyphMap} size={22} color={quickActions[0].color} />
                   </View>
                   <Text style={s(colors).quickText}>{quickActions[0].name}</Text>
-                </TouchableOpacity>
+                </SpringTouchable>
               </View>
               {quickActions.slice(1).map((action, index) => (
-                <View key={index} style={{ width: '48%', paddingHorizontal: 4, paddingVertical: 4 }}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={() => navigation?.navigate?.(action.route)} style={s(colors).quickCardInner}>
+                <Animated.View
+                  key={index}
+                  entering={FadeIn.delay(index * 60).springify()}
+                  style={{ width: '48%', paddingHorizontal: 4, paddingVertical: 4 }}
+                >
+                  <SpringTouchable onPress={() => navigation?.navigate?.(action.route)} style={s(colors).quickCardInner}>
                     <View style={[s(colors).quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
                       <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={action.color} />
                     </View>
                     <Text style={s(colors).quickText}>{action.name}</Text>
-                  </TouchableOpacity>
-                </View>
+                  </SpringTouchable>
+                </Animated.View>
               ))}
             </View>
           </View>
@@ -340,8 +373,12 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
             </View>
           ) : (
             <>
-              {paginatedDrivers.map(driver => (
-                <View key={driver.id} style={s(colors).listItem}>
+              {paginatedDrivers.map((driver, index) => (
+                <Animated.View
+                  key={driver.id}
+                  entering={FadeIn.delay(index * 60).springify()}
+                  style={s(colors).listItem}
+                >
                   <View style={s(colors).listAvatar}>
                     <Text style={{ color: '#002395', fontWeight: 'bold', fontSize: 14 }}>{(driver.full_name || 'D').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</Text>
                   </View>
@@ -350,7 +387,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
                     <Text style={s(colors).listMeta}>{driver.phone || 'No phone'}</Text>
                   </View>
                   <Badge label={getStatusText(driver.status, driver.is_verified)} variant={getStatusVariant(driver.status, driver.is_verified)} size="small" />
-                </View>
+                </Animated.View>
               ))}
               {totalDriverPages > 1 && <Pagination currentPage={driverPage} totalPages={totalDriverPages} onPageChange={setDriverPage} itemsPerPage={DRIVERS_PER_PAGE} totalItems={filteredDrivers.length} />}
             </>
@@ -381,8 +418,12 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
             </View>
           ) : (
             <>
-              {paginatedPayments.map(payment => (
-                <View key={payment.id} style={s(colors).listItem}>
+              {paginatedPayments.map((payment, index) => (
+                <Animated.View
+                  key={payment.id}
+                  entering={FadeIn.delay(index * 60).springify()}
+                  style={s(colors).listItem}
+                >
                   <View style={[s(colors).listAvatar, { backgroundColor: 'rgba(0,119,73,0.25)', borderColor: 'rgba(0,119,73,0.3)' }]}>
                     <Ionicons name="card" size={20} color="#007749" />
                   </View>
@@ -391,7 +432,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
                     <Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" />
                   </View>
                   <Text style={s(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-                </View>
+                </Animated.View>
               ))}
               {totalPaymentPages > 1 && <Pagination currentPage={paymentPage} totalPages={totalPaymentPages} onPageChange={setPaymentPage} itemsPerPage={PAYMENTS_PER_PAGE} totalItems={filteredPayments.length} />}
             </>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
+import { DeepLinkContext } from '../context/DeepLinkContext';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -81,6 +82,7 @@ export function AuthStack({ onLogin }: AuthStackProps) {
 
 // Wrapper components
 function LoginScreenWrapper({ onLogin, onNavigateToRegister, onNavigateToForgotPassword }: { onLogin: (role: string) => void; onNavigateToRegister: () => void; onNavigateToForgotPassword: () => void }) {
+  const { confirmationError, setConfirmationError } = React.useContext(DeepLinkContext);
   return (
     <LoginScreen
       onLogin={onLogin}
@@ -90,6 +92,8 @@ function LoginScreenWrapper({ onLogin, onNavigateToRegister, onNavigateToForgotP
         navigate: () => {},
         goBack: () => {}
       }}
+      confirmationError={confirmationError}
+      onConfirmationErrorHandled={() => setConfirmationError(null)}
     />
   );
 }

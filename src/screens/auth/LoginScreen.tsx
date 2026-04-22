@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,9 +16,11 @@ import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void; onForgotPassword?: () => void };
   onLogin?: (role: string) => void;
+  confirmationError?: string | null;
+  onConfirmationErrorHandled?: () => void;
 }
 
-export default function LoginScreen({ navigation, onLogin }: Props) {
+export default function LoginScreen({ navigation, onLogin, confirmationError, onConfirmationErrorHandled }: Props) {
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,6 +33,15 @@ export default function LoginScreen({ navigation, onLogin }: Props) {
 
   // Use ui-plugin theme colors directly
   const colors = themeColors;
+
+  // Show confirmation error alert when deep link fails
+  useEffect(() => {
+    if (confirmationError) {
+      Alert.alert('Confirmation Failed', confirmationError, [
+        { text: 'OK', onPress: onConfirmationErrorHandled }
+      ]);
+    }
+  }, [confirmationError]);
 
 
   const handleLogin = async () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { supabase, Profile, Driver, Child } from '../lib/api';
@@ -217,17 +218,17 @@ export default function ChatScreen({ navigation }: Props) {
     setSelectedChat(conv);
   };
 
-  const renderMessage = ({ item }: { item: Message }) => {
+  const renderMessage = ({ item, index }: { item: Message; index: number }) => {
     const isMyMessage = item.sender_id === currentUser?.id;
     return (
-      <View style={[styles(colors).messageBubble, isMyMessage ? styles(colors).myMessage : styles(colors).theirMessage]}>
+      <Animated.View entering={FadeIn.delay(index * 30).springify()} style={[styles(colors).messageBubble, isMyMessage ? styles(colors).myMessage : styles(colors).theirMessage]}>
         <Text style={[styles(colors).messageText, isMyMessage ? { color: colors.text } : { color: colors.text }]}>
           {item.message}
         </Text>
         <Text style={[styles(colors).messageTime, isMyMessage ? { color: '#fff8' } : { color: colors.textSecondary }]}>
           {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
-      </View>
+      </Animated.View>
     );
   };
 

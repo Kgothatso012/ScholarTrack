@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LayoutAnimation, UIManager, View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming, FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -37,14 +37,14 @@ interface ChildWithDriver {
     phone?: string;
     rating?: number;
     is_available?: boolean;
-  };
+  } | null;
   driver_assignments?: { status: string }[];
   pickup_lat?: number;
   pickup_lng?: number;
 }
 
 interface Props {
-  navigation: { goBack: () => void; navigate: (s: string) void };
+  navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
 const DEFAULT_REGION = { latitude: -25.7479, longitude: 28.2292, latitudeDelta: 0.05, longitudeDelta: 0.05 };
@@ -115,7 +115,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
   const fetchDriverRating = useCallback(async (driverId: string) => {
     try {
-      const { data } = await supabase.from('driver_reviews').select('rating').eq('driver_id', driverId);
+      const { data } = await supabase.from('reviews').select('rating').eq('driver_id', driverId);
       if (data && data.length > 0) {
         const sum = data.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0);
         setDriverRating(sum / data.length);
@@ -141,9 +141,10 @@ export default function LiveTrackScreen({ navigation }: Props) {
   // Poll driver location every 30 seconds
   useEffect(() => {
     if (!selectedChild?.driver?.id) return;
-    fetchDriverLocation(selectedChild.driver.id);
+    const driverId = selectedChild.driver.id;
+    fetchDriverLocation(driverId);
     pollingInterval.current = setInterval(() => {
-      fetchDriverLocation(selectedChild.driver.id);
+      fetchDriverLocation(driverId);
     }, 30000);
     return () => {
       if (pollingInterval.current) clearInterval(pollingInterval.current);
@@ -226,11 +227,11 @@ export default function LiveTrackScreen({ navigation }: Props) {
       const parentId = await AsyncStorage.getItem('userId');
       const now = new Date();
       const month = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
-      await supabase.from('driver_reviews').insert({
+      await supabase.from('reviews').insert({
         driver_id: selectedChild.driver.id,
         parent_id: parentId,
         rating,
-        review_text: '',
+        comment: '',
         month,
       });
       Alert.alert('Thanks!', 'Your rating has been submitted.');
@@ -345,10 +346,12 @@ export default function LiveTrackScreen({ navigation }: Props) {
       {/* Child Selector */}
       {children.length > 1 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: spacing.md, paddingHorizontal: spacing.lg }} contentContainerStyle={{ gap: spacing.sm, flexDirection: 'row' }}>
-          {children.map(c => (
-            <TouchableOpacity key={c.id} onPress={() => handleSelectChild(c)} style={{ backgroundColor: c.id === child.id ? colors.primary : colors.card, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, borderWidth: 1, borderColor: c.id === child.id ? colors.primary : colors.border }}>
-              <Text style={{ ...typography.label, color: c.id === child.id ? colors.textInverse : colors.text }}>{c.full_name}</Text>
-            </TouchableOpacity>
+          {children.map((c, index) => (
+            <Animated.View key={c.id} entering={FadeIn.delay(index * 50).springify()}>
+              <TouchableOpacity onPress={() => handleSelectChild(c)} style={{ backgroundColor: c.id === child.id ? colors.primary : colors.card, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, borderWidth: 1, borderColor: c.id === child.id ? colors.primary : colors.border }}>
+                <Text style={{ ...typography.label, color: c.id === child.id ? colors.textInverse : colors.text }}>{c.full_name}</Text>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
         </ScrollView>
       )}
@@ -433,11 +436,13 @@ export default function LiveTrackScreen({ navigation }: Props) {
           { icon: 'chatbubble', label: 'Message', color: colors.primary, onPress: handleMessageDriver },
           { icon: 'share-social', label: 'Share', color: colors.primary, onPress: handleShare },
           { icon: 'warning', label: 'Alert', color: colors.error, onPress: () => navigation.navigate('Emergency') },
-        ].map(action => (
-          <TouchableOpacity key={action.label} onPress={action.onPress} style={{ alignItems: 'center', padding: spacing.sm }}>
-            <Ionicons name={action.icon as any} size={24} color={action.color} />
-            <Text style={{ ...typography.labelSmall, color: colors.text, marginTop: spacing.xs }}>{action.label}</Text>
-          </TouchableOpacity>
+        ].map((action, index) => (
+          <Animated.View key={action.label} entering={FadeIn.delay(index * 40).springify()}>
+            <TouchableOpacity onPress={action.onPress} style={{ alignItems: 'center', padding: spacing.sm }}>
+              <Ionicons name={action.icon as any} size={24} color={action.color} />
+              <Text style={{ ...typography.labelSmall, color: colors.text, marginTop: spacing.xs }}>{action.label}</Text>
+            </TouchableOpacity>
+          </Animated.View>
         ))}
       </View>
 
@@ -453,10 +458,12 @@ export default function LiveTrackScreen({ navigation }: Props) {
             <Text style={{ ...typography.h3, color: colors.text, textAlign: 'center', fontWeight: '700', marginBottom: spacing.xs }}>Rate Your Driver</Text>
             <Text style={{ ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg }}>How was your trip experience?</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.lg }}>
-              {[1,2,3,4,5].map(star => (
-                <TouchableOpacity key={star} onPress={() => setRating(star)} style={{ marginHorizontal: 4 }}>
-                  <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={40} color={star <= rating ? colors.accent : colors.textMuted} />
-                </TouchableOpacity>
+              {[1,2,3,4,5].map((star, index) => (
+                <Animated.View key={star} entering={FadeIn.delay(index * 40).springify()}>
+                  <TouchableOpacity onPress={() => setRating(star)} style={{ marginHorizontal: 4 }}>
+                    <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={40} color={star <= rating ? colors.accent : colors.textMuted} />
+                  </TouchableOpacity>
+                </Animated.View>
               ))}
             </View>
             <View style={{ flexDirection: 'row' }}>

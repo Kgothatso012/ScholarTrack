@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withRepeat, withSequence, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withRepeat, withSequence, runOnJS, FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -75,8 +75,8 @@ const EmergencyScreen = () => {
       setSendingSos(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { Alert.alert('Error', 'Please login first'); return; }
-      const location = await locationService.getCurrentLocation();
-      const locationStr = location ? `${location.coords.latitude},${location.coords.longitude}` : undefined;
+      const result = await locationService.getCurrentLocation();
+      const locationStr = result.location ? `${result.location.coords.latitude},${result.location.coords.longitude}` : undefined;
       const panicAlert = await panicAlertService.createPanicAlert(user.id, locationStr);
       for (const contact of contacts) {
         await sendAppNotification('EMERGENCY', user.id, {
@@ -250,18 +250,23 @@ const EmergencyScreen = () => {
       <View style={s(colors).section}>
         <Text style={s(colors).sectionTitle}>Quick Dial</Text>
         {quickDials.map((item, index) => (
-          <TouchableOpacity key={index} onPress={() => callNumber(item.phone)} style={s(colors).quickDialItem}>
-            <View style={[s(colors).dialIcon, { backgroundColor: `${item.color}20`, borderColor: `${item.color}40` }]}>
-              <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
-            </View>
-            <View style={s(colors).dialInfo}>
-              <Text style={s(colors).dialName}>{item.name}</Text>
-              <Text style={s(colors).dialNumber}>{item.phone}</Text>
-            </View>
-            <View style={s(colors).callBtn}>
-              <Ionicons name="call" size={18} color="#007749" />
-            </View>
-          </TouchableOpacity>
+          <Animated.View
+            key={index}
+            entering={FadeIn.delay(index * 80).springify()}
+          >
+            <TouchableOpacity onPress={() => callNumber(item.phone)} style={s(colors).quickDialItem}>
+              <View style={[s(colors).dialIcon, { backgroundColor: `${item.color}20`, borderColor: `${item.color}40` }]}>
+                <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+              </View>
+              <View style={s(colors).dialInfo}>
+                <Text style={s(colors).dialName}>{item.name}</Text>
+                <Text style={s(colors).dialNumber}>{item.phone}</Text>
+              </View>
+              <View style={s(colors).callBtn}>
+                <Ionicons name="call" size={18} color="#007749" />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
         ))}
       </View>
 
@@ -272,7 +277,16 @@ const EmergencyScreen = () => {
           <View style={s(colors).glass}>
             <View style={s(colors).glassRefraction} />
             {[1,2,3].map(i => (
-              <View key={i} style={{ height: 60, backgroundColor: 'rgba(255,255,255,0.03)', marginBottom: 1 }} />
+              <View key={i} style={{ height: 76, marginBottom: spacing.sm, borderRadius: borderRadius.xxl, overflow: 'hidden' }}>
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', padding: spacing.md, gap: spacing.md }}>
+                  <View style={{ width: 45, height: 45, borderRadius: 22.5, backgroundColor: 'rgba(255,184,28,0.22)' }} />
+                  <View style={{ flex: 1, gap: spacing.xs }}>
+                    <View style={{ height: 14, borderRadius: 4, backgroundColor: 'rgba(255,184,28,0.18)', width: '60%' }} />
+                    <View style={{ height: 12, borderRadius: 4, backgroundColor: 'rgba(255,184,28,0.12)', width: '40%' }} />
+                  </View>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,184,28,0.15)' }} />
+                </View>
+              </View>
             ))}
           </View>
         ) : contacts.length === 0 ? (
@@ -281,8 +295,12 @@ const EmergencyScreen = () => {
             <Text style={s(colors).emptyText}>No emergency contacts added. Add contacts in Settings.</Text>
           </View>
         ) : (
-          contacts.map(contact => (
-            <View key={contact.id} style={s(colors).contactCard}>
+          contacts.map((contact, index) => (
+            <Animated.View
+              key={contact.id}
+              entering={FadeIn.delay(index * 70).springify()}
+              style={s(colors).contactCard}
+            >
               <View style={s(colors).contactAvatar}>
                 <Text style={s(colors).contactInitial}>{getInitials(contact.name)}</Text>
               </View>
@@ -294,7 +312,7 @@ const EmergencyScreen = () => {
               <TouchableOpacity onPress={() => callNumber(contact.phone)} style={s(colors).callBtn}>
                 <Ionicons name="call" size={18} color="#007749" />
               </TouchableOpacity>
-            </View>
+            </Animated.View>
           ))
         )}
       </View>
@@ -303,10 +321,14 @@ const EmergencyScreen = () => {
       <View style={s(colors).section}>
         <Text style={s(colors).sectionTitle}>Safety Tips</Text>
         {tips.map((tip, index) => (
-          <View key={index} style={s(colors).tipCard}>
+          <Animated.View
+            key={index}
+            entering={FadeIn.delay(index * 60).springify()}
+            style={s(colors).tipCard}
+          >
             <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color="#FFB81C" />
             <Text style={s(colors).tipText}>{tip.text}</Text>
-          </View>
+          </Animated.View>
         ))}
       </View>
 

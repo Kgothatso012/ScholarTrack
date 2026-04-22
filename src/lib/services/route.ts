@@ -5,7 +5,7 @@ export const routeService = {
   async getRoutes() {
     const { data, error } = await supabase
       .from('routes')
-      .select('*, school:schools(name)')
+      .select('*')
       .order('name');
     if (error) throw error;
     return data;
@@ -13,7 +13,7 @@ export const routeService = {
   async getAllRoutes() {
     const { data, error } = await supabase
       .from('routes')
-      .select('*, school:schools(name), stops:route_stops(*), driver:drivers(full_name)')
+      .select('*')
       .order('name');
     if (error) throw error;
     return data;

@@ -4,13 +4,6 @@
     "slug": "scholartrack-expo54",
     "version": "1.0.0",
     "scheme": "scholartrack",
-    "linking": {
-      "enabled": true,
-      "prefixes": [
-        "scholartrack://",
-        "https://scholartrack.co.za"
-      ]
-    },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -37,9 +30,12 @@
       "package": "com.scholartrack.sa",
       "config": {
         "googleMaps": {
-          "apiKey": "${GOOGLE_MAPS_API_KEY}"
+          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
         }
       }
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

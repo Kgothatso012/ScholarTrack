@@ -12,11 +12,7 @@ export const childrenService = {
     // Get children with driver assignments in single query
     const { data, error } = await supabase
       .from('children')
-      .select(`
-        *,
-        school:schools(name),
-        driver_assignments(*, driver:drivers(full_name, phone, is_available, rating))
-      `)
+      .select('*, school:schools(name), driver_assignments(*, driver:drivers(id, full_name, phone, is_available))')
       .eq('parent_id', parentId)
       .eq('status', 'active');
 
@@ -39,7 +35,7 @@ export const childrenService = {
       .from('driver_assignments')
       .select(`
         *,
-        driver:drivers(full_name, phone, is_available, rating)
+        driver:drivers(id, full_name, phone, is_available, rating)
       `)
       .eq('child_id', childId)
       .eq('status', 'active')

@@ -78,7 +78,7 @@ export const documentService = {
   async getAllParentDocuments() {
     const { data, error } = await supabase
       .from('parent_documents')
-      .select('*, parent:profiles(full_name)')
+      .select('*')
       .order('uploaded_at', { ascending: false });
     if (error) throw error;
     return data;

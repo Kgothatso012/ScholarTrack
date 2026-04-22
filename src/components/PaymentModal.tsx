@@ -1,10 +1,34 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useTheme, ThemeColors } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import { payStackService, paymentHelper } from '../lib/paystack';
+
+const SPRING = { damping: 15, stiffness: 150 };
+
+// Spring press wrapper for pay button
+const SpringButton = ({ children, onPress, disabled, style }: { children: React.ReactNode; onPress: () => void; disabled?: boolean; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.05, SPRING) }],
+    opacity: withSpring(disabled ? 0.6 : 1, SPRING),
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      disabled={disabled}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
 
 interface Props {
   visible: boolean;
@@ -136,7 +160,7 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
                 </Text>
               </View>
 
-              <TouchableOpacity
+              <SpringButton
                 style={[styles(colors).payButton, { backgroundColor: colors.primary }]}
                 onPress={handlePayment}
                 disabled={loading}
@@ -149,7 +173,7 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
                     <Text style={styles(colors).payButtonText}>Pay {paymentHelper.formatRand(amount)}</Text>
                   </>
                 )}
-              </TouchableOpacity>
+              </SpringButton>
             </View>
           ) : (
             <View style={styles(colors).processing}>

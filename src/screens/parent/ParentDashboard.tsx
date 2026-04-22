@@ -1,15 +1,23 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Animated, LayoutAnimation, Platform, UIManager } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  FadeIn,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, Child, Trip } from '../../lib/supabase';
+import { linkingService } from '../../lib/services/linking';
 import { useTheme } from '../../context/ThemeContext';
 import { cacheService } from '../../lib/cache';
 import { ThemeColors } from '../../context/ThemeContext';
 
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -34,7 +42,26 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const SPRING = { useNativeDriver: true, toValue: 1, friction: 8, tension: 100 };
+const SPRING = { damping: 15, stiffness: 150 };
+
+// Spring press wrapper — scale-down on press with spring physics
+const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
 
 const ParentDashboard = ({ navigation }: Props) => {
   const { colors } = useTheme();
@@ -48,20 +75,6 @@ const ParentDashboard = ({ navigation }: Props) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
-
-  // Animation values initialized once
-  const statAnims = [
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-  ];
-  const quickAnims = [
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-    useRef<Animated.Value>(new Animated.Value(0)),
-  ];
 
   const loadData = async (forceRefresh = false) => {
     try {
@@ -101,55 +114,55 @@ const ParentDashboard = ({ navigation }: Props) => {
 
   const fetchFreshData = async (userId: string) => {
     try {
-      const { data: childrenData } = await supabase
-        .from('children')
-        .select('*')
-        .eq('parent_id', userId);
+      // Fetch children with driver assignments
+      const childrenWithDrivers = await linkingService.getChildrenWithDrivers(userId);
+      setChildren(childrenWithDrivers as Child[]);
+      await cacheService.set('parent_children_' + userId, childrenWithDrivers, CACHE_TTL);
 
-      if (childrenData) {
-        setChildren(childrenData);
-        await cacheService.set('parent_children_' + userId, childrenData, CACHE_TTL);
+      if (childrenWithDrivers.length > 0) {
+        const activeAssignments = childrenWithDrivers
+          .flatMap((c: any) => c.driver_assignments || [])
+          .filter((a: any) => a.status === 'active' && a.driver_id);
+        const driverIds = [...new Set(activeAssignments.map((a: any) => a.driver_id))];
 
-        if (childrenData.length > 0) {
-          const childIds = childrenData.map((c: Child) => c.id);
-          const today = new Date().toISOString().split('T')[0];
-
-          const { data: tripsData } = await supabase
+        let tripsData: Trip[] = [];
+        if (driverIds.length > 0) {
+          const { data } = await supabase
             .from('trips')
             .select('*')
-            .in('child_id', childIds)
-            .gte('scheduled_time', today)
+            .in('driver_id', driverIds)
             .order('scheduled_time', { ascending: true })
             .limit(20);
-
-          setTrips(tripsData || []);
-          await cacheService.set('parent_trips_' + userId, tripsData || [], CACHE_TTL);
-
-          const activeTrips = (tripsData || []).filter((t: Trip) => t.status === 'in_progress').length;
-
-          const { data: paymentsData } = await supabase
-            .from('payments')
-            .select('*')
-            .in('child_id', childIds)
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-          const pendingPayments = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'pending').length;
-
-          setStats([
-            { label: 'Children', value: childrenData.length, positive: true },
-            { label: 'Trips Today', value: (tripsData || []).length, positive: true },
-            { label: 'Active', value: activeTrips, positive: activeTrips > 0 },
-            { label: 'Pending', value: pendingPayments, positive: pendingPayments === 0 },
-          ]);
-        } else {
-          setStats([
-            { label: 'Children', value: 0, positive: true },
-            { label: 'Trips Today', value: 0, positive: true },
-            { label: 'Active', value: 0, positive: true },
-            { label: 'Pending', value: 0, positive: true },
-          ]);
+          tripsData = data || [];
         }
+
+        setTrips(tripsData);
+        await cacheService.set('parent_trips_' + userId, tripsData, CACHE_TTL);
+
+        const activeTrips = tripsData.filter((t: Trip) => t.status === 'in_progress').length;
+
+        const { data: paymentsData } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('parent_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        const pendingPayments = (paymentsData || []).filter((p: PaymentRecord) => p.status === 'pending').length;
+
+        setStats([
+          { label: 'Children', value: childrenWithDrivers.length, positive: true },
+          { label: 'Trips', value: tripsData.length, positive: true },
+          { label: 'Active', value: activeTrips, positive: activeTrips > 0 },
+          { label: 'Pending', value: pendingPayments, positive: pendingPayments === 0 },
+        ]);
+      } else {
+        setStats([
+          { label: 'Children', value: 0, positive: true },
+          { label: 'Trips', value: 0, positive: true },
+          { label: 'Active', value: 0, positive: true },
+          { label: 'Pending', value: 0, positive: true },
+        ]);
       }
     } catch (error) {
       console.error('Error fetching fresh data:', error);
@@ -308,9 +321,7 @@ const ParentDashboard = ({ navigation }: Props) => {
   if (loading) {
     return (
       <View style={[s(colors).container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={[s(colors).glass, s(colors).loadingGlass]}>
-          <Text style={{ ...typography.body, color: 'rgba(255,255,255,0.5)' }}>Loading dashboard...</Text>
-        </View>
+        <SkeletonDashboard />
       </View>
     );
   }
@@ -416,9 +427,9 @@ const ParentDashboard = ({ navigation }: Props) => {
                   </Text>
                   <Text style={s(colors).heroSub}>Tap to view real-time location</Text>
                 </View>
-                <TouchableOpacity onPress={() => navigation?.navigate?.('LiveTrack')} style={s(colors).heroBtn}>
+                <SpringTouchable onPress={() => navigation?.navigate?.('LiveTrack')} style={s(colors).heroBtn}>
                   <Text style={s(colors).heroBtnText}>Track</Text>
-                </TouchableOpacity>
+                </SpringTouchable>
               </View>
             </View>
           </View>
@@ -428,9 +439,12 @@ const ParentDashboard = ({ navigation }: Props) => {
             <Text style={s(colors).sectionLabel}>Quick Actions</Text>
             <View style={s(colors).quickGrid}>
               {quickActions.slice(0, 4).map((action, index) => (
-                  <View key={index} style={s(colors).quickCard}>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
+                  <Animated.View
+                    key={index}
+                    entering={FadeIn.delay(index * 60).springify()}
+                    style={s(colors).quickCard}
+                  >
+                    <SpringTouchable
                       onPress={() => navigation?.navigate?.(action.route)}
                       style={s(colors).quickCardInner}
                     >
@@ -438,8 +452,8 @@ const ParentDashboard = ({ navigation }: Props) => {
                         <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.color} />
                       </View>
                       <Text style={s(colors).quickText}>{action.name}</Text>
-                    </TouchableOpacity>
-                  </View>
+                    </SpringTouchable>
+                  </Animated.View>
                 ))}
             </View>
           </View>
@@ -459,7 +473,11 @@ const ParentDashboard = ({ navigation }: Props) => {
                 const iconBg = isDropoff ? 'rgba(0,119,73,0.25)' : 'rgba(0,35,149,0.25)';
                 const iconBorder = isDropoff ? 'rgba(0,119,73,0.3)' : 'rgba(0,35,149,0.3)';
                 return (
-                  <View key={trip.id} style={s(colors).listItem}>
+                  <Animated.View
+                    key={trip.id}
+                    entering={FadeIn.delay(index * 80).springify()}
+                    style={s(colors).listItem}
+                  >
                     <View style={[s(colors).listAvatar, { backgroundColor: iconBg, borderColor: iconBorder }]}>
                       <Ionicons name={isDropoff ? 'home' : 'school'} size={18} color={iconColor} />
                     </View>
@@ -468,7 +486,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                       <Text style={s(colors).listMeta}>{formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}</Text>
                     </View>
                     <Badge label={getTripStatus(trip)} variant={getStatusVariant(trip.status)} size="small" />
-                  </View>
+                  </Animated.View>
                 );
               })
             )}
@@ -493,8 +511,12 @@ const ParentDashboard = ({ navigation }: Props) => {
               </TouchableOpacity>
             </View>
           ) : (
-            children.map((child) => (
-              <View key={child.id} style={s(colors).listItem}>
+            children.map((child, index) => (
+              <Animated.View
+                key={child.id}
+                entering={FadeIn.delay(index * 80).springify()}
+                style={s(colors).listItem}
+              >
                 <View style={[s(colors).listAvatar, { backgroundColor: 'rgba(0,35,149,0.25)', borderColor: 'rgba(0,35,149,0.3)' }]}>
                   <Text style={{ ...typography.label, color: '#002395', fontWeight: '700' }}>
                     {(child.full_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
@@ -505,7 +527,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                   <Text style={s(colors).listMeta}>{child.grade ? `Grade ${child.grade}` : 'School not set'}</Text>
                 </View>
                 <Badge label={child.status === 'active' ? 'Active' : 'Inactive'} variant={child.status === 'active' ? 'success' : 'neutral'} size="small" />
-              </View>
+              </Animated.View>
             ))
           )}
         </View>
@@ -547,15 +569,5 @@ const ParentDashboard = ({ navigation }: Props) => {
     </ScrollView>
   );
 };
-
-// Helper: fade-in from Animated.Value
-const FadeInCustom = (anim: Animated.Value) => ({
-  left: 0,
-  right: 0,
-  opacity: anim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
-  transform: [{
-    translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }),
-  }],
-});
 
 export default ParentDashboard;

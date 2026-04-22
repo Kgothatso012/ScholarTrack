@@ -1,4 +1,5 @@
 // Location Tracking Service for ScholarTrack
+// Patched: Huawei/GMS fallback support
 import * as Location from 'expo-location';
 import { supabase } from '../lib/api';
 
@@ -11,58 +12,117 @@ export interface DriverLocation {
   speed?: number;
 }
 
+export interface LocationResult {
+  location: Location.LocationObject | null;
+  error: string | null;
+  isHuaweiFallback: boolean;
+}
+
+// Detect if we're on a device without Google Play Services
+// Huawei devices and some custom ROMs don't have GMS
+async function isGooglePlayServicesAvailable(): Promise<boolean> {
+  try {
+    // Try a simple location call — if it fails with SERVICE_INVALID, GMS is missing
+    await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
+    return true;
+  } catch (error: any) {
+    const message = error?.message || '';
+    if (
+      message.includes('SERVICE_INVALID') ||
+      message.includes('ConnectionResult') ||
+      message.includes('LocationServices.API') ||
+      message.includes('not available on this device') ||
+      error?.code === 'SERVICE_INVALID'
+    ) {
+      return false;
+    }
+    // Other errors (permission denied, etc.) don't mean GMS is missing
+    return true;
+  }
+}
+
 export const locationService = {
-  // Request location permissions
+  // Request location permissions (graceful — no crash on Huawei)
   async requestPermissions(): Promise<boolean> {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    return status === 'granted';
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      return status === 'granted';
+    } catch (error: any) {
+      console.warn('[Location] Permission request failed:', error?.message);
+      return false;
+    }
   },
 
-  // Get current location
-  async getCurrentLocation(): Promise<Location.LocationObject | null> {
+  // Get current location — with Huawei/GMS fallback
+  async getCurrentLocation(): Promise<LocationResult> {
+    const gmsAvailable = await isGooglePlayServicesAvailable();
+
+    if (!gmsAvailable) {
+      console.warn('[Location] Google Play Services not available — using fallback');
+      return {
+        location: null,
+        error: 'Location requires Google Play Services. Your device (Huawei) does not support this feature.',
+        isHuaweiFallback: true,
+      };
+    }
+
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-
-        return null;
+        return {
+          location: null,
+          error: 'Location permission denied. Enable in Settings.',
+          isHuaweiFallback: false,
+        };
       }
 
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
 
-      return location;
-    } catch (error) {
-      console.error('Error getting location:', error);
-      return null;
+      return { location, error: null, isHuaweiFallback: false };
+    } catch (error: any) {
+      console.error('[Location] getCurrentLocation error:', error?.message);
+      return {
+        location: null,
+        error: 'Could not get location. Check GPS is enabled.',
+        isHuaweiFallback: false,
+      };
     }
   },
 
   // Start background location tracking (for drivers)
-  async startBackgroundTracking(driverId: string): Promise<boolean> {
-    try {
-      const hasPermission = await Location.requestBackgroundPermissionsAsync();
-      if (!hasPermission) {
+  async startBackgroundTracking(driverId: string): Promise<{ success: boolean; error: string | null }> {
+    const gmsAvailable = await isGooglePlayServicesAvailable();
 
-        return false;
+    if (!gmsAvailable) {
+      return {
+        success: false,
+        error: 'Background tracking requires Google Play Services. Your device does not support this.',
+      };
+    }
+
+    try {
+      const { status } = await Location.requestBackgroundPermissionsAsync();
+      if (status !== 'granted') {
+        return { success: false, error: 'Background location permission denied.' };
       }
 
-      // Watch location in background
       await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 30000, // Update every 30 seconds
-          distanceInterval: 10, // Or every 10 meters
+          timeInterval: 30000,
+          distanceInterval: 10,
         },
         async (location) => {
           await this.updateDriverLocation(driverId, location);
         }
       );
 
-      return true;
-    } catch (error) {
-      console.error('Error starting background tracking:', error);
-      return false;
+      return { success: true, error: null };
+    } catch (error: any) {
+      console.error('[Location] startBackgroundTracking error:', error?.message);
+      return { success: false, error: error?.message || 'Failed to start tracking.' };
     }
   },
 
@@ -75,7 +135,6 @@ export const locationService = {
       const { latitude, longitude, accuracy, speed } = location.coords;
       const last_updated = new Date().toISOString();
 
-      // Save to driver_tracking table
       await supabase.from('driver_tracking').insert({
         driver_id: driverId,
         latitude,
@@ -85,7 +144,6 @@ export const locationService = {
         speed: speed || null,
       });
 
-      // Also update driver's current location
       await supabase
         .from('drivers')
         .update({
@@ -95,7 +153,7 @@ export const locationService = {
         })
         .eq('id', driverId);
     } catch (error) {
-      console.error('Error updating driver location:', error);
+      console.error('[Location] updateDriverLocation error:', error);
     }
   },
 
@@ -113,7 +171,7 @@ export const locationService = {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error getting driver location:', error);
+      console.error('[Location] getDriverLocation error:', error);
       return null;
     }
   },
@@ -134,22 +192,16 @@ export const locationService = {
         latitude: driver.current_latitude,
         longitude: driver.current_longitude,
         last_updated: new Date(driver.last_location_update).getTime(),
-        accuracy: 10, // Default accuracy
+        accuracy: 10,
       }));
     } catch (error) {
-      console.error('Error getting drivers locations:', error);
+      console.error('[Location] getActiveDriversLocations error:', error);
       return [];
     }
   },
 
-  // Calculate distance between two points (Haversine formula)
-  calculateDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number {
-    const R = 6371; // Earth's radius in km
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
     const a =
@@ -166,9 +218,8 @@ export const locationService = {
     return deg * (Math.PI / 180);
   },
 
-  // Get ETA based on distance (assuming avg speed of 40 km/h in city)
   getETA(distanceKm: number): number {
     const avgSpeedKmh = 40;
-    return Math.round((distanceKm / avgSpeedKmh) * 60); // Returns minutes
+    return Math.round((distanceKm / avgSpeedKmh) * 60);
   },
 };

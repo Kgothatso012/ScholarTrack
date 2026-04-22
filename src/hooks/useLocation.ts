@@ -1,51 +1,73 @@
 // useLocation Hook - Easy location tracking for any component
+// Patched: Huawei/GMS fallback support
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Location from 'expo-location';
-import { locationService } from '../services/location';
+import { locationService, LocationResult } from '../services/location';
 
 export function useLocation(driverId?: string) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isHuaweiFallback, setIsHuaweiFallback] = useState(false);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
-  const getLocation = useCallback(async () => {
-    const loc = await locationService.getCurrentLocation();
-    if (loc) {
-      setLocation(loc);
+  const getLocation = useCallback(async (): Promise<LocationResult> => {
+    const result: LocationResult = await locationService.getCurrentLocation();
+
+    if (result.isHuaweiFallback) {
+      setIsHuaweiFallback(true);
+      setError('Google Play Services not available on this device.');
+      return result;
+    }
+
+    if (result.error) {
+      setError(result.error);
+      return result;
+    }
+
+    if (result.location) {
+      setLocation(result.location);
       if (driverId) {
-        await locationService.updateDriverLocation(driverId, loc);
+        await locationService.updateDriverLocation(driverId, result.location);
       }
     }
-    return loc;
+
+    return result;
   }, [driverId]);
 
-  const startTracking = useCallback(async () => {
-    const hasPermission = await locationService.requestPermissions();
-    if (!hasPermission) {
-      setError('Location permission denied');
-      return false;
+  const startTracking = useCallback(async (): Promise<{ success: boolean; error: string | null }> => {
+    // Check GMS availability first
+    const result: LocationResult = await locationService.getCurrentLocation();
+
+    if (result.isHuaweiFallback) {
+      setIsHuaweiFallback(true);
+      setError('Background tracking requires Google Play Services.');
+      return { success: false, error: 'Google Play Services not available.' };
     }
 
     if (!driverId) {
       setError('No driver ID provided');
-      return false;
+      return { success: false, error: 'No driver ID.' };
     }
 
-    // Cancel any existing subscription
+    if (result.error) {
+      setError(result.error);
+      return { success: false, error: result.error };
+    }
+
+    // Cancel existing subscription
     if (subscriptionRef.current) {
       subscriptionRef.current.remove();
     }
 
-    // Actually start watching position
     subscriptionRef.current = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
         timeInterval: 10000,
         distanceInterval: 10,
       },
-      (loc) => {
-        const locationObj = {
+      async (loc) => {
+        const locationObj: Location.LocationObject = {
           coords: {
             latitude: loc.coords.latitude,
             longitude: loc.coords.longitude,
@@ -59,13 +81,13 @@ export function useLocation(driverId?: string) {
         };
         setLocation(locationObj);
         if (driverId) {
-          locationService.updateDriverLocation(driverId, locationObj);
+          await locationService.updateDriverLocation(driverId, locationObj);
         }
       }
     );
 
     setIsTracking(true);
-    return true;
+    return { success: true, error: null };
   }, [driverId]);
 
   const stopTracking = useCallback(() => {
@@ -76,7 +98,6 @@ export function useLocation(driverId?: string) {
     setIsTracking(false);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (subscriptionRef.current) {
@@ -90,6 +111,7 @@ export function useLocation(driverId?: string) {
     location,
     isTracking,
     error,
+    isHuaweiFallback,
     getLocation,
     startTracking,
     stopTracking,

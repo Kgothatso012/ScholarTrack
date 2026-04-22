@@ -5,7 +5,7 @@ export const tripServiceEnhanced = {
   async getAllTrips() {
     const { data, error } = await supabase
       .from('trips')
-      .select('*, driver:drivers(full_name), children:children(full_name, school:schools(name))')
+      .select('*')
       .order('created_at', { ascending: false });
     if (error) throw error;
     return data;

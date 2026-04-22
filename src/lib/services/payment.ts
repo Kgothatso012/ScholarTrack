@@ -14,7 +14,7 @@ export const paymentService = {
   async getPaymentsForDriver(driverId: string) {
     const { data, error } = await supabase
       .from('payments')
-      .select('*, parent:profiles(full_name)')
+      .select('*')
       .eq('driver_id', driverId)
       .order('created_at', { ascending: false });
     if (error) throw error;
