@@ -763,16 +763,16 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
         {/* MAP */}
         <View style={s.mapWrap}>
-          <MapView
-            ref={mapRef}
-            style={{ flex: 1 }}
-            region={region}
-            showsUserLocation={false}
-            showsMyLocationButton={false}
-            showsCompass={false}
-            mapType="standard"
-          >
-            {driverLocation && (
+          {driverLocation ? (
+            <MapView
+              ref={mapRef}
+              style={{ width: '100%', height: 220 }}
+              region={region}
+              showsUserLocation={false}
+              showsMyLocationButton={false}
+              showsCompass={false}
+              mapType="standard"
+            >
               <Marker
                 coordinate={{
                   latitude: driverLocation.latitude,
@@ -785,28 +785,30 @@ export default function LiveTrackScreen({ navigation }: Props) {
                   <BusMarkerAnimated />
                 </View>
               </Marker>
-            )}
-            {child.pickup_lat && child.pickup_lng && (
-              <>
-                <Circle
-                  center={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
-                  radius={200}
-                  fillColor="rgba(0,119,73,0.15)"
-                  strokeColor="rgba(0,119,73,0.5)"
-                  strokeWidth={2}
-                />
-                <Marker
-                  coordinate={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
-                  title="Pickup Zone"
-                  description={child.school?.name ?? 'School'}
-                >
-                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: DT.green2, alignItems: 'center', justifyContent: 'center' }}>
-                    <Ionicons name="school" size={16} color={DT.cyan} />
-                  </View>
-                </Marker>
-              </>
-            )}
-          </MapView>
+              {child.pickup_lat && child.pickup_lng && (
+                <>
+                  <Circle
+                    center={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
+                    radius={200}
+                    fillColor="rgba(0,119,73,0.15)"
+                    strokeColor="rgba(0,119,73,0.5)"
+                    strokeWidth={2}
+                  />
+                  <Marker
+                    coordinate={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
+                    title="Pickup Zone"
+                    description={child.school?.name ?? 'School'}
+                  >
+                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: DT.green2, alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="school" size={16} color={DT.cyan} />
+                    </View>
+                  </Marker>
+                </>
+              )}
+            </MapView>
+          ) : (
+            <MapPlaceholder driverLocation={null} />
+          )}
           <View style={s.mapFooter}>
             <View style={s.mapLegend}>
               <View style={s.legendItem}>

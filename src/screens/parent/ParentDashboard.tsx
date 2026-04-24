@@ -1,6 +1,5 @@
-// ScholarTrack Parent Dashboard — Design System: Dark SA Transport
-// Aesthetic: Industrial Dark + Cyan/Amber/SA Flag accents
-// "Night route dashboard" — trust, precision, real-time awareness
+// ScholarTrack Parent Dashboard — Taste-Skill Theme Redesign
+// Industrial dark aesthetic using theme tokens exclusively. No hardcoded colors.
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -35,13 +34,18 @@ import { cacheService } from '../../lib/cache';
 import { ThemeColors } from '../../context/ThemeContext';
 
 import { Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const CACHE_TTL = 2 * 60 * 1000;
+
+const SPRING = { damping: 15, stiffness: 150 };
+
+// ─── Theme (dark mode) ────────────────────────────────────────────────────────
+const { colors: C, spacing: S, borderRadius: BR, typography: TY } = getTheme('dark');
 
 interface DashboardStat {
   label: string;
@@ -60,28 +64,7 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const SPRING = { damping: 15, stiffness: 150 };
-
-// ─── Design Tokens (dark SA transport) ───────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  border2: '#0f1e34',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
-
-// ─── Spring-press wrapper ────────────────────────────────────────────────────
+// ─── Spring-press wrapper ──────────────────────────────────────────────────────
 const SpringTouchable = ({
   children,
   onPress,
@@ -108,8 +91,8 @@ const SpringTouchable = ({
   );
 };
 
-// ─── Breathing dot (live indicator) ─────────────────────────────────────────
-const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+// ─── Breathing dot (live indicator) ───────────────────────────────────────────
+const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -124,13 +107,7 @@ const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: 
     <View style={{ width: size + 8, height: size + 8, justifyContent: 'center', alignItems: 'center' }}>
       <Animated.View
         style={[
-          {
-            position: 'absolute',
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: color,
-          },
+          { position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color },
           ringStyle,
         ]}
       />
@@ -139,37 +116,7 @@ const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: 
   );
 };
 
-// ─── Bento stat cell ─────────────────────────────────────────────────────────
-const bentoGlassStyle = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,183,0,.1)',
-  borderRadius: 20,
-};
-const bentoGlassRefraction = {
-  position: 'absolute' as const,
-  top: 0,
-  left: 0,
-  right: 0,
-  height: 1,
-  backgroundColor: 'rgba(255,183,0,.18)',
-};
-const bentoLeftBarBase = {
-  position: 'absolute' as const,
-  left: 0,
-  top: 30,
-  bottom: 30,
-  width: 3,
-  borderRadius: 2,
-};
-const bentoLabelBase = {
-  fontFamily: 'DMMono_400Regular',
-  fontSize: 9,
-  letterSpacing: 1.5,
-  textTransform: 'uppercase' as const,
-  color: 'rgba(255,255,255,.35)',
-};
-
+// ─── Bento stat cell ───────────────────────────────────────────────────────────
 const BentoCell = ({
   label,
   value,
@@ -183,48 +130,30 @@ const BentoCell = ({
   danger?: boolean;
   delay?: number;
 }) => (
-  <Animated.View
-    entering={FadeIn.delay(delay).springify()}
-    style={{
-      width: wide ? '55%' : '45%',
-      paddingHorizontal: 4,
-      paddingVertical: 4,
-    }}
-  >
-    <View style={[bentoGlassStyle, { position: 'relative' }]}>
-      <View style={bentoGlassRefraction} />
-      <View style={[bentoLeftBarBase, { backgroundColor: danger ? DT.red + '99' : DT.amber + '99' }]} />
-      <View style={{ paddingVertical: 16, paddingHorizontal: 14 }}>
-        <Text style={bentoLabelBase}>{label}</Text>
-        <Text style={{ fontFamily: 'Syne_800ExtraBold', fontSize: 28, letterSpacing: -1, marginTop: 4, color: danger ? DT.red : DT.amber }}>{value}</Text>
-      </View>
+  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: wide ? '55%' : '45%', padding: 4 }}>
+    <View
+      style={{
+        backgroundColor: C.surface,
+        borderWidth: 1,
+        borderColor: danger ? C.error + '44' : C.border,
+        borderRadius: BR.xl,
+        padding: S.lg,
+      }}
+    >
+      <Text style={[TY.caption, { color: C.textMuted, marginBottom: 4 }]}>{label}</Text>
+      <Text
+        style={[
+          TY.displayMedium,
+          { color: danger ? C.error : C.primary, fontSize: 28, letterSpacing: -1, lineHeight: 32 },
+        ]}
+      >
+        {value}
+      </Text>
     </View>
   </Animated.View>
 );
 
-// ─── Quick action card ────────────────────────────────────────────────────────
-const quickCardInnerBase = {
-  flexDirection: 'row' as const,
-  alignItems: 'center' as const,
-  gap: 10,
-  padding: 14,
-  borderRadius: 16,
-  borderWidth: 1,
-};
-const qaIconWrapBase = {
-  width: 36,
-  height: 36,
-  borderRadius: 10,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  borderWidth: 1,
-};
-const qaLabelBase = {
-  fontFamily: 'Syne_500Medium',
-  fontSize: 13,
-  color: DT.white,
-};
-
+// ─── Quick action card ─────────────────────────────────────────────────────────
 const QuickCard = ({
   iconName,
   iconColor,
@@ -242,44 +171,41 @@ const QuickCard = ({
   onPress: () => void;
   delay?: number;
 }) => (
-  <Animated.View
-    entering={FadeIn.delay(delay).springify()}
-    style={{ width: '50%', paddingHorizontal: 4, paddingVertical: 4 }}
-  >
-    <SpringTouchable onPress={onPress} style={{}}>
-      <View style={[quickCardInnerBase, { backgroundColor: DT.panel, borderColor }]}>
-        <View style={[qaIconWrapBase, { backgroundColor: bgColor, borderColor }]}>
+  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: '50%', padding: 4 }}>
+    <SpringTouchable onPress={onPress}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: S.sm,
+          padding: S.lg,
+          backgroundColor: bgColor,
+          borderWidth: 1,
+          borderColor,
+          borderRadius: BR.lg,
+        }}
+      >
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: BR.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: bgColor,
+            borderWidth: 1,
+            borderColor,
+          }}
+        >
           <Ionicons name={iconName as any} size={19} color={iconColor} />
         </View>
-        <Text style={qaLabelBase}>{label}</Text>
+        <Text style={[TY.label, { color: C.text }]}>{label}</Text>
       </View>
     </SpringTouchable>
   </Animated.View>
 );
 
-// ─── Trip list item ───────────────────────────────────────────────────────────
-const tripItemBase = {
-  flexDirection: 'row' as const,
-  alignItems: 'center' as const,
-  gap: 10,
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,183,0,.07)',
-  borderRadius: 16,
-  padding: 12,
-  marginBottom: 6,
-};
-const tripAvatarBase = {
-  width: 36,
-  height: 36,
-  borderRadius: 10,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  borderWidth: 1,
-};
-const tripNameBase = { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: DT.white };
-const tripMetaBase = { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.35)', marginTop: 2 };
-
+// ─── Trip list item ─────────────────────────────────────────────────────────────
 const TripItem = ({
   icon,
   name,
@@ -299,22 +225,46 @@ const TripItem = ({
   borderColor: string;
   delay?: number;
 }) => {
-  const iconColor = icon === 'home' ? DT.green2 : '#6699ff';
+  const iconColor = icon === 'home' ? C.success : C.info;
   return (
-  <Animated.View entering={FadeIn.delay(delay).springify()} style={tripItemBase}>
-    <View style={[tripAvatarBase, { backgroundColor: bgColor, borderColor }]}>
-      <Ionicons name={icon as any} size={17} color={iconColor} />
-    </View>
-    <View style={{ flex: 1 }}>
-      <Text style={tripNameBase}>{name}</Text>
-      <Text style={tripMetaBase}>{meta}</Text>
-    </View>
-    <Badge label={badgeLabel} variant={badgeVariant} size="small" />
-  </Animated.View>
+    <Animated.View entering={FadeIn.delay(delay).springify()} style={{ marginBottom: S.sm }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: S.sm,
+          backgroundColor: C.surface,
+          borderWidth: 1,
+          borderColor,
+          borderRadius: BR.lg,
+          padding: S.md,
+        }}
+      >
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: BR.md,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: bgColor,
+            borderWidth: 1,
+            borderColor,
+          }}
+        >
+          <Ionicons name={icon as any} size={17} color={iconColor} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[TY.label, { color: C.text }]}>{name}</Text>
+          <Text style={[TY.monoSmall, { color: C.textMuted, marginTop: 2 }]}>{meta}</Text>
+        </View>
+        <Badge label={badgeLabel} variant={badgeVariant} size="small" />
+      </View>
+    </Animated.View>
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component ────────────────────────────────────────────────────────────
 const ParentDashboard = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
@@ -481,34 +431,30 @@ const ParentDashboard = ({ navigation }: Props) => {
   };
 
   const quickActions = [
-    { iconName: 'map-outline', iconColor: DT.green, label: 'Track Bus', bgColor: 'rgba(0,119,73,.18)', borderColor: 'rgba(0,119,73,.35)', route: 'LiveTrack' },
-    { iconName: 'people-outline', iconColor: '#6699ff', label: 'My Children', bgColor: 'rgba(0,35,149,.2)', borderColor: 'rgba(0,35,149,.4)', route: 'Children' },
-    { iconName: 'person-add-outline', iconColor: DT.amber, label: 'Hire Driver', bgColor: 'rgba(255,183,0,.12)', borderColor: 'rgba(255,183,0,.28)', route: 'HireDriver' },
-    { iconName: 'warning-outline', iconColor: DT.red, label: 'Emergency', bgColor: 'rgba(255,61,90,.15)', borderColor: 'rgba(255,61,90,.3)', route: 'Emergency' },
-    { iconName: 'card-outline', iconColor: DT.amber, label: 'Payments', bgColor: 'rgba(255,183,0,.12)', borderColor: 'rgba(255,183,0,.28)', route: 'Payments' },
-    { iconName: 'time-outline', iconColor: DT.muted, label: 'History', bgColor: 'rgba(74,106,138,.15)', borderColor: 'rgba(74,106,138,.3)', route: 'History' },
+    { iconName: 'map-outline', iconColor: C.success, label: 'Track Bus', bgColor: C.success + '1A', borderColor: C.success + '33', route: 'LiveTrack' },
+    { iconName: 'people-outline', iconColor: C.info, label: 'My Children', bgColor: C.info + '1A', borderColor: C.info + '33', route: 'Children' },
+    { iconName: 'person-add-outline', iconColor: C.primary, label: 'Hire Driver', bgColor: C.primary + '1A', borderColor: C.primary + '33', route: 'HireDriver' },
+    { iconName: 'warning-outline', iconColor: C.error, label: 'Emergency', bgColor: C.error + '1A', borderColor: C.error + '33', route: 'Emergency' },
+    { iconName: 'card-outline', iconColor: C.primary, label: 'Payments', bgColor: C.primary + '1A', borderColor: C.primary + '33', route: 'Payments' },
+    { iconName: 'time-outline', iconColor: C.textMuted, label: 'History', bgColor: C.border, borderColor: C.borderLight, route: 'History' },
   ];
 
   const isLive = trips.some(t => t.status === 'in_progress');
   const activeTripCount = trips.filter(t => t.status === 'in_progress').length;
 
-  const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-  // ─── Styles ────────────────────────────────────────────────────────────────
+  // ─── Styles ─────────────────────────────────────────────────────────────────
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
+
     // HEADER
     dashHeader: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.backgroundAlt,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.primary,
       borderBottomLeftRadius: 28,
       borderBottomRightRadius: 28,
-      position: 'relative',
-      overflow: 'hidden',
     },
     dashHeaderBg1: {
       position: 'absolute',
@@ -517,7 +463,7 @@ const ParentDashboard = ({ navigation }: Props) => {
       width: 200,
       height: 200,
       borderRadius: 100,
-      backgroundColor: 'rgba(255,183,0,.06)',
+      backgroundColor: C.primary + '0D',
     },
     dashHeaderBg2: {
       position: 'absolute',
@@ -526,187 +472,166 @@ const ParentDashboard = ({ navigation }: Props) => {
       width: 160,
       height: 160,
       borderRadius: 80,
-      backgroundColor: 'rgba(0,119,73,.1)',
+      backgroundColor: C.success + '1A',
     },
     dhTop: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      position: 'relative',
-      zIndex: 1,
-      marginBottom: 14,
+      marginBottom: S.md,
     },
-    dhBrand: {
-      fontFamily: 'Syne_800ExtraBold',
-      fontSize: 26,
-      letterSpacing: -0.3,
-      color: DT.white,
-    },
-    dhSub: {
-      fontFamily: 'DMMono_400Regular',
-      fontSize: 10,
-      color: 'rgba(255,255,255,.45)',
-      marginTop: 4,
-      letterSpacing: 1,
-    },
-    dhActions: { flexDirection: 'row', gap: spacing.sm },
+    dhBrand: { ...TY.displayMedium, color: C.text, marginBottom: 4 },
+    dhSub: { ...TY.monoSmall, color: C.textMuted, letterSpacing: 1 },
+    dhActions: { flexDirection: 'row', gap: S.sm },
     dhBtn: {
       width: 34,
       height: 34,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255,255,255,.07)',
+      borderRadius: BR.md,
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,.08)',
+      borderColor: C.border,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    dhBtnIcon: { fontSize: 17 },
-    dhStatus: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      position: 'relative',
-      zIndex: 1,
-    },
-    dhStatusText: {
-      fontFamily: 'Syne_700Bold',
-      fontSize: 11,
-      color: 'rgba(255,255,255,.5)',
-      letterSpacing: 0.5,
-    },
+    dhStatus: { flexDirection: 'row', alignItems: 'center', gap: S.sm },
+    dhStatusText: { ...TY.labelSmall, color: C.textMuted, letterSpacing: 0.5 },
+
     // TABS
     tabsOuter: {
       flexDirection: 'row',
-      marginHorizontal: spacing.md,
-      marginTop: spacing.md,
-      backgroundColor: 'rgba(255,255,255,.03)',
+      marginHorizontal: S.lg,
+      marginTop: S.lg,
+      backgroundColor: C.surface,
       borderRadius: 999,
       padding: 3,
       borderWidth: 1,
-      borderColor: 'rgba(255,183,0,.07)',
+      borderColor: C.border,
     },
     tabBtn: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 8,
+      paddingVertical: S.sm,
       borderRadius: 999,
       gap: 5,
     },
-    tabBtnActive: { backgroundColor: DT.blue },
-    tabText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.35)' },
-    tabTextActive: { color: DT.white, fontWeight: '600' },
-    tabIcon: { fontSize: 12 },
-    // GLASS CARD
-    glass: {
-      backgroundColor: 'rgba(255,255,255,.04)',
-      borderWidth: 1,
-      borderColor: 'rgba(255,183,0,.1)',
-      borderRadius: 20,
-      overflow: 'hidden',
-    },
-    glassRefraction: {
+    tabBtnActive: { backgroundColor: C.secondaryDark },
+    tabText: { ...TY.labelSmall, color: C.textMuted },
+    tabTextActive: { color: C.text, fontWeight: '600' },
+    tabIcon: { fontSize: 14 },
+
+    // HERO CARD (with glass refraction)
+    heroCard: { marginHorizontal: S.lg, marginTop: S.lg },
+    heroCardInner: { flexDirection: 'row', alignItems: 'center', padding: S.xl, gap: S.md, overflow: 'hidden' },
+    heroRefraction: {
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       height: 1,
-      backgroundColor: 'rgba(255,183,0,.18)',
+      backgroundColor: C.cyan + '33',
     },
-    bentoLeftBar: {
-      position: 'absolute',
-      left: 0,
-      top: '15%',
-      bottom: '15%',
-      width: 3,
-      borderRadius: 2,
-    },
-    bentoLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.35)' },
-    bentoValue: { fontFamily: 'Syne_700Bold', fontSize: 30, fontWeight: '800', letterSpacing: -1, marginTop: 4 },
-    // LIVE TRACK HERO
-    heroCard: { marginHorizontal: 12, marginTop: 8 },
-    heroCardInner: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 12 },
     heroText: { flex: 1 },
-    heroTag: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 5 },
-    heroTagText: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)' },
-    heroTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white, lineHeight: 20 },
-    heroSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.35)', marginTop: 3 },
+    heroTag: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+    heroTagText: { ...TY.caption, color: C.textMuted },
+    heroTitle: { ...TY.h3, color: C.text, lineHeight: 22 },
+    heroSub: { ...TY.bodySmall, color: C.textMuted, marginTop: 2 },
     heroTrackBtn: {
-      backgroundColor: 'rgba(0,119,73,.25)',
+      backgroundColor: C.success + '33',
       borderWidth: 1,
-      borderColor: 'rgba(0,119,73,.45)',
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
+      borderColor: C.success + '55',
+      borderRadius: BR.md,
+      paddingHorizontal: S.lg,
+      paddingVertical: S.sm,
     },
-    heroTrackBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: DT.green2, fontWeight: '600' },
+    heroTrackBtnText: { ...TY.buttonSmall, color: C.success, textTransform: 'uppercase', letterSpacing: 1 },
+
     // SECTION LABEL
-    secLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,.22)', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
+    secLabel: { ...TY.caption, color: C.textMuted, paddingHorizontal: S.lg, paddingTop: S.xl, paddingBottom: S.sm },
+
     // QUICK ACTIONS
-    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 8 },
-    quickCardInner: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 16, borderWidth: 1 },
-    qaIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
-    qaLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '500', color: DT.white },
+    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: S.sm },
+
     // TRIP LIST
-    tripList: { paddingHorizontal: 12, paddingBottom: 12 },
-    tripItem: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(255,183,0,.07)', borderRadius: 16, padding: 12, marginBottom: 6 },
-    tripAvatar: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
-    tripName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '500', color: DT.white },
-    tripMeta: { fontFamily: 'Syne_700Bold', fontSize: 10, color: 'rgba(255,255,255,.35)', marginTop: 2 },
+    tripList: { paddingHorizontal: S.lg, paddingBottom: S.lg },
+
     // CHILD LIST
-    childListItem: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(255,183,0,.07)', borderRadius: 16, padding: 12, marginBottom: 6 },
-    childAvatar: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, backgroundColor: 'rgba(0,35,149,.2)', borderColor: 'rgba(0,35,149,.3)' },
-    childInitial: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.blue },
+    childListItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: S.sm,
+      backgroundColor: C.surface,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: BR.lg,
+      padding: S.md,
+      marginBottom: S.sm,
+    },
+    childAvatar: {
+      width: 36,
+      height: 36,
+      borderRadius: BR.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: C.info + '1A',
+      borderWidth: 1,
+      borderColor: C.info + '33',
+    },
+    childInitial: { ...TY.label, color: C.info, fontWeight: '700' },
     childInfo: { flex: 1 },
-    childName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '500', color: DT.white },
-    childMeta: { fontFamily: 'Syne_700Bold', fontSize: 10, color: 'rgba(255,255,255,.35)', marginTop: 2 },
+    childName: { ...TY.label, color: C.text },
+    childMeta: { ...TY.monoSmall, color: C.textMuted, marginTop: 2 },
+
     // EMPTY STATE
-    emptyGlass: { alignItems: 'center', padding: 32 },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.35)', marginTop: 10, textAlign: 'center' },
+    emptyGlass: { alignItems: 'center', padding: S.xxxl },
+    emptyText: { ...TY.bodySmall, color: C.textMuted, marginTop: S.sm, textAlign: 'center' },
+
     // RATING MODAL
     modalOverlay: {
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(0,0,0,.65)',
+      backgroundColor: C.overlay,
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 100,
-      padding: 24,
+      padding: S.xl,
     },
-    modalCard: { backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border, borderRadius: 24, padding: 28, width: '100%', alignItems: 'center' },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.white, marginBottom: 4 },
-    modalSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginBottom: 20 },
-    modalStars: { flexDirection: 'row', gap: 8, marginBottom: 24 },
-    modalStarBtn: { padding: 4 },
-    modalBtns: { flexDirection: 'row', gap: 8, width: '100%' },
-    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: DT.border, alignItems: 'center' },
-    modalBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: DT.muted },
-    modalBtnPrimary: { backgroundColor: DT.cyan, borderColor: DT.cyan },
-    modalBtnPrimaryText: { color: DT.bg, fontWeight: '600' },
-    // STATUS BAR
-    statusBar: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+    modalCard: {
+      backgroundColor: C.surfaceElevated,
+      borderWidth: 1,
+      borderColor: C.border,
+      borderRadius: BR.xxl,
+      padding: S.xxxl,
+      width: '100%',
       alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: insets.top + 8,
-      paddingBottom: 4,
-      backgroundColor: DT.bg,
     },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 4 },
-    sbIcon: { fontSize: 12 },
+    modalTitle: { ...TY.h2, color: C.text, marginBottom: 4 },
+    modalSub: { ...TY.bodySmall, color: C.textMuted, marginBottom: S.xl },
+    modalStars: { flexDirection: 'row', gap: S.sm, marginBottom: S.xl },
+    modalStarBtn: { padding: 4 },
+    modalBtns: { flexDirection: 'row', gap: S.sm, width: '100%' },
+    modalBtn: {
+      flex: 1,
+      paddingVertical: S.md,
+      borderRadius: BR.md,
+      borderWidth: 1.5,
+      borderColor: C.border,
+      alignItems: 'center',
+    },
+    modalBtnText: { ...TY.buttonSmall, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+    modalBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
+    modalBtnPrimaryText: { color: C.textInverse, fontWeight: '600' },
   });
-
-  const loadingColor = DT.cyan;
 
   if (loading) {
     return (
       <View style={[s.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={{ alignItems: 'center', gap: 12 }}>
-          <Ionicons name="bus" size={28} color={DT.dim} />
-          <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, letterSpacing: 2, textTransform: 'uppercase' }}>Loading dashboard…</Text>
+        <View style={{ alignItems: 'center', gap: S.md }}>
+          <Ionicons name="bus" size={28} color={C.textMuted} />
+          <Text style={{ ...TY.labelSmall, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>
+            Loading dashboard…
+          </Text>
         </View>
       </View>
     );
@@ -717,23 +642,9 @@ const ParentDashboard = ({ navigation }: Props) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={loadingColor}
-            colors={[loadingColor]}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
       >
-        {/* ── STATUS BAR ── */}
-        <View style={s.statusBar}>
-          <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}>
-            <Ionicons name="wifi" size={14} color={DT.dim} />
-            <Ionicons name="battery-full" size={14} color={DT.dim} />
-          </View>
-        </View>
-
         {/* ── HEADER ── */}
         <View style={s.dashHeader}>
           <View style={s.dashHeaderBg1} />
@@ -745,18 +656,18 @@ const ParentDashboard = ({ navigation }: Props) => {
             </View>
             <View style={s.dhActions}>
               <TouchableOpacity onPress={onRefresh} style={s.dhBtn}>
-                <Ionicons name="refresh" size={17} color={DT.white} />
+                <Ionicons name="refresh" size={17} color={C.text} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation?.navigate?.('Settings')} style={s.dhBtn}>
-                <Ionicons name="settings-outline" size={17} color={DT.white} />
+                <Ionicons name="settings-outline" size={17} color={C.text} />
               </TouchableOpacity>
               <TouchableOpacity onPress={handleLogout} style={s.dhBtn}>
-                <Ionicons name="log-out-outline" size={17} color={DT.white} />
+                <Ionicons name="log-out-outline" size={17} color={C.text} />
               </TouchableOpacity>
             </View>
           </View>
           <View style={s.dhStatus}>
-            <Ionicons name="radio" size={10} color={isLive ? DT.green2 : DT.muted} />
+            <BreathingDot color={isLive ? C.success : C.textMuted} size={8} />
             <Text style={s.dhStatusText}>{isLive ? 'Live tracking active' : 'All systems normal'}</Text>
           </View>
         </View>
@@ -764,16 +675,16 @@ const ParentDashboard = ({ navigation }: Props) => {
         {/* ── TABS ── */}
         <View style={s.tabsOuter}>
           {[
-            { key: 'overview', label: 'Overview', emoji: 'grid' },
-            { key: 'children', label: 'Children', emoji: 'people' },
-            { key: 'trips', label: 'Trips', emoji: 'bus' },
+            { key: 'overview', label: 'Overview', icon: 'grid' },
+            { key: 'children', label: 'Children', icon: 'people' },
+            { key: 'trips', label: 'Trips', icon: 'bus' },
           ].map((tab) => (
             <TouchableOpacity
               key={tab.key}
               onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setActiveTab(tab.key); }}
               style={[s.tabBtn, activeTab === tab.key && s.tabBtnActive]}
             >
-              <Ionicons name={tab.emoji as any} size={14} color={activeTab === tab.key ? DT.white : DT.muted} />
+              <Ionicons name={tab.icon as any} size={14} color={activeTab === tab.key ? C.text : C.textMuted} />
               <Text style={activeTab === tab.key ? [s.tabText, s.tabTextActive] : s.tabText}>{tab.label}</Text>
             </TouchableOpacity>
           ))}
@@ -782,8 +693,9 @@ const ParentDashboard = ({ navigation }: Props) => {
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <Animated.View entering={FadeIn.springify()}>
+
             {/* Bento Stats */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 8, paddingTop: 12 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: S.sm, paddingTop: S.md }}>
               {stats.map((stat, i) => (
                 <BentoCell
                   key={i}
@@ -796,13 +708,23 @@ const ParentDashboard = ({ navigation }: Props) => {
               ))}
             </View>
 
-            {/* Live Track Hero */}
-            <View style={[s.glass, s.heroCard]}>
-              <View style={s.glassRefraction} />
+            {/* Live Track Hero — ONLY card with glass refraction */}
+            <View
+              style={{
+                marginHorizontal: S.lg,
+                marginTop: S.lg,
+                backgroundColor: C.glassCyan,
+                borderWidth: 1,
+                borderColor: C.cyan + '26',
+                borderRadius: BR.xl,
+                overflow: 'hidden',
+              }}
+            >
+              <View style={s.heroRefraction} />
               <TouchableOpacity onPress={() => navigation?.navigate?.('LiveTrack')} style={s.heroCardInner}>
                 <View style={s.heroText}>
                   <View style={s.heroTag}>
-                    <Ionicons name="radio" size={6} color={isLive ? DT.green2 : DT.muted} />
+                    <BreathingDot color={isLive ? C.success : C.textMuted} size={6} />
                     <Text style={s.heroTagText}>Live Tracking</Text>
                   </View>
                   <Text style={s.heroTitle}>
@@ -836,11 +758,11 @@ const ParentDashboard = ({ navigation }: Props) => {
             </View>
 
             {/* Recent Trips */}
-            <Text style={[s.secLabel, { marginTop: 8 }]}>Recent Trips</Text>
+            <Text style={[s.secLabel, { marginTop: S.md }]}>Recent Trips</Text>
             <View style={s.tripList}>
               {trips.length === 0 ? (
-                <View style={[s.glass, s.emptyGlass]}>
-                  <Ionicons name="bus" size={28} color={DT.dim} />
+                <View style={{ alignItems: 'center', padding: S.xxxl }}>
+                  <Ionicons name="bus" size={28} color={C.textMuted} />
                   <Text style={s.emptyText}>No upcoming trips</Text>
                 </View>
               ) : (
@@ -854,8 +776,8 @@ const ParentDashboard = ({ navigation }: Props) => {
                       meta={`${formatDate(trip.scheduled_time)} · ${formatTime(trip.scheduled_time)}`}
                       badgeLabel={getTripStatus(trip)}
                       badgeVariant={getStatusVariant(trip.status)}
-                      bgColor={isDropoff ? 'rgba(0,119,73,.15)' : 'rgba(0,35,149,.2)'}
-                      borderColor={isDropoff ? 'rgba(0,119,73,.25)' : 'rgba(0,35,149,.3)'}
+                      bgColor={isDropoff ? C.success + '1A' : C.info + '1A'}
+                      borderColor={isDropoff ? C.success + '33' : C.info + '33'}
                       delay={i * 80}
                     />
                   );
@@ -867,11 +789,11 @@ const ParentDashboard = ({ navigation }: Props) => {
 
         {/* ── CHILDREN ── */}
         {activeTab === 'children' && (
-          <Animated.View entering={FadeIn.springify()} style={{ padding: 12 }}>
+          <Animated.View entering={FadeIn.springify()} style={{ paddingHorizontal: S.lg, paddingTop: S.md }}>
             <Text style={s.secLabel}>My Children ({children.length})</Text>
             {children.length === 0 ? (
-              <View style={[s.glass, s.emptyGlass]}>
-                <Ionicons name="people" size={28} color={DT.dim} />
+              <View style={{ alignItems: 'center', padding: S.xxxl }}>
+                <Ionicons name="people" size={28} color={C.textMuted} />
                 <Text style={s.emptyText}>No children added yet</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Children')} style={s.heroTrackBtn}>
                   <Text style={s.heroTrackBtnText}>Add Child</Text>
@@ -899,11 +821,11 @@ const ParentDashboard = ({ navigation }: Props) => {
 
         {/* ── TRIPS ── */}
         {activeTab === 'trips' && (
-          <Animated.View entering={FadeIn.springify()} style={{ padding: 12 }}>
+          <Animated.View entering={FadeIn.springify()} style={{ paddingHorizontal: S.lg, paddingTop: S.md }}>
             <Text style={s.secLabel}>All Trips ({trips.length})</Text>
             {trips.length === 0 ? (
-              <View style={[s.glass, s.emptyGlass]}>
-                <Ionicons name="bus" size={28} color={DT.dim} />
+              <View style={{ alignItems: 'center', padding: S.xxxl }}>
+                <Ionicons name="bus" size={28} color={C.textMuted} />
                 <Text style={s.emptyText}>No trips found</Text>
               </View>
             ) : (
@@ -917,8 +839,8 @@ const ParentDashboard = ({ navigation }: Props) => {
                     meta={`${formatDate(trip.scheduled_time)} · ${formatTime(trip.scheduled_time)}`}
                     badgeLabel={getTripStatus(trip)}
                     badgeVariant={getStatusVariant(trip.status)}
-                    bgColor={isDropoff ? 'rgba(0,119,73,.15)' : 'rgba(0,35,149,.2)'}
-                    borderColor={isDropoff ? 'rgba(0,119,73,.25)' : 'rgba(0,35,149,.3)'}
+                    bgColor={isDropoff ? C.success + '1A' : C.info + '1A'}
+                    borderColor={isDropoff ? C.success + '33' : C.info + '33'}
                   />
                 );
               })
@@ -938,26 +860,16 @@ const ParentDashboard = ({ navigation }: Props) => {
             <Text style={s.modalSub}>How was your trip experience?</Text>
             <View style={s.modalStars}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <TouchableOpacity
-                  key={star}
-                  onPress={() => setRating(star)}
-                  style={s.modalStarBtn}
-                >
-                  <Ionicons name={star <= rating ? "star" : "star-outline"} size={32} color={DT.amber} />
+                <TouchableOpacity key={star} onPress={() => setRating(star)} style={s.modalStarBtn}>
+                  <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={32} color={C.primary} />
                 </TouchableOpacity>
               ))}
             </View>
             <View style={s.modalBtns}>
-              <TouchableOpacity
-                onPress={() => { setRating(0); setShowRatingModal(false); }}
-                style={[s.modalBtn, { flex: 1 }]}
-              >
+              <TouchableOpacity onPress={() => { setRating(0); setShowRatingModal(false); }} style={[s.modalBtn, { flex: 1 }]}>
                 <Text style={s.modalBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSubmitRating}
-                style={[s.modalBtn, s.modalBtnPrimary, { flex: 1 }]}
-              >
+              <TouchableOpacity onPress={handleSubmitRating} style={[s.modalBtn, s.modalBtnPrimary, { flex: 1 }]}>
                 <Text style={[s.modalBtnText, s.modalBtnPrimaryText]}>Submit</Text>
               </TouchableOpacity>
             </View>
