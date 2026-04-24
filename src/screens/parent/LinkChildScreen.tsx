@@ -33,25 +33,15 @@ import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
 
 const SpringTouchable = ({
   children,
@@ -85,7 +75,7 @@ const glassCard = {
   borderColor: 'rgba(255,255,255,.08)',
 };
 
-const avatarColors = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+const avatarColors = [C.primary, C.accent, C.success, C.error, '#a855f7'];
 
 // ─── Parametric styles ────────────────────────────────────────────────────────
 const childAvatarStyle = (index: number) => ({
@@ -100,18 +90,18 @@ const childAvatarStyle = (index: number) => ({
 });
 
 const schoolChipStyle = (selected: boolean) => ({
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.sm,
+  paddingHorizontal: S.md,
+  paddingVertical: S.sm,
   borderRadius: borderRadius.lg,
-  marginRight: spacing.sm,
+  marginRight: S.sm,
   borderWidth: 1,
-  borderColor: selected ? DT.cyan : DT.border,
-  backgroundColor: selected ? DT.cyan + '20' : 'transparent',
+  borderColor: selected ? C.primary : C.border,
+  backgroundColor: selected ? C.primary + '20' : 'transparent',
 });
 
 const schoolChipTextStyle = (selected: boolean) => ({
   ...typography.labelSmall,
-  color: selected ? DT.cyan : DT.muted,
+  color: selected ? C.primary : C.textMuted,
 });
 
 interface Props {
@@ -226,7 +216,7 @@ export default function LinkChildScreen({ navigation }: Props) {
     <Animated.View entering={ZoomIn.duration(300).delay(index * 60)}>
       <View style={[styles.childCard, { overflow: 'hidden' }]}>
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-        <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+        <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
         <View style={styles.childHeader}>
           <View style={childAvatarStyle(index)}>
             <Text style={styles.avatarText}>{item.full_name?.charAt(0)}</Text>
@@ -235,8 +225,8 @@ export default function LinkChildScreen({ navigation }: Props) {
             <Text style={styles.childName}>{item.full_name}</Text>
             <Text style={styles.childSchool}>{item.school?.name || 'No school'}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: DT.green + '25', borderWidth: 1, borderColor: DT.green + '50' }]}>
-            <Text style={[styles.statusText, { color: DT.green }]}>Active</Text>
+          <View style={[styles.statusBadge, { backgroundColor: C.success + '25', borderWidth: 1, borderColor: C.success + '50' }]}>
+            <Text style={[styles.statusText, { color: C.success }]}>Active</Text>
           </View>
         </View>
         {item.grade && (
@@ -249,18 +239,18 @@ export default function LinkChildScreen({ navigation }: Props) {
         )}
         <View style={styles.childActions}>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: DT.cyan + '20', borderWidth: 1, borderColor: DT.cyan + '40' }]}
+            style={[styles.actionBtn, { backgroundColor: C.primary + '20', borderWidth: 1, borderColor: C.primary + '40' }]}
             onPress={() => handleEditChild(item)}
           >
-            <Ionicons name="pencil" size={16} color={DT.cyan} />
-            <Text style={[styles.actionText, { color: DT.cyan }]}>Edit</Text>
+            <Ionicons name="pencil" size={16} color={C.primary} />
+            <Text style={[styles.actionText, { color: C.primary }]}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: DT.red + '20', borderWidth: 1, borderColor: DT.red + '40' }]}
+            style={[styles.actionBtn, { backgroundColor: C.error + '20', borderWidth: 1, borderColor: C.error + '40' }]}
             onPress={() => handleDeleteChild(item)}
           >
-            <Ionicons name="trash" size={16} color={DT.red} />
-            <Text style={[styles.actionText, { color: DT.red }]}>Remove</Text>
+            <Ionicons name="trash" size={16} color={C.error} />
+            <Text style={[styles.actionText, { color: C.error }]}>Remove</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -270,23 +260,23 @@ export default function LinkChildScreen({ navigation }: Props) {
   const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: spacing.md,
-      paddingTop: insets.top + spacing.md,
-      paddingBottom: spacing.md,
+      paddingHorizontal: S.md,
+      paddingTop: insets.top + S.md,
+      paddingBottom: S.md,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
     },
-    backBtn: { padding: spacing.xs },
-    headerTitle: { flex: 1, ...typography.h3, color: DT.white, marginLeft: spacing.sm },
-    addBtn: { padding: spacing.xs },
+    backBtn: { padding: S.xs },
+    headerTitle: { flex: 1, ...typography.h3, color: C.text, marginLeft: S.sm },
+    addBtn: { padding: S.xs },
     loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center', marginTop: 10 },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: 10 },
     addFirstBtn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -295,12 +285,12 @@ export default function LinkChildScreen({ navigation }: Props) {
       marginTop: 20,
       ...glassCard,
     },
-    addFirstText: { ...typography.button, color: DT.cyan, marginLeft: 8 },
-    list: { padding: spacing.lg },
+    addFirstText: { ...typography.button, color: C.primary, marginLeft: 8 },
+    list: { padding: S.lg },
     childCard: {
       borderRadius: 20,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
@@ -309,89 +299,89 @@ export default function LinkChildScreen({ navigation }: Props) {
     },
     childHeader: { flexDirection: 'row' as const, alignItems: 'center' as const },
     childAvatar: undefined as any,
-    avatarText: { ...typography.h4, color: DT.white },
-    childInfo: { flex: 1, marginLeft: spacing.md },
-    childName: { ...typography.label, color: DT.white },
-    childSchool: { ...typography.bodySmall, color: DT.muted },
+    avatarText: { ...typography.h4, color: C.text },
+    childInfo: { flex: 1, marginLeft: S.md },
+    childName: { ...typography.label, color: C.text },
+    childSchool: { ...typography.bodySmall, color: C.textMuted },
     statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.md },
     statusText: { ...typography.caption, fontWeight: '600' },
-    childDetail: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.sm },
-    childActions: { flexDirection: 'row', marginTop: spacing.md, gap: spacing.sm },
+    childDetail: { ...typography.bodySmall, color: C.textMuted, marginTop: S.sm },
+    childActions: { flexDirection: 'row', marginTop: S.md, gap: S.sm },
     actionBtn: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: spacing.sm,
-      paddingHorizontal: spacing.md,
+      padding: S.sm,
+      paddingHorizontal: S.md,
       borderRadius: borderRadius.md,
     },
-    actionText: { ...typography.labelSmall, marginLeft: spacing.xs },
+    actionText: { ...typography.labelSmall, marginLeft: S.xs },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
     modalContent: {
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       maxHeight: '85%',
-      backgroundColor: DT.panel,
-      padding: spacing.lg,
-      paddingBottom: insets.bottom + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingBottom: insets.bottom + S.lg,
     },
     modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: spacing.lg,
+      marginBottom: S.lg,
     },
-    modalTitle: { ...typography.h3, color: DT.white },
-    modalBody: { paddingBottom: spacing.md },
-    inputLabel: { ...typography.labelSmall, color: DT.muted, marginBottom: spacing.xs, marginTop: spacing.md },
+    modalTitle: { ...typography.h3, color: C.text },
+    modalBody: { paddingBottom: S.md },
+    inputLabel: { ...typography.labelSmall, color: C.textMuted, marginBottom: S.xs, marginTop: S.md },
     input: {
       backgroundColor: 'rgba(255,255,255,.06)',
-      padding: spacing.md,
+      padding: S.md,
       borderRadius: borderRadius.md,
       ...typography.body,
-      color: DT.white,
+      color: C.text,
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
     },
-    schoolScroll: { marginBottom: spacing.md },
+    schoolScroll: { marginBottom: S.md },
     schoolChip: undefined as any,
     schoolChipText: undefined as any,
     submitBtn: {
-      padding: spacing.md,
+      padding: S.md,
       borderRadius: borderRadius.lg,
       alignItems: 'center',
-      marginTop: spacing.lg,
-      backgroundColor: DT.cyan,
+      marginTop: S.lg,
+      backgroundColor: C.primary,
     },
-    submitText: { ...typography.button, color: DT.bg, fontWeight: '700' },
+    submitText: { ...typography.button, color: C.background, fontWeight: '700' },
   });
 
   return (
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: C.accent, opacity: 0.06 }} />
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={DT.white} />
+          <Ionicons name="arrow-back" size={24} color={C.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Children</Text>
         <TouchableOpacity onPress={() => setShowAddModal(true)} style={styles.addBtn}>
-          <Ionicons name="add" size={28} color={DT.cyan} />
+          <Ionicons name="add" size={28} color={C.primary} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loading}>
-          <ActivityIndicator size="large" color={DT.cyan} />
+          <ActivityIndicator size="large" color={C.primary} />
         </View>
       ) : children.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="people-outline" size={64} color={DT.muted} />
+          <Ionicons name="people-outline" size={64} color={C.textMuted} />
           <Text style={styles.emptyText}>No children linked yet</Text>
           <TouchableOpacity
             style={styles.addFirstBtn}
             onPress={() => setShowAddModal(true)}
           >
-            <Ionicons name="add" size={20} color={DT.cyan} />
+            <Ionicons name="add" size={20} color={C.primary} />
             <Text style={styles.addFirstText}>Add Your First Child</Text>
           </TouchableOpacity>
         </View>
@@ -411,7 +401,7 @@ export default function LinkChildScreen({ navigation }: Props) {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Child</Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                <Ionicons name="close" size={24} color={DT.muted} />
+                <Ionicons name="close" size={24} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalBody}>
@@ -419,7 +409,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="Enter child's full name"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.full_name}
                 onChangeText={t => setNewChild({ ...newChild, full_name: t })}
               />
@@ -427,7 +417,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g., Grade 5"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.grade}
                 onChangeText={t => setNewChild({ ...newChild, grade: t })}
               />
@@ -449,7 +439,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="Enter pickup address"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.pickup_address}
                 onChangeText={t => setNewChild({ ...newChild, pickup_address: t })}
               />
@@ -471,7 +461,7 @@ export default function LinkChildScreen({ navigation }: Props) {
                 setShowEditModal(false);
                 setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
               }}>
-                <Ionicons name="close" size={24} color={DT.muted} />
+                <Ionicons name="close" size={24} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalBody}>
@@ -479,7 +469,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="Enter child's full name"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.full_name}
                 onChangeText={t => setNewChild({ ...newChild, full_name: t })}
               />
@@ -487,7 +477,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g., Grade 5"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.grade}
                 onChangeText={t => setNewChild({ ...newChild, grade: t })}
               />
@@ -509,7 +499,7 @@ export default function LinkChildScreen({ navigation }: Props) {
               <TextInput
                 style={styles.input}
                 placeholder="Enter pickup address"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newChild.pickup_address}
                 onChangeText={t => setNewChild({ ...newChild, pickup_address: t })}
               />

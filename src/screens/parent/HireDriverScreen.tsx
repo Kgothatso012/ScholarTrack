@@ -33,25 +33,15 @@ import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
 
 const SpringTouchable = ({
   children,
@@ -85,7 +75,7 @@ const glassCard = {
   borderColor: 'rgba(255,255,255,.08)',
 };
 
-const avatarColors = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+const avatarColors = [C.primary, C.accent, C.success, C.error, '#a855f7'];
 
 const driverAvatarStyle = (index: number) => ({
   width: 50,
@@ -200,7 +190,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
           key={i}
           name={filled ? 'star' : 'star-outline'}
           size={starSize}
-          color={DT.amber}
+          color={C.accent}
           style={{ marginRight: 2 }}
         />
       );
@@ -212,84 +202,84 @@ const HireDriverScreen = ({ navigation }: Props) => {
 
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     searchContainer: {
-      margin: spacing.lg,
-      padding: spacing.md,
+      margin: S.lg,
+      padding: S.md,
       borderRadius: borderRadius.lg,
       flexDirection: 'row',
       alignItems: 'center',
       ...glassCard,
     },
-    searchInput: { flex: 1, marginLeft: spacing.sm, ...typography.body, color: DT.white },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    searchInput: { flex: 1, marginLeft: S.sm, ...typography.body, color: C.text },
+    section: { padding: S.lg },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     driverCard: {
       borderRadius: 20,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
       borderTopWidth: 0,
     },
-    driverHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: spacing.md },
+    driverHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: S.md },
     driverAvatar: undefined as any,
-    driverInitial: { ...typography.h4, color: DT.white },
-    driverInfo: { flex: 1, marginLeft: spacing.md },
-    driverName: { ...typography.label, color: DT.white },
-    driverVehicle: { ...typography.bodySmall, color: DT.muted },
-    driverRating: { flexDirection: 'row' as const, alignItems: 'center' as const, marginTop: spacing.xs },
-    ratingText: { ...typography.labelSmall, color: DT.amber, marginLeft: spacing.xs },
+    driverInitial: { ...typography.h4, color: C.text },
+    driverInfo: { flex: 1, marginLeft: S.md },
+    driverName: { ...typography.label, color: C.text },
+    driverVehicle: { ...typography.bodySmall, color: C.textMuted },
+    driverRating: { flexDirection: 'row' as const, alignItems: 'center' as const, marginTop: S.xs },
+    ratingText: { ...typography.labelSmall, color: C.accent, marginLeft: S.xs },
     driverDetails: {
       flexDirection: 'row' as const,
       flexWrap: 'wrap' as const,
       justifyContent: 'space-between' as const,
-      marginTop: spacing.md,
-      paddingTop: spacing.md,
+      marginTop: S.md,
+      paddingTop: S.md,
       borderTopWidth: 1,
-      borderTopColor: DT.border,
+      borderTopColor: C.border,
     },
     detailItem: { alignItems: 'center' as const },
-    detailLabel: { ...typography.caption, color: DT.muted },
-    detailValue: { ...typography.label, color: DT.white, marginTop: spacing.xs },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' as const, padding: spacing.xl },
+    detailLabel: { ...typography.caption, color: C.textMuted },
+    detailValue: { ...typography.label, color: C.text, marginTop: S.xs },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center' as const, padding: S.xl },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' as const },
     modalContent: {
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
-      padding: spacing.lg,
-      paddingBottom: insets.bottom + spacing.lg,
-      backgroundColor: DT.panel,
+      padding: S.lg,
+      paddingBottom: insets.bottom + S.lg,
+      backgroundColor: C.surface,
     },
     modalHeader: {
       flexDirection: 'row' as const,
       justifyContent: 'space-between' as const,
       alignItems: 'center' as const,
-      marginBottom: spacing.sm,
+      marginBottom: S.sm,
     },
-    modalTitle: { fontSize: 20, fontWeight: 'bold' as const, color: DT.white },
-    modalSubtitle: { fontSize: 14, color: DT.muted, marginBottom: spacing.md },
+    modalTitle: { fontSize: 20, fontWeight: 'bold' as const, color: C.text },
+    modalSubtitle: { fontSize: 14, color: C.textMuted, marginBottom: S.md },
     childItem: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       paddingVertical: 14,
       borderBottomWidth: 1,
-      borderBottomColor: DT.border,
+      borderBottomColor: C.border,
     },
     childAvatar: undefined as any,
-    childName: { fontSize: 16, fontWeight: '600' as const, color: DT.white },
-    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: DT.bg },
+    childName: { fontSize: 16, fontWeight: '600' as const, color: C.text },
+    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: C.background },
   });
 
   if (loading) {
@@ -300,7 +290,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
           <Text style={styles.headerSubtext}>Find vetted drivers near you</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={DT.cyan} />
+          <ActivityIndicator size="large" color={C.primary} />
           <Text style={[styles.emptyText, { marginTop: spacing.md }]}>Finding available drivers...</Text>
         </View>
       </View>
@@ -311,19 +301,19 @@ const HireDriverScreen = ({ navigation }: Props) => {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.primary]} tintColor={C.primary} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
           <Text style={styles.headerTitle}>Hire a Driver</Text>
           <Text style={styles.headerSubtext}>Find vetted drivers near you</Text>
         </View>
 
         {/* Search */}
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={DT.muted} />
+          <Ionicons name="search" size={20} color={C.textMuted} />
           <Input
             placeholder="Search by name or vehicle..."
             value={searchQuery}
@@ -338,7 +328,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
 
           {filteredDrivers.length === 0 ? (
             <View style={styles.emptyText}>
-              <Ionicons name="car-sport-outline" size={64} color={DT.muted} />
+              <Ionicons name="car-sport-outline" size={64} color={C.textMuted} />
               <Text style={styles.emptyText}>No drivers found. Try a different search.</Text>
             </View>
           ) : (
@@ -346,7 +336,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
               <Animated.View key={driver.id || index} entering={ZoomIn.duration(300).delay(index * 60)}>
                 <View style={[styles.driverCard, { overflow: 'hidden' }]}>
                   <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
                   <View style={styles.driverHeader}>
                     <View style={driverAvatarStyle(index)}>
                       <Text style={styles.driverInitial}>
@@ -403,7 +393,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
                     </View>
                     <View style={styles.detailItem}>
                       <Text style={styles.detailLabel}>Price</Text>
-                      <Text style={[styles.detailValue, { color: DT.amber }]}>R2500/mo</Text>
+                      <Text style={[styles.detailValue, { color: C.accent }]}>R2500/mo</Text>
                     </View>
                   </View>
 
@@ -427,7 +417,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
                 Request {selectedDriver?.full_name}
               </Text>
               <TouchableOpacity onPress={() => { setShowChildModal(false); setSelectedDriver(null); }}>
-                <Ionicons name="close" size={24} color={DT.muted} />
+                <Ionicons name="close" size={24} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSubtitle}>
@@ -435,7 +425,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
             </Text>
             {children.length === 0 ? (
               <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: DT.muted, textAlign: 'center' }}>
+                <Text style={{ color: C.textMuted, textAlign: 'center' }}>
                   No children added yet.{'\n'}Add a child first in "My Children".
                 </Text>
                 <Spacer size="md" />
@@ -455,25 +445,25 @@ const HireDriverScreen = ({ navigation }: Props) => {
                     onPress={() => handleConfirmRequest(item.id)}
                     style={styles.childItem}
                   >
-                    <View style={childAvatarStyle(DT.cyan)}>
-                      <Text style={{ color: DT.white, fontWeight: 'bold' }}>
+                    <View style={childAvatarStyle(C.primary)}>
+                      <Text style={{ color: C.text, fontWeight: 'bold' }}>
                         {item.full_name?.charAt(0)}
                       </Text>
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.childName}>{item.full_name}</Text>
                       {item.grade && (
-                        <Text style={{ color: DT.muted, fontSize: 13 }}>
+                        <Text style={{ color: C.textMuted, fontSize: 13 }}>
                           {item.grade} - {item.school?.name || 'No school'}
                         </Text>
                       )}
                     </View>
-                    <Ionicons name="arrow-forward" size={20} color={DT.muted} />
+                    <Ionicons name="arrow-forward" size={20} color={C.textMuted} />
                   </SpringTouchable>
                 )}
               />
             )}
-            {hiring && <ActivityIndicator style={{ margin: 10 }} color={DT.cyan} />}
+            {hiring && <ActivityIndicator style={{ margin: 10 }} color={C.primary} />}
           </View>
         </View>
       </Modal>

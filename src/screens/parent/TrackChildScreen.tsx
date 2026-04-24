@@ -36,26 +36,15 @@ import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
-
 const glassCard = {
   backgroundColor: 'rgba(255,255,255,.04)',
   borderWidth: 1,
@@ -91,21 +80,21 @@ interface EnrichedChild {
 
 // ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
 const childChipStyle = (selected: boolean) => ({
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.sm,
+  paddingHorizontal: S.md,
+  paddingVertical: S.sm,
   borderRadius: borderRadius.full,
-  marginRight: spacing.sm,
+  marginRight: S.sm,
   flexDirection: 'row' as const,
   alignItems: 'center' as const,
-  backgroundColor: selected ? DT.cyan + '25' : DT.panel,
+  backgroundColor: selected ? C.primary + '25' : C.surface,
   borderWidth: 1,
-  borderColor: selected ? DT.cyan : DT.border,
+  borderColor: selected ? C.primary : C.border,
 });
 
 const childChipTextStyle = (selected: boolean) => ({
   ...typography.labelSmall,
-  marginLeft: spacing.xs,
-  color: selected ? DT.cyan : DT.muted,
+  marginLeft: S.xs,
+  color: selected ? C.primary : C.textMuted,
 });
 
 const SpringTouchable = ({
@@ -134,7 +123,7 @@ const SpringTouchable = ({
   );
 };
 
-const BreathingDot = ({ color = DT.green, size = 8 }: { color?: string; size?: number }) => {
+const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   useEffect(() => {
@@ -303,49 +292,49 @@ export default function TrackChildScreen({ navigation }: Props) {
   const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     content: { flex: 1 },
-    contentPad: { padding: spacing.lg },
-    childSelector: { marginBottom: spacing.lg },
+    contentPad: { padding: S.lg },
+    childSelector: { marginBottom: S.lg },
     childScroll: { flexDirection: 'row' as const },
     childChip: undefined as any,
     childChipText: undefined as any,
     placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
-    placeholderIcon: { marginBottom: spacing.md },
-    placeholderTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.sm },
-    placeholderText: { ...typography.body, color: DT.muted, textAlign: 'center' },
+    placeholderIcon: { marginBottom: S.md },
+    placeholderTitle: { ...typography.h3, color: C.text, marginBottom: S.sm },
+    placeholderText: { ...typography.body, color: C.textMuted, textAlign: 'center' },
     infoCard: {
       borderRadius: 20,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
       borderTopWidth: 0,
     },
-    infoTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.sm },
-    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
-    infoLabel: { ...typography.bodySmall, color: DT.muted, width: 80 },
-    infoValue: { ...typography.body, color: DT.white, flex: 1 },
-    mapContainer: { height: 280, marginBottom: spacing.md, marginHorizontal: spacing.lg, borderRadius: borderRadius.lg, overflow: 'hidden' },
+    infoTitle: { ...typography.h4, color: C.text, marginBottom: S.sm },
+    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: S.sm },
+    infoLabel: { ...typography.bodySmall, color: C.textMuted, width: 80 },
+    infoValue: { ...typography.body, color: C.text, flex: 1 },
+    mapContainer: { height: 280, marginBottom: S.md, marginHorizontal: S.lg, borderRadius: borderRadius.lg, overflow: 'hidden' },
     map: { flex: 1, borderRadius: borderRadius.lg },
-    mapOverlay: { position: 'absolute', top: spacing.md, left: spacing.md, right: spacing.md },
+    mapOverlay: { position: 'absolute', top: S.md, left: S.md, right: S.md },
     liveBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: DT.green,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.xs,
+      backgroundColor: C.success,
+      paddingHorizontal: S.md,
+      paddingVertical: S.xs,
       borderRadius: borderRadius.full,
       alignSelf: 'flex-start',
     },
@@ -353,66 +342,66 @@ export default function TrackChildScreen({ navigation }: Props) {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: DT.white,
-      marginRight: spacing.xs,
+      backgroundColor: C.text,
+      marginRight: S.xs,
     },
-    liveText: { ...typography.labelSmall, color: DT.bg, fontWeight: '700' },
+    liveText: { ...typography.labelSmall, color: C.background, fontWeight: '700' },
     driverCard: {
-      marginHorizontal: spacing.lg,
+      marginHorizontal: S.lg,
       borderRadius: 20,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
       borderTopWidth: 0,
     },
-    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: S.md },
     driverAvatar: {
       width: 50,
       height: 50,
       borderRadius: 25,
-      backgroundColor: DT.cyan + '20',
+      backgroundColor: C.primary + '20',
       borderWidth: 1.5,
-      borderColor: DT.cyan,
+      borderColor: C.primary,
       justifyContent: 'center',
       alignItems: 'center',
     },
-    driverInitial: { ...typography.h3, color: DT.cyan },
-    driverInfo: { flex: 1, marginLeft: spacing.md },
-    driverName: { ...typography.label, color: DT.white },
-    driverVehicle: { ...typography.bodySmall, color: DT.muted },
+    driverInitial: { ...typography.h3, color: C.primary },
+    driverInfo: { flex: 1, marginLeft: S.md },
+    driverName: { ...typography.label, color: C.text },
+    driverVehicle: { ...typography.bodySmall, color: C.textMuted },
     driverActions: {
       flexDirection: 'row',
       justifyContent: 'space-around',
-      marginTop: spacing.md,
-      paddingTop: spacing.md,
+      marginTop: S.md,
+      paddingTop: S.md,
       borderTopWidth: 1,
-      borderTopColor: DT.border,
+      borderTopColor: C.border,
     },
     actionBtn: { alignItems: 'center' },
-    actionText: { ...typography.labelSmall, color: DT.cyan, marginTop: spacing.xs },
+    actionText: { ...typography.labelSmall, color: C.primary, marginTop: S.xs },
     statusCard: {
-      marginHorizontal: spacing.lg,
+      marginHorizontal: S.lg,
       borderRadius: 20,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
     },
     statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: DT.green, marginRight: spacing.sm },
-    statusText: { ...typography.label, color: DT.white },
-    etaText: { ...typography.h4, color: DT.amber },
-    etaLabel: { ...typography.bodySmall, color: DT.muted },
+    statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: C.success, marginRight: S.sm },
+    statusText: { ...typography.label, color: C.text },
+    etaText: { ...typography.h4, color: C.accent },
+    etaLabel: { ...typography.bodySmall, color: C.textMuted },
     quickActions: {
-      marginHorizontal: spacing.lg,
+      marginHorizontal: S.lg,
       flexDirection: 'row',
       borderRadius: 20,
-      padding: spacing.md,
+      padding: S.md,
       justifyContent: 'space-around',
       ...glassCard,
       position: 'relative' as const,
@@ -420,7 +409,7 @@ export default function TrackChildScreen({ navigation }: Props) {
       borderColor: 'rgba(255,183,0,.12)',
     },
     quickBtn: { alignItems: 'center', flex: 1 },
-    quickBtnText: { ...typography.labelSmall, color: DT.white, marginTop: spacing.xs, textAlign: 'center' },
+    quickBtnText: { ...typography.labelSmall, color: C.text, marginTop: S.xs, textAlign: 'center' },
   });
 
   if (loading) {
@@ -431,8 +420,8 @@ export default function TrackChildScreen({ navigation }: Props) {
           <Text style={styles.headerSubtext}>Real-time location tracking</Text>
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={DT.cyan} />
-          <Text style={{ ...typography.body, color: DT.muted, marginTop: spacing.md }}>Loading...</Text>
+          <ActivityIndicator size="large" color={C.primary} />
+          <Text style={{ ...typography.body, color: C.textMuted, marginTop: S.md }}>Loading...</Text>
         </View>
       </View>
     );
@@ -442,7 +431,7 @@ export default function TrackChildScreen({ navigation }: Props) {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
         <Text style={styles.headerTitle}>Track Child</Text>
         <Text style={styles.headerSubtext}>Real-time location tracking</Text>
       </View>
@@ -450,14 +439,14 @@ export default function TrackChildScreen({ navigation }: Props) {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.primary]} tintColor={C.primary} />
         }
       >
         <View style={styles.contentPad}>
           {/* Multi-Child Selector */}
           {children.length > 1 && (
             <View style={styles.childSelector}>
-              <Text style={{ ...typography.label, color: DT.white, marginBottom: spacing.sm }}>
+              <Text style={{ ...typography.label, color: C.text, marginBottom: S.sm }}>
                 Select Child:
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -469,7 +458,7 @@ export default function TrackChildScreen({ navigation }: Props) {
                       onPress={() => setSelectedChild(child)}
                       style={childChipStyle(isSelected)}
                     >
-                      <Ionicons name="person" size={16} color={isSelected ? DT.cyan : DT.muted} />
+                      <Ionicons name="person" size={16} color={isSelected ? C.primary : C.textMuted} />
                       <Text style={childChipTextStyle(isSelected)}>{child.name}</Text>
                     </SpringTouchable>
                   );
@@ -498,8 +487,8 @@ export default function TrackChildScreen({ navigation }: Props) {
                     title={selectedChild.driver?.name || 'Driver'}
                     description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
                   >
-                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: DT.cyan, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: DT.panel }}>
-                      <Ionicons name="bus" size={24} color={DT.bg} />
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: C.primary, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: C.surface }}>
+                      <Ionicons name="bus" size={24} color={C.background} />
                     </View>
                   </Marker>
                 )}
@@ -517,7 +506,7 @@ export default function TrackChildScreen({ navigation }: Props) {
               <Animated.View entering={ZoomIn.duration(300).delay(100)}>
                 <View style={[styles.driverCard, { overflow: 'hidden' }]}>
                   <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
                   <View style={styles.driverHeader}>
                     <View style={styles.driverAvatar}>
                       <Text style={styles.driverInitial}>
@@ -532,15 +521,15 @@ export default function TrackChildScreen({ navigation }: Props) {
                   </View>
                   <View style={styles.driverActions}>
                     <SpringTouchable onPress={handleCallDriver} style={styles.actionBtn}>
-                      <Ionicons name="call" size={24} color={DT.green} />
+                      <Ionicons name="call" size={24} color={C.success} />
                       <Text style={styles.actionText}>Call</Text>
                     </SpringTouchable>
                     <SpringTouchable onPress={handleMessageDriver} style={styles.actionBtn}>
-                      <Ionicons name="chatbubble" size={24} color={DT.cyan} />
+                      <Ionicons name="chatbubble" size={24} color={C.primary} />
                       <Text style={styles.actionText}>Message</Text>
                     </SpringTouchable>
                     <SpringTouchable onPress={() => navigation?.navigate?.('LiveTrack')} style={styles.actionBtn}>
-                      <Ionicons name="expand" size={24} color={DT.amber} />
+                      <Ionicons name="expand" size={24} color={C.accent} />
                       <Text style={styles.actionText}>Full Map</Text>
                     </SpringTouchable>
                   </View>
@@ -552,10 +541,10 @@ export default function TrackChildScreen({ navigation }: Props) {
             <Animated.View entering={ZoomIn.duration(300).delay(150)}>
               <View style={[styles.statusCard, { overflow: 'hidden' }]}>
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
                 <View style={styles.statusRow}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <BreathingDot color={DT.green} size={12} />
+                    <BreathingDot color={C.success} size={12} />
                     <Text style={styles.statusText}>
                       {driverLocation ? 'Driver is moving' : 'Locating driver...'}
                     </Text>
@@ -565,7 +554,7 @@ export default function TrackChildScreen({ navigation }: Props) {
                     {etaMinutes !== null ? (
                       <Text style={styles.etaLabel}>{etaMinutes} mins</Text>
                     ) : (
-                      <Text style={[styles.etaLabel, { color: DT.muted }]}>--</Text>
+                      <Text style={[styles.etaLabel, { color: C.textMuted }]}>--</Text>
                     )}
                   </View>
                 </View>
@@ -576,7 +565,7 @@ export default function TrackChildScreen({ navigation }: Props) {
             <View style={styles.contentPad}>
               <View style={[styles.infoCard, { overflow: 'hidden' }]}>
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
                 <Text style={styles.infoTitle}>{selectedChild.name}</Text>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>School:</Text>
@@ -591,17 +580,17 @@ export default function TrackChildScreen({ navigation }: Props) {
               {/* Quick Actions */}
               <View style={[styles.quickActions, { overflow: 'hidden' }]}>
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
                 <SpringTouchable style={styles.quickBtn} onPress={() => {}}>
-                  <Ionicons name="warning" size={24} color={DT.red} />
+                  <Ionicons name="warning" size={24} color={C.error} />
                   <Text style={styles.quickBtnText}>Emergency</Text>
                 </SpringTouchable>
                 <SpringTouchable style={styles.quickBtn} onPress={() => navigation?.navigate?.('LiveTrack')}>
-                  <Ionicons name="map" size={24} color={DT.cyan} />
+                  <Ionicons name="map" size={24} color={C.primary} />
                   <Text style={styles.quickBtnText}>Full Map</Text>
                 </SpringTouchable>
                 <SpringTouchable style={styles.quickBtn} onPress={() => navigation?.navigate?.('TripHistory')}>
-                  <Ionicons name="time" size={24} color={DT.amber} />
+                  <Ionicons name="time" size={24} color={C.accent} />
                   <Text style={styles.quickBtnText}>History</Text>
                 </SpringTouchable>
               </View>
@@ -610,7 +599,7 @@ export default function TrackChildScreen({ navigation }: Props) {
         ) : (
           <Animated.View entering={ZoomIn.duration(300)} style={styles.placeholder}>
             <View style={styles.placeholderIcon}>
-              <Ionicons name="map" size={64} color={DT.muted} />
+              <Ionicons name="map" size={64} color={C.textMuted} />
             </View>
             <Text style={styles.placeholderTitle}>No Child Selected</Text>
             <Text style={styles.placeholderText}>

@@ -31,26 +31,15 @@ import { supabase, emergencyContactService, EmergencyContact } from '../../lib/a
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
 
 const SpringTouchable = ({
   children,
@@ -84,7 +73,7 @@ const glassCard = {
   borderColor: 'rgba(255,255,255,.08)',
 };
 
-const avatarColors = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+const avatarColors = [C.primary, C.accent, C.success, C.error, '#a855f7'];
 
 const contactAvatarStyle = (index: number) => ({
   width: 50,
@@ -159,21 +148,21 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
   const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     addBtn: {
-      margin: spacing.lg,
-      padding: spacing.md,
+      margin: S.lg,
+      padding: S.md,
       borderRadius: borderRadius.lg,
       ...glassCard,
       borderTopWidth: 1,
@@ -182,13 +171,13 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    addBtnText: { ...typography.button, color: DT.cyan, marginLeft: spacing.sm },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    addBtnText: { ...typography.button, color: C.primary, marginLeft: S.sm },
+    section: { padding: S.lg },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     contactCard: {
       borderRadius: borderRadius.lg,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
@@ -196,33 +185,33 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     },
     contactRow: { flexDirection: 'row' as const, alignItems: 'center' as const },
     contactAvatar: undefined as any,
-    contactInitial: { ...typography.h4, color: DT.white },
-    contactInfo: { flex: 1, marginLeft: spacing.md },
-    contactName: { ...typography.label, color: DT.white },
-    contactPhone: { ...typography.bodySmall, color: DT.muted },
-    contactRelation: { ...typography.caption, color: DT.muted },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center', padding: spacing.xl },
+    contactInitial: { ...typography.h4, color: C.text },
+    contactInfo: { flex: 1, marginLeft: S.md },
+    contactName: { ...typography.label, color: C.text },
+    contactPhone: { ...typography.bodySmall, color: C.textMuted },
+    contactRelation: { ...typography.caption, color: C.textMuted },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', padding: S.xl },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
     modalContent: {
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
-      padding: spacing.lg,
-      paddingBottom: insets.bottom + spacing.lg,
-      backgroundColor: DT.panel,
+      padding: S.lg,
+      paddingBottom: insets.bottom + S.lg,
+      backgroundColor: C.surface,
     },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
-    modalTitle: { ...typography.h3, color: DT.white },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: S.lg },
+    modalTitle: { ...typography.h3, color: C.text },
     input: {
       backgroundColor: 'rgba(255,255,255,.06)',
-      padding: spacing.md,
+      padding: S.md,
       borderRadius: borderRadius.md,
-      marginBottom: spacing.md,
+      marginBottom: S.md,
       ...typography.body,
-      color: DT.white,
+      color: C.text,
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
     },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: DT.bg },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.background },
   });
 
   if (loading) {
@@ -243,14 +232,14 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
         <Text style={styles.headerTitle}>Emergency Contacts</Text>
         <Text style={styles.headerSubtext}>Manage your emergency contacts</Text>
       </View>
 
       {/* Add Button */}
       <SpringTouchable onPress={() => setShowAddModal(true)} style={styles.addBtn}>
-        <Ionicons name="add" size={20} color={DT.cyan} />
+        <Ionicons name="add" size={20} color={C.primary} />
         <Text style={styles.addBtnText}>Add Contact</Text>
       </SpringTouchable>
 
@@ -258,14 +247,14 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       <ScrollView
         style={styles.section}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.primary]} tintColor={C.primary} />
         }
       >
         <Text style={sectionLabelStyle}>My Contacts ({contacts.length})</Text>
 
         {contacts.length === 0 ? (
           <Animated.View entering={ZoomIn.duration(300)} style={{ alignItems: 'center', padding: spacing.xl }}>
-            <Ionicons name="people-outline" size={64} color={DT.muted} />
+            <Ionicons name="people-outline" size={64} color={C.textMuted} />
             <Text style={styles.emptyText}>No emergency contacts yet</Text>
             <Spacer size="md" />
             <Button title="Add First Contact" onPress={() => setShowAddModal(true)} variant="primary" />
@@ -296,7 +285,7 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
                     onPress={() => handleDelete(contact)}
                     style={{ marginLeft: spacing.sm, padding: spacing.xs }}
                   >
-                    <Ionicons name="trash" size={20} color={DT.red} />
+                    <Ionicons name="trash" size={20} color={C.error} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -312,32 +301,32 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Contact</Text>
               <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                <Ionicons name="close" size={24} color={DT.muted} />
+                <Ionicons name="close" size={24} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <View style={{ marginBottom: spacing.lg }}>
-              <Text style={{ ...typography.labelSmall, color: DT.muted, marginBottom: 4 }}>Full Name</Text>
+              <Text style={{ ...typography.labelSmall, color: C.textMuted, marginBottom: 4 }}>Full Name</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Enter full name"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={formData.name}
                 onChangeText={t => setFormData({ ...formData, name: t })}
               />
-              <Text style={{ ...typography.labelSmall, color: DT.muted, marginBottom: 4 }}>Phone Number</Text>
+              <Text style={{ ...typography.labelSmall, color: C.textMuted, marginBottom: 4 }}>Phone Number</Text>
               <TextInput
                 style={styles.input}
                 placeholder="+27 XX XXX XXXX"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={formData.phone}
                 onChangeText={t => setFormData({ ...formData, phone: t })}
                 keyboardType="phone-pad"
               />
-              <Text style={{ ...typography.labelSmall, color: DT.muted, marginBottom: 4 }}>Relationship</Text>
+              <Text style={{ ...typography.labelSmall, color: C.textMuted, marginBottom: 4 }}>Relationship</Text>
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Spouse, Parent"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={formData.relationship}
                 onChangeText={t => setFormData({ ...formData, relationship: t })}
               />

@@ -30,31 +30,21 @@ import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
 
 // ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
 const progressFillStyle = (pct: number): ViewStyle => ({
   height: 8,
   width: `${pct}%` as any,
-  backgroundColor: pct >= 100 ? DT.green : DT.cyan,
+  backgroundColor: pct >= 100 ? C.success : C.primary,
   borderRadius: 4,
 });
 
@@ -108,7 +98,7 @@ const documentTypes = [
   { id: 'consent_form', label: 'Consent Form', icon: 'document-text', required: false },
 ];
 
-const docColors = [DT.cyan, DT.amber, DT.green, DT.red];
+const docColors = [C.primary, C.accent, C.success, C.error];
 
 interface ParentDocument {
   id: string;
@@ -174,58 +164,58 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
 
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSub: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     progressCard: {
-      margin: spacing.lg,
-      padding: spacing.lg,
+      margin: S.lg,
+      padding: S.lg,
       borderRadius: borderRadius.lg,
       ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',
     },
-    progressTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.md },
+    progressTitle: { ...typography.h4, color: C.text, marginBottom: S.md },
     progressBar: {
       height: 8,
-      backgroundColor: DT.border,
+      backgroundColor: C.border,
       borderRadius: 4,
       overflow: 'hidden',
     },
     progressFill: undefined as any,
-    progressText: { ...typography.labelSmall, color: DT.muted, marginTop: spacing.xs },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    progressText: { ...typography.labelSmall, color: C.textMuted, marginTop: S.xs },
+    section: { padding: S.lg },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     docCard: {
       borderRadius: borderRadius.lg,
-      padding: spacing.lg,
-      marginBottom: spacing.md,
+      padding: S.lg,
+      marginBottom: S.md,
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       ...glassCard,
     },
     docIcon: undefined as any,
-    docInfo: { flex: 1, marginLeft: spacing.md },
-    docLabel: { ...typography.label, color: DT.white },
-    docStatus: { ...typography.bodySmall, color: DT.muted, marginTop: 2 },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center', padding: spacing.xl },
+    docInfo: { flex: 1, marginLeft: S.md },
+    docLabel: { ...typography.label, color: C.text },
+    docStatus: { ...typography.bodySmall, color: C.textMuted, marginTop: 2 },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', padding: S.xl },
   });
 
   return (
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
         <Text style={styles.headerTitle}>Documents</Text>
         <Text style={styles.headerSub}>Upload required documents</Text>
       </View>
@@ -258,7 +248,7 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
                   <Ionicons
                     name={doc.icon as keyof typeof Ionicons.glyphMap}
                     size={24}
-                    color={isUploaded ? DT.green : docColors[index % docColors.length]}
+                    color={isUploaded ? C.success : docColors[index % docColors.length]}
                   />
                 </View>
                 <View style={styles.docInfo}>
@@ -268,7 +258,7 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
                   </Text>
                 </View>
                 {isUploaded ? (
-                  <Ionicons name="checkmark-circle" size={24} color={DT.green} />
+                  <Ionicons name="checkmark-circle" size={24} color={C.success} />
                 ) : (
                   <Ionicons name="cloud-upload" size={24} color={docColors[index % docColors.length]} />
                 )}

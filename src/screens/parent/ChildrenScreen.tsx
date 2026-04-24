@@ -32,27 +32,15 @@ import { supabase } from '../../lib/supabase';
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-
-// ─── Design Tokens ─────────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
 
 // ─── Spring-press wrapper ─────────────────────────────────────────────────────
 const SpringTouchable = ({
@@ -82,7 +70,7 @@ const SpringTouchable = ({
 };
 
 // ─── Breathing dot ────────────────────────────────────────────────────────────
-const BreathingDot = ({ color = DT.green, size = 8 }: { color?: string; size?: number }) => {
+const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   useEffect(() => {
@@ -96,7 +84,7 @@ const BreathingDot = ({ color = DT.green, size = 8 }: { color?: string; size?: n
 };
 
 // Child avatar colors for variety
-const AVATAR_COLORS = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+const AVATAR_COLORS = [C.accent, C.primary, C.success, C.error, '#a855f7'];
 
 // ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
 const glassCardBase = {
@@ -191,30 +179,30 @@ export default function ChildrenScreen({ navigation }: Props) {
   };
 
   const quickActions = [
-    { name: 'Track All', icon: 'map', color: DT.cyan, route: 'LiveTrack' },
-    { name: 'Add Driver', icon: 'person-add', color: DT.amber, route: 'HireDriver' },
-    { name: 'Emergency', icon: 'warning', color: DT.red, route: 'Emergency' },
-    { name: 'Documents', icon: 'document-text', color: DT.cyan, route: 'ParentDocs' },
+    { name: 'Track All', icon: 'map', color: C.primary, route: 'LiveTrack' },
+    { name: 'Add Driver', icon: 'person-add', color: C.accent, route: 'HireDriver' },
+    { name: 'Emergency', icon: 'warning', color: C.error, route: 'Emergency' },
+    { name: 'Documents', icon: 'document-text', color: C.primary, route: 'ParentDocs' },
   ];
 
   const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSub: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     addBtn: {
-      margin: spacing.lg,
-      padding: spacing.md,
+      margin: S.lg,
+      padding: S.md,
       borderRadius: borderRadius.lg,
       ...glassCardBase,
       borderTopWidth: 1,
@@ -223,13 +211,13 @@ export default function ChildrenScreen({ navigation }: Props) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    addBtnText: { ...typography.button, color: DT.cyan, marginLeft: spacing.sm },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    addBtnText: { ...typography.button, color: C.primary, marginLeft: S.sm },
+    section: { padding: S.lg },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     childCard: {
       borderRadius: borderRadius.lg,
-      padding: spacing.md,
-      marginBottom: spacing.md,
+      padding: S.md,
+      marginBottom: S.md,
       ...glassCardBase,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
@@ -239,19 +227,19 @@ export default function ChildrenScreen({ navigation }: Props) {
     },
     childRow: { flexDirection: 'row' as const, alignItems: 'center' as const },
     childAvatar: undefined as any,
-    childInitial: { ...typography.h4, color: DT.white },
-    childInfo: { flex: 1, marginLeft: spacing.md },
-    childName: { ...typography.label, color: DT.white },
-    childSchool: { ...typography.bodySmall, color: DT.muted, marginTop: 2 },
-    childGrade: { ...typography.caption, color: DT.muted },
+    childInitial: { ...typography.h4, color: C.text },
+    childInfo: { flex: 1, marginLeft: S.md },
+    childName: { ...typography.label, color: C.text },
+    childSchool: { ...typography.bodySmall, color: C.textMuted, marginTop: 2 },
+    childGrade: { ...typography.caption, color: C.textMuted },
     childStatus: { alignItems: 'flex-end' as const },
-    childDriver: { ...typography.caption, color: DT.muted, marginTop: 2 },
+    childDriver: { ...typography.caption, color: C.textMuted, marginTop: 2 },
     actionsGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, justifyContent: 'space-between' as const },
     actionBtn: undefined as any,
-    actionText: { ...typography.labelSmall, color: DT.white, marginTop: spacing.xs },
-    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: DT.bg },
+    actionText: { ...typography.labelSmall, color: C.text, marginTop: S.xs },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: S.xl },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center' },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.background },
   });
 
   if (loading) {
@@ -262,8 +250,8 @@ export default function ChildrenScreen({ navigation }: Props) {
           <Text style={styles.headerSub}>Manage your children</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={DT.cyan} />
-          <Text style={[styles.emptyText, { marginTop: spacing.md }]}>Loading children...</Text>
+          <ActivityIndicator size="large" color={C.primary} />
+          <Text style={[styles.emptyText, { marginTop: S.md }]}>Loading children...</Text>
         </View>
       </View>
     );
@@ -273,14 +261,14 @@ export default function ChildrenScreen({ navigation }: Props) {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header with radial glow */}
       <View style={styles.header}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
         <Text style={styles.headerTitle}>My Children</Text>
         <Text style={styles.headerSub}>Manage your children</Text>
       </View>
 
       {/* Add Button */}
       <SpringTouchable onPress={addChild} style={styles.addBtn}>
-        <Ionicons name="add-circle" size={24} color={DT.cyan} />
+        <Ionicons name="add-circle" size={24} color={C.primary} />
         <Text style={styles.addBtnText}>Add Child</Text>
       </SpringTouchable>
 
@@ -291,16 +279,16 @@ export default function ChildrenScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[DT.cyan]}
-            tintColor={DT.cyan}
+            colors={[C.primary]}
+            tintColor={C.primary}
           />
         }
       >
         {childList.length === 0 ? (
           <Animated.View entering={ZoomIn.duration(300)} style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={64} color={DT.muted} />
+            <Ionicons name="people-outline" size={64} color={C.textMuted} />
             <Text style={styles.emptyText}>No children added yet</Text>
-            <Text style={[styles.emptyText, { marginTop: spacing.sm }]}>Tap "Add Child" to get started</Text>
+            <Text style={[styles.emptyText, { marginTop: S.sm }]}>Tap "Add Child" to get started</Text>
           </Animated.View>
         ) : (
           childList.map((child, index) => (
@@ -326,8 +314,8 @@ export default function ChildrenScreen({ navigation }: Props) {
                       size="small"
                     />
                     {child.driver !== 'Pending' && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
-                        <BreathingDot color={DT.green} size={6} />
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: S.xs }}>
+                        <BreathingDot color={C.success} size={6} />
                         <Text style={styles.childDriver}>  {child.driver}</Text>
                       </View>
                     )}

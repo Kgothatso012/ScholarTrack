@@ -32,26 +32,15 @@ import { paymentService, Payment } from '../../lib/api';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
-
 const SpringTouchable = ({
   children,
   onPress,
@@ -137,21 +126,21 @@ const PaymentScreen = ({ navigation }: Props) => {
 
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
-      padding: spacing.lg,
-      paddingTop: insets.top + spacing.lg,
+      backgroundColor: C.surface,
+      padding: S.lg,
+      paddingTop: insets.top + S.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: C.accent,
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h1, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h1, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     balanceCard: {
-      margin: spacing.lg,
-      padding: spacing.xl,
+      margin: S.lg,
+      padding: S.xl,
       borderRadius: borderRadius.lg,
       alignItems: 'center',
       ...glassCard,
@@ -159,63 +148,63 @@ const PaymentScreen = ({ navigation }: Props) => {
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',
     },
-    balanceLabel: { ...typography.label, color: DT.muted },
-    balanceAmount: { ...typography.displayLarge, color: DT.amber, marginVertical: spacing.sm },
-    balanceDue: { ...typography.bodySmall, color: DT.muted },
+    balanceLabel: { ...typography.label, color: C.textMuted },
+    balanceAmount: { ...typography.displayLarge, color: C.accent, marginVertical: S.sm },
+    balanceDue: { ...typography.bodySmall, color: C.textMuted },
     payBtn: {
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.md,
+      paddingHorizontal: S.xl,
+      paddingVertical: S.md,
       borderRadius: borderRadius.md,
-      marginTop: spacing.md,
-      backgroundColor: DT.green,
+      marginTop: S.md,
+      backgroundColor: C.success,
     },
-    payBtnText: { ...typography.button, color: DT.bg, fontWeight: '700' },
+    payBtnText: { ...typography.button, color: C.background, fontWeight: '700' },
     statsRow: {
       flexDirection: 'row' as const,
-      marginHorizontal: spacing.lg,
+      marginHorizontal: S.lg,
       borderRadius: borderRadius.lg,
-      padding: spacing.md,
+      padding: S.md,
       ...glassCard,
     },
     infoRow: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-    infoContent: { marginLeft: spacing.sm },
-    infoLabel: { ...typography.labelSmall, color: DT.muted },
-    infoValue: { ...typography.h4, color: DT.white },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    infoContent: { marginLeft: S.sm },
+    infoLabel: { ...typography.labelSmall, color: C.textMuted },
+    infoValue: { ...typography.h4, color: C.text },
+    section: { padding: S.lg },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     emptyContainer: {
       borderRadius: borderRadius.lg,
-      padding: spacing.xl,
+      padding: S.xl,
       alignItems: 'center',
       ...glassCard,
     },
-    emptyTitle: { ...typography.h4, color: DT.white, marginTop: spacing.md },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center', marginTop: spacing.sm },
+    emptyTitle: { ...typography.h4, color: C.text, marginTop: S.md },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: S.sm },
     paymentCard: {
       borderRadius: borderRadius.lg,
-      padding: spacing.md,
-      marginBottom: spacing.sm,
+      padding: S.md,
+      marginBottom: S.sm,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       ...glassCard,
     },
     paymentInfo: { flex: 1 },
-    paymentMonth: { ...typography.label, color: DT.white },
-    paymentDate: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    paymentMonth: { ...typography.label, color: C.text },
+    paymentDate: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     paymentRight: { alignItems: 'flex-end' },
-    paymentAmount: { ...typography.h4, color: DT.amber },
+    paymentAmount: { ...typography.h4, color: C.accent },
     methodCard: {
       borderRadius: borderRadius.lg,
-      padding: spacing.md,
+      padding: S.md,
       flexDirection: 'row',
       alignItems: 'center',
       ...glassCard,
     },
-    methodInfo: { flex: 1, marginLeft: spacing.md },
-    methodName: { ...typography.label, color: DT.white },
-    methodExpiry: { ...typography.bodySmall, color: DT.muted },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: DT.bg },
+    methodInfo: { flex: 1, marginLeft: S.md },
+    methodName: { ...typography.label, color: C.text },
+    methodExpiry: { ...typography.bodySmall, color: C.textMuted },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.background },
   });
 
   if (loading) {
@@ -226,7 +215,7 @@ const PaymentScreen = ({ navigation }: Props) => {
           <Text style={styles.headerSubtext}>Manage your subscriptions</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={DT.cyan} />
+          <ActivityIndicator size="large" color={C.primary} />
         </View>
       </View>
     );
@@ -236,12 +225,12 @@ const PaymentScreen = ({ navigation }: Props) => {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.primary]} tintColor={C.primary} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
           <Text style={styles.headerTitle}>Payments</Text>
           <Text style={styles.headerSubtext}>Manage your subscriptions</Text>
         </View>
@@ -267,7 +256,7 @@ const PaymentScreen = ({ navigation }: Props) => {
             <View style={[styles.balanceCard, { overflow: 'hidden', position: 'relative' }]}>
               <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
               <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.5)' }} />
-              <Ionicons name="checkmark-circle" size={50} color={DT.green} />
+              <Ionicons name="checkmark-circle" size={50} color={C.success} />
               <Text style={[styles.balanceLabel, { marginTop: spacing.sm }]}>All Caught Up!</Text>
               <Text style={styles.balanceDue}>No pending payments</Text>
             </View>
@@ -277,14 +266,14 @@ const PaymentScreen = ({ navigation }: Props) => {
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <View style={styles.infoRow}>
-            <Ionicons name="cash" size={20} color={DT.cyan} />
+            <Ionicons name="cash" size={20} color={C.primary} />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Total Paid</Text>
               <Text style={styles.infoValue}>R{paidPayments.reduce((sum, p) => sum + p.amount, 0)}</Text>
             </View>
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="document-text" size={20} color={DT.cyan} />
+            <Ionicons name="document-text" size={20} color={C.primary} />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Transactions</Text>
               <Text style={styles.infoValue}>{payments.length}</Text>
@@ -297,7 +286,7 @@ const PaymentScreen = ({ navigation }: Props) => {
           <Text style={sectionLabelStyle}>Payment History</Text>
           {payments.length === 0 ? (
             <View style={[styles.emptyContainer, { overflow: 'hidden' }]}>
-              <Ionicons name="receipt-outline" size={60} color={DT.muted} />
+              <Ionicons name="receipt-outline" size={60} color={C.textMuted} />
               <Text style={styles.emptyTitle}>No Payments Yet</Text>
               <Text style={styles.emptyText}>
                 Your payment history will appear here once you hire a driver and make payments.
@@ -331,12 +320,12 @@ const PaymentScreen = ({ navigation }: Props) => {
         <View style={styles.section}>
           <Text style={sectionLabelStyle}>Payment Methods</Text>
           <SpringTouchable onPress={() => {}} style={styles.methodCard}>
-            <Ionicons name="card" size={24} color={DT.cyan} />
+            <Ionicons name="card" size={24} color={C.primary} />
             <View style={styles.methodInfo}>
               <Text style={styles.methodName}>Add Payment Method</Text>
               <Text style={styles.methodExpiry}>Coming soon</Text>
             </View>
-            <Ionicons name="add-circle" size={24} color={DT.muted} />
+            <Ionicons name="add-circle" size={24} color={C.textMuted} />
           </SpringTouchable>
         </View>
 
