@@ -5,24 +5,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -122,35 +107,35 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(34,211,238,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     progressCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 16 },
-    progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: DT.border },
-    progressFill: { height: '100%', borderRadius: 4, backgroundColor: DT.green2 },
-    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: DT.muted },
+    progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
+    progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
+    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: C.textMuted },
     categorySection: { marginTop: 16, paddingHorizontal: 16 },
-    categoryTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.amber, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
-    checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border, borderRadius: 14, padding: 14, marginBottom: 8 },
-    checkItemChecked: { borderColor: 'rgba(0,230,118,.3)', backgroundColor: 'rgba(0,230,118,.06)' },
+    categoryTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.primary, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
+    checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 14, padding: 14, marginBottom: 8 },
+    checkItemChecked: { borderColor: 'rgba(52,211,153,.3)', backgroundColor: 'rgba(52,211,153,.06)' },
     itemIcon: { marginHorizontal: 10 },
-    itemText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.text },
-    itemTextChecked: { color: DT.green2, fontWeight: '600' },
+    itemText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
+    itemTextChecked: { color: C.success, fontWeight: '600' },
     buttonContainer: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginTop: 8, marginBottom: 16 },
-    resetBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: DT.panel, paddingVertical: 15, borderRadius: 14, borderWidth: 1, borderColor: DT.border, gap: 8 },
-    resetBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.muted },
-    submitBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: DT.green2, paddingVertical: 15, borderRadius: 14, gap: 8 },
-    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.bg, letterSpacing: 1, textTransform: 'uppercase' },
-    noticeBox: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(0,229,255,.05)', borderWidth: 1, borderColor: 'rgba(0,229,255,.15)', alignItems: 'flex-start', gap: 10 },
-    noticeText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, lineHeight: 17 },
+    resetBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.card, paddingVertical: 15, borderRadius: 14, borderWidth: 1, borderColor: C.border, gap: 8 },
+    resetBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.textMuted },
+    submitBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.success, paddingVertical: 15, borderRadius: 14, gap: 8 },
+    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 1, textTransform: 'uppercase' },
+    noticeBox: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(34,211,238,.05)', borderWidth: 1, borderColor: 'rgba(34,211,238,.15)', alignItems: 'flex-start', gap: 10 },
+    noticeText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     bottomPadding: { height: 50 },
   });
 
@@ -158,14 +143,14 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Vehicle Safety</Text><Text style={s.ltSub}>Pre-Trip Inspection</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...')} style={{ backgroundColor: DT.red, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>
@@ -177,8 +162,8 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => setRefreshing(true)}
-            tintColor={DT.cyan}
-            colors={[DT.cyan]}
+            tintColor={C.cyan}
+            colors={[C.cyan]}
           />
         }
       >
@@ -204,14 +189,14 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
                 <Ionicons
                   name={item.checked ? 'checkbox' : 'square-outline'}
                   size={24}
-                  color={item.checked ? DT.green2 : DT.dim}
+                  color={item.checked ? C.success : C.textMuted}
                 />
-                <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.checked ? DT.green2 : DT.muted} style={s.itemIcon} />
+                <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.checked ? C.success : C.textMuted} style={s.itemIcon} />
                 <Text style={[s.itemText, item.checked && s.itemTextChecked]}>
                   {item.name}
                 </Text>
                 {item.required && (
-                  <Text style={{ fontSize: 10, color: DT.red, fontWeight: '600', marginLeft: 4 }}>REQ</Text>
+                  <Text style={{ fontSize: 10, color: C.error, fontWeight: '600', marginLeft: 4 }}>REQ</Text>
                 )}
               </TouchableOpacity>
             ))}
@@ -221,19 +206,19 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
         {/* Buttons */}
         <View style={s.buttonContainer}>
           <TouchableOpacity style={s.resetBtn} onPress={resetChecks}>
-            <Ionicons name="refresh" size={20} color={DT.muted} />
+            <Ionicons name="refresh" size={20} color={C.textMuted} />
             <Text style={s.resetBtnText}>Reset All</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={s.submitBtn} onPress={submitChecklist}>
-            <Ionicons name="checkmark-circle" size={20} color={DT.bg} />
+            <Ionicons name="checkmark-circle" size={20} color={C.background} />
             <Text style={s.submitBtnText}>Submit Checklist</Text>
           </TouchableOpacity>
         </View>
 
         {/* Legal Notice */}
         <View style={s.noticeBox}>
-          <Ionicons name="information-circle" size={18} color={DT.cyan} />
+          <Ionicons name="information-circle" size={18} color={C.cyan} />
           <Text style={s.noticeText}>
             This checklist complies with South African National Road Traffic Act (Act 93 of 1996) and Scholar Transport Regulations. Driver must complete before each trip.
           </Text>

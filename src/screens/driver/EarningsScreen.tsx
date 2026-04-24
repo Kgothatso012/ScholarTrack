@@ -6,24 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -137,46 +122,46 @@ const EarningsScreen = ({ navigation }: Props) => {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.primary, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(217,119,6,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    balanceCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(255,183,0,.2)', borderWidth: 1 },
-    balanceTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' },
-    balanceLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
-    balanceAmount: { fontFamily: 'Syne_700Bold', fontSize: 42, fontWeight: '800', color: DT.amber, marginVertical: 8, letterSpacing: -1 },
-    balanceSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
-    withdrawBtn: { marginHorizontal: 16, marginTop: 20, paddingVertical: 16, borderRadius: 16, backgroundColor: DT.green2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    balanceCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(217,119,6,.2)', borderWidth: 1 },
+    balanceTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(217,119,6,.3)' },
+    balanceLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+    balanceAmount: { fontFamily: 'Syne_700Bold', fontSize: 42, fontWeight: '800', color: C.primary, marginVertical: 8, letterSpacing: -1 },
+    balanceSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
+    withdrawBtn: { marginHorizontal: 16, marginTop: 20, paddingVertical: 16, borderRadius: 16, backgroundColor: C.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     withdrawBtnDisabled: { opacity: 0.4 },
-    withdrawBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.bg, letterSpacing: 0.5, textTransform: 'uppercase' },
+    withdrawBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background, letterSpacing: 0.5, textTransform: 'uppercase' },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { width: '47%', ...glass, padding: 16, alignItems: 'center', borderColor: 'rgba(255,183,0,.12)' },
-    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
-    statValue: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: DT.white, marginTop: 6 },
+    statCard: { width: '47%', ...glass, padding: 16, alignItems: 'center', borderColor: 'rgba(217,119,6,.12)' },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: C.text, marginTop: 6 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     paymentCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     paymentTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     paymentInfo: { flex: 1 },
-    paymentMonth: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
-    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
-    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.amber },
+    paymentMonth: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
+    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
+    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.primary },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 40 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },
     bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Earnings</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={s.emptyText}>Loading earnings...</Text>
@@ -189,7 +174,7 @@ const EarningsScreen = ({ navigation }: Props) => {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -201,7 +186,7 @@ const EarningsScreen = ({ navigation }: Props) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
       >
         {/* Balance Card */}
         <View style={s.balanceCard}>
@@ -214,7 +199,7 @@ const EarningsScreen = ({ navigation }: Props) => {
             onPress={handleWithdraw}
             disabled={processing || earnings.available <= 0}
           >
-            <Ionicons name="arrow-up" size={18} color={DT.bg} />
+            <Ionicons name="arrow-up" size={18} color={C.background} />
             <Text style={s.withdrawBtnText}>{processing ? 'Processing...' : 'Withdraw Funds'}</Text>
           </TouchableOpacity>
         </View>
@@ -236,7 +221,7 @@ const EarningsScreen = ({ navigation }: Props) => {
           <View style={s.statCard}>
             <Text style={s.statLabel}>Rating</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 }}>
-              <Ionicons name="star" size={16} color={DT.amber} />
+              <Ionicons name="star" size={16} color={C.primary} />
               <Text style={[s.statValue, { fontSize: 20 }]}>{earnings.rating}</Text>
             </View>
           </View>
@@ -259,7 +244,7 @@ const EarningsScreen = ({ navigation }: Props) => {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={s.paymentAmount}>R{payment.amount}</Text>
-                  <View style={[s.statusBadge, { backgroundColor: payment.status === 'paid' ? DT.green2 : DT.amber }]}>
+                  <View style={[s.statusBadge, { backgroundColor: payment.status === 'paid' ? C.success : C.warning }]}>
                     <Text style={s.statusText}>{payment.status === 'paid' ? 'Paid' : 'Pending'}</Text>
                   </View>
                 </View>

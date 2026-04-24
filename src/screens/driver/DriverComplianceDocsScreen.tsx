@@ -5,24 +5,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -108,9 +93,9 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
   ]);
 
   const getStatusColor = (verified: boolean, required: boolean) => {
-    if (verified) return DT.green2;
-    if (required) return DT.red;
-    return DT.amber;
+    if (verified) return C.success;
+    if (required) return C.error;
+    return C.primary;
   };
 
   const getStatusText = (verified: boolean, required: boolean) => {
@@ -150,40 +135,40 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.primary, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(217,119,6,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     scoreCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 20, flexDirection: 'row', alignItems: 'center' },
-    scoreCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: DT.amber, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,183,0,.08)' },
-    scoreText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: DT.amber },
-    scoreLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.white },
+    scoreCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: C.primary, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(217,119,6,.08)' },
+    scoreText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: C.primary },
+    scoreLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.text },
     scoreInfo: { flex: 1, marginLeft: 16 },
-    scoreTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white },
-    scoreSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 4 },
-    warningText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.red, marginTop: 6, fontWeight: '600' },
-    legalBox: { marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 14, backgroundColor: 'rgba(0,35,149,.1)', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-    legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, lineHeight: 17 },
+    scoreTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
+    scoreSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 4 },
+    warningText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.error, marginTop: 6, fontWeight: '600' },
+    legalBox: { marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 14, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     docCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     docTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
     docIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
     docInfo: { flex: 1, marginLeft: 12 },
     docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    docName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white, flex: 1 },
+    docName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text, flex: 1 },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
-    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
-    expiryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim, marginTop: 3 },
-    uploadBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: DT.green2, gap: 10 },
-    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg, letterSpacing: 0.5 },
+    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
+    expiryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
+    uploadBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: C.success, gap: 10 },
+    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     bottomPadding: { height: 50 },
   });
 
@@ -191,14 +176,14 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>SA Transport Requirements</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: DT.red, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>
@@ -207,7 +192,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
         }
       >
         {/* Compliance Score */}
@@ -227,7 +212,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
 
         {/* Legal Reference */}
         <View style={s.legalBox}>
-          <Ionicons name="information-circle" size={18} color={DT.blue} />
+          <Ionicons name="information-circle" size={18} color={C.info} />
           <Text style={s.legalText}>
             Required by: National Land Transport Act (Act 5 of 2009) & Scholar Transport Regulations
           </Text>
@@ -261,7 +246,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
                     <Text style={s.expiryText}>Expires: {doc.expiryDate}</Text>
                   )}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={DT.dim} />
+                <Ionicons name="chevron-forward" size={20} color={C.textMuted} />
               </TouchableOpacity>
             );
           })}
@@ -269,7 +254,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
 
         {/* Upload Button */}
         <TouchableOpacity style={s.uploadBtn}>
-          <Ionicons name="cloud-upload" size={22} color={DT.bg} />
+          <Ionicons name="cloud-upload" size={22} color={C.background} />
           <Text style={s.uploadBtnText}>Upload All Documents</Text>
         </TouchableOpacity>
 

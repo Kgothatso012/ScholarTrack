@@ -7,24 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: S } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -60,7 +45,6 @@ const TripScreen = ({ navigation }: Props) => {
     } catch (error) { console.error('Error fetching trips:', error); }
     finally { setLoading(false); }
   }, []);
-
   useEffect(() => { fetchTrips(); }, [fetchTrips]);
 
   const onRefresh = async () => { setRefreshing(true); await fetchTrips(); setRefreshing(false); };
@@ -80,7 +64,6 @@ const TripScreen = ({ navigation }: Props) => {
       { text: 'End Trip', onPress: async () => { try { await tripService.updateTripStatus(currentTrip.id, 'completed'); setTripActive(false); fetchTrips(); Alert.alert('Success', 'Trip completed!'); } catch (error) { Alert.alert('Error', 'Failed to end trip'); } } },
     ]);
   };
-
   const now = new Date();
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
@@ -88,62 +71,62 @@ const TripScreen = ({ navigation }: Props) => {
   const upcomingTrips = trips.filter(t => t.status === 'scheduled').length;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.cyan, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, marginTop: 10 },
+    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
     tripStatus: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20, alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     statusBadge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
-    statusText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: DT.white, textTransform: 'uppercase', letterSpacing: 1 },
-    routeName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: DT.white, marginTop: 10, textAlign: 'center' },
+    statusText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.text, textTransform: 'uppercase', letterSpacing: 1 },
+    routeName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 10, textAlign: 'center' },
     tripStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 16 },
     stat: { alignItems: 'center' },
-    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.amber },
-    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.primary },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     tripActions: { padding: 16 },
-    startBtn: { backgroundColor: DT.green2, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
-    endBtn: { backgroundColor: DT.red, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
-    btnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.bg },
+    startBtn: { backgroundColor: C.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
+    endBtn: { backgroundColor: C.error, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
+    btnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background },
     noTripCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 24, alignItems: 'center' },
-    noTripText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: DT.white, marginTop: 10 },
-    noTripSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 6, textAlign: 'center' },
+    noTripText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 10 },
+    noTripSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 6, textAlign: 'center' },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     tripCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     tripIcon: { marginRight: 14 },
     tripInfo: { flex: 1 },
-    tripName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    tripTime: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    tripName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    tripTime: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
     tripStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-    tripStatusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.white, textTransform: 'capitalize' },
+    tripStatusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'capitalize' },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
     quickAction: { ...glass, padding: 16, alignItems: 'center', flex: 1, marginHorizontal: 4 },
-    quickActionText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.text, marginTop: 6, textAlign: 'center' },
+    quickActionText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text, marginTop: 6, textAlign: 'center' },
     emptyContainer: { ...glass, padding: 30, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
-    emptyTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: DT.white, marginTop: 12 },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, textAlign: 'center', marginTop: 8 },
+    emptyTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 12 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, textAlign: 'center', marginTop: 8 },
     bottomPadding: { height: 50 },
   });
 
   // Empty state
   if (!loading && trips.length === 0) {
     return (
-      <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />} showsVerticalScrollIndicator={false}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+      <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />} showsVerticalScrollIndicator={false}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
         <View style={s.noTripCard}>
           <View style={s.cardTopRefraction} />
-          <Ionicons name="bus-outline" size={60} color={DT.muted} />
+          <Ionicons name="bus-outline" size={60} color={C.textMuted} />
           <Text style={s.noTripText}>No Active Trips</Text>
           <Text style={s.noTripSubtext}>You don't have any trips assigned yet. Trips will appear here when parents book your service.</Text>
         </View>
@@ -151,11 +134,11 @@ const TripScreen = ({ navigation }: Props) => {
           <Text style={s.sectionTitle}>Quick Actions</Text>
           <View style={s.quickActions}>
             <TouchableOpacity style={s.quickAction} onPress={() => Linking.openURL('https://www.google.com/maps')} activeOpacity={0.7}>
-              <Ionicons name="navigate" size={22} color={DT.cyan} />
+              <Ionicons name="navigate" size={22} color={C.cyan} />
               <Text style={s.quickActionText}>Navigate</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.quickAction} onPress={() => navigation.navigate('Support')} activeOpacity={0.7}>
-              <Ionicons name="help-circle" size={22} color={DT.amber} />
+              <Ionicons name="help-circle" size={22} color={C.primary} />
               <Text style={s.quickActionText}>Support</Text>
             </TouchableOpacity>
           </View>
@@ -168,19 +151,19 @@ const TripScreen = ({ navigation }: Props) => {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={DT.cyan} /><Text style={s.loadingText}>Loading trips...</Text></View>
+        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.cyan} /><Text style={s.loadingText}>Loading trips...</Text></View>
       </View>
     );
   }
 
   return (
-    <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />} showsVerticalScrollIndicator={false}>
       {/* Status Bar */}
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       {/* Header */}
@@ -196,7 +179,7 @@ const TripScreen = ({ navigation }: Props) => {
         <>
           <View style={s.tripStatus}>
             <View style={s.cardTopRefraction} />
-            <View style={[s.statusBadge, { backgroundColor: tripActive ? DT.green2 : DT.amber }]}>
+            <View style={[s.statusBadge, { backgroundColor: tripActive ? C.success : C.primary }]}>
               <Text style={s.statusText}>{tripActive ? 'In Progress' : 'Scheduled'}</Text>
             </View>
             <Text style={s.routeName}>{currentTrip.pickup_location || 'Route'} → {currentTrip.dropoff_location || 'Destination'}</Text>
@@ -210,12 +193,12 @@ const TripScreen = ({ navigation }: Props) => {
           <View style={s.tripActions}>
             {!tripActive ? (
               <TouchableOpacity style={s.startBtn} onPress={startTrip} activeOpacity={0.8}>
-                <Ionicons name="play" size={22} color={DT.bg} />
+                <Ionicons name="play" size={22} color={C.background} />
                 <Text style={s.btnText}>Start Trip</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={s.endBtn} onPress={endTrip} activeOpacity={0.8}>
-                <Ionicons name="stop" size={22} color={DT.white} />
+                <Ionicons name="stop" size={22} color={C.text} />
                 <Text style={s.btnText}>End Trip</Text>
               </TouchableOpacity>
             )}
@@ -224,7 +207,7 @@ const TripScreen = ({ navigation }: Props) => {
       ) : (
         <View style={s.noTripCard}>
           <View style={s.cardTopRefraction} />
-          <Ionicons name="calendar-outline" size={40} color={DT.muted} />
+          <Ionicons name="calendar-outline" size={40} color={C.textMuted} />
           <Text style={s.noTripText}>No trip scheduled</Text>
           <Text style={s.noTripSubtext}>You have no upcoming trips. Check back later or contact support.</Text>
         </View>
@@ -235,7 +218,7 @@ const TripScreen = ({ navigation }: Props) => {
         <Text style={s.sectionTitle}>All Trips</Text>
         {trips.length === 0 ? (
           <View style={s.emptyContainer}>
-            <Ionicons name="bus-outline" size={48} color={DT.muted} style={s.emptyIcon} />
+            <Ionicons name="bus-outline" size={48} color={C.textMuted} style={s.emptyIcon} />
             <Text style={s.emptyTitle}>No Trips Yet</Text>
             <Text style={s.emptyText}>Your trip history will appear here.</Text>
           </View>
@@ -244,15 +227,15 @@ const TripScreen = ({ navigation }: Props) => {
             <View key={trip.id} style={s.tripCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.tripIcon}>
-                {trip.status === 'completed' ? <Ionicons name="checkmark-circle" size={22} color={DT.green2} />
-                  : trip.status === 'in_progress' ? <Ionicons name="locate" size={22} color={DT.amber} />
-                  : <Ionicons name="time-outline" size={22} color={DT.muted} />}
+                {trip.status === 'completed' ? <Ionicons name="checkmark-circle" size={22} color={C.success} />
+                  : trip.status === 'in_progress' ? <Ionicons name="locate" size={22} color={C.primary} />
+                  : <Ionicons name="time-outline" size={22} color={C.textMuted} />}
               </View>
               <View style={s.tripInfo}>
                 <Text style={s.tripName}>{trip.pickup_location || 'Pickup'} → {trip.dropoff_location || 'Dropoff'}</Text>
                 <Text style={s.tripTime}>{trip.pickup_time ? new Date(trip.pickup_time).toLocaleDateString('en-ZA') : 'Not scheduled'}</Text>
               </View>
-              <View style={[s.tripStatusBadge, { backgroundColor: trip.status === 'completed' ? DT.green2 : trip.status === 'in_progress' ? DT.amber : DT.blue }]}>
+              <View style={[s.tripStatusBadge, { backgroundColor: trip.status === 'completed' ? C.success : trip.status === 'in_progress' ? C.primary : C.info }]}>
                 <Text style={s.tripStatusText}>{trip.status === 'completed' ? 'Done' : trip.status === 'in_progress' ? 'Active' : 'Scheduled'}</Text>
               </View>
             </View>
@@ -269,15 +252,15 @@ const TripScreen = ({ navigation }: Props) => {
             const position = await Location.getCurrentPositionAsync({}); const { latitude, longitude } = position.coords; Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`); }
             catch (err) { Alert.alert('Location Error', 'Could not get location. Enable GPS.'); }
           }} activeOpacity={0.7}>
-            <Ionicons name="navigate" size={22} color={DT.cyan} />
+            <Ionicons name="navigate" size={22} color={C.cyan} />
             <Text style={s.quickActionText}>Navigate</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.quickAction} onPress={() => Alert.alert('No Parent Linked', 'No parent contact linked to this trip yet.')} activeOpacity={0.7}>
-            <Ionicons name="call" size={22} color={DT.green2} />
+            <Ionicons name="call" size={22} color={C.success} />
             <Text style={s.quickActionText}>Call Parent</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.quickAction} onPress={() => navigation.navigate('Chat')} activeOpacity={0.7}>
-            <Ionicons name="chatbubbles" size={22} color={DT.amber} />
+            <Ionicons name="chatbubbles" size={22} color={C.primary} />
             <Text style={s.quickActionText}>Message</Text>
           </TouchableOpacity>
         </View>

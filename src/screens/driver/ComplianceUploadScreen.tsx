@@ -11,8 +11,7 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -232,7 +231,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   const getExpiryStatusColor = (date?: Date) => {
     const days = getDaysUntilExpiry(date);
     if (days === null) return C.textMuted;
-    if (days < 0) return C.danger;
+    if (days < 0) return C.error;
     if (days <= 30) return C.accent;
     return C.success;
   };
@@ -439,14 +438,14 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
     label: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.textSecondary, marginBottom: 6, letterSpacing: 0.3 },
     labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
     input: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
-    inputError: { borderColor: C.danger, backgroundColor: 'rgba(255,61,90,.08)' },
-    errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.danger, marginTop: 4 },
+    inputError: { borderColor: C.error, backgroundColor: 'rgba(255,61,90,.08)' },
+    errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.error, marginTop: 4 },
     helperText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
     docCard: { ...glass, padding: 16, marginBottom: 12 },
     docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     docInfo: { flex: 1 },
     docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
-    docRequired: { color: C.danger },
+    docRequired: { color: C.error },
     docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,230,118,.1)', borderRadius: 12, padding: 14, marginTop: 12, borderWidth: 1, borderColor: `${C.success}40` },
     uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.success, marginLeft: 8 },
@@ -551,7 +550,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           </TouchableOpacity>
           <View><Text style={s.ltTitle}>Driver Compliance</Text><Text style={s.ltSub}>Complete all required documents</Text></View>
           <TouchableOpacity onPress={handleLogout} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,61,90,.15)', justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="log-out-outline" size={18} color={C.danger} />
+            <Ionicons name="log-out-outline" size={18} color={C.error} />
           </TouchableOpacity>
         </View>
       </View>
@@ -716,7 +715,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                       <Text style={s.previewDate}>Uploaded {doc.document.uploadedAt.toLocaleDateString()}</Text>
                     </View>
                     <TouchableOpacity style={s.removeBtn} onPress={() => removeDocument(doc.id)}>
-                      <Ionicons name="trash-outline" size={18} color={C.danger} />
+                      <Ionicons name="trash-outline" size={18} color={C.error} />
                     </TouchableOpacity>
                   </View>
                 ) : (

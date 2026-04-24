@@ -5,24 +5,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -107,47 +92,47 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(34,211,238,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     infoCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 16 },
     infoRow: { flexDirection: 'row', marginBottom: 10 },
     infoItem: { flex: 1, alignItems: 'center' },
-    infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    infoValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white, marginTop: 2 },
+    infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    infoValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginTop: 2 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
     statCard: { flex: 1, ...glass, paddingVertical: 16, alignItems: 'center' },
-    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: DT.amber },
-    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.primary },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white, marginBottom: 4, letterSpacing: 0.5 },
-    sectionSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginBottom: 12 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 4, letterSpacing: 0.5 },
+    sectionSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginBottom: 12 },
     childCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     childTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
-    childAvatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.2)' },
-    childInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.amber },
+    childAvatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: 'rgba(217,119,6,.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(217,119,6,.2)' },
+    childInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.primary },
     childInfo: { flex: 1, marginLeft: 12 },
     childHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    childName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    childName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
-    childGrade: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    childGrade: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     childLocation: { flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 4 },
-    locationText: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.dim },
-    parentContact: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 3, fontWeight: '600' },
-    emergencyBox: { marginHorizontal: 16, marginBottom: 16, ...glass, padding: 14, borderColor: 'rgba(255,61,90,.3)' },
+    locationText: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted },
+    parentContact: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 3, fontWeight: '600' },
+    emergencyBox: { marginHorizontal: 16, marginBottom: 16, ...glass, padding: 14, borderColor: 'rgba(248,113,113,.3)' },
     emergencyHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 },
-    emergencyTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.red },
-    emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, lineHeight: 18 },
-    completeBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: DT.green2, gap: 10 },
-    completeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg, letterSpacing: 0.5 },
+    emergencyTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.error },
+    emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 18 },
+    completeBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: C.success, gap: 10 },
+    completeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     bottomPadding: { height: 50 },
   });
 
@@ -155,14 +140,14 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Trip Manifest</Text><Text style={s.ltSub}>{manifest.route}</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: DT.red, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>
@@ -171,33 +156,33 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={DT.cyan} colors={[DT.cyan]} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={C.cyan} colors={[C.cyan]} />
         }
       >
         {/* Trip Info */}
         <View style={s.infoCard}>
           <View style={s.infoRow}>
             <View style={s.infoItem}>
-              <Ionicons name="calendar" size={18} color={DT.cyan} />
+              <Ionicons name="calendar" size={18} color={C.cyan} />
               <Text style={s.infoLabel}>Date</Text>
               <Text style={s.infoValue}>{manifest.date}</Text>
             </View>
             <View style={s.infoItem}>
-              <Ionicons name="bus" size={18} color={DT.cyan} />
+              <Ionicons name="bus" size={18} color={C.cyan} />
               <Text style={s.infoLabel}>Trip ID</Text>
               <Text style={s.infoValue}>{manifest.id}</Text>
             </View>
           </View>
           <View style={s.infoRow}>
             <View style={s.infoItem}>
-              <Ionicons name="person" size={18} color={DT.amber} />
+              <Ionicons name="person" size={18} color={C.primary} />
               <Text style={s.infoLabel}>Driver</Text>
               <Text style={s.infoValue}>{manifest.driver}</Text>
             </View>
             <View style={s.infoItem}>
-              <Ionicons name="flag" size={18} color={DT.amber} />
+              <Ionicons name="flag" size={18} color={C.primary} />
               <Text style={s.infoLabel}>Status</Text>
-              <Text style={[s.infoValue, { color: manifest.status === 'completed' ? DT.green2 : DT.amber }]}>
+              <Text style={[s.infoValue, { color: manifest.status === 'completed' ? C.success : C.warning }]}>
                 {manifest.status === 'in_progress' ? 'In Progress' : 'Completed'}
               </Text>
             </View>
@@ -218,7 +203,7 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
           {manifest.children.map((child) => (
             <TouchableOpacity
               key={child.id}
-              style={[s.childCard, child.onboard && { borderColor: 'rgba(0,230,118,.3)', borderWidth: 1 }]}
+              style={[s.childCard, child.onboard && { borderColor: 'rgba(52,211,153,.3)', borderWidth: 1 }]}
               onPress={() => toggleOnboard(child.id)}
               activeOpacity={0.7}
             >
@@ -229,22 +214,22 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
               <View style={s.childInfo}>
                 <View style={s.childHeader}>
                   <Text style={s.childName}>{child.name}</Text>
-                  <View style={[s.statusBadge, { backgroundColor: child.onboard ? DT.green2 : DT.amber }]}>
+                  <View style={[s.statusBadge, { backgroundColor: child.onboard ? C.success : C.warning }]}>
                     <Text style={s.statusText}>{child.onboard ? 'Onboard' : 'Waiting'}</Text>
                   </View>
                 </View>
                 <Text style={s.childGrade}>{child.grade}</Text>
                 <View style={s.childLocation}>
-                  <Ionicons name="location" size={11} color={DT.dim} />
+                  <Ionicons name="location" size={11} color={C.textMuted} />
                   <Text style={s.locationText}>Pickup: {child.pickupLocation}</Text>
                 </View>
                 <View style={s.childLocation}>
-                  <Ionicons name="flag" size={11} color={DT.dim} />
+                  <Ionicons name="flag" size={11} color={C.textMuted} />
                   <Text style={s.locationText}>Dropoff: {child.dropoffLocation}</Text>
                 </View>
                 <Text style={s.parentContact}>{child.parentContact}</Text>
               </View>
-              <Ionicons name={child.onboard ? 'checkbox' : 'square-outline'} size={26} color={child.onboard ? DT.green2 : DT.dim} />
+              <Ionicons name={child.onboard ? 'checkbox' : 'square-outline'} size={26} color={child.onboard ? C.success : C.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
@@ -252,7 +237,7 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
         {/* Emergency Contacts */}
         <View style={s.emergencyBox}>
           <View style={s.emergencyHeader}>
-            <Ionicons name="warning" size={18} color={DT.red} />
+            <Ionicons name="warning" size={18} color={C.error} />
             <Text style={s.emergencyTitle}>Emergency Contacts</Text>
           </View>
           <Text style={s.emergencyText}>Police: 10111  |  Ambulance: 10177  |  Scholar Transport Hotline: 0800 123 456</Text>
@@ -261,7 +246,7 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
         {/* Complete Button */}
         {manifest.status !== 'completed' && (
           <TouchableOpacity style={s.completeBtn} onPress={completeTrip}>
-            <Ionicons name="checkmark-done-circle" size={22} color={DT.bg} />
+            <Ionicons name="checkmark-done-circle" size={22} color={C.background} />
             <Text style={s.completeBtnText}>Complete Trip</Text>
           </TouchableOpacity>
         )}

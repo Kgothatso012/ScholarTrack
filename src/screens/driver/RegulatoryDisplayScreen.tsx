@@ -5,24 +5,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -61,37 +46,37 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.blue, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,35,149,.08)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.info, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(148,163,184,.08)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.amber, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.primary, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
     infoCard: { ...glass, padding: 16, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     infoRowIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
     infoContent: { flex: 1, marginLeft: 12 },
-    infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
-    infoValue: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: DT.white, marginTop: 2 },
-    divider: { height: 1, backgroundColor: DT.border, marginVertical: 2 },
+    infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+    infoValue: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.text, marginTop: 2 },
+    divider: { height: 1, backgroundColor: C.border, marginVertical: 2 },
     emergencyCard: { ...glass, padding: 16 },
     emergencyRow: { flexDirection: 'row' },
     emergencyItem: { flex: 1, alignItems: 'center', padding: 10 },
-    emergencyLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 5, textTransform: 'uppercase' },
-    emergencyNumber: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: DT.white, marginTop: 3 },
+    emergencyLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 5, textTransform: 'uppercase' },
+    emergencyNumber: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.text, marginTop: 3 },
     contactRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     contactContent: { marginLeft: 12 },
-    contactLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, textTransform: 'uppercase' },
-    contactNumber: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: DT.white },
-    legalNotice: { marginHorizontal: 16, marginTop: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(0,35,149,.1)', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-    legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, lineHeight: 17 },
+    contactLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase' },
+    contactNumber: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.text },
+    legalNotice: { marginHorizontal: 16, marginTop: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     bottomPadding: { height: 50 },
   });
 
@@ -99,7 +84,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -112,7 +97,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={DT.blue} colors={[DT.blue]} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={C.info} colors={[C.info]} />
         }
       >
         {/* Operator Details */}
@@ -121,8 +106,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
           <View style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,229,255,.1)' }]}>
-                <Ionicons name="business" size={20} color={DT.cyan} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(34,211,238,.1)' }]}>
+                <Ionicons name="business" size={20} color={C.cyan} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Operator Name</Text>
@@ -131,8 +116,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             </View>
             <View style={s.divider} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(255,183,0,.1)' }]}>
-                <Ionicons name="card" size={20} color={DT.amber} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(217,119,6,.1)' }]}>
+                <Ionicons name="card" size={20} color={C.primary} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Operating License No.</Text>
@@ -141,8 +126,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             </View>
             <View style={s.divider} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,230,118,.1)' }]}>
-                <Ionicons name="calendar" size={20} color={DT.green2} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(52,211,153,.1)' }]}>
+                <Ionicons name="calendar" size={20} color={C.success} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>License Expiry</Text>
@@ -158,8 +143,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
           <View style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
-                <Ionicons name="car" size={20} color={DT.blue} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(148,163,184,.15)' }]}>
+                <Ionicons name="car" size={20} color={C.info} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Vehicle Registration</Text>
@@ -168,8 +153,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             </View>
             <View style={s.divider} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
-                <Ionicons name="document-text" size={20} color={DT.blue} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(148,163,184,.15)' }]}>
+                <Ionicons name="document-text" size={20} color={C.info} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Vehicle Permit No.</Text>
@@ -178,8 +163,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             </View>
             <View style={s.divider} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,229,255,.1)' }]}>
-                <Ionicons name="people" size={20} color={DT.cyan} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(34,211,238,.1)' }]}>
+                <Ionicons name="people" size={20} color={C.cyan} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Max Passengers</Text>
@@ -188,12 +173,12 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             </View>
             <View style={s.divider} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(255,61,90,.15)' }]}>
-                <Ionicons name="speedometer" size={20} color={DT.red} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(248,113,113,.15)' }]}>
+                <Ionicons name="speedometer" size={20} color={C.error} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Speed Limit</Text>
-                <Text style={[s.infoValue, { color: DT.red }]}>{regulatoryInfo.speedLimit} km/h</Text>
+                <Text style={[s.infoValue, { color: C.error }]}>{regulatoryInfo.speedLimit} km/h</Text>
               </View>
             </View>
           </View>
@@ -205,8 +190,8 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
           <View style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(255,183,0,.1)' }]}>
-                <Ionicons name="map" size={20} color={DT.amber} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(217,119,6,.1)' }]}>
+                <Ionicons name="map" size={20} color={C.primary} />
               </View>
               <View style={s.infoContent}>
                 <Text style={s.infoLabel}>Route Permit No.</Text>
@@ -223,12 +208,12 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             <View style={s.cardTopRefraction} />
             <View style={s.emergencyRow}>
               <View style={s.emergencyItem}>
-                <Ionicons name="call" size={20} color={DT.red} />
+                <Ionicons name="call" size={20} color={C.error} />
                 <Text style={s.emergencyLabel}>Police</Text>
                 <Text style={s.emergencyNumber}>{regulatoryInfo.police}</Text>
               </View>
               <View style={s.emergencyItem}>
-                <Ionicons name="medkit" size={20} color={DT.red} />
+                <Ionicons name="medkit" size={20} color={C.error} />
                 <Text style={s.emergencyLabel}>Ambulance</Text>
                 <Text style={s.emergencyNumber}>{regulatoryInfo.ambulance}</Text>
               </View>
@@ -236,20 +221,20 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
             <View style={s.divider} />
             <View style={s.emergencyRow}>
               <View style={s.emergencyItem}>
-                <Ionicons name="warning" size={20} color={DT.amber} />
+                <Ionicons name="warning" size={20} color={C.primary} />
                 <Text style={s.emergencyLabel}>Transport Hotline</Text>
                 <Text style={s.emergencyNumber}>{regulatoryInfo.emergencyHotline}</Text>
               </View>
               <View style={s.emergencyItem}>
-                <Ionicons name="car" size={20} color={DT.cyan} />
+                <Ionicons name="car" size={20} color={C.cyan} />
                 <Text style={s.emergencyLabel}>Taxi Contact</Text>
                 <Text style={s.emergencyNumber}>{regulatoryInfo.taxiContact}</Text>
               </View>
             </View>
             <View style={s.divider} />
             <View style={s.contactRow}>
-              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
-                <Ionicons name="business" size={20} color={DT.blue} />
+              <View style={[s.infoRowIcon, { backgroundColor: 'rgba(148,163,184,.15)' }]}>
+                <Ionicons name="business" size={20} color={C.info} />
               </View>
               <View style={s.contactContent}>
                 <Text style={s.contactLabel}>Dept. of Transport</Text>
@@ -261,7 +246,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
 
         {/* Legal Notice */}
         <View style={s.legalNotice}>
-          <Ionicons name="information-circle" size={18} color={DT.blue} />
+          <Ionicons name="information-circle" size={18} color={C.info} />
           <Text style={s.legalText}>
             This vehicle is authorized under the National Land Transport Act (Act 5 of 2009) and Provincial Scholar Transport Regulations. Operating without valid licenses is an offence. Complaints can be lodged at the Department of Transport.
           </Text>

@@ -7,24 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: S } = getTheme('dark');
 
 // Glassmorphism helper
 const glass = {
@@ -96,7 +81,6 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
       setLoading(false);
     }
   }, []);
-
   useEffect(() => { checkExistingCompliance(); }, [checkExistingCompliance]);
 
   const onRefresh = async () => {
@@ -136,7 +120,6 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
       updateComplianceStatus(updatedDocs);
     }
   };
-
   const showDocumentOptions = (docId: string) => {
     Alert.alert('Add Document', 'Choose how to add the document', [
       { text: 'Take Photo', onPress: () => takePhoto(docId) },
@@ -165,58 +148,58 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.cyan, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     progressCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 16 },
-    progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: DT.border },
-    progressFill: { height: '100%', borderRadius: 4, backgroundColor: DT.green2 },
-    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: DT.muted },
+    progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
+    progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
+    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: C.textMuted },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, overflow: 'hidden' },
     statCard: { flex: 1, alignItems: 'center', paddingVertical: 16 },
-    statNum: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: DT.amber },
-    statNum2: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: DT.cyan },
-    statLbl: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statNum: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.primary },
+    statNum2: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.cyan },
+    statLbl: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     docCard: { ...glass, padding: 16, marginBottom: 12 },
     docTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.12)' },
     docHdr: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     docInfo: { flex: 1 },
-    docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
-    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 4 },
+    docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
+    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
     uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 12, marginTop: 14, borderWidth: 1.5, borderColor: 'rgba(0,229,255,.3)', borderStyle: 'dashed' },
-    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.cyan, marginLeft: 8, letterSpacing: 1, textTransform: 'uppercase' },
+    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.cyan, marginLeft: 8, letterSpacing: 1, textTransform: 'uppercase' },
     previewRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, padding: 10, borderRadius: 10, backgroundColor: 'rgba(0,230,118,.08)' },
-    previewName: { flex: 1, marginLeft: 8, fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.green2 },
+    previewName: { flex: 1, marginLeft: 8, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.success },
     changeBtn: { paddingHorizontal: 12, paddingVertical: 6 },
-    changeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.cyan },
-    submitBtn: { marginHorizontal: 16, marginBottom: 24, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: DT.green2 },
-    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.bg, letterSpacing: 1, textTransform: 'uppercase' },
+    changeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.cyan },
+    submitBtn: { marginHorizontal: 16, marginBottom: 24, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: C.success },
+    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 1, textTransform: 'uppercase' },
     successCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 32, alignItems: 'center' },
-    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white, marginTop: 16, marginBottom: 8, textAlign: 'center' },
-    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', lineHeight: 20 },
-    submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 12 },
+    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8, textAlign: 'center' },
+    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
+    submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 12 },
     helpCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 12, ...glass, padding: 16 },
-    helpText: { flex: 1, marginLeft: 12, fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, lineHeight: 18 },
+    helpText: { flex: 1, marginLeft: 12, fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, lineHeight: 18 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, marginTop: 10 },
+    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
   });
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View></View>
-        <View style={s.loadingContainer}><ActivityIndicator size="large" color={DT.cyan} /><Text style={s.loadingText}>Loading compliance...</Text></View>
+        <View style={s.loadingContainer}><ActivityIndicator size="large" color={C.cyan} /><Text style={s.loadingText}>Loading compliance...</Text></View>
       </View>
     );
   }
@@ -224,19 +207,19 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
   if (existingCompliance?.status === 'pending_review') {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
             <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View>
-            <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: DT.red, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}>
+        <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}>
           <View style={s.successCard}>
-            <Ionicons name="checkmark-circle" size={80} color={DT.green2} />
+            <Ionicons name="checkmark-circle" size={80} color={C.success} />
             <Text style={s.successTitle}>Submitted Successfully!</Text>
             <Text style={s.successText}>Your documents are being reviewed.{'\n'}This typically takes 1-2 business days.</Text>
             <Text style={s.submittedDate}>Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}</Text>
@@ -249,8 +232,8 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
                 <View style={s.docHdr}>
                   <View style={s.docInfo}><Text style={s.docLabel}>{doc.label}</Text></View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Ionicons name="checkmark-circle" size={14} color={DT.green2} />
-                    <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.green2, fontWeight: '600' }}>Uploaded</Text>
+                    <Ionicons name="checkmark-circle" size={14} color={C.success} />
+                    <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 10, color: C.success, fontWeight: '600' }}>Uploaded</Text>
                   </View>
                 </View>
               </View>
@@ -264,18 +247,18 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+      <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: DT.red, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}>
         {/* Progress */}
         <View style={s.progressCard}>
           <View style={s.progressBar}><View style={[s.progressFill, { width: `${(verified / documents.length) * 100}%` }]} /></View>
@@ -296,24 +279,24 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
               <View style={s.docTopRefraction} />
               <View style={s.docHdr}>
                 <View style={s.docInfo}>
-                  <Text style={s.docLabel}>{doc.label}{doc.required && <Text style={{ color: DT.red }}> *</Text>}</Text>
+                  <Text style={s.docLabel}>{doc.label}{doc.required && <Text style={{ color: C.error }}> *</Text>}</Text>
                   <Text style={s.docDesc}>{doc.description}</Text>
                 </View>
                 {doc.document ? (
-                  <View style={{ padding: 4 }}><Ionicons name="checkmark-circle" size={22} color={DT.green2} /></View>
+                  <View style={{ padding: 4 }}><Ionicons name="checkmark-circle" size={22} color={C.success} /></View>
                 ) : (
-                  <View style={{ padding: 4 }}><Ionicons name="time-outline" size={20} color={DT.amber} /></View>
+                  <View style={{ padding: 4 }}><Ionicons name="time-outline" size={20} color={C.primary} /></View>
                 )}
               </View>
               {doc.document ? (
                 <View style={s.previewRow}>
-                  <Ionicons name="document-text" size={16} color={DT.green2} />
+                  <Ionicons name="document-text" size={16} color={C.success} />
                   <Text style={s.previewName} numberOfLines={1}>{doc.document.name}</Text>
                   <TouchableOpacity onPress={() => showDocumentOptions(doc.id)} style={s.changeBtn}><Text style={s.changeBtnText}>Change</Text></TouchableOpacity>
                 </View>
               ) : (
                 <TouchableOpacity style={s.uploadBtn} onPress={() => showDocumentOptions(doc.id)}>
-                  <Ionicons name="cloud-upload" size={20} color={DT.cyan} /><Text style={s.uploadBtnText}>Upload Document</Text>
+                  <Ionicons name="cloud-upload" size={20} color={C.cyan} /><Text style={s.uploadBtnText}>Upload Document</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -322,12 +305,12 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
 
         {/* Submit */}
         <TouchableOpacity style={[s.submitBtn, pending > 0 && { opacity: 0.5 }]} onPress={submitCompliance} disabled={pending > 0}>
-          <Ionicons name="send" size={18} color={DT.bg} /><Text style={s.submitBtnText}>Submit for Review</Text>
+          <Ionicons name="send" size={18} color={C.background} /><Text style={s.submitBtnText}>Submit for Review</Text>
         </TouchableOpacity>
 
         {/* Help */}
         <View style={s.helpCard}>
-          <Ionicons name="help-circle" size={22} color={DT.cyan} />
+          <Ionicons name="help-circle" size={22} color={C.cyan} />
           <Text style={s.helpText}>Contact support for help with document verification</Text>
         </View>
 
