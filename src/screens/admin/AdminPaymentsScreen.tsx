@@ -5,24 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -79,10 +64,10 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': case 'completed': return DT.green2;
-      case 'pending': return DT.amber;
-      case 'failed': return DT.red;
-      default: return DT.muted;
+      case 'paid': case 'completed': return C.success;
+      case 'pending': return C.primary;
+      case 'failed': return C.error;
+      default: return C.textMuted;
     }
   };
 
@@ -111,50 +96,50 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.primary, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
     statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
-    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '700', color: DT.amber },
-    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '700', color: C.primary },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     searchWrap: { flexDirection: 'row', alignItems: 'center', ...glass, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginBottom: 12, gap: 8 },
-    searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white },
-    searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted },
+    searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
+    searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted },
     paymentCard: { ...glass, padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     paymentInfo: { flex: 1 },
-    paymentId: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.text },
-    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
-    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.amber },
+    paymentId: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text },
+    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
+    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.primary },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 40 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },
     paginationRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingHorizontal: 4 },
-    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border },
-    pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.cyan },
-    pageInfo: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
+    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
+    pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.cyan },
+    pageInfo: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
     bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Payments</Text><Text style={s.ltSub}>Manage all transactions</Text></View></View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={DT.green2} />
+          <ActivityIndicator size="large" color={C.success} />
         </View>
       </View>
     );
@@ -164,7 +149,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -176,7 +161,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.green2} colors={[DT.green2]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.success} colors={[C.success]} />}
       >
         {/* Stats */}
         <View style={s.statsRow}>
@@ -191,7 +176,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
 
           {/* Search */}
           <View style={s.searchWrap}>
-            <Ionicons name="search" size={16} color={DT.muted} />
+            <Ionicons name="search" size={16} color={C.textMuted} />
             <View style={{ flex: 1 }}>
               {searchQuery ? (
                 <Text style={s.searchInput}>{searchQuery}</Text>
@@ -201,7 +186,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
             </View>
             {searchQuery ? (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color={DT.muted} />
+                <Ionicons name="close-circle" size={16} color={C.textMuted} />
               </TouchableOpacity>
             ) : null}
           </View>

@@ -6,24 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { supabase } from '../../lib/supabase';
 import { Spacer, Badge } from '../../ui-plugin/components';
-
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+import { getTheme } from '../../ui-plugin/theme';
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -57,6 +40,7 @@ interface DriverTrackingPayload {
 }
 
 export default function FleetTrackingScreen({ navigation }: Props) {
+  const { colors: C } = getTheme('dark');
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [driverLocations, setDriverLocations] = useState<DriverLocation[]>([]);
@@ -126,26 +110,26 @@ export default function FleetTrackingScreen({ navigation }: Props) {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.primary, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    mapContainer: { height: 260, marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: DT.border },
+    mapContainer: { height: 260, marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
     map: { flex: 1 },
     mapOverlay: { position: 'absolute', top: 8, right: 8, flexDirection: 'row' },
-    liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: DT.green2, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, gap: 4 },
-    liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: DT.bg },
-    liveText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.bg },
+    liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.success, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, gap: 4 },
+    liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.background },
+    liveText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.background },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
     statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
-    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.cyan },
-    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.cyan },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     selectedCard: { ...glass, padding: 16, marginBottom: 10 },
@@ -153,18 +137,18 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     driverRow: { flexDirection: 'row', alignItems: 'center' },
     driverAvatar: { width: 46, height: 46, borderRadius: 23, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(0,229,255,.2)' },
-    driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.cyan },
+    driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.cyan },
     driverInfo: { flex: 1, marginLeft: 12 },
-    driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    driverVehicle: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    driverVehicle: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 9, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     detailRow: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 12 },
     detailItem: { alignItems: 'center' },
-    detailValue: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.cyan },
-    detailLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 2, textTransform: 'uppercase' },
+    detailValue: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.cyan },
+    detailLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 2, textTransform: 'uppercase' },
     driverCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 30 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 30 },
     emptyCard: { ...glass, padding: 30, alignItems: 'center' },
     bottomPadding: { height: 50 },
   });
@@ -172,7 +156,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Fleet Tracking</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={s.emptyText}>Loading fleet...</Text>
@@ -185,7 +169,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -197,7 +181,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}
       >
         {/* Live Map */}
         <View style={s.mapContainer}>
@@ -212,11 +196,11 @@ export default function FleetTrackingScreen({ navigation }: Props) {
               >
                 <View style={{
                   width: 40, height: 40, borderRadius: 20,
-                  backgroundColor: driver.status === 'active' ? DT.green2 : DT.amber,
+                  backgroundColor: driver.status === 'active' ? C.success : C.primary,
                   justifyContent: 'center', alignItems: 'center',
-                  borderWidth: 3, borderColor: selectedDriver?.driver_id === driver.driver_id ? DT.cyan : DT.panel,
+                  borderWidth: 3, borderColor: selectedDriver?.driver_id === driver.driver_id ? C.cyan : C.surface,
                 }}>
-                  <Ionicons name="bus" size={20} color={DT.bg} />
+                  <Ionicons name="bus" size={20} color={C.background} />
                 </View>
               </Marker>
             ))}
@@ -250,7 +234,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
                   <Text style={s.driverName}>{selectedDriver.driver_name}</Text>
                   <Text style={s.driverVehicle}>{selectedDriver.vehicle}</Text>
                 </View>
-                <View style={[s.badge, { backgroundColor: selectedDriver.status === 'active' ? DT.green2 : DT.amber }]}>
+                <View style={[s.badge, { backgroundColor: selectedDriver.status === 'active' ? C.success : C.primary }]}>
                   <Text style={s.badgeText}>{selectedDriver.status}</Text>
                 </View>
               </View>
@@ -282,13 +266,13 @@ export default function FleetTrackingScreen({ navigation }: Props) {
               <TouchableOpacity key={driver.driver_id} style={s.driverCard} onPress={() => setSelectedDriver(driver)} activeOpacity={0.7}>
                 <View style={s.cardTopRefraction} />
                 <View style={[s.driverAvatar, { backgroundColor: 'rgba(0,229,255,.08)', width: 40, height: 40, borderRadius: 20 }]}>
-                  <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: DT.cyan }}>{(driver.driver_name || 'D').substring(0, 1).toUpperCase()}</Text>
+                  <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.cyan }}>{(driver.driver_name || 'D').substring(0, 1).toUpperCase()}</Text>
                 </View>
                 <View style={s.driverInfo}>
                   <Text style={s.driverName}>{driver.driver_name}</Text>
                   <Text style={s.driverVehicle}>{driver.vehicle} • {driver.latitude !== 0 ? 'On map' : 'No location'}</Text>
                 </View>
-                <View style={[s.badge, { backgroundColor: driver.status === 'active' ? DT.green2 : DT.amber }]}>
+                <View style={[s.badge, { backgroundColor: driver.status === 'active' ? C.success : C.primary }]}>
                   <Text style={s.badgeText}>{driver.status}</Text>
                 </View>
               </TouchableOpacity>

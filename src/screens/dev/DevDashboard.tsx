@@ -12,25 +12,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { Card, Button, Spacer } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../lib/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-  dim: '#2a4060',
-};
+const { colors: C } = getTheme('dark');
+const CYAN = '#00e5ff';
+const AMBER = '#ffb700';
+const GREEN2 = '#00e676';
+const RED = '#ff3d5a';
 
 const SPRING = { damping: 15, stiffness: 150 };
 
@@ -86,39 +78,39 @@ const DevDashboard = ({ navigation }: Props) => {
   };
 
   const devTools = [
-    { name: 'API Console', icon: 'code-slash' as const, color: DT.cyan },
+    { name: 'API Console', icon: 'code-slash' as const, color: CYAN },
     { name: 'Database', icon: 'server' as const, color: '#0066ff' },
-    { name: 'Logs', icon: 'list' as const, color: DT.amber },
-    { name: 'Settings', icon: 'settings' as const, color: DT.muted },
-    { name: 'Users', icon: 'people' as const, color: DT.green },
+    { name: 'Logs', icon: 'list' as const, color: AMBER },
+    { name: 'Settings', icon: 'settings' as const, color: C.textMuted },
+    { name: 'Users', icon: 'people' as const, color: GREEN2 },
     { name: 'Routes', icon: 'map' as const, color: '#7c4dff' },
   ];
 
   const statusItems = [
-    { label: 'API Status', value: 'Online', icon: 'checkmark-circle' as const, color: DT.green },
-    { label: 'Database', value: 'Connected', icon: 'checkmark-circle' as const, color: DT.green },
-    { label: 'Environment', value: 'Development', icon: 'code-slash' as const, color: DT.amber },
-    { label: 'Realtime', value: 'Active', icon: 'flash' as const, color: DT.cyan },
+    { label: 'API Status', value: 'Online', icon: 'checkmark-circle' as const, color: GREEN2 },
+    { label: 'Database', value: 'Connected', icon: 'checkmark-circle' as const, color: GREEN2 },
+    { label: 'Environment', value: 'Development', icon: 'code-slash' as const, color: AMBER },
+    { label: 'Realtime', value: 'Active', icon: 'flash' as const, color: CYAN },
   ];
 
   const quickActions = [
-    { label: 'Sync Database', icon: 'refresh' as const, color: DT.cyan },
-    { label: 'Export Logs', icon: 'download' as const, color: DT.amber },
-    { label: 'Clear Cache', icon: 'trash' as const, color: DT.red },
+    { label: 'Sync Database', icon: 'refresh' as const, color: CYAN },
+    { label: 'Export Logs', icon: 'download' as const, color: AMBER },
+    { label: 'Clear Cache', icon: 'trash' as const, color: RED },
   ];
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.cyan,
+      borderBottomColor: CYAN,
     },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: DT.white },
-    headerSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, marginTop: 2 },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: C.text },
+    headerSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 2 },
     logoutBtn: { padding: spacing.xs },
     section: { padding: spacing.lg },
     sectionLabel: {
@@ -138,7 +130,7 @@ const DevDashboard = ({ navigation }: Props) => {
       backgroundColor: 'rgba(0,229,255,.15)',
     },
     toolCardInner: { alignItems: 'center', paddingTop: spacing.sm },
-    toolName: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: DT.white, marginTop: spacing.sm, textAlign: 'center' },
+    toolName: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: C.text, marginTop: spacing.sm, textAlign: 'center' },
     statusCard: { ...glassCard },
     statusTop: { height: 1, backgroundColor: 'rgba(0,229,255,.15)' },
     statusRow: {
@@ -150,20 +142,20 @@ const DevDashboard = ({ navigation }: Props) => {
     statusIconBox: {
       width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
     },
-    statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.text },
-    statusValue: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: DT.white },
+    statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textSecondary },
+    statusValue: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: C.text },
     actionBtn: {
       ...glassCard,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
       paddingVertical: spacing.md, marginBottom: spacing.sm,
     },
-    actionBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: DT.white },
+    actionBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: C.text },
     dangerBtn: {
       borderRadius: 14, paddingVertical: spacing.md, marginBottom: spacing.sm,
       backgroundColor: 'rgba(255,61,90,.10)',
       borderWidth: 1, borderColor: 'rgba(255,61,90,.15)',
     },
-    dangerBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: DT.red, textAlign: 'center' },
+    dangerBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: RED, textAlign: 'center' },
   });
 
   return (
@@ -173,13 +165,13 @@ const DevDashboard = ({ navigation }: Props) => {
         <View style={s.headerRow}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Ionicons name="construct" size={20} color={DT.cyan} />
+              <Ionicons name="construct" size={20} color={CYAN} />
               <Text style={s.headerTitle}>Dev Dashboard</Text>
             </View>
             <Text style={s.headerSub}>ScholarTrack Development Tools</Text>
           </View>
           <TouchableOpacity onPress={handleLogout} style={s.logoutBtn}>
-            <Ionicons name="log-out-outline" size={22} color={DT.white} />
+            <Ionicons name="log-out-outline" size={22} color={C.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -243,7 +235,7 @@ const DevDashboard = ({ navigation }: Props) => {
           onPress={() => Alert.alert('Coming Soon', 'Cache clearing not yet implemented.')}
           style={s.dangerBtn}
         >
-          <Ionicons name="trash-outline" size={16} color={DT.red} />
+          <Ionicons name="trash-outline" size={16} color={RED} />
           <Text style={s.dangerBtnText}>Clear Cache</Text>
         </SpringTouchable>
       </View>

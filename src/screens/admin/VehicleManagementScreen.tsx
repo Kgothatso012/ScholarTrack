@@ -5,24 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: S } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -75,10 +60,10 @@ export default function VehicleManagementScreen({ navigation }: Props) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return DT.green2;
-      case 'maintenance': return DT.amber;
-      case 'inactive': return DT.dim;
-      default: return DT.muted;
+      case 'active': return C.success;
+      case 'maintenance': return C.warning;
+      case 'inactive': return C.textMuted;
+      default: return C.textMuted;
     }
   };
 
@@ -86,49 +71,49 @@ export default function VehicleManagementScreen({ navigation }: Props) {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(245,158,11,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
-    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 4 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
     statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
-    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.cyan },
-    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    addBtn: { marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, backgroundColor: DT.blue, gap: 8 },
-    addBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, letterSpacing: 0.5 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.accent },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    addBtn: { marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, backgroundColor: C.primary, gap: 8 },
+    addBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, letterSpacing: 0.5 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     vehicleCard: { ...glass, padding: 16, marginBottom: 10 },
-    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
-    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(245,158,11,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(245,158,11,.6)' },
     vehicleHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-    vehiclePlate: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white },
+    vehiclePlate: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     vehicleDetails: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-    vehicleDetail: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 40 },
+    vehicleDetail: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },
     emptyCard: { ...glass, padding: 30, alignItems: 'center' },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 },
     modalContent: { ...glass, padding: 24, borderRadius: 24 },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white, marginBottom: 20 },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 20 },
     modalBtn: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
-    modalBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.bg },
-    modalBtnSecondary: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.border },
-    modalBtnSecondaryText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.muted },
+    modalBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background },
+    modalBtnSecondary: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    modalBtnSecondaryText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
     bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Vehicles</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={s.emptyText}>Loading vehicles...</Text>
@@ -141,7 +126,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -153,7 +138,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.blue} colors={[DT.blue]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
       >
         {/* Stats */}
         <View style={s.statsRow}>
@@ -164,7 +149,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
 
         {/* Add Button */}
         <TouchableOpacity style={s.addBtn} onPress={() => setShowAddModal(true)}>
-          <Ionicons name="add" size={18} color={DT.white} />
+          <Ionicons name="add" size={18} color={C.text} />
           <Text style={s.addBtnText}>Add Vehicle</Text>
         </TouchableOpacity>
 
@@ -206,7 +191,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             <Text style={s.modalTitle}>Add Vehicle</Text>
-            <TouchableOpacity style={[s.modalBtn, { backgroundColor: DT.blue }]} onPress={handleAddVehicle}>
+            <TouchableOpacity style={[s.modalBtn, { backgroundColor: C.primary }]} onPress={handleAddVehicle}>
               <Text style={s.modalBtnText}>Save Vehicle</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.modalBtnSecondary} onPress={() => setShowAddModal(false)}>

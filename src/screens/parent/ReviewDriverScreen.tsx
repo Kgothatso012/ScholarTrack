@@ -30,28 +30,21 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { ratingService } from '../../lib/services';
-
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../lib/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
+
+// Theme token aliases for this screen
+const C = getTheme('dark').colors;
+// Custom accent colors not in theme - keep original values to preserve design
+const CYAN = '#00e5ff';
+const AMBER = '#ffb700';
 
 const SpringTouchable = ({
   children,
@@ -191,26 +184,26 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
   };
 
   const getRatingColor = (r: number) => {
-    if (r >= 4) return DT.green;
-    if (r >= 3) return DT.amber;
-    if (r > 0) return DT.red;
-    return DT.muted;
+    if (r >= 4) return C.success;
+    if (r >= 3) return AMBER;
+    if (r > 0) return C.danger;
+    return C.textMuted;
   };
 
   const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
 
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.amber,
+      borderBottomColor: AMBER,
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     driverCard: {
       margin: spacing.lg,
       padding: spacing.xl,
@@ -226,16 +219,16 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       width: 70,
       height: 70,
       borderRadius: 35,
-      backgroundColor: DT.cyan + '20',
+      backgroundColor: CYAN + '20',
       borderWidth: 1.5,
-      borderColor: DT.cyan,
+      borderColor: CYAN,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: spacing.md,
     },
-    driverName: { ...typography.h3, color: DT.white },
-    driverSchool: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
-    driverRate: { ...typography.h4, color: DT.amber, marginTop: spacing.xs },
+    driverName: { ...typography.h3, color: C.text },
+    driverSchool: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
+    driverRate: { ...typography.h4, color: AMBER, marginTop: spacing.xs },
     ratingSection: {
       margin: spacing.lg,
       padding: spacing.xl,
@@ -243,7 +236,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       alignItems: 'center',
       ...glassCard,
     },
-    ratingTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.lg },
+    ratingTitle: { ...typography.h4, color: C.text, marginBottom: spacing.lg },
     stars: { flexDirection: 'row', marginBottom: spacing.sm },
     ratingText: { ...typography.label, marginTop: spacing.sm },
     warningBox: {
@@ -252,15 +245,15 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       padding: spacing.md,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: DT.red + '40',
-      backgroundColor: DT.red + '10',
+      borderColor: C.danger + '40',
+      backgroundColor: C.danger + '10',
       marginTop: spacing.md,
     },
     warningText: {
       flex: 1,
       marginLeft: spacing.sm,
       ...typography.caption,
-      color: DT.red,
+      color: C.danger,
     },
     feedbackSection: {
       margin: spacing.lg,
@@ -269,27 +262,27 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       borderRadius: borderRadius.lg,
       ...glassCard,
     },
-    feedbackTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.md },
+    feedbackTitle: { ...typography.h4, color: C.text, marginBottom: spacing.md },
     feedbackInput: {
       borderRadius: borderRadius.md,
       padding: spacing.md,
       minHeight: 100,
       textAlignVertical: 'top',
       ...typography.body,
-      color: DT.white,
+      color: C.text,
       backgroundColor: 'rgba(255,255,255,.06)',
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
     },
     submitBtn: {
       margin: spacing.lg,
       padding: spacing.md,
       borderRadius: borderRadius.lg,
-      backgroundColor: DT.cyan,
+      backgroundColor: CYAN,
       alignItems: 'center',
     },
     submitBtnDisabled: { opacity: 0.6 },
-    submitBtnText: { ...typography.button, color: DT.bg, fontWeight: '700' },
+    submitBtnText: { ...typography.button, color: C.background, fontWeight: '700' },
     completedSection: {
       margin: spacing.lg,
       padding: spacing.xl,
@@ -297,17 +290,17 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       alignItems: 'center',
       ...glassCard,
     },
-    completedTitle: { ...typography.h3, color: DT.white, marginTop: spacing.md },
-    completedText: { ...typography.body, color: DT.muted, textAlign: 'center', marginTop: spacing.sm },
+    completedTitle: { ...typography.h3, color: C.text, marginTop: spacing.md },
+    completedText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: spacing.sm },
     historySection: {
       margin: spacing.lg,
       padding: spacing.lg,
       borderRadius: borderRadius.lg,
       ...glassCard,
     },
-    historyTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.md },
+    historyTitle: { ...typography.h4, color: C.text, marginBottom: spacing.md },
     emptyHistory: { alignItems: 'center', paddingVertical: spacing.xl },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center', marginTop: spacing.md },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: spacing.md },
     reviewCard: {
       borderRadius: borderRadius.md,
       padding: spacing.md,
@@ -315,9 +308,9 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       backgroundColor: 'rgba(255,255,255,.04)',
     },
     reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    reviewMonth: { ...typography.label, color: DT.white },
+    reviewMonth: { ...typography.label, color: C.text },
     reviewRating: { flexDirection: 'row' },
-    reviewComment: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs, fontStyle: 'italic' },
+    reviewComment: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs, fontStyle: 'italic' },
     flaggedBadge: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -325,10 +318,10 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       paddingVertical: 3,
       borderRadius: borderRadius.sm,
       marginTop: spacing.xs,
-      backgroundColor: DT.red + '15',
+      backgroundColor: C.danger + '15',
       alignSelf: 'flex-start',
     },
-    flaggedText: { ...typography.caption, color: DT.red, marginLeft: 4 },
+    flaggedText: { ...typography.caption, color: C.danger, marginLeft: 4 },
     infoSection: {
       margin: spacing.lg,
       marginTop: 0,
@@ -342,7 +335,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       flex: 1,
       marginLeft: spacing.sm,
       ...typography.caption,
-      color: DT.muted,
+      color: C.textMuted,
       lineHeight: 18,
     },
     bottomPadding: { height: spacing.xl },
@@ -352,12 +345,12 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[CYAN]} tintColor={CYAN} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: AMBER, opacity: 0.06 }} />
           <Text style={styles.headerTitle}>Monthly Review</Text>
           <Text style={styles.headerSubtext}>
             Rate your driver for {currentMonth} {currentYear}
@@ -368,11 +361,11 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
         <Animated.View entering={ZoomIn.duration(300)}>
           <View style={[styles.driverCard, { overflow: 'hidden' }]}>
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-            <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+            <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: AMBER, borderRadius: 2 }} />
             {driver ? (
               <>
                 <View style={styles.driverAvatar}>
-                  <Ionicons name="person" size={36} color={DT.cyan} />
+                  <Ionicons name="person" size={36} color={CYAN} />
                 </View>
                 <Text style={styles.driverName}>{driver.full_name}</Text>
                 <Text style={styles.driverSchool}>Vehicle: {driver.vehicle_plate}</Text>
@@ -382,7 +375,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
               </>
             ) : (
               <>
-                <Ionicons name="car-sport-outline" size={50} color={DT.muted} />
+                <Ionicons name="car-sport-outline" size={50} color={C.textMuted} />
                 <Text style={[styles.driverName, { marginTop: spacing.md }]}>No Driver Assigned</Text>
                 <Text style={styles.driverSchool}>
                   Hire a driver to start using ScholarTrack
@@ -409,7 +402,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                       <Ionicons
                         name={star <= rating ? 'star' : 'star-outline'}
                         size={44}
-                        color={star <= rating ? DT.amber : DT.muted}
+                        color={star <= rating ? AMBER : C.textMuted}
                       />
                     </TouchableOpacity>
                   ))}
@@ -419,7 +412,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                 </Text>
                 {rating > 0 && rating < 4 && (
                   <View style={styles.warningBox}>
-                    <Ionicons name="warning" size={18} color={DT.red} />
+                    <Ionicons name="warning" size={18} color={C.danger} />
                     <Text style={styles.warningText}>
                       Ratings below 4 stars will flag the payment for admin review
                     </Text>
@@ -433,7 +426,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
               <TextInput
                 style={styles.feedbackInput}
                 placeholder="Tell us more about your experience (optional)"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 multiline
                 numberOfLines={4}
                 value={comment}
@@ -447,7 +440,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
               style={[styles.submitBtn, (loading || rating === 0) && styles.submitBtnDisabled]}
             >
               {loading ? (
-                <ActivityIndicator color={DT.bg} />
+                <ActivityIndicator color={C.background} />
               ) : (
                 <Text style={styles.submitBtnText}>Submit Review</Text>
               )}
@@ -456,7 +449,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
         ) : !driver ? null : (
           <Animated.View entering={ZoomIn.duration(300)}>
             <View style={[styles.completedSection, { overflow: 'hidden' }]}>
-              <Ionicons name="checkmark-done-circle" size={60} color={DT.green} />
+              <Ionicons name="checkmark-done-circle" size={60} color={C.success} />
               <Text style={styles.completedTitle}>Review Submitted!</Text>
               <Text style={styles.completedText}>
                 You've already reviewed for {currentMonth} {currentYear}. See your history below.
@@ -470,7 +463,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
           <Text style={sectionLabelStyle}>Review History</Text>
           {reviews.length === 0 ? (
             <View style={styles.emptyHistory}>
-              <Ionicons name="document-text-outline" size={40} color={DT.muted} />
+              <Ionicons name="document-text-outline" size={40} color={C.textMuted} />
               <Text style={styles.emptyText}>
                 Your review history will appear here after you submit reviews.
               </Text>
@@ -487,7 +480,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                           key={star}
                           name={star <= review.rating ? 'star' : 'star-outline'}
                           size={14}
-                          color={star <= review.rating ? DT.amber : DT.muted}
+                          color={star <= review.rating ? AMBER : C.textMuted}
                         />
                       ))}
                     </View>
@@ -497,7 +490,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                   )}
                   {review.status === 'flagged' && (
                     <View style={styles.flaggedBadge}>
-                      <Ionicons name="flag" size={12} color={DT.red} />
+                      <Ionicons name="flag" size={12} color={C.danger} />
                       <Text style={styles.flaggedText}>Flagged for review</Text>
                     </View>
                   )}
@@ -509,7 +502,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
 
         {/* Payment Info */}
         <View style={styles.infoSection}>
-          <Ionicons name="information-circle" size={22} color={DT.cyan} />
+          <Ionicons name="information-circle" size={22} color={CYAN} />
           <Text style={styles.infoText}>
             Payments are held in escrow until you submit your monthly review. Ratings of 4+ stars release the payment to your driver.
           </Text>

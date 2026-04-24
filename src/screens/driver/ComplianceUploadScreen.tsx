@@ -11,24 +11,10 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -245,10 +231,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
   const getExpiryStatusColor = (date?: Date) => {
     const days = getDaysUntilExpiry(date);
-    if (days === null) return DT.muted;
-    if (days < 0) return DT.red;
-    if (days <= 30) return DT.amber;
-    return DT.green2;
+    if (days === null) return C.textMuted;
+    if (days < 0) return C.danger;
+    if (days <= 30) return C.accent;
+    return C.success;
   };
 
   const pickDocument = async (docId: string) => {
@@ -427,92 +413,92 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   const progressPct = requiredCount > 0 ? (uploadedCount / documents.length) * 100 : 0;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, marginTop: 10 },
+    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
     progressCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20, marginBottom: 8 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
-    progressBar: { height: 8, backgroundColor: DT.border, borderRadius: 4, overflow: 'hidden' },
-    progressFill: { height: '100%', backgroundColor: complianceStatus === 'complete' ? DT.green2 : complianceStatus === 'partial' ? DT.amber : DT.dim, borderRadius: 4 },
-    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 8, textAlign: 'center' },
+    progressBar: { height: 8, backgroundColor: C.border, borderRadius: 4, overflow: 'hidden' },
+    progressFill: { height: '100%', backgroundColor: complianceStatus === 'complete' ? C.success : complianceStatus === 'partial' ? C.accent : C.textMuted, borderRadius: 4 },
+    progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 8, textAlign: 'center' },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     sectionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
     sectionIcon: { marginRight: 8 },
     inputGroup: { marginBottom: 16 },
-    label: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.text, marginBottom: 6, letterSpacing: 0.3 },
+    label: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.textSecondary, marginBottom: 6, letterSpacing: 0.3 },
     labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-    input: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: DT.border, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white },
-    inputError: { borderColor: DT.red, backgroundColor: 'rgba(255,61,90,.08)' },
-    errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.red, marginTop: 4 },
-    helperText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 4 },
+    input: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
+    inputError: { borderColor: C.danger, backgroundColor: 'rgba(255,61,90,.08)' },
+    errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.danger, marginTop: 4 },
+    helperText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
     docCard: { ...glass, padding: 16, marginBottom: 12 },
     docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     docInfo: { flex: 1 },
-    docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
-    docRequired: { color: DT.red },
-    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
-    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,230,118,.1)', borderRadius: 12, padding: 14, marginTop: 12, borderWidth: 1, borderColor: `${DT.green2}40` },
-    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.green2, marginLeft: 8 },
+    docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
+    docRequired: { color: C.danger },
+    docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
+    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,230,118,.1)', borderRadius: 12, padding: 14, marginTop: 12, borderWidth: 1, borderColor: `${C.success}40` },
+    uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.success, marginLeft: 8 },
     uploadedPreview: { flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: 'rgba(255,255,255,.03)', borderRadius: 10, padding: 8 },
-    previewImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: DT.border },
+    previewImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: C.border },
     previewInfo: { flex: 1, marginLeft: 10 },
-    previewName: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.white },
-    previewDate: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 2 },
+    previewName: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text },
+    previewDate: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 2 },
     removeBtn: { padding: 8 },
-    expiryContainer: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: DT.border },
-    expiryLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.text, marginBottom: 6 },
+    expiryContainer: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border },
+    expiryLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textSecondary, marginBottom: 6 },
     expiryBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,.03)', borderRadius: 10, padding: 10, borderWidth: 1 },
-    expiryBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.text, marginLeft: 8 },
+    expiryBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textSecondary, marginLeft: 8 },
     expiryStatus: { marginTop: 4 },
     expiryStatusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '600' },
-    disclaimer: { flexDirection: 'row', padding: 16, marginHorizontal: 16, marginBottom: 16, backgroundColor: 'rgba(255,183,0,.06)', borderRadius: 12, borderLeftWidth: 3, borderLeftColor: DT.amber },
-    disclaimerText: { flex: 1, marginLeft: 10, fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, lineHeight: 18 },
-    submitBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: DT.amber, marginHorizontal: 16, padding: 16, borderRadius: 14, marginBottom: 8 },
+    disclaimer: { flexDirection: 'row', padding: 16, marginHorizontal: 16, marginBottom: 16, backgroundColor: 'rgba(255,183,0,.06)', borderRadius: 12, borderLeftWidth: 3, borderLeftColor: C.accent },
+    disclaimerText: { flex: 1, marginLeft: 10, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 18 },
+    submitBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: 14, marginBottom: 8 },
     submitBtnDisabled: { opacity: 0.6 },
-    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.bg, marginLeft: 8 },
+    submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background, marginLeft: 8 },
     bottomPadding: { height: 50 },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: DT.panel, borderRadius: 20, padding: 24, width: '85%', maxHeight: '60%', borderWidth: 1, borderColor: DT.border },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white, textAlign: 'center', marginBottom: 20 },
+    modalContent: { backgroundColor: C.surface, borderRadius: 20, padding: 24, width: '85%', maxHeight: '60%', borderWidth: 1, borderColor: C.border },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text, textAlign: 'center', marginBottom: 20 },
     pickerRow: { flexDirection: 'row', justifyContent: 'space-between', height: 200 },
     pickerColumn: { flex: 1, marginHorizontal: 4 },
-    pickerLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, textAlign: 'center', marginBottom: 8 },
+    pickerLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textAlign: 'center', marginBottom: 8 },
     pickerScroll: { height: 160 },
     pickerItem: { paddingVertical: 8, paddingHorizontal: 8, alignItems: 'center', borderRadius: 8 },
-    pickerItemSelected: { backgroundColor: DT.amber },
-    pickerItemText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.text },
-    pickerItemTextSelected: { color: DT.bg, fontWeight: '600' },
+    pickerItemSelected: { backgroundColor: C.accent },
+    pickerItemText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textSecondary },
+    pickerItemTextSelected: { color: C.background, fontWeight: '600' },
     modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
     modalCancel: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.06)', marginRight: 8, alignItems: 'center' },
-    modalCancelText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.muted },
-    modalConfirm: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: DT.amber, marginLeft: 8, alignItems: 'center' },
-    modalConfirmText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.bg },
+    modalCancelText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
+    modalConfirm: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.accent, marginLeft: 8, alignItems: 'center' },
+    modalConfirmText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background },
     successCard: { ...glass, margin: 16, padding: 32, alignItems: 'center', marginTop: 40 },
-    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: DT.white, marginTop: 16, marginBottom: 8 },
-    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', lineHeight: 20 },
-    submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 8 },
-    viewDocsBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: DT.amber, marginHorizontal: 16, padding: 16, borderRadius: 14, marginTop: 20 },
-    viewDocsBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg, marginLeft: 8 },
+    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8 },
+    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
+    submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 8 },
+    viewDocsBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: 14, marginTop: 20 },
+    viewDocsBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background, marginLeft: 8 },
   });
 
   // ── Loading State ────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Driver Compliance</Text></View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={DT.amber} /><Text style={s.loadingText}>Loading compliance status...</Text></View>
+        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.accent} /><Text style={s.loadingText}>Loading compliance status...</Text></View>
       </View>
     );
   }
@@ -521,10 +507,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   if (existingCompliance && existingCompliance.status === 'pending_review') {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={18} color={DT.white} />
+            <Ionicons name="arrow-back" size={18} color={C.text} />
           </TouchableOpacity>
           <Text style={s.ltTitle}>Driver Compliance</Text>
           <View style={{ width: 36 }} />
@@ -532,13 +518,13 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           <View style={s.successCard}>
             <View style={s.cardTopRefraction} />
-            <Ionicons name="checkmark-circle" size={80} color={DT.green2} />
+            <Ionicons name="checkmark-circle" size={80} color={C.success} />
             <Text style={s.successTitle}>Submitted Successfully!</Text>
             <Text style={s.successText}>Your compliance documents have been submitted for review. This typically takes 1-2 business days.</Text>
             <Text style={s.submittedDate}>Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}</Text>
           </View>
           <TouchableOpacity style={s.viewDocsBtn} onPress={() => Alert.alert('View Documents', 'This would open the submitted documents.')}>
-            <Ionicons name="document-text" size={20} color={DT.bg} />
+            <Ionicons name="document-text" size={20} color={C.background} />
             <Text style={s.viewDocsBtnText}>View Submitted Documents</Text>
           </TouchableOpacity>
           <Spacer size="xl" />
@@ -553,7 +539,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
       {/* Status Bar */}
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       {/* Header */}
@@ -561,17 +547,17 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={18} color={DT.white} />
+            <Ionicons name="arrow-back" size={18} color={C.text} />
           </TouchableOpacity>
           <View><Text style={s.ltTitle}>Driver Compliance</Text><Text style={s.ltSub}>Complete all required documents</Text></View>
           <TouchableOpacity onPress={handleLogout} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,61,90,.15)', justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="log-out-outline" size={18} color={DT.red} />
+            <Ionicons name="log-out-outline" size={18} color={C.danger} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(false)} tintColor={DT.amber} colors={[DT.amber]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(false)} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Progress Indicator */}
         <View style={s.progressCard}>
@@ -580,14 +566,14 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
             <View style={[s.progressFill, { width: `${progressPct}%` }]} />
           </View>
           <Text style={s.progressText}>
-            {complianceStatus === 'complete' ? <><Ionicons name="checkmark-circle" size={14} color={DT.green} /> All documents uploaded</> : complianceStatus === 'partial' ? <><Ionicons name="document-text" size={14} color={DT.amber} /> Partially complete</> : <><Ionicons name="arrow-up" size={14} color={DT.muted} /> Start uploading documents</>}
+            {complianceStatus === 'complete' ? <><Ionicons name="checkmark-circle" size={14} color={C.success} /> All documents uploaded</> : complianceStatus === 'partial' ? <><Ionicons name="document-text" size={14} color={C.accent} /> Partially complete</> : <><Ionicons name="arrow-up" size={14} color={C.textMuted} /> Start uploading documents</>}
           </Text>
         </View>
 
         {/* Personal Information */}
         <View style={s.section}>
           <View style={s.sectionRow}>
-            <Ionicons name="person" size={18} color={DT.amber} style={s.sectionIcon} />
+            <Ionicons name="person" size={18} color={C.accent} style={s.sectionIcon} />
             <Text style={s.sectionTitle}>Personal Information</Text>
           </View>
 
@@ -601,7 +587,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[s.input, errors.fullName && s.inputError]}
                   placeholder="e.g., John Sipho Moyo"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   onBlur={onBlur} onChangeText={onChange} value={value}
                   autoCapitalize="words"
                 />
@@ -612,7 +598,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
           {/* RSA ID */}
           <View style={s.inputGroup}>
-            <Text style={s.label}>🇿🇦 RSA ID Number (13 digits)</Text>
+            <Text style={s.label}>RSA ID Number (13 digits)</Text>
             <Controller
               control={control} name="idNumber"
               rules={{ validate: (value) => { const r = validateRSAId(value); return r.valid || r.error; } }}
@@ -620,7 +606,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[s.input, errors.idNumber && s.inputError]}
                   placeholder="e.g., 8501011234567"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   onBlur={onBlur} onChangeText={onChange} value={value}
                   keyboardType="numeric" maxLength={13}
                 />
@@ -633,7 +619,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           {/* Cell Number */}
           <View style={s.inputGroup}>
             <View style={s.labelRow}>
-              <Ionicons name="call" size={14} color={DT.muted} />
+              <Ionicons name="call" size={14} color={C.textMuted} />
               <Text style={s.label}> Cell Number</Text>
             </View>
             <Controller
@@ -643,7 +629,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[s.input, errors.phoneNumber && s.inputError]}
                   placeholder="e.g., 0821234567"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   onBlur={onBlur} onChangeText={onChange} value={value}
                   keyboardType="phone-pad" maxLength={10}
                 />
@@ -654,7 +640,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
           {/* Email */}
           <View style={s.inputGroup}>
-            <Text style={s.label}>📧 Email Address</Text>
+            <Text style={s.label}>Email Address</Text>
             <Controller
               control={control} name="email"
               rules={{ required: 'Email is required' }}
@@ -662,7 +648,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[s.input, errors.email && s.inputError]}
                   placeholder="e.g., john@example.com"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   onBlur={onBlur} onChangeText={onChange} value={value}
                   keyboardType="email-address" autoCapitalize="none"
                 />
@@ -675,7 +661,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         {/* PDP License */}
         <View style={s.section}>
           <View style={s.sectionRow}>
-            <Ionicons name="bus" size={18} color={DT.amber} style={s.sectionIcon} />
+            <Ionicons name="bus" size={18} color={C.accent} style={s.sectionIcon} />
             <Text style={s.sectionTitle}>PDP License</Text>
           </View>
           <View style={s.inputGroup}>
@@ -687,7 +673,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                 <TextInput
                   style={[s.input, errors.pdpNumber && s.inputError]}
                   placeholder="e.g., PDP12345678"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   onBlur={onBlur} onChangeText={(text) => onChange(text.toUpperCase())} value={value}
                   autoCapitalize="characters" maxLength={11}
                 />
@@ -701,10 +687,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         {/* Documents */}
         <View style={s.section}>
           <View style={s.sectionRow}>
-            <Ionicons name="document" size={18} color={DT.amber} style={s.sectionIcon} />
+            <Ionicons name="document" size={18} color={C.accent} style={s.sectionIcon} />
             <Text style={s.sectionTitle}>Required Documents</Text>
           </View>
-          <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: -8, marginBottom: 16 }}>Upload clear photos or PDFs of each document</Text>
+          <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: -8, marginBottom: 16 }}>Upload clear photos or PDFs of each document</Text>
 
           {documents.map((doc) => {
             const expiryColor = getExpiryStatusColor(doc.expiryDate);
@@ -717,8 +703,8 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                     <Text style={s.docDesc}>{doc.description}</Text>
                   </View>
                   {doc.document
-                    ? <Ionicons name="checkmark-circle" size={24} color={DT.green2} />
-                    : <Ionicons name="time-outline" size={20} color={DT.amber} />
+                    ? <Ionicons name="checkmark-circle" size={24} color={C.success} />
+                    : <Ionicons name="time-outline" size={20} color={C.accent} />
                   }
                 </View>
 
@@ -730,12 +716,12 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                       <Text style={s.previewDate}>Uploaded {doc.document.uploadedAt.toLocaleDateString()}</Text>
                     </View>
                     <TouchableOpacity style={s.removeBtn} onPress={() => removeDocument(doc.id)}>
-                      <Ionicons name="trash-outline" size={18} color={DT.red} />
+                      <Ionicons name="trash-outline" size={18} color={C.danger} />
                     </TouchableOpacity>
                   </View>
                 ) : (
                   <TouchableOpacity style={s.uploadBtn} onPress={() => showDocumentOptions(doc.id)}>
-                    <Ionicons name="cloud-upload-outline" size={20} color={DT.green2} />
+                    <Ionicons name="cloud-upload-outline" size={20} color={C.success} />
                     <Text style={s.uploadBtnText}>Take Photo or Choose File</Text>
                   </TouchableOpacity>
                 )}
@@ -824,7 +810,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
 
         {/* Legal Disclaimer */}
         <View style={s.disclaimer}>
-          <Ionicons name="shield-checkmark-outline" size={18} color={DT.amber} />
+          <Ionicons name="shield-checkmark-outline" size={18} color={C.accent} />
           <Text style={s.disclaimerText}>
             By submitting, I confirm all documents are authentic and valid. I understand that providing false information is a criminal offence under South African law.
           </Text>
@@ -838,8 +824,8 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           activeOpacity={0.8}
         >
           {isSubmitting
-            ? <ActivityIndicator color={DT.bg} />
-            : <><Ionicons name="send" size={18} color={DT.bg} /><Text style={s.submitBtnText}>Submit for Review</Text></>
+            ? <ActivityIndicator color={C.background} />
+            : <><Ionicons name="send" size={18} color={C.background} /><Text style={s.submitBtnText}>Submit for Review</Text></>
           }
         </TouchableOpacity>
 

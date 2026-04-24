@@ -4,24 +4,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { routeService, driverService, linkingService, Route, Driver } from '../../lib/api';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: S } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -100,74 +85,74 @@ export default function RouteManagementScreen({ navigation }: Props) {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
-    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(245,158,11,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
-    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 4 },
     backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
-    addBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(0,229,255,.15)', justifyContent: 'center', alignItems: 'center' },
+    addBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(34,211,238,.15)', justifyContent: 'center', alignItems: 'center' },
     loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
     emptyIcon: { marginBottom: 12 },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, textAlign: 'center' },
-    addFirstBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 14, backgroundColor: DT.cyan, gap: 8, marginTop: 20 },
-    addFirstText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.bg },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, textAlign: 'center' },
+    addFirstBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 14, backgroundColor: C.primary, gap: 8, marginTop: 20 },
+    addFirstText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.textInverse },
     list: { padding: 16 },
     routeCard: { ...glass, padding: 16, marginBottom: 12 },
-    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
-    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(245,158,11,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(245,158,11,.6)' },
     routeHeader: { flexDirection: 'row', alignItems: 'center' },
     routeIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
     routeInfo: { flex: 1, marginLeft: 12 },
-    routeName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white },
-    routeDriver: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 3 },
+    routeName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
+    routeDriver: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 3 },
     assignBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-    stopsContainer: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: DT.border },
-    stopsTitle: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: DT.amber, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 },
+    stopsContainer: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: C.border },
+    stopsTitle: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.warning, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 },
     stopItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
     stopDot: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
-    stopNumber: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: DT.bg },
-    stopName: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.text },
-    viewBtn: { marginTop: 14, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.cyan },
-    viewBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.cyan },
+    stopNumber: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.background },
+    stopName: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textSecondary },
+    viewBtn: { marginTop: 14, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.cyan },
+    viewBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.cyan },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-    modalContent: { backgroundColor: DT.bg2, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: '80%' },
+    modalContent: { backgroundColor: C.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: '80%' },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: DT.white },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text },
     modalBody: { paddingBottom: 20 },
-    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.amber, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-    input: { backgroundColor: DT.panel, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white, borderWidth: 1, borderColor: DT.border, marginBottom: 16 },
+    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.warning, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+    input: { backgroundColor: C.card, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border, marginBottom: 16 },
     driverScroll: { marginBottom: 16 },
-    driverChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, marginRight: 10, borderWidth: 1 },
+    driverChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: C.border },
     driverChipText: { fontFamily: 'Syne_700Bold', fontSize: 13, marginLeft: 6 },
-    submitBtn: { backgroundColor: DT.cyan, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
-    submitText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg },
-    noChildren: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', padding: 20 },
-    childItem: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 14, marginBottom: 10, backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border },
-    childAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-    childInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.cyan },
+    submitBtn: { backgroundColor: C.cyan, paddingVertical: 16, borderRadius: 14, alignItems: 'center' },
+    submitText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.textInverse },
+    noChildren: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', padding: 20 },
+    childItem: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 14, marginBottom: 10, backgroundColor: C.card, borderWidth: 1, borderColor: C.border },
+    childAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(34,211,238,.1)', borderWidth: 1, borderColor: 'rgba(34,211,238,.2)' },
+    childInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.cyan },
     childInfo: { flex: 1, marginLeft: 12 },
-    childName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    childSchool: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    childName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    childSchool: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     bottomPadding: { height: 50 },
   });
 
   if (loading && routes.length === 0) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
-          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={DT.white} /></TouchableOpacity>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={C.text} /></TouchableOpacity>
           <Text style={s.ltTitle}>Routes</Text>
-          <TouchableOpacity style={s.addBtn} onPress={() => setShowModal(true)}><Ionicons name="add" size={20} color={DT.cyan} /></TouchableOpacity>
+          <TouchableOpacity style={s.addBtn} onPress={() => setShowModal(true)}><Ionicons name="add" size={20} color={C.accent} /></TouchableOpacity>
         </View></View>
-        <View style={s.loading}><ActivityIndicator size="large" color={DT.cyan} /></View>
+        <View style={s.loading}><ActivityIndicator size="large" color={C.accent} /></View>
       </View>
     );
   }
@@ -176,28 +161,28 @@ export default function RouteManagementScreen({ navigation }: Props) {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
       </View>
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={18} color={DT.white} />
+            <Ionicons name="arrow-back" size={18} color={C.text} />
           </TouchableOpacity>
           <View><Text style={s.ltTitle}>Route Management</Text><Text style={s.ltSub}>{routes.length} routes configured</Text></View>
           <TouchableOpacity style={s.addBtn} onPress={() => setShowModal(true)}>
-            <Ionicons name="add" size={20} color={DT.cyan} />
+            <Ionicons name="add" size={20} color={C.accent} />
           </TouchableOpacity>
         </View>
       </View>
 
       {routes.length === 0 ? (
         <View style={s.empty}>
-          <Ionicons name="bus-outline" size={60} color={DT.muted} />
+          <Ionicons name="bus-outline" size={60} color={C.textMuted} />
           <Text style={s.emptyText}>No routes configured</Text>
           <TouchableOpacity style={s.addFirstBtn} onPress={() => setShowModal(true)}>
-            <Ionicons name="add" size={18} color={DT.bg} />
+            <Ionicons name="add" size={18} color={C.background} />
             <Text style={s.addFirstText}>Create First Route</Text>
           </TouchableOpacity>
         </View>
@@ -206,21 +191,21 @@ export default function RouteManagementScreen({ navigation }: Props) {
           data={routes}
           keyExtractor={item => item.id}
           contentContainerStyle={s.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
           ListFooterComponent={<View style={s.bottomPadding} />}
           renderItem={({ item: route }) => (
             <View style={s.routeCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.routeHeader}>
-                <View style={[s.routeIcon, { backgroundColor: 'rgba(0,229,255,.12)', borderWidth: 1, borderColor: 'rgba(0,229,255,.2)' }]}>
-                  <Ionicons name="bus" size={22} color={DT.cyan} />
+                <View style={[s.routeIcon, { backgroundColor: 'rgba(34,211,238,.12)', borderWidth: 1, borderColor: 'rgba(34,211,238,.2)' }]}>
+                  <Ionicons name="bus" size={22} color={C.cyan} />
                 </View>
                 <View style={s.routeInfo}>
                   <Text style={s.routeName}>{route.name}</Text>
                   <Text style={s.routeDriver}>Driver: {route.driver?.full_name || 'Unassigned'}</Text>
                 </View>
-                <TouchableOpacity style={[s.assignBtn, { backgroundColor: 'rgba(0,229,255,.1)' }]} onPress={() => setSelectedRoute(route)}>
-                  <Ionicons name="person-add" size={18} color={DT.cyan} />
+                <TouchableOpacity style={[s.assignBtn, { backgroundColor: 'rgba(34,211,238,.1)' }]} onPress={() => setSelectedRoute(route)}>
+                  <Ionicons name="person-add" size={18} color={C.cyan} />
                 </TouchableOpacity>
               </View>
 
@@ -229,7 +214,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
                   <Text style={s.stopsTitle}>Stops ({route.stops.length})</Text>
                   {route.stops.sort((a, b) => a.order - b.order).map((stop, idx) => (
                     <View key={stop.id} style={s.stopItem}>
-                      <View style={[s.stopDot, { backgroundColor: DT.cyan }]}>
+                      <View style={[s.stopDot, { backgroundColor: C.cyan }]}>
                         <Text style={s.stopNumber}>{idx + 1}</Text>
                       </View>
                       <Text style={s.stopName}>{stop.name}</Text>
@@ -253,7 +238,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
             <View style={s.modalHeader}>
               <Text style={s.modalTitle}>Create New Route</Text>
               <TouchableOpacity onPress={() => setShowModal(false)}>
-                <Ionicons name="close" size={22} color={DT.muted} />
+                <Ionicons name="close" size={22} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <ScrollView style={s.modalBody} showsVerticalScrollIndicator={false}>
@@ -261,7 +246,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
               <TextInput
                 style={s.input}
                 placeholder="e.g., Morning Route - Zone A"
-                placeholderTextColor={DT.muted}
+                placeholderTextColor={C.textMuted}
                 value={newRoute.name}
                 onChangeText={t => setNewRoute({ ...newRoute, name: t })}
               />
@@ -271,13 +256,13 @@ export default function RouteManagementScreen({ navigation }: Props) {
                   <TouchableOpacity
                     key={driver.id}
                     style={[s.driverChip, {
-                      backgroundColor: newRoute.driver_id === driver.id ? 'rgba(0,229,255,.15)' : DT.panel,
-                      borderColor: newRoute.driver_id === driver.id ? DT.cyan : DT.border,
+                      backgroundColor: newRoute.driver_id === driver.id ? 'rgba(34,211,238,.15)' : C.card,
+                      borderColor: newRoute.driver_id === driver.id ? C.cyan : C.border,
                     }]}
                     onPress={() => setNewRoute({ ...newRoute, driver_id: driver.id })}
                   >
-                    <Ionicons name="person" size={14} color={newRoute.driver_id === driver.id ? DT.cyan : DT.muted} />
-                    <Text style={[s.driverChipText, { color: newRoute.driver_id === driver.id ? DT.cyan : DT.text }]}>
+                    <Ionicons name="person" size={14} color={newRoute.driver_id === driver.id ? C.cyan : C.textMuted} />
+                    <Text style={[s.driverChipText, { color: newRoute.driver_id === driver.id ? C.cyan : C.textSecondary }]}>
                       {driver.full_name}
                     </Text>
                   </TouchableOpacity>
@@ -298,7 +283,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
             <View style={s.modalHeader}>
               <Text style={[s.modalTitle, { fontSize: 16 }]}>Assign Children to {selectedRoute?.name}</Text>
               <TouchableOpacity onPress={() => setSelectedRoute(null)}>
-                <Ionicons name="close" size={22} color={DT.muted} />
+                <Ionicons name="close" size={22} color={C.textMuted} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -311,14 +296,14 @@ export default function RouteManagementScreen({ navigation }: Props) {
                     style={s.childItem}
                     onPress={() => selectedRoute && handleAssignChild(selectedRoute.id, child.id)}
                   >
-                    <View style={[s.childAvatar, { backgroundColor: 'rgba(0,229,255,.1)', borderWidth: 1, borderColor: 'rgba(0,229,255,.2)' }]}>
+                    <View style={s.childAvatar}>
                       <Text style={s.childInitial}>{child.full_name?.charAt(0)}</Text>
                     </View>
                     <View style={s.childInfo}>
                       <Text style={s.childName}>{child.full_name}</Text>
                       <Text style={s.childSchool}>{child.school?.name || 'No school'}</Text>
                     </View>
-                    <Ionicons name="add-circle" size={24} color={DT.cyan} />
+                    <Ionicons name="add-circle" size={24} color={C.cyan} />
                   </TouchableOpacity>
                 ))
               )}

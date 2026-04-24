@@ -5,14 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810', bg2: '#080d1a', panel: '#0b1120', border: '#1a2a40',
-  cyan: '#00e5ff', amber: '#ffb700', green: '#007749', green2: '#00e676',
-  blue: '#002395', red: '#ff3d5a', dim: '#2e4a6e', muted: '#4a6a8a',
-  text: '#9bbdd4', white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -186,16 +181,16 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   const maxTrips = Math.max(...tripAnalytics.map(d => d.trips));
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     exportBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
     content: { padding: 16 },
@@ -203,61 +198,61 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     statCard: { width: '48%', ...glass, padding: 14, alignItems: 'center', borderColor: 'rgba(255,255,255,.08)' },
     statIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
-    statValue: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: DT.white },
-    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     chartCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     chartContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 150, paddingBottom: 24 },
     barContainer: { alignItems: 'center', flex: 1 },
     bar: { width: 28, borderRadius: 4, minHeight: 8 },
-    barLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 5 },
-    barValue: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '600', color: DT.text, position: 'absolute', top: -16 },
-    chartLegend: { alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: DT.border },
-    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+    barLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 5 },
+    barValue: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '600', color: C.textSecondary, position: 'absolute', top: -16 },
+    chartLegend: { alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: C.border },
+    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted },
     paymentCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
-    paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border },
-    paymentMonth: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: DT.white, width: 52 },
+    paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border },
+    paymentMonth: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: C.text, width: 52 },
     paymentAmounts: { flexDirection: 'row', gap: 12 },
-    paid: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.green2 },
-    pending: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.amber },
-    overdue: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.red },
+    paid: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.success },
+    pending: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.warning },
+    overdue: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.error },
     driverCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
-    driverRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border },
+    driverRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border },
     driverRank: { marginRight: 12 },
-    rankNumber: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '700', color: DT.white, overflow: 'hidden' },
+    rankNumber: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '700', color: C.text, overflow: 'hidden' },
     driverInfo: { flex: 1 },
-    driverName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
-    driverStats: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, marginTop: 2 },
+    driverName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
+    driverStats: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textMuted, marginTop: 2 },
     driverRating: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    ratingValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white },
+    ratingValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text },
     complianceCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
-    complianceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border, gap: 14 },
+    complianceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: C.border, gap: 14 },
     complianceInfo: { flex: 1 },
-    complianceTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    complianceTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
     complianceStatus: { fontFamily: 'DMMono_400Regular', fontSize: 12, marginTop: 2 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     bottomSpacer: { height: 50 },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'flex-end' },
-    modalContent: { backgroundColor: DT.bg2, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+    modalContent: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text },
     exportOptions: { gap: 10 },
     exportOption: { ...glass, flexDirection: 'row', alignItems: 'center', padding: 16, gap: 14 },
-    exportOptionText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
-    exportOptionDesc: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+    exportOptionText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
+    exportOptionDesc: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted },
   });
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
-          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={DT.white} /></TouchableOpacity>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={C.text} /></TouchableOpacity>
           <Text style={s.ltTitle}>Reports</Text>
-          <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}><Ionicons name="download" size={18} color={DT.cyan} /></TouchableOpacity>
+          <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}><Ionicons name="download" size={18} color={C.accent} /></TouchableOpacity>
         </View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={DT.cyan} /><Text style={{ color: DT.muted, marginTop: 10 }}>Loading reports...</Text></View>
+        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.accent} /><Text style={{ color: C.textMuted, marginTop: 10 }}>Loading reports...</Text></View>
       </View>
     );
   }
@@ -267,7 +262,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
       {/* Status Bar */}
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       {/* Header */}
@@ -275,11 +270,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={18} color={DT.white} />
+            <Ionicons name="arrow-back" size={18} color={C.text} />
           </TouchableOpacity>
           <View><Text style={s.ltTitle}>Reports Dashboard</Text><Text style={s.ltSub}>Comprehensive analytics</Text></View>
           <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}>
-            <Ionicons name="download" size={18} color={DT.cyan} />
+            <Ionicons name="download" size={18} color={C.accent} />
           </TouchableOpacity>
         </View>
       </View>
@@ -287,16 +282,16 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
       <ScrollView
         style={s.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Overview Stats */}
         <Text style={s.sectionTitle}>Overview</Text>
         <View style={s.statsGrid}>
           {[
-            { title: 'Students', value: reportData?.totalStudents || 0, icon: 'people', color: DT.blue },
-            { title: 'Active Drivers', value: reportData?.activeDrivers || 0, icon: 'car', color: DT.green2 },
-            { title: 'Completed Trips', value: reportData?.completedTrips || 0, icon: 'navigate', color: DT.amber },
-            { title: 'Revenue', value: `R${(reportData?.totalRevenue || 0).toLocaleString()}`, icon: 'cash', color: DT.red },
+            { title: 'Students', value: reportData?.totalStudents || 0, icon: 'people', color: C.primary },
+            { title: 'Active Drivers', value: reportData?.activeDrivers || 0, icon: 'car', color: C.success },
+            { title: 'Completed Trips', value: reportData?.completedTrips || 0, icon: 'navigate', color: C.warning },
+            { title: 'Revenue', value: `R${(reportData?.totalRevenue || 0).toLocaleString()}`, icon: 'cash', color: C.error },
           ].map((stat, i) => (
             <View key={i} style={s.statCard}>
               <View style={[s.statIcon, { backgroundColor: `${stat.color}18` }]}>
@@ -317,7 +312,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
             {tripAnalytics.map((item, index) => (
               <View key={index} style={s.barContainer}>
                 <View style={{ position: 'relative', height: `${(item.trips / maxTrips) * 100}%`, justifyContent: 'flex-end' }}>
-                  <View style={[s.bar, { backgroundColor: DT.cyan, height: '100%' }]} />
+                  <View style={[s.bar, { backgroundColor: C.accent, height: '100%' }]} />
                   <Text style={s.barValue}>{item.trips}</Text>
                 </View>
                 <Text style={s.barLabel}>{item.date}</Text>
@@ -356,14 +351,14 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
           {driverPerformance.slice(0, 5).map((driver, index) => (
             <View key={driver.id} style={[s.driverRow, index === 4 && { borderBottomWidth: 0 }]}>
               <View style={s.driverRank}>
-                <Text style={[s.rankNumber, { backgroundColor: index < 3 ? DT.blue : DT.dim }]}>{index + 1}</Text>
+                <Text style={[s.rankNumber, { backgroundColor: index < 3 ? C.primary : C.textMuted }]}>{index + 1}</Text>
               </View>
               <View style={s.driverInfo}>
                 <Text style={s.driverName}>{driver.full_name}</Text>
                 <Text style={s.driverStats}>{driver.trips_completed} trips | {driver.on_time_rate}% on-time</Text>
               </View>
               <View style={s.driverRating}>
-                <Ionicons name="star" size={14} color={DT.amber} />
+                <Ionicons name="star" size={14} color={C.warning} />
                 <Text style={s.ratingValue}>{driver.rating.toFixed(1)}</Text>
               </View>
             </View>
@@ -376,9 +371,9 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
           <View style={s.cardTopRefraction} />
           <View style={s.cardLeftBar} />
           {[
-            { icon: 'shield-checkmark', title: 'POPIA Compliant', status: 'Verified', color: DT.green2 },
-            { icon: 'document-text', title: 'Transport Act Reports', status: 'Monthly submission required', color: DT.blue },
-            { icon: 'people', title: 'Learner Transport Database', status: '12,450 registered learners', color: DT.amber },
+            { icon: 'shield-checkmark', title: 'POPIA Compliant', status: 'Verified', color: C.success },
+            { icon: 'document-text', title: 'Transport Act Reports', status: 'Monthly submission required', color: C.primary },
+            { icon: 'people', title: 'Learner Transport Database', status: '12,450 registered learners', color: C.warning },
           ].map((item, i) => (
             <View key={i} style={[s.complianceRow, i === 2 && { borderBottomWidth: 0 }]}>
               <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
@@ -401,16 +396,16 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
             <View style={s.modalHeader}>
               <Text style={s.modalTitle}>Export Report</Text>
               <TouchableOpacity onPress={() => setShowExportModal(false)}>
-                <Ionicons name="close" size={22} color={DT.muted} />
+                <Ionicons name="close" size={22} color={C.textMuted} />
               </TouchableOpacity>
             </View>
 
             <View style={s.exportOptions}>
               {[
-                { type: 'full', icon: 'document', color: DT.cyan, label: 'Full Report', desc: 'Complete system overview' },
-                { type: 'trips', icon: 'bus', color: DT.amber, label: 'Trip Report', desc: 'Last 7 days analytics' },
-                { type: 'payments', icon: 'card', color: DT.green2, label: 'Payment Report', desc: 'Revenue & collections' },
-                { type: 'drivers', icon: 'people', color: DT.red, label: 'Driver Report', desc: 'Performance metrics' },
+                { type: 'full', icon: 'document', color: C.accent, label: 'Full Report', desc: 'Complete system overview' },
+                { type: 'trips', icon: 'bus', color: C.warning, label: 'Trip Report', desc: 'Last 7 days analytics' },
+                { type: 'payments', icon: 'card', color: C.success, label: 'Payment Report', desc: 'Revenue & collections' },
+                { type: 'drivers', icon: 'people', color: C.error, label: 'Driver Report', desc: 'Performance metrics' },
               ].map((opt, i) => (
                 <TouchableOpacity key={i} style={s.exportOption} onPress={() => exportToCSV(opt.type)} activeOpacity={0.7}>
                   <Ionicons name={opt.icon as keyof typeof Ionicons.glyphMap} size={24} color={opt.color} />

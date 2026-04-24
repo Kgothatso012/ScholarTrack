@@ -7,26 +7,17 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../ui-plugin/theme';
+import { getTheme } from '../../lib/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-  dim: '#2a4060',
-};
+const { colors: C } = getTheme('dark');
+const CYAN = '#00e5ff';
+const AMBER = '#ffb700';
+const GREEN2 = '#00e676';
 
 const SPRING = { damping: 15, stiffness: 150 };
 
@@ -63,18 +54,18 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
   const [query, setQuery] = useState('');
 
   const tables = [
-    { name: 'users', rows: 245, size: '1.2 MB', icon: 'people' as const, color: DT.cyan },
-    { name: 'drivers', rows: 24, size: '156 KB', icon: 'car' as const, color: DT.green },
-    { name: 'parents', rows: 156, size: '420 KB', icon: 'person' as const, color: DT.amber },
-    { name: 'trips', rows: 1245, size: '2.1 MB', icon: 'navigate' as const, color: DT.cyan },
-    { name: 'payments', rows: 890, size: '890 KB', icon: 'card' as const, color: DT.amber },
-    { name: 'schools', rows: 12, size: '24 KB', icon: 'school' as const, color: DT.green },
+    { name: 'users', rows: 245, size: '1.2 MB', icon: 'people' as const, color: CYAN },
+    { name: 'drivers', rows: 24, size: '156 KB', icon: 'car' as const, color: GREEN2 },
+    { name: 'parents', rows: 156, size: '420 KB', icon: 'person' as const, color: AMBER },
+    { name: 'trips', rows: 1245, size: '2.1 MB', icon: 'navigate' as const, color: CYAN },
+    { name: 'payments', rows: 890, size: '890 KB', icon: 'card' as const, color: AMBER },
+    { name: 'schools', rows: 12, size: '24 KB', icon: 'school' as const, color: GREEN2 },
   ];
 
   const actions = [
-    { label: 'Sync DB', icon: 'sync' as const, color: DT.green },
-    { label: 'Backup', icon: 'cloud-download' as const, color: DT.cyan },
-    { label: 'Migrate', icon: 'git-branch' as const, color: DT.amber },
+    { label: 'Sync DB', icon: 'sync' as const, color: GREEN2 },
+    { label: 'Backup', icon: 'cloud-download' as const, color: CYAN },
+    { label: 'Migrate', icon: 'git-branch' as const, color: AMBER },
   ];
 
   const runQuery = () => {
@@ -83,17 +74,17 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
   };
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: DT.cyan,
+      borderBottomColor: CYAN,
     },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: DT.white },
-    headerSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, marginTop: 2 },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: C.text },
+    headerSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 2 },
     backBtn: { padding: spacing.xs },
     section: { padding: spacing.lg },
     sectionLabel: {
@@ -108,12 +99,12 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,.05)',
     },
     statusDot: {
-      width: 8, height: 8, borderRadius: 4, backgroundColor: DT.green, marginRight: spacing.sm,
+      width: 8, height: 8, borderRadius: 4, backgroundColor: GREEN2, marginRight: spacing.sm,
     },
-    statusText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: DT.green },
+    statusText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: GREEN2 },
     statusField: { flexDirection: 'row', alignItems: 'center' },
-    statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, width: 72 },
-    statusValue: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.text },
+    statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, width: 72 },
+    statusValue: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textSecondary },
     queryCard: { ...glassCard },
     queryTop: { height: 1, backgroundColor: 'rgba(0,229,255,.15)' },
     queryInput: {
@@ -123,9 +114,9 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
     },
     runBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-      paddingVertical: spacing.md, backgroundColor: DT.green,
+      paddingVertical: spacing.md, backgroundColor: GREEN2,
     },
-    runBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.bg },
+    runBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.background },
     tableCard: {
       ...glassCard,
       flexDirection: 'row', alignItems: 'center',
@@ -135,8 +126,8 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
     },
     tableInfo: { flex: 1, marginLeft: spacing.md },
-    tableName: { fontFamily: 'DMMono_400Regular', fontSize: 13, color: DT.white },
-    tableMeta: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 2 },
+    tableName: { fontFamily: 'DMMono_400Regular', fontSize: 13, color: C.text },
+    tableMeta: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 2 },
     viewBtn: { padding: spacing.xs },
     actionRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
     actionBtn: {
@@ -144,7 +135,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       flex: 1, alignItems: 'center',
       paddingVertical: spacing.lg,
     },
-    actionLabel: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: DT.white, marginTop: spacing.xs },
+    actionLabel: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: C.text, marginTop: spacing.xs },
   });
 
   return (
@@ -153,11 +144,11 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       <View style={s.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
-            <Ionicons name="chevron-back" size={22} color={DT.white} />
+            <Ionicons name="chevron-back" size={22} color={C.text} />
           </TouchableOpacity>
           <View>
             <View style={s.headerRow}>
-              <Ionicons name="server" size={20} color={DT.cyan} />
+              <Ionicons name="server" size={20} color={CYAN} />
               <Text style={s.headerTitle}>Database</Text>
             </View>
             <Text style={s.headerSub}>Query and manage Supabase</Text>
@@ -197,13 +188,13 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
           <TextInput
             style={s.queryInput}
             placeholder="SELECT * FROM users LIMIT 10;"
-            placeholderTextColor={DT.muted}
+            placeholderTextColor={C.textMuted}
             value={query}
             onChangeText={setQuery}
             multiline
           />
           <SpringTouchable onPress={runQuery} style={s.runBtn}>
-            <Ionicons name="play" size={16} color={DT.bg} />
+            <Ionicons name="play" size={16} color={C.background} />
             <Text style={s.runBtnText}>Run Query</Text>
           </SpringTouchable>
         </View>
@@ -226,7 +217,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
               <Text style={s.tableMeta}>{table.rows} rows · {table.size}</Text>
             </View>
             <TouchableOpacity style={s.viewBtn}>
-              <Ionicons name="eye-outline" size={18} color={DT.muted} />
+              <Ionicons name="eye-outline" size={18} color={C.textMuted} />
             </TouchableOpacity>
           </SpringTouchable>
         ))}

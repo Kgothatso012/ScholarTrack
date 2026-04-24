@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, getTheme } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void; onForgotPassword?: () => void };
@@ -29,6 +29,44 @@ const DT = {
   red: '#ff3d5a',
   muted: '#4a6a8a',
   white: '#e8f4ff',
+};
+const t = getTheme('dark');
+const C = {
+  // Primary amber accent (unified taste-skill)
+  primary: t.colors.primary,
+  primaryLight: t.colors.primaryLight,
+  primaryDark: t.colors.primaryDark,
+  // Cyan (unified taste-skill)
+  cyan: t.colors.cyan,
+  cyanLight: t.colors.cyanLight,
+  // Success green (unified taste-skill)
+  success: t.colors.success,
+  successLight: t.colors.successLight,
+  // Background / surface tokens
+  surface: t.colors.surface,
+  surfaceElevated: t.colors.surfaceElevated,
+  // Text tokens
+  text: t.colors.text,
+  textMuted: t.colors.textMuted,
+  textSecondary: t.colors.textSecondary,
+  // Border tokens
+  border: t.colors.border,
+  borderLight: t.colors.borderLight,
+  // Shadows
+  shadow: t.colors.shadow,
+  shadowStrong: t.colors.shadowStrong,
+  // Input background
+  inputBg: t.colors.inputBg,
+  // Glass surfaces (from cards preset)
+  glassBg: 'rgba(255, 255, 255, 0.04)',
+  glassCyanBorder: 'rgba(0, 229, 255, 0.10)',
+  glassRefraction: 'rgba(0, 229, 255, 0.18)',
+  glassAmberBorder: 'rgba(255, 183, 0, 0.10)',
+  // Overlay
+  overlay: t.colors.overlay,
+  // Semantic aliases
+  danger: t.colors.error,
+  dangerLight: t.colors.errorLight,
 };
 
 const SPRING = { damping: 15, stiffness: 150 };
@@ -189,72 +227,72 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
       position: 'relative',
       overflow: 'hidden',
     },
-    headerGlow1: { position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(0,229,255,.06)' },
-    headerGlow2: { position: 'absolute', bottom: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.06)' },
+    headerGlow1: { position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: `${C.cyan}10` },
+    headerGlow2: { position: 'absolute', bottom: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: `${C.primary}10` },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xl },
-    headerBrand: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
-    headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.45)', marginTop: 4, letterSpacing: 0.5 },
+    headerBrand: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4, letterSpacing: 0.5 },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.45)' },
-    headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)', alignItems: 'center', justifyContent: 'center' },
+    headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: C.textMuted },
+    headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassCyanBorder, alignItems: 'center', justifyContent: 'center' },
     // GLASS
-    glass: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.1)', borderRadius: 20, overflow: 'hidden' },
-    glassRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.18)' },
+    glass: { backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassCyanBorder, borderRadius: 20, overflow: 'hidden' },
+    glassRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: C.glassRefraction },
     // LOGO
     logoSection: { alignItems: 'center', marginBottom: spacing.xl },
     logoCircle: {
       width: 72, height: 72, borderRadius: 20, backgroundColor: DT.blue,
       justifyContent: 'center', alignItems: 'center',
-      borderWidth: 1, borderColor: 'rgba(0,229,255,.25)',
-      shadowColor: DT.cyan, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24, elevation: 8,
+      borderWidth: 1, borderColor: `${C.cyan}40`,
+      shadowColor: C.cyan, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24, elevation: 8,
     },
-    appTitle: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: DT.white, letterSpacing: -0.5, marginTop: spacing.md },
-    appSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.4)', marginTop: spacing.xs, letterSpacing: 0.5 },
+    appTitle: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: C.text, letterSpacing: -0.5, marginTop: spacing.md },
+    appSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: spacing.xs, letterSpacing: 0.5 },
     // FORM
     formCard: { marginBottom: spacing.lg },
-    welcomeText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
-    subtitleText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, marginTop: spacing.xs, marginBottom: spacing.lg },
-    infoBox: { backgroundColor: 'rgba(0,229,255,.06)', borderRadius: 14, padding: spacing.md, borderLeftWidth: 3, borderLeftColor: DT.cyan, marginTop: spacing.sm },
-    infoTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.cyan, marginBottom: spacing.sm },
-    infoText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.45)', marginBottom: spacing.xs },
+    welcomeText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    subtitleText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg },
+    infoBox: { backgroundColor: `${C.cyan}10`, borderRadius: 14, padding: spacing.md, borderLeftWidth: 3, borderLeftColor: C.cyan, marginTop: spacing.sm },
+    infoTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.cyan, marginBottom: spacing.sm },
+    infoText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginBottom: spacing.xs },
     // INPUT
-    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.12)', borderRadius: 14, paddingHorizontal: 14, marginBottom: 12, height: 50 },
+    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassBg, borderWidth: 1, borderColor: `${C.cyan}1F`, borderRadius: 14, paddingHorizontal: 14, marginBottom: 12, height: 50 },
     inputIcon: { marginRight: 10 },
-    input: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.white },
-    inputPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.muted },
+    input: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 15, color: C.text },
+    inputPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 15, color: C.textMuted },
     // FORGOT ROW
     forgotRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: spacing.md },
     forgotBtn: { paddingVertical: spacing.xs },
-    forgotText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.cyan, fontWeight: '600' },
-    // LOGIN BTN
+    forgotText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.cyan, fontWeight: '600' },
+    // LOGIN BTN — primary amber (taste-skill cyan for login CTA — distinct from amber used in password field)
     loginBtn: {
-      backgroundColor: DT.cyan, borderRadius: 14, height: 52,
+      backgroundColor: C.cyan, borderRadius: 14, height: 52,
       justifyContent: 'center', alignItems: 'center',
-      shadowColor: DT.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
+      shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
     },
-    loginBtnDisabled: { backgroundColor: DT.muted },
+    loginBtnDisabled: { backgroundColor: C.textMuted },
     loginBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.bg },
     // DIVIDER
     divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.lg },
-    dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,.06)' },
-    dividerText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.25)', marginHorizontal: spacing.md, letterSpacing: 1, textTransform: 'uppercase' },
+    dividerLine: { flex: 1, height: 1, backgroundColor: C.glassBg },
+    dividerText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginHorizontal: spacing.md, letterSpacing: 1, textTransform: 'uppercase' },
     // REGISTER
     registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 },
-    registerText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
-    registerLink: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.amber, fontWeight: '700' },
+    registerText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted },
+    registerLink: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.primary, fontWeight: '700' },
     // MODAL
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
-    modalCard: { backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border, borderRadius: 24, padding: spacing.xl, width: '100%', maxWidth: 400, position: 'relative' },
-    modalRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.18)' },
-    modalClose: { position: 'absolute', top: spacing.md, right: spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,.06)', alignItems: 'center', justifyContent: 'center' },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: DT.white, marginTop: spacing.xl, marginBottom: spacing.xs },
-    modalSub: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, marginBottom: spacing.lg },
+    modalOverlay: { flex: 1, backgroundColor: C.overlay, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
+    modalCard: { backgroundColor: C.surfaceElevated, borderWidth: 1, borderColor: C.border, borderRadius: 24, padding: spacing.xl, width: '100%', maxWidth: 400, position: 'relative' },
+    modalRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: C.glassRefraction },
+    modalClose: { position: 'absolute', top: spacing.md, right: spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, alignItems: 'center', justifyContent: 'center' },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: C.text, marginTop: spacing.xl, marginBottom: spacing.xs },
+    modalSub: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, marginBottom: spacing.lg },
     // SUCCESS
     successWrap: { alignItems: 'center', paddingVertical: spacing.xl },
-    successIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: 'rgba(0,230,118,.15)', borderWidth: 1, borderColor: 'rgba(0,230,118,.3)', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md },
-    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.green2, marginBottom: spacing.xs },
-    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', marginBottom: spacing.lg },
-    successEmail: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.white, fontWeight: '600' },
+    successIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: `${C.success}26`, borderWidth: 1, borderColor: `${C.success}4D`, justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md },
+    successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.success, marginBottom: spacing.xs },
+    successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', marginBottom: spacing.lg },
+    successEmail: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.text, fontWeight: '600' },
   });
 
   const now = new Date();
@@ -274,7 +312,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
                 <Text style={s.headerSub}>Safe Student Transport</Text>
               </View>
               <View style={s.headerBadge}>
-                <BreathingDot color={DT.green2} size={7} />
+                <BreathingDot color={C.success} size={7} />
                 <Text style={s.headerBadgeText}>Secure Login</Text>
               </View>
             </View>
@@ -284,7 +322,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
         {/* Logo + Welcome */}
         <Animated.View entering={FadeIn.delay(100).springify()} style={s.logoSection}>
           <View style={s.logoCircle}>
-            <Ionicons name="school" size={36} color={DT.white} />
+            <Ionicons name="school" size={36} color={C.text} />
           </View>
           <Text style={s.appTitle}>Welcome Back</Text>
           <Text style={s.appSubtitle}>Sign in to your account</Text>
@@ -297,8 +335,8 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
             <View style={{ padding: spacing.lg }}>
               {/* Info toggle */}
               <TouchableOpacity onPress={() => setShowInfo(!showInfo)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md }}>
-                <Ionicons name="information-circle" size={16} color={DT.cyan} />
-                <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.cyan }}>{showInfo ? 'Hide info' : 'What is ScholarTrack?'}</Text>
+                <Ionicons name="information-circle" size={16} color={C.cyan} />
+                <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: C.cyan }}>{showInfo ? 'Hide info' : 'What is ScholarTrack?'}</Text>
               </TouchableOpacity>
 
               {showInfo && (
@@ -316,11 +354,11 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
 
               {/* Email Input */}
               <View style={s.inputWrap}>
-                <Ionicons name="mail-outline" size={18} color={DT.cyan} style={s.inputIcon} />
+                <Ionicons name="mail-outline" size={18} color={C.cyan} style={s.inputIcon} />
                 <TextInput
                   style={email ? s.input : s.inputPlaceholder}
                   placeholder="Email address"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -332,11 +370,11 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
 
               {/* Password Input */}
               <View style={s.inputWrap}>
-                <Ionicons name="lock-closed-outline" size={18} color={DT.amber} style={s.inputIcon} />
+                <Ionicons name="lock-closed-outline" size={18} color={C.primary} style={s.inputIcon} />
                 <TextInput
                   style={password ? s.input : s.inputPlaceholder}
                   placeholder="Password"
-                  placeholderTextColor={DT.muted}
+                  placeholderTextColor={C.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -344,7 +382,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
                   returnKeyType="done"
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
-                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={DT.muted} />
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={C.textMuted} />
                 </TouchableOpacity>
               </View>
 
@@ -391,13 +429,13 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
           <Animated.View entering={ZoomIn.springify()} style={s.modalCard}>
             <View style={s.modalRefraction} />
             <TouchableOpacity onPress={() => setShowResetModal(false)} style={s.modalClose}>
-              <Ionicons name="close" size={20} color={DT.white} />
+              <Ionicons name="close" size={20} color={C.text} />
             </TouchableOpacity>
 
             {showResetSuccess ? (
               <View style={s.successWrap}>
                 <View style={s.successIcon}>
-                  <Ionicons name="mail" size={30} color={DT.green2} />
+                  <Ionicons name="mail" size={30} color={C.success} />
                 </View>
                 <Text style={s.successTitle}>Check Your Email</Text>
                 <Text style={s.successText}>
@@ -413,11 +451,11 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
                 <Text style={s.modalTitle}>Reset Password</Text>
                 <Text style={s.modalSub}>Enter your email to receive a reset link</Text>
                 <View style={s.inputWrap}>
-                  <Ionicons name="mail-outline" size={18} color={DT.cyan} style={s.inputIcon} />
+                  <Ionicons name="mail-outline" size={18} color={C.cyan} style={s.inputIcon} />
                   <TextInput
                     style={resetEmail ? s.input : s.inputPlaceholder}
                     placeholder="Enter your email"
-                    placeholderTextColor={DT.muted}
+                    placeholderTextColor={C.textMuted}
                     value={resetEmail}
                     onChangeText={setResetEmail}
                     keyboardType="email-address"

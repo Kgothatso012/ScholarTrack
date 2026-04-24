@@ -35,27 +35,11 @@ import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
 import { spacing } from '../../ui-plugin/theme';
 import { Spacer, Badge } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
 
 const DEFAULT_REGION = { latitude: -25.7479, longitude: 28.2292, latitudeDelta: 0.05, longitudeDelta: 0.05 };
 
@@ -88,6 +72,14 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
+// ─── Theme colors ─────────────────────────────────────────────────────────────
+const { colors: C } = getTheme('dark');
+const CYAN = '#00e5ff';
+const AMBER = '#ffb700';
+const SA_GREEN = '#007749';
+const SA_GREEN2 = '#00e676';
+const SA_BLUE = '#002395';
+
 // ─── Animated Bus Marker ──────────────────────────────────────────────────────
 const BusMarkerAnimated = () => {
   const scale = useSharedValue(1);
@@ -109,7 +101,7 @@ const BusMarkerAnimated = () => {
       <Animated.View style={[busStyles.ring2, ring2Style]} />
       <Animated.View style={[busStyles.ring1, ring1Style]} />
       <Animated.View style={[busStyles.busDot, dotStyle]}>
-        <Ionicons name="bus" size={18} color={DT.bg} />
+        <Ionicons name="bus" size={18} color={C.background} />
       </Animated.View>
     </View>
   );
@@ -121,9 +113,9 @@ const busStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: DT.cyan,
+    backgroundColor: CYAN,
     borderWidth: 3,
-    borderColor: DT.white,
+    borderColor: C.text,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -148,7 +140,7 @@ const busStyles = StyleSheet.create({
 });
 
 // ─── Breathing Dot ───────────────────────────────────────────────────────────
-const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+const BreathingDot = ({ color = SA_GREEN2, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -200,11 +192,11 @@ const MapPlaceholder = ({
       <View style={mapStyles.routeLine} />
       {/* home marker */}
       <View style={mapStyles.homeMarker}>
-        <Ionicons name="home" size={18} color={DT.amber} />
+        <Ionicons name="home" size={18} color={AMBER} />
       </View>
       {/* pickup zone */}
       <View style={mapStyles.pickupZone}>
-        <Ionicons name="school" size={18} color={DT.amber} />
+        <Ionicons name="school" size={18} color={AMBER} />
       </View>
       {/* pulsing bus */}
       <Animated.View style={[mapStyles.busMarkerWrap, busPosStyle]}>
@@ -217,13 +209,13 @@ const MapPlaceholder = ({
 const mapStyles = StyleSheet.create({
   mapContainer: {
     height: 220,
-    backgroundColor: DT.panel,
+    backgroundColor: C.surface,
     position: 'relative',
   },
   gridOverlay: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: DT.panel,
+    backgroundColor: C.surface,
   },
   routeLine: {
     position: 'absolute',
@@ -231,7 +223,7 @@ const mapStyles = StyleSheet.create({
     left: '15%',
     right: '20%',
     height: 2,
-    backgroundColor: DT.green2,
+    backgroundColor: SA_GREEN2,
     opacity: 0.7,
   },
   homeMarker: {
@@ -445,7 +437,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
   // ─── Styles ────────────────────────────────────────────────────────────────
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     statusBar: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -453,17 +445,17 @@ export default function LiveTrackScreen({ navigation }: Props) {
       paddingHorizontal: 20,
       paddingTop: insets.top + 8,
       paddingBottom: 4,
-      backgroundColor: DT.bg,
+      backgroundColor: C.background,
     },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.white, letterSpacing: 0.5 },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
     ltHeader: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: 0,
       borderBottomWidth: 4,
-      borderBottomColor: DT.cyan,
+      borderBottomColor: CYAN,
       position: 'relative',
       overflow: 'hidden',
     },
@@ -483,7 +475,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       position: 'relative',
       zIndex: 1,
     },
-    ltTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 26, color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 26, color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 1.5, textTransform: 'uppercase' as const },
     ltBack: {
       width: 32,
@@ -508,13 +500,13 @@ export default function LiveTrackScreen({ navigation }: Props) {
       borderWidth: 1,
     },
     childChipText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 0.8 },
-    childChipActive: { backgroundColor: DT.blue, borderColor: DT.cyan, color: DT.cyan },
-    childChipInactive: { backgroundColor: 'rgba(255,255,255,.03)', borderColor: DT.border, color: DT.muted },
-    mapWrap: { marginHorizontal: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: DT.border },
+    childChipActive: { backgroundColor: SA_BLUE, borderColor: CYAN, color: CYAN },
+    childChipInactive: { backgroundColor: 'rgba(255,255,255,.03)', borderColor: C.border, color: C.textMuted },
+    mapWrap: { marginHorizontal: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
     mapFooter: {
-      backgroundColor: DT.panel,
+      backgroundColor: C.surface,
       borderTopWidth: 1,
-      borderTopColor: DT.border,
+      borderTopColor: C.border,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -524,16 +516,16 @@ export default function LiveTrackScreen({ navigation }: Props) {
     mapLegend: { flexDirection: 'row', gap: 12 },
     legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     legendDot: { width: 8, height: 8, borderRadius: 4 },
-    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted },
-    mapExpand: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.cyan, flexDirection: 'row' as const, alignItems: 'center', gap: 4 },
+    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted },
+    mapExpand: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: CYAN, flexDirection: 'row' as const, alignItems: 'center', gap: 4 },
     driverCard: {
       marginHorizontal: 16,
       marginTop: 10,
-      backgroundColor: DT.panel,
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
       borderTopWidth: 3,
-      borderTopColor: DT.cyan,
+      borderTopColor: CYAN,
       borderRadius: 18,
       padding: 16,
       overflow: 'hidden',
@@ -547,11 +539,11 @@ export default function LiveTrackScreen({ navigation }: Props) {
       backgroundColor: 'rgba(0,229,255,.15)',
     },
     dcTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    dcName: { fontFamily: 'Syne_800ExtraBold', fontSize: 17, color: DT.white },
+    dcName: { fontFamily: 'Syne_800ExtraBold', fontSize: 17, color: C.text },
     dcMeta: { flexDirection: 'column', gap: 6 },
     dcRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     dcIcon: { fontSize: 14 },
-    dcRowText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+    dcRowText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted },
     dcStars: { flexDirection: 'row', gap: 2 },
     coordRow: {
       flexDirection: 'row',
@@ -561,17 +553,17 @@ export default function LiveTrackScreen({ navigation }: Props) {
       marginTop: 6,
     },
     coordIcon: { fontSize: 14 },
-    coordText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.cyan },
+    coordText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: CYAN },
     quickRow: {
       flexDirection: 'row',
       justifyContent: 'space-around',
       marginHorizontal: 16,
       marginTop: 8,
-      backgroundColor: DT.panel,
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
       borderTopWidth: 2,
-      borderTopColor: DT.cyan,
+      borderTopColor: CYAN,
       borderRadius: 18,
       paddingVertical: 14,
       paddingHorizontal: 8,
@@ -586,21 +578,21 @@ export default function LiveTrackScreen({ navigation }: Props) {
       justifyContent: 'center',
       borderWidth: 1,
     },
-    qaLbl: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' as const, color: DT.muted },
+    qaLbl: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' as const, color: C.textMuted },
     rateBtn: {
       marginHorizontal: 16,
       marginTop: 8,
       marginBottom: 20,
       paddingVertical: 13,
       borderWidth: 1.5,
-      borderColor: DT.border,
+      borderColor: C.border,
       borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row' as const,
       gap: 6,
     },
-    rateBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' as const, color: DT.muted },
+    rateBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' as const, color: C.textMuted },
     modalOverlay: {
       position: 'absolute' as const,
       inset: 0,
@@ -611,26 +603,26 @@ export default function LiveTrackScreen({ navigation }: Props) {
       padding: 24,
     },
     modalCard: {
-      backgroundColor: DT.panel,
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: DT.border,
+      borderColor: C.border,
       borderRadius: 24,
       padding: 28,
       width: '100%',
       alignItems: 'center',
     },
-    modalTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 19, color: DT.white, marginBottom: 4 },
-    modalSub: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, marginBottom: 20 },
+    modalTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 19, color: C.text, marginBottom: 4 },
+    modalSub: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textMuted, marginBottom: 20 },
     modalStars: { flexDirection: 'row', gap: 8, marginBottom: 24 },
     modalStarBtn: { padding: 4 },
     modalBtns: { flexDirection: 'row', gap: 8, width: '100%' },
-    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: DT.border, alignItems: 'center' },
-    modalBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: DT.muted },
-    modalBtnPrimary: { backgroundColor: DT.cyan, borderColor: DT.cyan },
-    modalBtnPrimaryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.bg },
+    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: C.border, alignItems: 'center' },
+    modalBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: C.textMuted },
+    modalBtnPrimary: { backgroundColor: CYAN, borderColor: CYAN },
+    modalBtnPrimaryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.background },
     emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
-    emptyTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 18, color: DT.white, marginTop: 16, textAlign: 'center' },
-    emptyText: { fontFamily: 'Syne_400Regular', fontSize: 14, color: DT.text, marginTop: 8, textAlign: 'center' },
+    emptyTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 18, color: C.text, marginTop: 16, textAlign: 'center' },
+    emptyText: { fontFamily: 'Syne_400Regular', fontSize: 14, color: C.textSecondary, marginTop: 8, textAlign: 'center' },
     statusBadge: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
@@ -642,7 +634,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       backgroundColor: 'rgba(0,230,118,.08)',
       borderColor: 'rgba(0,230,118,.25)',
     },
-    statusBadgeText: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: DT.green2 },
+    statusBadgeText: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: SA_GREEN2 },
   });
 
   // ─── Loading ─────────────────────────────────────────────────────────────
@@ -651,7 +643,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       <View style={s.container}>
         <View style={s.statusBar}>
           <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
         </View>
         <View style={[s.ltHeader, { paddingTop: 12 }]}>
           <View style={s.ltHeaderBg} />
@@ -663,8 +655,8 @@ export default function LiveTrackScreen({ navigation }: Props) {
           </View>
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Ionicons name="bus" size={40} color={DT.cyan} />
-          <Text style={{ fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, letterSpacing: 2, textTransform: 'uppercase', marginTop: 12 }}>Loading location…</Text>
+          <Ionicons name="bus" size={40} color={CYAN} />
+          <Text style={{ fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginTop: 12 }}>Loading location…</Text>
         </View>
       </View>
     );
@@ -676,7 +668,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       <View style={s.container}>
         <View style={s.statusBar}>
           <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
         </View>
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
@@ -686,24 +678,24 @@ export default function LiveTrackScreen({ navigation }: Props) {
               <Text style={s.ltSub}>Real-time bus location</Text>
             </View>
             <TouchableOpacity onPress={() => navigation.goBack()} style={s.ltBack}>
-              <Ionicons name="chevron-back" size={18} color={DT.white} />
+              <Ionicons name="chevron-back" size={18} color={C.text} />
             </TouchableOpacity>
           </View>
         </View>
         <View style={s.emptyWrap}>
-          <Ionicons name="location" size={48} color={DT.dim} />
+          <Ionicons name="location" size={48} color={C.textMuted} />
           <Text style={s.emptyTitle}>No Active Driver</Text>
           <Text style={s.emptyText}>Link a child to a driver to start{'\n'}tracking their bus in real-time.</Text>
           <Spacer size="lg" />
           <TouchableOpacity
             onPress={() => navigation.navigate('LinkChild')}
-            style={{ backgroundColor: DT.cyan, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+            style={{ backgroundColor: CYAN, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
           >
-            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.bg, letterSpacing: 1, textTransform: 'uppercase' }}>Link a Child</Text>
+            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.background, letterSpacing: 1, textTransform: 'uppercase' }}>Link a Child</Text>
           </TouchableOpacity>
           <Spacer size="md" />
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingVertical: 8 }}>
-            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted }}>Go Back</Text>
+            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted }}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -715,13 +707,13 @@ export default function LiveTrackScreen({ navigation }: Props) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={CYAN} colors={[CYAN]} />
         }
       >
         {/* STATUS BAR */}
         <View style={s.statusBar}>
           <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
         </View>
 
         {/* HEADER */}
@@ -733,7 +725,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
               <Text style={s.ltSub}>Updated {getLastUpdated()} · {getStatus()}</Text>
             </View>
             <TouchableOpacity onPress={() => navigation.goBack()} style={s.ltBack}>
-              <Ionicons name="chevron-back" size={18} color={DT.white} />
+              <Ionicons name="chevron-back" size={18} color={C.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -741,7 +733,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         {/* STATUS BADGE */}
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 0 }}>
           <View style={[s.statusBadge]}>
-            <Ionicons name="radio" size={8} color={DT.green2} />
+            <Ionicons name="radio" size={8} color={SA_GREEN2} />
             <Text style={s.statusBadgeText}>{getStatus()}</Text>
           </View>
         </View>
@@ -755,7 +747,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
                 onPress={() => handleSelectChild(c)}
                 style={[s.childChip, c.id === child.id ? s.childChipActive : s.childChipInactive]}
               >
-                <Text style={[s.childChipText, c.id === child.id ? { color: DT.cyan } : {}]}>{c.full_name}</Text>
+                <Text style={[s.childChipText, c.id === child.id ? { color: CYAN } : {}]}>{c.full_name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -799,8 +791,8 @@ export default function LiveTrackScreen({ navigation }: Props) {
                     title="Pickup Zone"
                     description={child.school?.name ?? 'School'}
                   >
-                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: DT.green2, alignItems: 'center', justifyContent: 'center' }}>
-                      <Ionicons name="school" size={16} color={DT.cyan} />
+                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: SA_GREEN2, alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="school" size={16} color={CYAN} />
                     </View>
                   </Marker>
                 </>
@@ -812,16 +804,16 @@ export default function LiveTrackScreen({ navigation }: Props) {
           <View style={s.mapFooter}>
             <View style={s.mapLegend}>
               <View style={s.legendItem}>
-                <View style={[s.legendDot, { backgroundColor: DT.cyan }]} />
+                <View style={[s.legendDot, { backgroundColor: CYAN }]} />
                 <Text style={s.legendText}>Bus</Text>
               </View>
               <View style={s.legendItem}>
-                <View style={[s.legendDot, { backgroundColor: DT.green2 }]} />
+                <View style={[s.legendDot, { backgroundColor: SA_GREEN2 }]} />
                 <Text style={s.legendText}>Pickup Zone</Text>
               </View>
             </View>
             <TouchableOpacity>
-              <Text style={s.mapExpand}><Ionicons name="expand" size={14} color={DT.cyan} /> Fullscreen</Text>
+              <Text style={s.mapExpand}><Ionicons name="expand" size={14} color={CYAN} /> Fullscreen</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -835,23 +827,23 @@ export default function LiveTrackScreen({ navigation }: Props) {
           </View>
           <View style={s.dcMeta}>
             <View style={s.dcRow}>
-              <Ionicons name="star" size={12} color={DT.amber} />
+              <Ionicons name="star" size={12} color={AMBER} />
               <View style={s.dcStars}>
                 {[1,2,3,4,5].map(i => (
                   <Ionicons
                     key={i}
                     name={i <= Math.round(driverRating) ? 'star' : 'star-outline'}
                     size={13}
-                    color={i <= Math.round(driverRating) ? DT.amber : DT.dim}
+                    color={i <= Math.round(driverRating) ? AMBER : C.textMuted}
                   />
                 ))}
               </View>
-              <Text style={[s.dcRowText, { color: DT.amber }]}>
+              <Text style={[s.dcRowText, { color: AMBER }]}>
                 {driverRating > 0 ? `${driverRating.toFixed(1)} (${driverReviewsCount} reviews)` : 'No reviews yet'}
               </Text>
             </View>
             <View style={s.dcRow}>
-              <Ionicons name="school" size={12} color={DT.cyan} />
+              <Ionicons name="school" size={12} color={CYAN} />
               <Text style={s.dcRowText}>{child.school?.name || 'School not set'}</Text>
             </View>
           </View>
@@ -860,7 +852,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         {/* COORDINATES */}
         {driverLocation && (
           <View style={s.coordRow}>
-            <Ionicons name="navigate-outline" size={14} color={DT.dim} />
+            <Ionicons name="navigate-outline" size={14} color={C.textMuted} />
             <Text style={s.coordText}>{driverLocation.latitude.toFixed(5)}, {driverLocation.longitude.toFixed(5)}</Text>
           </View>
         )}
@@ -870,7 +862,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
           <View style={{ position: 'absolute' as const, top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.15)' }} />
           <TouchableOpacity onPress={handleCallDriver} style={s.qaItem}>
             <View style={[s.qaCircle, { backgroundColor: 'rgba(0,119,73,.15)', borderColor: 'rgba(0,119,73,.35)' }]}>
-              <Ionicons name="call-outline" size={20} color={DT.green2} />
+              <Ionicons name="call-outline" size={20} color={SA_GREEN2} />
             </View>
             <Text style={s.qaLbl}>Call</Text>
           </TouchableOpacity>
@@ -888,7 +880,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Emergency')} style={s.qaItem}>
             <View style={[s.qaCircle, { backgroundColor: 'rgba(255,61,90,.15)', borderColor: 'rgba(255,61,90,.35)' }]}>
-              <Ionicons name="warning" size={18} color={DT.amber} />
+              <Ionicons name="warning" size={18} color={AMBER} />
             </View>
             <Text style={s.qaLbl}>Alert</Text>
           </TouchableOpacity>
@@ -896,7 +888,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
         {/* RATE DRIVER BUTTON */}
         <TouchableOpacity onPress={() => setShowRatingModal(true)} style={s.rateBtn}>
-          <Ionicons name="star-outline" size={14} color={DT.muted} />
+          <Ionicons name="star-outline" size={14} color={C.textMuted} />
           <Text style={s.rateBtnText}>Rate Driver</Text>
         </TouchableOpacity>
 
@@ -914,7 +906,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
             <View style={s.modalStars}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity key={star} onPress={() => setRating(star)} style={s.modalStarBtn}>
-                  <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={36} color={DT.amber} style={{ opacity: star <= rating ? 1 : 0.35 }} />
+                  <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={36} color={AMBER} style={{ opacity: star <= rating ? 1 : 0.35 }} />
                 </TouchableOpacity>
               ))}
             </View>
