@@ -3,11 +3,14 @@ import { View, ActivityIndicator, StyleSheet, Text, Linking, Alert } from 'react
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
+import { Syne_400Regular, Syne_600SemiBold, Syne_700Bold, Syne_800ExtraBold } from '@expo-google-fonts/syne';
+import { DMMono_400Regular } from '@expo-google-fonts/dm-mono';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { DeepLinkContext, DeepLinkProvider } from './src/context/DeepLinkContext';
 import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
-import { ErrorBoundary, LoadingScreen } from './src/components/ErrorBoundary';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 import SplashScreen from './src/components/SplashScreen';
 
@@ -199,6 +202,18 @@ function AppContentWithTheme() {
 }
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    Syne_400Regular,
+    Syne_600SemiBold,
+    Syne_700Bold,
+    Syne_800ExtraBold,
+    DMMono_400Regular,
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return <SplashScreen />;
+  }
+
   return (
     <ThemeProvider>
       <ThemedApp />

@@ -1,42 +1,56 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
+// Panic Screen — Design System: Dark SA Transport
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { panicAlertService } from '../../lib/services/emergency';
 import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
+import { Spacer, Badge } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge, SkeletonCard } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 export const PanicButton = ({
   style,
   size = 60,
   onActivate,
 }: {
-  style?: StyleProp<ViewStyle>;
+  style?: any;
   size?: number;
   onActivate?: () => void;
 }) => {
-  const { colors } = useTheme();
   const [pressed, setPressed] = useState(false);
-
   return (
     <TouchableOpacity
       style={[
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: colors.error,
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
+        { width: size, height: size, borderRadius: size / 2, backgroundColor: DT.red, justifyContent: 'center', alignItems: 'center' },
         pressed && { transform: [{ scale: 0.95 }] },
         style,
       ]}
@@ -44,21 +58,19 @@ export const PanicButton = ({
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <Ionicons name="warning" size={size * 0.5} color={colors.textInverse} />
+      <Ionicons name="warning" size={size * 0.5} color={DT.white} />
     </TouchableOpacity>
   );
 };
 
 export default function PanicScreen() {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [sosActive, setSosActive] = useState(false);
   const [sending, setSending] = useState(false);
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadContacts();
-  }, []);
+  useEffect(() => { loadContacts(); }, []);
 
   const loadContacts = async () => {
     try {
@@ -67,38 +79,19 @@ export default function PanicScreen() {
       if (!user) return;
       const data = await emergencyContactService.getContacts(user.id);
       setContacts(data);
-    } catch (error) {
-      console.error('Error loading contacts:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error loading contacts:', error); }
+    finally { setLoading(false); }
   };
 
   const sendSOS = async () => {
-    if (contacts.length === 0) {
-      Alert.alert('No Contacts', 'Please add emergency contacts first');
-      return;
-    }
-
+    if (contacts.length === 0) { Alert.alert('No Contacts', 'Please add emergency contacts first'); return; }
     try {
       setSending(true);
-
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        Alert.alert('Error', 'Please login first');
-        return;
-      }
-
-      // Get location
+      if (!user) { Alert.alert('Error', 'Please login first'); return; }
       const result = await locationService.getCurrentLocation();
-      const locationStr = result.location
-        ? `${result.location.coords.latitude},${result.location.coords.longitude}`
-        : undefined;
-
-      // Create panic alert
+      const locationStr = result.location ? `${result.location.coords.latitude},${result.location.coords.longitude}` : undefined;
       const panicAlert = await panicAlertService.createPanicAlert(user.id, locationStr);
-
-      // Notify all emergency contacts
       for (const contact of contacts) {
         await sendAppNotification('EMERGENCY', user.id, {
           message: `Emergency SOS from ${user.email}`,
@@ -107,171 +100,139 @@ export default function PanicScreen() {
           panicAlertId: panicAlert?.id,
         });
       }
-
       setSosActive(true);
     } catch (error: unknown) {
       console.error('SOS Error:', error);
       Alert.alert('SOS Failed', error instanceof Error ? error.message || 'Failed to send emergency alert' : 'Failed to send emergency alert');
-    } finally {
-      setSending(false);
-    }
+    } finally { setSending(false); }
   };
 
   const triggerSOS = () => {
-    if (contacts.length === 0) {
-      Alert.alert('No Contacts', 'Please add emergency contacts first');
-      return;
-    }
-    Alert.alert(
-      'Trigger SOS',
-      `Send emergency alert to ${contacts.length} contact(s)?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'SEND', style: 'destructive', onPress: sendSOS },
-      ]
-    );
+    if (contacts.length === 0) { Alert.alert('No Contacts', 'Please add emergency contacts first'); return; }
+    Alert.alert('Trigger SOS', `Send emergency alert to ${contacts.length} contact(s)?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'SEND', style: 'destructive', onPress: sendSOS },
+    ]);
   };
 
-  const cancelSOS = () => {
-    setSosActive(false);
-  };
+  const cancelSOS = () => { setSosActive(false); };
 
   const callContact = (phone: string) => {
-    Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => {
-      Alert.alert('Error', 'Unable to make phone call');
-    });
+    Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => Alert.alert('Error', 'Unable to make phone call'));
   };
 
-  const styles = (colors: ThemeColors) =>
-    StyleSheet.create({
-      container: { flex: 1, backgroundColor: colors.background },
-      header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md, borderBottomWidth: 4, borderBottomColor: colors.accent },
-      headerTitle: { ...typography.displayMedium, color: colors.textInverse },
-      headerSub: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
-      sosCard: {
-        backgroundColor: colors.error,
-        margin: spacing.lg,
-        padding: spacing.xl,
-        borderRadius: borderRadius.card,
-        alignItems: 'center',
-        borderTopWidth: 4,
-        borderTopColor: 'rgba(255,255,255,0.3)',
-        shadowColor: colors.error,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 16,
-        elevation: 2,
-      },
-      sosText: { ...typography.displayMedium, color: colors.textInverse, marginBottom: spacing.sm },
-      sosSub: { ...typography.body, color: colors.textInverse, opacity: 0.8 },
-      sosLoading: { marginTop: spacing.md },
-      section: { padding: spacing.lg },
-      sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-      contactCard: {
-        backgroundColor: colors.card,
-        borderRadius: borderRadius.lg,
-        padding: spacing.md,
-        marginBottom: spacing.sm,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderLeftWidth: 3,
-        borderLeftColor: colors.accent,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 16,
-        elevation: 2,
-      },
-      contactIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.primaryMuted,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      contactInfo: { flex: 1, marginLeft: spacing.md },
-      contactName: { ...typography.label, color: colors.text },
-      contactPhone: { ...typography.bodySmall, color: colors.textSecondary },
-      emptyText: {
-        ...typography.body,
-        color: colors.textSecondary,
-        textAlign: 'center',
-        padding: spacing.xl,
-      },
-    });
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.red, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,61,90,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
+    sosCard: { marginHorizontal: 16, marginTop: 20, ...glass, padding: 32, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)', borderWidth: 1, shadowColor: DT.red, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24 },
+    sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
+    sosButton: { width: 100, height: 100, borderRadius: 50, backgroundColor: DT.red, justifyContent: 'center', alignItems: 'center', marginBottom: 16, shadowColor: DT.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 12 },
+    sosText: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: DT.white, marginBottom: 6 },
+    sosSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
+    sosLoading: { marginTop: 12 },
+    activeCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 20, borderColor: 'rgba(255,61,90,.3)', borderWidth: 1 },
+    activeTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
+    activeTitle: { fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.white, textAlign: 'center', marginBottom: 14 },
+    cancelBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.border },
+    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.muted },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    contactCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
+    contactIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,229,255,.3)' },
+    contactInfo: { flex: 1, marginLeft: 12 },
+    contactName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
+    contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    callBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 30 },
+    skeletonCard: { ...glass, height: 76, marginBottom: 10, borderRadius: 20 },
+    bottomPadding: { height: 50 },
+  });
 
   return (
-    <ScrollView style={styles(colors).container}>
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Emergency SOS</Text>
-        <Text style={styles(colors).headerSub}>Quick emergency response</Text>
+    <View style={s.container}>
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      {/* SOS Button */}
-      <Card variant="elevated" padding="large">
-        <TouchableOpacity
-          style={styles(colors).sosCard}
-          onPress={triggerSOS}
-          disabled={sending}
-        >
-          <Text style={styles(colors).sosText}>SEND SOS</Text>
-          <Text style={styles(colors).sosSub}>Tap to alert all contacts</Text>
-          {sending && (
-            <View style={styles(colors).sosLoading}>
-              <ActivityIndicator color={colors.textInverse} />
-            </View>
-          )}
-        </TouchableOpacity>
-      </Card>
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Emergency SOS</Text><Text style={s.ltSub}>Quick emergency response</Text></View>
+        </View>
+      </View>
 
-      {/* Active SOS State */}
-      {sosActive && (
-        <Card variant="elevated" padding="large">
-          <Badge label="SOS ACTIVE" variant="error" size="small" />
-          <Spacer size="md" />
-          <Text style={{ color: colors.text, textAlign: 'center', marginBottom: spacing.md }}>
-            Emergency contacts have been notified
-          </Text>
-          <Button title="Cancel Alert" onPress={cancelSOS} variant="outline" fullWidth />
-        </Card>
-      )}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* SOS Button */}
+        <View style={s.sosCard}>
+          <View style={s.sosTopRefraction} />
+          <TouchableOpacity style={s.sosButton} onPress={triggerSOS} disabled={sending} activeOpacity={0.8}>
+            <Ionicons name="warning" size={44} color={DT.white} />
+          </TouchableOpacity>
+          <Text style={s.sosText}>{sending ? 'SENDING...' : 'TAP TO SEND SOS'}</Text>
+          <Text style={s.sosSub}>{contacts.length} contacts will be notified</Text>
+          {sending && <View style={s.sosLoading}><ActivityIndicator color={DT.red} /></View>}
+        </View>
 
-      {/* Emergency Contacts */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Emergency Contacts ({contacts.length})</Text>
-        {loading ? (
-          <>
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </>
-        ) : contacts.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No emergency contacts added</Text>
-          </Card>
-        ) : (
-          contacts.map((contact) => (
-            <Card key={contact.id} variant="elevated" padding="medium">
-              <View style={styles(colors).contactCard}>
-                <View style={styles(colors).contactIcon}>
-                  <Ionicons name="person" size={20} color={colors.accent} />
+        {/* Active SOS State */}
+        {sosActive && (
+          <View style={s.activeCard}>
+            <View style={s.activeTopRefraction} />
+            <Badge label="SOS ACTIVE" variant="error" size="medium" />
+            <Spacer size="md" />
+            <Text style={s.activeTitle}>Emergency contacts have been notified</Text>
+            <TouchableOpacity style={s.cancelBtn} onPress={cancelSOS}>
+              <Text style={s.cancelBtnText}>Cancel Alert</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Emergency Contacts */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Emergency Contacts ({contacts.length})</Text>
+          {loading ? (
+            <>
+              <View style={s.skeletonCard} />
+              <View style={s.skeletonCard} />
+              <View style={s.skeletonCard} />
+            </>
+          ) : contacts.length === 0 ? (
+            <Text style={s.emptyText}>No emergency contacts added</Text>
+          ) : (
+            contacts.map((contact) => (
+              <View key={contact.id} style={s.contactCard}>
+                <View style={s.cardTopRefraction} />
+                <View style={[s.contactIcon, { backgroundColor: 'rgba(0,229,255,.08)' }]}>
+                  <Ionicons name="person" size={18} color={DT.cyan} />
                 </View>
-                <View style={styles(colors).contactInfo}>
-                  <Text style={styles(colors).contactName}>{contact.name}</Text>
-                  <Text style={styles(colors).contactPhone}>{contact.phone}</Text>
+                <View style={s.contactInfo}>
+                  <Text style={s.contactName}>{contact.name}</Text>
+                  <Text style={s.contactPhone}>{contact.phone}</Text>
+                  {contact.is_primary && <Badge label="Primary" variant="warning" size="small" />}
                 </View>
-                <TouchableOpacity onPress={() => callContact(contact.phone)}>
-                  <Ionicons name="call" size={20} color={colors.success} />
+                <TouchableOpacity style={[s.callBtn, { backgroundColor: 'rgba(0,119,73,.15)' }]} onPress={() => callContact(contact.phone)}>
+                  <Ionicons name="call" size={18} color={DT.green2} />
                 </TouchableOpacity>
               </View>
-            </Card>
-          ))
-        )}
-      </View>
+            ))
+          )}
+        </View>
 
-      <Spacer size="xl" />
-    </ScrollView>
+        <Spacer size="xl" />
+        <View style={s.bottomPadding} />
+      </ScrollView>
+    </View>
   );
 }

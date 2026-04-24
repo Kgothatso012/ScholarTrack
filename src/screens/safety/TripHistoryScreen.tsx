@@ -1,13 +1,36 @@
+// Trip History Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface Trip {
   id: string;
@@ -18,7 +41,7 @@ interface Trip {
 }
 
 export default function TripHistoryScreen() {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
@@ -30,16 +53,9 @@ export default function TripHistoryScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: children } = await supabase
-        .from('children')
-        .select('id')
-        .eq('parent_id', user.id);
-
+      const { data: children } = await supabase.from('children').select('id').eq('parent_id', user.id);
       const childIds = children?.map((c: { id: string }) => c.id) || [];
-      if (childIds.length === 0) {
-        setTrips([]);
-        return;
-      }
+      if (childIds.length === 0) { setTrips([]); return; }
 
       const { data: tripsData } = await supabase
         .from('trips')
@@ -49,30 +65,21 @@ export default function TripHistoryScreen() {
         .limit(50);
 
       setTrips(tripsData || []);
-    } catch (error) {
-      console.error('Error loading trips:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    } catch (error) { console.error('Error loading trips:', error); }
+    finally { setLoading(false); setRefreshing(false); }
   };
 
-  useEffect(() => {
-    loadTrips();
-  }, []);
+  useEffect(() => { loadTrips(); }, []);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadTrips();
-  }, []);
+  const onRefresh = useCallback(async () => { setRefreshing(true); await loadTrips(); }, []);
 
-  const getStatusVariant = (status: string): 'success' | 'error' | 'warning' | 'neutral' | 'info' => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'cancelled': return 'error';
-      case 'delayed': return 'warning';
-      case 'in_progress': return 'info';
-      default: return 'neutral';
+      case 'completed': return DT.green2;
+      case 'cancelled': return DT.red;
+      case 'delayed': return DT.amber;
+      case 'in_progress': return DT.cyan;
+      default: return DT.muted;
     }
   };
 
@@ -98,100 +105,128 @@ export default function TripHistoryScreen() {
 
   const filteredTrips = filter === 'all' ? trips : trips.filter((t: Trip) => t.status === filter);
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
-    loadingText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
-    filters: { flexDirection: 'row', backgroundColor: colors.card, marginHorizontal: spacing.lg, marginTop: -spacing.md, padding: spacing.sm, borderRadius: borderRadius.lg, elevation: 3 },
-    filterBtn: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: borderRadius.md, marginHorizontal: spacing.xs },
-    filterActive: { backgroundColor: colors.primary },
-    filterText: { ...typography.labelSmall, color: colors.textSecondary },
-    filterTextActive: { color: colors.textInverse },
-    section: { padding: spacing.lg },
-    tripCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, elevation: 2 },
-    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
-    tripDate: { ...typography.caption, color: colors.textSecondary },
-    tripRoute: { ...typography.label, color: colors.text, marginBottom: spacing.xs },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
+    filters: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, ...glass, padding: 6 },
+    filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 12, marginHorizontal: 3 },
+    filterActive: { backgroundColor: DT.cyan },
+    filterText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.muted },
+    filterTextActive: { color: DT.bg },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    tripCard: { ...glass, padding: 14, marginBottom: 10 },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
+    tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    tripDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
+    tripRoute: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white, marginBottom: 8 },
     tripDetails: { flexDirection: 'row', justifyContent: 'space-between' },
-    tripDetail: { flexDirection: 'row', alignItems: 'center' },
-    tripDetailText: { ...typography.caption, color: colors.textSecondary, marginLeft: spacing.xs },
-    emptyState: { alignItems: 'center', padding: spacing.xxl },
-    emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.sm },
+    tripDetail: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    tripDetailText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
+    emptyState: { ...glass, padding: 40, alignItems: 'center' },
+    emptyIcon: { marginBottom: 12 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, marginTop: 12 },
+    bottomPadding: { height: 50 },
   });
 
   const FilterButton = ({ label, value }: { label: string; value: typeof filter }) => (
     <TouchableOpacity
-      style={[styles(colors).filterBtn, filter === value && styles(colors).filterActive]}
+      style={[s.filterBtn, filter === value && s.filterActive]}
       onPress={() => setFilter(value)}
     >
-      <Text style={[styles(colors).filterText, filter === value && styles(colors).filterTextActive]}>{label}</Text>
+      <Text style={[s.filterText, filter === value && s.filterTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loadingContainer]}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).loadingText}>Loading trips...</Text>
-        </Card>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Trip History</Text><Text style={s.ltSub}>All trips</Text></View></View>
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+          <Text style={s.loadingText}>Loading trips...</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles(colors).container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
-    >
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Trip History</Text>
+    <View style={s.container}>
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      {/* Filters */}
-      <View style={styles(colors).filters}>
-        <FilterButton label="All" value="all" />
-        <FilterButton label="Completed" value="completed" />
-        <FilterButton label="Cancelled" value="cancelled" />
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Trip History</Text><Text style={s.ltSub}>All trips</Text></View>
+        </View>
       </View>
 
-      {/* Trips List */}
-      <View style={styles(colors).section}>
-        {filteredTrips.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <View style={styles(colors).emptyState}>
-              <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
-              <Text style={styles(colors).emptyText}>No trips found</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+      >
+        {/* Filters */}
+        <View style={s.filters}>
+          <FilterButton label="All" value="all" />
+          <FilterButton label="Completed" value="completed" />
+          <FilterButton label="Cancelled" value="cancelled" />
+        </View>
+
+        {/* Trips List */}
+        <View style={s.section}>
+          {filteredTrips.length === 0 ? (
+            <View style={s.emptyState}>
+              <View style={s.emptyIcon}><Ionicons name="bus-outline" size={44} color={DT.muted} /></View>
+              <Text style={s.emptyText}>No trips found</Text>
             </View>
-          </Card>
-        ) : (
-          filteredTrips.map((trip) => (
-            <Card key={trip.id} variant="elevated" padding="medium">
-              <View style={styles(colors).tripCard}>
-                <View style={styles(colors).tripHeader}>
-                  <Text style={styles(colors).tripDate}>{formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}</Text>
-                  <Badge label={getStatusLabel(trip.status)} variant={getStatusVariant(trip.status)} size="small" />
-                </View>
-                <Text style={styles(colors).tripRoute}>{trip.route_name || 'Route Trip'}</Text>
-                <View style={styles(colors).tripDetails}>
-                  <View style={styles(colors).tripDetail}>
-                    <Ionicons name="person" size={14} color={colors.textSecondary} />
-                    <Text style={styles(colors).tripDetailText}>Child ID: {trip.child_id?.substring(0, 8)}</Text>
+          ) : (
+            filteredTrips.map((trip) => (
+              <View key={trip.id} style={s.tripCard}>
+                <View style={s.cardTopRefraction} />
+                <View style={s.tripHeader}>
+                  <Text style={s.tripDate}>{formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}</Text>
+                  <View style={[s.statusBadge, { backgroundColor: getStatusColor(trip.status) }]}>
+                    <Text style={s.statusText}>{getStatusLabel(trip.status)}</Text>
                   </View>
-                  <View style={styles(colors).tripDetail}>
-                    <Ionicons name="location" size={14} color={colors.textSecondary} />
-                    <Text style={styles(colors).tripDetailText}>{trip.status}</Text>
+                </View>
+                <Text style={s.tripRoute}>{trip.route_name || 'Route Trip'}</Text>
+                <View style={s.tripDetails}>
+                  <View style={s.tripDetail}>
+                    <Ionicons name="person" size={13} color={DT.dim} />
+                    <Text style={s.tripDetailText}>Child: {trip.child_id?.substring(0, 8)}</Text>
+                  </View>
+                  <View style={s.tripDetail}>
+                    <Ionicons name="location" size={13} color={DT.dim} />
+                    <Text style={s.tripDetailText}>{trip.status}</Text>
                   </View>
                 </View>
               </View>
-            </Card>
-          ))
-        )}
-      </View>
+            ))
+          )}
+        </View>
 
-      <Spacer size="xl" />
-    </ScrollView>
+        <Spacer size="xl" />
+        <View style={s.bottomPadding} />
+      </ScrollView>
+    </View>
   );
 }

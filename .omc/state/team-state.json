@@ -1,0 +1,11 @@
+{
+  "team_name": "scholartrack-redesign",
+  "description": "Redesign all remaining ScholarTrack app screens to match dark SA Transport design system in src/lib/theme.ts",
+  "agent_count": 3,
+  "agent_types": "designer",
+  "task": "Redesign all remaining ScholarTrack app screens to match dark SA Transport design system in src/lib/theme.ts",
+  "fix_loop_count": 0,
+  "max_fix_loops": 3,
+  "linked_ralph": false,
+  "stage_history": "team-plan"
+}

@@ -1,24 +1,44 @@
+// Driver Trip Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
 import { notificationService } from '../../services/NotificationService';
 
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
 export default function DriverTripScreen({ navigation }: Props) {
-  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -36,112 +56,49 @@ export default function DriverTripScreen({ navigation }: Props) {
     loadData();
     requestLocation();
     return () => {
-      if (locationSubscription.current) {
-        locationSubscription.current.remove();
-      }
+      if (locationSubscription.current) locationSubscription.current.remove();
     };
   }, []);
 
   const requestLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required for trip tracking');
-        return;
-      }
-
+      if (status !== 'granted') { Alert.alert('Permission Denied', 'Location permission is required'); return; }
       const location = await Location.getCurrentPositionAsync({});
-      setCurrentLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude
-      });
-
-      // Start watching location
+      setCurrentLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
       locationSubscription.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000,
-          distanceInterval: 10
-        },
+        { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 10 },
         (location) => {
-          setCurrentLocation({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude
-          });
-          // Update driver tracking in background
-          if (driver && isOnline) {
-            updateDriverLocation(location.coords.latitude, location.coords.longitude);
-          }
+          setCurrentLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
+          if (driver && isOnline) updateDriverLocation(location.coords.latitude, location.coords.longitude);
         }
       );
-    } catch (error) {
-      console.error('Location error:', error);
-    }
+    } catch (error) { console.error('Location error:', error); }
   };
 
   const updateDriverLocation = async (lat: number, lng: number) => {
     if (!driver?.id) return;
     try {
-      // Update driver_tracking table
-      await supabase.from('driver_tracking').insert({
-        driver_id: driver.id,
-        latitude: lat,
-        longitude: lng,
-        status: isOnline ? 'active' : 'idle',
-        last_updated: new Date().toISOString()
-      });
-
-      // Also update driver's current location in drivers table
-      await supabase.from('drivers').update({
-        current_latitude: lat,
-        current_longitude: lng,
-        last_location_update: new Date().toISOString()
-      }).eq('id', driver.id);
-
-      // Check geofence zones if trip is active
-      if (activeTrip && geofenceZones.length > 0) {
-        await checkGeofenceZones(lat, lng);
-      }
-    } catch (error) {
-      console.error('Location update error:', error);
-    }
+      await supabase.from('driver_tracking').insert({ driver_id: driver.id, latitude: lat, longitude: lng, status: isOnline ? 'active' : 'idle', last_updated: new Date().toISOString() });
+      await supabase.from('drivers').update({ current_latitude: lat, current_longitude: lng, last_location_update: new Date().toISOString() }).eq('id', driver.id);
+      if (activeTrip && geofenceZones.length > 0) await checkGeofenceZones(lat, lng);
+    } catch (error) { console.error('Location update error:', error); }
   };
 
   const checkGeofenceZones = async (lat: number, lng: number) => {
     if (!activeTrip) return;
-
     const events = await geofenceService.checkZones(lat, lng, geofenceZones);
-
     for (const event of events) {
-      // Send notification for pickup/dropoff
-      const message = event.type === 'pickup_arrived'
-        ? `Arrived at pickup location for ${event.zone.childName}`
-        : `Arrived at dropoff location for ${event.zone.childName}`;
-
-      await notificationService.scheduleNotification(
-        'Geofence Alert',
-        message,
-        { type: event.type, tripId: activeTrip.id, childId: event.zone.childId },
-        'safety'
-      );
-
-      // Show non-blocking in-screen banner
-      setGeofenceAlert({
-        type: event.type,
-        message,
-      });
-      // Auto-dismiss after 5 seconds
+      const message = event.type === 'pickup_arrived' ? `Arrived at pickup for ${event.zone.childName}` : `Arrived at dropoff for ${event.zone.childName}`;
+      await notificationService.scheduleNotification('Geofence Alert', message, { type: event.type, tripId: activeTrip.id, childId: event.zone.childId }, 'safety');
+      setGeofenceAlert({ type: event.type, message });
       setTimeout(() => setGeofenceAlert(null), 5000);
     }
   };
 
   const loadGeofenceZones = async (tripId: string) => {
-    try {
-      const zones = await geofenceService.getZonesForTrip(tripId);
-      setGeofenceZones(zones);
-    } catch (error) {
-      console.error('Error loading geofence zones:', error);
-    }
+    try { const zones = await geofenceService.getZonesForTrip(tripId); setGeofenceZones(zones); }
+    catch (error) { console.error('Error loading geofence zones:', error); }
   };
 
   const loadData = async () => {
@@ -150,17 +107,10 @@ export default function DriverTripScreen({ navigation }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get driver info
-      const { data: driverData } = await supabase
-        .from('drivers')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
+      const { data: driverData } = await supabase.from('drivers').select('*').eq('user_id', user.id).single();
       setDriver(driverData);
 
       if (driverData) {
-        // Load today's trips
         const { data: tripData } = await supabase
           .from('trips')
           .select('*, children(full_name, school:schools(name), pickup_address)')
@@ -169,296 +119,264 @@ export default function DriverTripScreen({ navigation }: Props) {
           .order('pickup_time', { ascending: true });
 
         setTrips(tripData || []);
-
-        // Check for active trip
         const active = tripData?.find((t: Trip) => t.status === 'in_progress');
         setActiveTrip(active);
 
-        // Load checked in students
         if (active?.id) {
-          const { data: checkins } = await supabase
-            .from('trip_checkins')
-            .select('child_id')
-            .eq('trip_id', active.id);
-
+          const { data: checkins } = await supabase.from('trip_checkins').select('child_id').eq('trip_id', active.id);
           setCheckedInStudents((checkins || []).map((c: { child_id: string }) => c.child_id));
         }
       }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error loading data:', error); }
+    finally { setLoading(false); }
   };
 
   const toggleOnlineStatus = async () => {
     try {
       await driverService.updateAvailability(driver?.id || '', !isOnline);
       setIsOnline(!isOnline);
-
-      // Update location status
-      if (currentLocation) {
-        await updateDriverLocation(currentLocation.latitude, currentLocation.longitude);
-      }
-
-      Alert.alert(
-        isOnline ? 'You are now OFFLINE' : 'You are now ONLINE',
-        isOnline ? 'You will not receive new trip requests' : 'You are ready to receive trips'
-      );
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update status');
-    }
+      if (currentLocation) await updateDriverLocation(currentLocation.latitude, currentLocation.longitude);
+      Alert.alert(isOnline ? 'You are now OFFLINE' : 'You are now ONLINE', isOnline ? 'You will not receive new trip requests' : 'You are ready to receive trips');
+    } catch (error) { Alert.alert('Error', 'Failed to update status'); }
   };
 
   const startTrip = async (tripId: string) => {
-    if (!currentLocation) {
-      Alert.alert('Error', 'Location not available');
-      return;
-    }
-
+    if (!currentLocation) { Alert.alert('Error', 'Location not available'); return; }
     try {
       await tripServiceEnhanced.startTrip(tripId);
       const trip = trips.find(t => t.id === tripId) || null;
       setActiveTrip(trip);
       setCheckedInStudents([]);
-
-      // Load geofence zones for this trip
-      if (trip) {
-        await loadGeofenceZones(tripId);
-      }
-
+      if (trip) await loadGeofenceZones(tripId);
       Alert.alert('Success', 'Trip started! Remember to check in each student.');
       loadData();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to start trip');
-    }
+    } catch (error) { Alert.alert('Error', 'Failed to start trip'); }
   };
 
   const completeTrip = async (tripId: string) => {
-    if (!currentLocation) {
-      Alert.alert('Error', 'Location not available');
-      return;
-    }
-
+    if (!currentLocation) { Alert.alert('Error', 'Location not available'); return; }
     if (checkedInStudents.length === 0) {
-      Alert.alert('Warning', 'No students checked in. Are you sure you want to complete this trip?', [
+      Alert.alert('Warning', 'No students checked in. Are you sure?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Complete Anyway', onPress: () => tripServiceEnhanced.completeTrip(tripId).then(() => loadData()) }
+        { text: 'Complete Anyway', onPress: () => tripServiceEnhanced.completeTrip(tripId).then(() => loadData()) },
       ]);
       return;
     }
-
     try {
       await tripServiceEnhanced.completeTrip(tripId);
       setActiveTrip(null);
       setCheckedInStudents([]);
-      Alert.alert('Success', 'Trip completed! Great work.');
+      Alert.alert('Success', 'Trip completed!');
       loadData();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to complete trip');
-    }
+    } catch (error) { Alert.alert('Error', 'Failed to complete trip'); }
   };
 
   const checkInStudent = async (childId: string, childName: string) => {
     if (!activeTrip) return;
-
     try {
       await supabase.from('trip_checkins').insert({
-        trip_id: activeTrip.id,
-        child_id: childId,
-        checked_in_at: new Date().toISOString(),
-        location_lat: currentLocation?.latitude,
-        location_lng: currentLocation?.longitude
+        trip_id: activeTrip.id, child_id: childId, checked_in_at: new Date().toISOString(),
+        location_lat: currentLocation?.latitude, location_lng: currentLocation?.longitude,
       });
-
       setCheckedInStudents([...checkedInStudents, childId]);
       Alert.alert('Checked In', `${childName} has been checked in!`);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to check in student');
-    }
+    } catch (error) { Alert.alert('Error', 'Failed to check in student'); }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#007749';
-      case 'in_progress': return '#FFB81C';
-      case 'scheduled': return '#002395';
-      default: return '#666';
+      case 'completed': return DT.green2;
+      case 'in_progress': return DT.amber;
+      case 'scheduled': return DT.blue;
+      default: return DT.muted;
     }
   };
 
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
+    sosBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 4 },
+    sosBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: '#fff' },
+    onlineBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, gap: 4 },
+    onlineBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: '#fff' },
+    geofenceBanner: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8, marginHorizontal: 16, marginTop: 12, borderRadius: 14, overflow: 'hidden' },
+    geofenceBannerText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: '#fff', flex: 1 },
+    activeTripCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 18, borderColor: DT.amber, borderWidth: 1 },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.2)' },
+    activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, gap: 4 },
+    statusBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
+    tripTime: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted },
+    tripRoute: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '600', color: DT.white, marginBottom: 14 },
+    checkinSection: { backgroundColor: DT.panel, borderRadius: 14, padding: 14, marginBottom: 14 },
+    checkinTitle: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.amber, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
+    studentRow: { flexDirection: 'row', alignItems: 'center' },
+    studentAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+    studentInfo: { flex: 1, marginLeft: 12 },
+    studentName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
+    studentSchool: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    checkedIn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 },
+    checkedInText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
+    checkinBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, gap: 4 },
+    checkinBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: '#fff' },
+    completeTripBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, gap: 8 },
+    completeTripBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: '#fff' },
+    noTripCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 40, alignItems: 'center' },
+    noTripText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, marginTop: 12, textAlign: 'center' },
+    locationText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim, marginTop: 6 },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    emptyCard: { ...glass, padding: 30, alignItems: 'center', marginBottom: 10 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, textAlign: 'center' },
+    tripCard: { ...glass, padding: 14, marginBottom: 10, borderColor: DT.border },
+    tripHeader: { flexDirection: 'row', alignItems: 'center' },
+    tripTimeBox: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, backgroundColor: 'rgba(0,35,149,.15)' },
+    tripTimeText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.cyan },
+    tripInfo: { flex: 1, marginLeft: 12 },
+    tripChild: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
+    tripSchool: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    statusDot: { width: 12, height: 12, borderRadius: 6 },
+    tripAddress: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 4 },
+    addressText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
+    startBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, marginTop: 10, gap: 6 },
+    startBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: '#fff' },
+    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, ...glass, overflow: 'hidden' },
+    statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.cyan },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    bottomSpacer: { height: 50 },
+  });
+
   if (loading) {
     return (
-      <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>My Trips</Text><Text style={s.ltSub}>Loading...</Text></View></View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
-        <View style={styles(colors).headerTop}>
-          <Text style={styles(colors).headerTitle}>🚐 My Trips</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <TouchableOpacity
-              style={[styles(colors).sosBtn, { backgroundColor: colors.danger }]}
-              onPress={() => {
-                Alert.alert(
-                  'Emergency SOS',
-                  'Calling emergency services...',
-                  [{ text: 'Cancel', style: 'cancel' }]
-                );
-              }}
-            >
-              <Ionicons name="warning" size={18} color="#fff" />
-              <Text style={styles(colors).sosBtnText}>SOS</Text>
+    <View style={s.container}>
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+      </View>
+
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>My Trips</Text><Text style={s.ltSub}>{driver?.full_name || 'Driver'} • {driver?.vehicle_type || 'Vehicle'}</Text></View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity style={[s.sosBtn, { backgroundColor: DT.red }]} onPress={() => Alert.alert('SOS', 'Emergency services...')}>
+              <Ionicons name="warning" size={14} color="#fff" /><Text style={s.sosBtnText}>SOS</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles(colors).onlineBtn, { backgroundColor: isOnline ? colors.success : colors.danger }]}
-              onPress={toggleOnlineStatus}
-            >
-              <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={16} color="#fff" />
-              <Text style={styles(colors).onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
+            <TouchableOpacity style={[s.onlineBtn, { backgroundColor: isOnline ? DT.green2 : DT.red }]} onPress={toggleOnlineStatus}>
+              <Ionicons name={isOnline ? 'radio-button-on' : 'radio-button-off'} size={14} color="#fff" /><Text style={s.onlineBtnText}>{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles(colors).headerSub}>
-          {driver?.full_name || 'Driver'} • {driver?.vehicle_type || 'Vehicle'}
-        </Text>
       </View>
 
-      {/* Non-blocking Geofence Alert Banner */}
-      {geofenceAlert && (
-        <TouchableOpacity
-          style={[styles(colors).geofenceBanner, { backgroundColor: colors.warning }]}
-          onPress={() => setGeofenceAlert(null)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="location" size={20} color="#fff" />
-          <Text style={styles(colors).geofenceBannerText}>{geofenceAlert.message}</Text>
-          <Ionicons name="close" size={16} color="#fff" />
-        </TouchableOpacity>
-      )}
-
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Geofence Alert Banner */}
+        {geofenceAlert && (
+          <TouchableOpacity style={[s.geofenceBanner, { backgroundColor: DT.amber }]} onPress={() => setGeofenceAlert(null)} activeOpacity={0.8}>
+            <Ionicons name="location" size={18} color="#fff" />
+            <Text style={s.geofenceBannerText}>{geofenceAlert.message}</Text>
+            <Ionicons name="close" size={16} color="#fff" />
+          </TouchableOpacity>
+        )}
+
         {/* Active Trip Card */}
         {activeTrip ? (
-          <View style={[styles(colors).activeTripCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
-            <View style={styles(colors).activeTripHeader}>
-              <View style={[styles(colors).statusBadge, { backgroundColor: colors.warning }]}>
-                <Ionicons name="bus" size={16} color="#fff" />
-                <Text style={styles(colors).statusBadgeText}>IN PROGRESS</Text>
+          <View style={s.activeTripCard}>
+            <View style={s.cardTopRefraction} />
+            <View style={s.activeTripHeader}>
+              <View style={[s.statusBadge, { backgroundColor: DT.amber }]}>
+                <Ionicons name="bus" size={14} color="#fff" /><Text style={s.statusBadgeText}>IN PROGRESS</Text>
               </View>
-              <Text style={[styles(colors).tripTime, { color: colors.text }]}>
-                Started: {new Date(activeTrip.actual_pickup_time || Date.now()).toLocaleTimeString()}
-              </Text>
+              <Text style={s.tripTime}>Started: {new Date(activeTrip.actual_pickup_time || Date.now()).toLocaleTimeString()}</Text>
             </View>
-
-            <Text style={[styles(colors).tripRoute, { color: colors.text }]}>
-              {activeTrip.children?.pickup_address || 'Pickup'} → {activeTrip.children?.school?.name || 'School'}
-            </Text>
-
+            <Text style={s.tripRoute}>{activeTrip.children?.pickup_address || 'Pickup'} → {activeTrip.children?.school?.name || 'School'}</Text>
             {/* Student Check-in */}
-            <View style={[styles(colors).checkinSection, { backgroundColor: colors.background }]}>
-              <Text style={[styles(colors).checkinTitle, { color: colors.text }]}>Student Check-in</Text>
-              <View style={styles(colors).studentRow}>
-                <View style={[styles(colors).studentAvatar, { backgroundColor: colors.primary + '20' }]}>
-                  <Ionicons name="person" size={20} color={colors.primary} />
+            <View style={s.checkinSection}>
+              <Text style={s.checkinTitle}>Student Check-in</Text>
+              <View style={s.studentRow}>
+                <View style={[s.studentAvatar, { backgroundColor: 'rgba(0,229,255,.1)', borderWidth: 1, borderColor: 'rgba(0,229,255,.2)' }]}>
+                  <Ionicons name="person" size={20} color={DT.cyan} />
                 </View>
-                <View style={styles(colors).studentInfo}>
-                  <Text style={[styles(colors).studentName, { color: colors.text }]}>
-                    {activeTrip.children?.full_name || 'Student'}
-                  </Text>
-                  <Text style={[styles(colors).studentSchool, { color: colors.textSecondary }]}>
-                    {activeTrip.children?.school?.name}
-                  </Text>
+                <View style={s.studentInfo}>
+                  <Text style={s.studentName}>{activeTrip.children?.full_name || 'Student'}</Text>
+                  <Text style={s.studentSchool}>{activeTrip.children?.school?.name}</Text>
                 </View>
                 {checkedInStudents.includes(activeTrip.children?.id || '') ? (
-                  <View style={[styles(colors).checkedIn, { backgroundColor: colors.success }]}>
-                    <Ionicons name="checkmark" size={16} color="#fff" />
-                    <Text style={styles(colors).checkedInText}>Checked In</Text>
+                  <View style={[s.checkedIn, { backgroundColor: DT.green2 }]}>
+                    <Ionicons name="checkmark" size={14} color="#fff" /><Text style={s.checkedInText}>Checked In</Text>
                   </View>
                 ) : (
-                  <TouchableOpacity
-                    style={[styles(colors).checkinBtn, { backgroundColor: colors.primary }]}
-                    onPress={() => checkInStudent(activeTrip.children?.id || '', activeTrip.children?.full_name || '')}
-                  >
-                    <Ionicons name="add" size={20} color="#fff" />
-                    <Text style={styles(colors).checkinBtnText}>Check In</Text>
+                  <TouchableOpacity style={[s.checkinBtn, { backgroundColor: DT.green2 }]} onPress={() => checkInStudent(activeTrip.children?.id || '', activeTrip.children?.full_name || '')}>
+                    <Ionicons name="add" size={16} color="#fff" /><Text style={s.checkinBtnText}>Check In</Text>
                   </TouchableOpacity>
                 )}
               </View>
             </View>
-
-            {/* Complete Trip Button */}
-            <TouchableOpacity
-              style={[styles(colors).completeTripBtn, { backgroundColor: colors.success }]}
-              onPress={() => completeTrip(activeTrip.id)}
-            >
-              <Ionicons name="flag" size={24} color="#fff" />
-              <Text style={styles(colors).completeTripBtnText}>Complete Trip</Text>
+            <TouchableOpacity style={[s.completeTripBtn, { backgroundColor: DT.green }]} onPress={() => completeTrip(activeTrip.id)}>
+              <Ionicons name="flag" size={20} color="#fff" /><Text style={s.completeTripBtnText}>Complete Trip</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={[styles(colors).noTripCard, { backgroundColor: colors.card }]}>
-            <Ionicons name="bus-outline" size={48} color={colors.textSecondary} />
-            <Text style={[styles(colors).noTripText, { color: colors.text }]}>
-              {isOnline ? 'No active trips' : 'Go online to receive trips'}
-            </Text>
+          <View style={s.noTripCard}>
+            <Ionicons name="bus-outline" size={44} color={DT.muted} />
+            <Text style={s.noTripText}>{isOnline ? 'No active trips' : 'Go online to receive trips'}</Text>
             {currentLocation && (
-              <Text style={[styles(colors).locationText, { color: colors.textSecondary }]}>
-                <Ionicons name="location" size={14} color={colors.textSecondary} /> Location active
-              </Text>
+              <Text style={s.locationText}><Ionicons name="location" size={12} color={DT.dim} /> Location active</Text>
             )}
           </View>
         )}
 
         {/* Today's Schedule */}
-        <View style={styles(colors).section}>
-          <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Today's Schedule</Text>
-
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Today's Schedule</Text>
           {trips.length === 0 ? (
-            <View style={[styles(colors).emptyCard, { backgroundColor: colors.card }]}>
-              <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
-                No trips scheduled for today
-              </Text>
-            </View>
+            <View style={s.emptyCard}><Text style={s.emptyText}>No trips scheduled for today</Text></View>
           ) : (
             trips.map((trip: Trip) => (
-              <View key={trip.id} style={[styles(colors).tripCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <View style={styles(colors).tripHeader}>
-                  <View style={[styles(colors).tripTimeBox, { backgroundColor: colors.selected }]}>
-                    <Text style={[styles(colors).tripTimeText, { color: colors.primary }]}>
-                      {trip.pickup_time ? new Date(trip.pickup_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}
+              <View key={trip.id} style={s.tripCard}>
+                <View style={s.cardTopRefraction} />
+                <View style={s.tripHeader}>
+                  <View style={s.tripTimeBox}>
+                    <Text style={s.tripTimeText}>
+                      {trip.pickup_time ? new Date(trip.pickup_time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'TBD'}
                     </Text>
                   </View>
-                  <View style={styles(colors).tripInfo}>
-                    <Text style={[styles(colors).tripChild, { color: colors.text }]}>
-                      {trip.children?.full_name || 'Student'}
-                    </Text>
-                    <Text style={[styles(colors).tripSchool, { color: colors.textSecondary }]}>
-                      {trip.children?.school?.name || 'School'}
-                    </Text>
+                  <View style={s.tripInfo}>
+                    <Text style={s.tripChild}>{trip.children?.full_name || 'Student'}</Text>
+                    <Text style={s.tripSchool}>{trip.children?.school?.name || 'School'}</Text>
                   </View>
-                  <View style={[styles(colors).statusDot, { backgroundColor: getStatusColor(trip.status) }]} />
+                  <View style={[s.statusDot, { backgroundColor: getStatusColor(trip.status) }]} />
                 </View>
-
-                <View style={styles(colors).tripAddress}>
-                  <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
-                  <Text style={[styles(colors).addressText, { color: colors.textSecondary }]}>
-                    {trip.children?.pickup_address || 'Pickup address'}
-                  </Text>
+                <View style={s.tripAddress}>
+                  <Ionicons name="location-outline" size={14} color={DT.dim} />
+                  <Text style={s.addressText}>{trip.children?.pickup_address || 'Pickup address'}</Text>
                 </View>
-
                 {trip.status === 'scheduled' && !activeTrip && (
-                  <TouchableOpacity
-                    style={[styles(colors).startBtn, { backgroundColor: colors.primary }]}
-                    onPress={() => startTrip(trip.id)}
-                  >
-                    <Ionicons name="play" size={20} color="#fff" />
-                    <Text style={styles(colors).startBtnText}>Start Trip</Text>
+                  <TouchableOpacity style={[s.startBtn, { backgroundColor: DT.green }]} onPress={() => startTrip(trip.id)}>
+                    <Ionicons name="play" size={16} color="#fff" /><Text style={s.startBtnText}>Start Trip</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -467,80 +385,14 @@ export default function DriverTripScreen({ navigation }: Props) {
         </View>
 
         {/* Quick Stats */}
-        <View style={[styles(colors).statsRow, { backgroundColor: colors.card }]}>
-          <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: colors.primary }]}>{trips.length}</Text>
-            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
-          </View>
-          <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: colors.success }]}>{trips.filter((t) => t.status === 'completed').length}</Text>
-            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Done</Text>
-          </View>
-          <View style={styles(colors).statItem}>
-            <Text style={[styles(colors).statNumber, { color: colors.warning }]}>{trips.filter((t) => t.status === 'in_progress').length}</Text>
-            <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Active</Text>
-          </View>
+        <View style={s.statsRow}>
+          <View style={s.statItem}><Text style={s.statNumber}>{trips.length}</Text><Text style={s.statLabel}>Total</Text></View>
+          <View style={s.statItem}><Text style={s.statNumber}>{trips.filter((t) => t.status === 'completed').length}</Text><Text style={s.statLabel}>Done</Text></View>
+          <View style={s.statItem}><Text style={s.statNumber}>{trips.filter((t) => t.status === 'in_progress').length}</Text><Text style={s.statLabel}>Active</Text></View>
         </View>
 
-        <View style={styles(colors).bottomSpacer} />
+        <View style={s.bottomSpacer} />
       </ScrollView>
     </View>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xxl },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { ...typography.h1, color: colors.textInverse },
-  sosBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
-  sosBtnText: { ...typography.labelSmall, color: colors.textInverse, fontWeight: '700' },
-  onlineBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
-  onlineBtnText: { ...typography.labelSmall, color: colors.textInverse },
-  headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-  geofenceBanner: { flexDirection: 'row', alignItems: 'center', padding: spacing.md, gap: spacing.sm },
-  geofenceBannerText: { ...typography.label, color: colors.textInverse, flex: 1 },
-  activeTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.lg, borderRadius: borderRadius.lg, borderWidth: 2, borderColor: colors.accent },
-  activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
-  statusBadgeText: { ...typography.labelSmall, color: colors.textInverse },
-  tripTime: { ...typography.bodySmall, color: colors.textSecondary },
-  tripRoute: { ...typography.h4, color: colors.text, marginBottom: spacing.md },
-  checkinSection: { backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md },
-  checkinTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.sm },
-  studentRow: { flexDirection: 'row', alignItems: 'center' },
-  studentAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary },
-  studentInfo: { flex: 1, marginLeft: spacing.md },
-  studentName: { ...typography.label, color: colors.text },
-  studentSchool: { ...typography.bodySmall, color: colors.textSecondary },
-  checkedIn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xxs },
-  checkedInText: { ...typography.labelSmall, color: colors.textInverse },
-  checkinBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accent, paddingHorizontal: spacing.lg, paddingVertical: spacing.xs, borderRadius: borderRadius.full, gap: spacing.xs },
-  checkinBtnText: { ...typography.button, color: colors.textInverse },
-  completeTripBtn: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.lg, borderRadius: borderRadius.md, gap: spacing.sm },
-  completeTripBtnText: { ...typography.button, color: colors.textInverse },
-  noTripCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.xxl, borderRadius: borderRadius.lg, alignItems: 'center' },
-  noTripText: { ...typography.h4, color: colors.text, marginTop: spacing.md },
-  locationText: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
-  section: { padding: spacing.lg },
-  sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-  emptyCard: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.md, alignItems: 'center' },
-  emptyText: { ...typography.body, color: colors.textSecondary },
-  tripCard: { backgroundColor: colors.card, borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
-  tripHeader: { flexDirection: 'row', alignItems: 'center' },
-  tripTimeBox: { backgroundColor: colors.primary + '20', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: borderRadius.sm },
-  tripTimeText: { ...typography.label, color: colors.primary },
-  tripInfo: { flex: 1, marginLeft: spacing.md },
-  tripChild: { ...typography.label, color: colors.text },
-  tripSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xxs },
-  statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.success },
-  tripAddress: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, gap: spacing.xs },
-  addressText: { ...typography.bodySmall, color: colors.textSecondary },
-  startBtn: { backgroundColor: colors.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: spacing.md, borderRadius: borderRadius.md, marginTop: spacing.sm, gap: spacing.xs },
-  startBtnText: { ...typography.button, color: colors.textInverse },
-  statsRow: { backgroundColor: colors.card, flexDirection: 'row', justifyContent: 'space-around', padding: spacing.lg, marginHorizontal: spacing.lg, borderRadius: borderRadius.md },
-  statItem: { alignItems: 'center' },
-  statNumber: { ...typography.h2, color: colors.accent },
-  statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-  bottomSpacer: { height: spacing.xxl }
-});

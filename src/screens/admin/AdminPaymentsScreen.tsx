@@ -1,20 +1,43 @@
+// Admin Payments Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge, SearchBar, Pagination, SkeletonListItem } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
 const AdminPaymentsScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,7 +52,6 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
       setPayments(data || []);
     } catch (error) {
@@ -40,9 +62,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     }
   };
 
-  useEffect(() => {
-    fetchPayments();
-  }, []);
+  useEffect(() => { fetchPayments(); }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -53,23 +73,21 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
   const processPayment = (id: string) => {
     Alert.alert('Process Payment', 'Mark this payment as processed?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Confirm',
-        onPress: async () => {
-          Alert.alert('Success', 'Payment marked as paid');
-          fetchPayments();
-        }
-      },
+      { text: 'Confirm', onPress: () => { Alert.alert('Success', 'Payment marked as paid'); fetchPayments(); } },
     ]);
   };
 
-  const getStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': case 'completed': return 'success';
-      case 'pending': return 'warning';
-      case 'failed': return 'error';
-      default: return 'neutral';
+      case 'paid': case 'completed': return DT.green2;
+      case 'pending': return DT.amber;
+      case 'failed': return DT.red;
+      default: return DT.muted;
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    return status || 'unknown';
   };
 
   const filteredPayments = payments.filter(payment => {
@@ -81,7 +99,6 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     );
   });
 
-  // Pagination
   const totalPages = Math.ceil(filteredPayments.length / PAYMENTS_PER_PAGE);
   const paginatedPayments = filteredPayments.slice(
     (currentPage - 1) * PAYMENTS_PER_PAGE,
@@ -90,116 +107,156 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
   const totalAmount = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const pendingCount = payments.filter(p => p.status === 'pending').length;
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    statsRow: { flexDirection: 'row', backgroundColor: colors.card, margin: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, elevation: 2 },
-    statItem: { flex: 1, alignItems: 'center' },
-    statNumber: { ...typography.h2, color: colors.accent },
-    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    paymentCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, elevation: 2 },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 6 },
+    sbIcon: { fontSize: 14 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
+    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '700', color: DT.amber },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
+    searchWrap: { flexDirection: 'row', alignItems: 'center', ...glass, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginBottom: 12, gap: 8 },
+    searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white },
+    searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted },
+    paymentCard: { ...glass, padding: 14, marginBottom: 10 },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     paymentInfo: { flex: 1 },
-    paymentId: { ...typography.label, color: colors.text },
-    paymentDate: { ...typography.bodySmall, color: colors.textSecondary },
-    paymentAmount: { ...typography.h4, color: colors.accent },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+    paymentId: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.text },
+    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.amber },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
+    statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 40 },
+    paginationRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingHorizontal: 4 },
+    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: DT.panel, borderWidth: 1, borderColor: DT.border },
+    pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.cyan },
+    pageInfo: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
+    bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <View style={styles(colors).header}>
-          <Text style={styles(colors).headerTitle}>Payments</Text>
-        </View>
-        <View style={{ padding: spacing.lg }}>
-          {[1, 2, 3, 4, 5].map(i => <SkeletonListItem key={i} />)}
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Payments</Text><Text style={s.ltSub}>Manage all transactions</Text></View></View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={DT.green2} />
         </View>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles(colors).container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
-    >
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Payments</Text>
-        <Text style={styles(colors).headerSubtext}>Manage all transactions</Text>
+    <View style={s.container}>
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
       </View>
 
-      {/* Stats */}
-      <View style={styles(colors).statsRow}>
-        <View style={styles(colors).statItem}>
-          <Text style={styles(colors).statNumber}>{payments.length}</Text>
-          <Text style={styles(colors).statLabel}>Total</Text>
-        </View>
-        <View style={styles(colors).statItem}>
-          <Text style={styles(colors).statNumber}>{pendingCount}</Text>
-          <Text style={styles(colors).statLabel}>Pending</Text>
-        </View>
-        <View style={styles(colors).statItem}>
-          <Text style={styles(colors).statNumber}>R{(totalAmount / 100).toFixed(0)}</Text>
-          <Text style={styles(colors).statLabel}>Total Value</Text>
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Payments</Text><Text style={s.ltSub}>Manage all transactions</Text></View>
         </View>
       </View>
 
-      {/* Payments List */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search by ID or status..."
-        />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.green2} colors={[DT.green2]} />}
+      >
+        {/* Stats */}
+        <View style={s.statsRow}>
+          <View style={s.statCard}><Text style={s.statNumber}>{payments.length}</Text><Text style={s.statLabel}>Total</Text></View>
+          <View style={s.statCard}><Text style={s.statNumber}>{pendingCount}</Text><Text style={s.statLabel}>Pending</Text></View>
+          <View style={s.statCard}><Text style={s.statNumber}>R{(totalAmount / 100).toFixed(0)}</Text><Text style={s.statLabel}>Value</Text></View>
+        </View>
 
-        {filteredPayments.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No payments found</Text>
-          </Card>
-        ) : (
-          <>
-            {paginatedPayments.map((payment) => (
-            <Card key={payment.id} variant="elevated" padding="medium">
-              <TouchableOpacity onPress={() => processPayment(payment.id)}>
-                <View style={styles(colors).paymentCard}>
-                  <View style={styles(colors).paymentRow}>
-                    <View style={styles(colors).paymentInfo}>
-                      <Text style={styles(colors).paymentId}>Payment #{payment.id?.substring(0, 8)}</Text>
-                      <Text style={styles(colors).paymentDate}>
+        {/* Payments List */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Recent Payments</Text>
+
+          {/* Search */}
+          <View style={s.searchWrap}>
+            <Ionicons name="search" size={16} color={DT.muted} />
+            <View style={{ flex: 1 }}>
+              {searchQuery ? (
+                <Text style={s.searchInput}>{searchQuery}</Text>
+              ) : (
+                <Text style={s.searchPlaceholder}>Search by ID or status...</Text>
+              )}
+            </View>
+            {searchQuery ? (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={16} color={DT.muted} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+
+          {filteredPayments.length === 0 ? (
+            <Text style={s.emptyText}>No payments found</Text>
+          ) : (
+            <>
+              {paginatedPayments.map((payment) => (
+                <TouchableOpacity key={payment.id} style={s.paymentCard} onPress={() => processPayment(payment.id)} activeOpacity={0.7}>
+                  <View style={s.cardTopRefraction} />
+                  <View style={s.paymentRow}>
+                    <View style={s.paymentInfo}>
+                      <Text style={s.paymentId}>Payment #{payment.id?.substring(0, 8)}</Text>
+                      <Text style={s.paymentDate}>
                         {payment.created_at ? new Date(payment.created_at).toLocaleDateString('en-ZA') : 'Date unknown'}
                       </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={styles(colors).paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-                      <Badge label={payment.status || 'unknown'} variant={getStatusVariant(payment.status)} size="small" />
+                      <Text style={s.paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+                      <View style={[s.statusBadge, { backgroundColor: getStatusColor(payment.status) }]}>
+                        <Text style={s.statusText}>{getStatusLabel(payment.status)}</Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            </Card>
-          ))}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={PAYMENTS_PER_PAGE}
-              totalItems={filteredPayments.length}
-            />
-          )}
-          </>
-        )}
-      </View>
+                </TouchableOpacity>
+              ))}
 
-      <Spacer size="xl" />
-    </ScrollView>
+              {totalPages > 1 && (
+                <View style={s.paginationRow}>
+                  <TouchableOpacity
+                    style={[s.pageBtn, currentPage === 1 && { opacity: 0.4 }]}
+                    onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <Text style={s.pageBtnText}>Prev</Text>
+                  </TouchableOpacity>
+                  <Text style={s.pageInfo}>Page {currentPage} of {totalPages}</Text>
+                  <TouchableOpacity
+                    style={[s.pageBtn, currentPage === totalPages && { opacity: 0.4 }]}
+                    onPress={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <Text style={s.pageBtnText}>Next</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+        </View>
+
+        <Spacer size="xl" />
+        <View style={s.bottomPadding} />
+      </ScrollView>
+    </View>
   );
 };
 

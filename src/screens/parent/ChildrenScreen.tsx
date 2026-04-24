@@ -1,14 +1,131 @@
+// ScholarTrack ChildrenScreen — Design System: Dark SA Transport
+// Dark glassmorphism cards, cyan/amber accents, spring animations
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  UIManager,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  ZoomIn,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
-import { supabase } from '../../lib/supabase';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { childrenService } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const SPRING = { damping: 15, stiffness: 150 };
+
+// ─── Design Tokens ─────────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#00e676',
+  red: '#ff3d5a',
+  white: '#ffffff',
+  text: '#9bbdd4',
+  muted: '#4a6a8a',
+};
+
+// ─── Spring-press wrapper ─────────────────────────────────────────────────────
+const SpringTouchable = ({
+  children,
+  onPress,
+  style,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+  style?: object;
+}) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+// ─── Breathing dot ────────────────────────────────────────────────────────────
+const BreathingDot = ({ color = DT.green, size = 8 }: { color?: string; size?: number }) => {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    scale.value = withRepeat(withSequence(withTiming(1.5, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+    opacity.value = withRepeat(withSequence(withTiming(0.3, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+  }, []);
+  const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }], opacity: opacity.value }));
+  return (
+    <Animated.View style={[{ width: size, height: size, borderRadius: size / 2, backgroundColor: color }, aStyle]} />
+  );
+};
+
+// Child avatar colors for variety
+const AVATAR_COLORS = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+
+// ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
+const glassCardBase = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+};
+
+const childAvatarStyle = (index: number) => ({
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: AVATAR_COLORS[index % AVATAR_COLORS.length] + '30',
+  borderWidth: 1.5,
+  borderColor: AVATAR_COLORS[index % AVATAR_COLORS.length],
+  justifyContent: 'center' as const,
+  alignItems: 'center' as const,
+});
+
+const actionBtnStyle = (color: string) => ({
+  width: '48%' as const,
+  borderRadius: borderRadius.lg,
+  padding: spacing.md,
+  marginBottom: spacing.sm,
+  alignItems: 'center' as const,
+  ...glassCardBase,
+});
+
+const getInitials = (name: string) => (name || 'C').substring(0, 1).toUpperCase();
 
 interface Child {
   id: string;
@@ -24,23 +141,23 @@ interface Props {
 }
 
 export default function ChildrenScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [children, setChildren] = useState<Child[]>([]);
+  const [childList, setChildList] = useState<Child[]>([]);
 
   const fetchChildren = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setChildren([]);
+        setChildList([]);
         return;
       }
 
       const data = await childrenService.getChildren(user.id);
       if (data && data.length > 0) {
-        setChildren(data.map((c) => ({
+        setChildList(data.map((c) => ({
           id: c.id,
           name: c.full_name,
           school: c.school?.name || 'Unknown School',
@@ -49,11 +166,11 @@ export default function ChildrenScreen({ navigation }: Props) {
           status: c.driver ? 'active' : 'inactive',
         })));
       } else {
-        setChildren([]);
+        setChildList([]);
       }
     } catch (error) {
       console.error('Error fetching children:', error);
-      setChildren([]);
+      setChildList([]);
     } finally {
       setLoading(false);
     }
@@ -73,122 +190,169 @@ export default function ChildrenScreen({ navigation }: Props) {
     navigation?.navigate?.('LinkChild');
   };
 
-  const getInitials = (name: string) => name.substring(0, 1).toUpperCase();
-
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.md },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSub: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    addBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card, margin: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, elevation: 3 },
-    addBtnText: { ...typography.button, color: colors.accent, marginLeft: spacing.sm },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    childCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', elevation: 3 },
-    childAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    childInitial: { ...typography.h4, color: colors.accent },
-    childInfo: { flex: 1, marginLeft: spacing.md },
-    childName: { ...typography.label, color: colors.text },
-    childSchool: { ...typography.bodySmall, color: colors.textSecondary, marginTop: spacing.xs },
-    childGrade: { ...typography.caption, color: colors.textSecondary },
-    childStatus: { alignItems: 'flex-end' },
-    childDriver: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
-    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    actionBtn: { width: '48%', backgroundColor: colors.card, padding: spacing.md, borderRadius: borderRadius.lg, alignItems: 'center', marginBottom: spacing.sm, elevation: 2 },
-    actionText: { ...typography.labelSmall, color: colors.text, marginTop: spacing.xs },
-    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
-  });
-
   const quickActions = [
-    { name: 'Track All', icon: 'map', color: colors.accent, route: 'LiveTrack' },
-    { name: 'Add Driver', icon: 'person-add', color: colors.accent, route: 'HireDriver' },
-    { name: 'Emergency', icon: 'warning', color: colors.error, route: 'Emergency' },
-    { name: 'Documents', icon: 'document-text', color: colors.primary, route: 'ParentDocs' },
+    { name: 'Track All', icon: 'map', color: DT.cyan, route: 'LiveTrack' },
+    { name: 'Add Driver', icon: 'person-add', color: DT.amber, route: 'HireDriver' },
+    { name: 'Emergency', icon: 'warning', color: DT.red, route: 'Emergency' },
+    { name: 'Documents', icon: 'document-text', color: DT.cyan, route: 'ParentDocs' },
   ];
+
+  const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: insets.top + spacing.lg,
+      borderBottomWidth: 4,
+      borderBottomColor: DT.amber,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    headerTitle: { ...typography.h2, color: DT.white },
+    headerSub: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    addBtn: {
+      margin: spacing.lg,
+      padding: spacing.md,
+      borderRadius: borderRadius.lg,
+      ...glassCardBase,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255,255,255,.12)',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    addBtnText: { ...typography.button, color: DT.cyan, marginLeft: spacing.sm },
+    section: { padding: spacing.lg },
+    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    childCard: {
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+      ...glassCardBase,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255,183,0,.3)',
+      borderColor: 'rgba(255,183,0,.12)',
+      borderLeftWidth: 0,
+      overflow: 'hidden',
+    },
+    childRow: { flexDirection: 'row' as const, alignItems: 'center' as const },
+    childAvatar: undefined as any,
+    childInitial: { ...typography.h4, color: DT.white },
+    childInfo: { flex: 1, marginLeft: spacing.md },
+    childName: { ...typography.label, color: DT.white },
+    childSchool: { ...typography.bodySmall, color: DT.muted, marginTop: 2 },
+    childGrade: { ...typography.caption, color: DT.muted },
+    childStatus: { alignItems: 'flex-end' as const },
+    childDriver: { ...typography.caption, color: DT.muted, marginTop: 2 },
+    actionsGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, justifyContent: 'space-between' as const },
+    actionBtn: undefined as any,
+    actionText: { ...typography.labelSmall, color: DT.white, marginTop: spacing.xs },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: DT.bg },
+  });
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <View style={styles(colors).header}>
-          <Text style={styles(colors).headerTitle}>My Children</Text>
-          <Text style={styles(colors).headerSub}>Manage your children</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>My Children</Text>
+          <Text style={styles.headerSub}>Manage your children</Text>
         </View>
-        <View style={styles(colors).emptyContainer}>
-          <ActivityIndicator size="large" color={colors.accent} />
-          <Text style={[styles(colors).emptyText, { marginTop: spacing.md }]}>Loading children...</Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+          <Text style={[styles.emptyText, { marginTop: spacing.md }]}>Loading children...</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles(colors).container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
-    >
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>My Children</Text>
-        <Text style={styles(colors).headerSub}>Manage your children</Text>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
+      {/* Header with radial glow */}
+      <View style={styles.header}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <Text style={styles.headerTitle}>My Children</Text>
+        <Text style={styles.headerSub}>Manage your children</Text>
       </View>
 
       {/* Add Button */}
-      <TouchableOpacity style={styles(colors).addBtn} onPress={addChild}>
-        <Ionicons name="add-circle" size={24} color={colors.accent} />
-        <Text style={styles(colors).addBtnText}>Add Child</Text>
-      </TouchableOpacity>
+      <SpringTouchable onPress={addChild} style={styles.addBtn}>
+        <Ionicons name="add-circle" size={24} color={DT.cyan} />
+        <Text style={styles.addBtnText}>Add Child</Text>
+      </SpringTouchable>
 
       {/* Children List */}
-      <View style={styles(colors).section}>
-        {children.length === 0 ? (
-          <View style={styles(colors).emptyContainer}>
-            <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
-            <Text style={styles(colors).emptyText}>No children added yet</Text>
-            <Text style={[styles(colors).emptyText, { marginTop: spacing.sm }]}>Tap "Add Child" to get started</Text>
-          </View>
+      <ScrollView
+        style={styles.section}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[DT.cyan]}
+            tintColor={DT.cyan}
+          />
+        }
+      >
+        {childList.length === 0 ? (
+          <Animated.View entering={ZoomIn.duration(300)} style={styles.emptyContainer}>
+            <Ionicons name="people-outline" size={64} color={DT.muted} />
+            <Text style={styles.emptyText}>No children added yet</Text>
+            <Text style={[styles.emptyText, { marginTop: spacing.sm }]}>Tap "Add Child" to get started</Text>
+          </Animated.View>
         ) : (
-          children.map((child) => (
-            <Card key={child.id} variant="elevated" padding="medium">
-              <View style={styles(colors).childCard}>
-                <View style={styles(colors).childAvatar}>
-                  <Text style={styles(colors).childInitial}>{getInitials(child.name)}</Text>
-                </View>
-                <View style={styles(colors).childInfo}>
-                  <Text style={styles(colors).childName}>{child.name}</Text>
-                  <Text style={styles(colors).childSchool}>{child.school}</Text>
-                  <Text style={styles(colors).childGrade}>{child.grade}</Text>
-                </View>
-                <View style={styles(colors).childStatus}>
-                  <Badge
-                    label={child.status === 'active' ? 'Active' : 'No Driver'}
-                    variant={child.status === 'active' ? 'success' : 'warning'}
-                    size="small"
-                  />
-                  {child.driver !== 'Pending' && (
-                    <Text style={styles(colors).childDriver}>{child.driver}</Text>
-                  )}
+          childList.map((child, index) => (
+            <Animated.View key={child.id} entering={ZoomIn.duration(300).delay(index * 60)}>
+              <View style={[styles.childCard, { borderRadius: borderRadius.lg, position: 'relative' }]}>
+                {/* Top refraction line */}
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                {/* Left bar accent */}
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.5)' }} />
+                <View style={styles.childRow}>
+                  <View style={childAvatarStyle(index)}>
+                    <Text style={styles.childInitial}>{getInitials(child.name)}</Text>
+                  </View>
+                  <View style={styles.childInfo}>
+                    <Text style={styles.childName}>{child.name}</Text>
+                    <Text style={styles.childSchool}>{child.school}</Text>
+                    <Text style={styles.childGrade}>{child.grade}</Text>
+                  </View>
+                  <View style={styles.childStatus}>
+                    <Badge
+                      label={child.status === 'active' ? 'Active' : 'No Driver'}
+                      variant={child.status === 'active' ? 'success' : 'warning'}
+                      size="small"
+                    />
+                    {child.driver !== 'Pending' && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
+                        <BreathingDot color={DT.green} size={6} />
+                        <Text style={styles.childDriver}>  {child.driver}</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
-            </Card>
+            </Animated.View>
           ))
         )}
-      </View>
 
-      {/* Quick Actions */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Quick Actions</Text>
-        <View style={styles(colors).actionsGrid}>
-          {quickActions.map((action, index) => (
-            <TouchableOpacity key={index} style={styles(colors).actionBtn} onPress={() => navigation?.navigate?.(action.route)}>
+        {/* Quick Actions */}
+        <Text style={sectionLabelStyle}>Quick Actions</Text>
+        <View style={styles.actionsGrid}>
+          {quickActions.map((action, i) => (
+            <SpringTouchable
+              key={i}
+              onPress={() => navigation?.navigate?.(action.route)}
+              style={actionBtnStyle(action.color)}
+            >
               <Ionicons name={action.icon as any} size={24} color={action.color} />
-              <Text style={styles(colors).actionText}>{action.name}</Text>
-            </TouchableOpacity>
+              <Text style={styles.actionText}>{action.name}</Text>
+            </SpringTouchable>
           ))}
         </View>
-      </View>
-
-      <Spacer size="xl" />
-    </ScrollView>
+      </ScrollView>
+    </Animated.View>
   );
 }

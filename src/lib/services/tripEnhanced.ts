@@ -1,5 +1,6 @@
 // Trip Service Enhanced
 import { supabase } from './supabase';
+import { locationService, DriverLocation } from '../../services/location';
 
 export const tripServiceEnhanced = {
   async getAllTrips() {
@@ -51,16 +52,8 @@ export const driverTrackingService = {
     if (error) throw error;
     return data;
   },
-  async getDriverLocation(driverId: string) {
-    const { data, error } = await supabase
-      .from('driver_tracking')
-      .select('*')
-      .eq('driver_id', driverId)
-      .order('last_updated', { ascending: false })
-      .limit(1)
-      .single();
-    if (error) return null;
-    return data;
+  async getDriverLocation(driverId: string): Promise<DriverLocation | null> {
+    return locationService.getDriverLocation(driverId);
   }
 };
 

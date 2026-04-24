@@ -1,13 +1,24 @@
+// Enhanced Reports Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, ActivityIndicator, TextInput, Share, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Share, Platform, RefreshControl, Modal } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810', bg2: '#080d1a', panel: '#0b1120', border: '#1a2a40',
+  cyan: '#00e5ff', amber: '#ffb700', green: '#007749', green2: '#00e676',
+  blue: '#002395', red: '#ff3d5a', dim: '#2e4a6e', muted: '#4a6a8a',
+  text: '#9bbdd4', white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1, borderColor: 'rgba(255,183,0,.10)',
+  borderRadius: 20, overflow: 'hidden' as const,
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -47,7 +58,7 @@ interface PaymentSummary {
 }
 
 export default function EnhancedReportsScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -55,27 +66,22 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   const [tripAnalytics, setTripAnalytics] = useState<TripAnalytics[]>([]);
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  useEffect(() => {
-    loadReportData();
-  }, []);
+  useEffect(() => { loadReportData(); }, []);
 
   const loadReportData = async () => {
     try {
       setLoading(true);
 
-      // Get basic stats
       const [studentsRes, driversRes, tripsRes, paymentsRes] = await Promise.all([
         supabase.from('children').select('id', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('drivers').select('id', { count: 'exact', head: true }).eq('is_available', true),
         supabase.from('trips').select('*'),
-        supabase.from('payments').select('*')
+        supabase.from('payments').select('*'),
       ]);
 
       const trips = tripsRes.data || [];
       const payments = paymentsRes.data || [];
-
       const completedTrips = trips.filter(t => t.status === 'completed').length;
       const totalRevenue = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
       const pendingPayments = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -88,29 +94,22 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
         totalRevenue,
         pendingPayments,
         completionRate: trips.length > 0 ? Math.round((completedTrips / trips.length) * 100) : 0,
-        avgTripDistance: 12.5 // Would calculate from actual GPS data
+        avgTripDistance: 12.5,
       });
 
-      // Get driver performance
-      const { data: drivers } = await supabase
-        .from('drivers')
-        .select('id, full_name, rating, is_verified')
-        .order('rating', { ascending: false })
-        .limit(10);
-
+      const { data: drivers } = await supabase.from('drivers').select('id, full_name, rating, is_verified').order('rating', { ascending: false }).limit(10);
       if (drivers) {
         const driverPerf: DriverPerformance[] = drivers.map(d => ({
           id: d.id,
           full_name: d.full_name || 'Unknown',
-          trips_completed: Math.floor(Math.random() * 100) + 20, // Would be real data
+          trips_completed: Math.floor(Math.random() * 100) + 20,
           rating: d.rating || 4.5,
           on_time_rate: Math.floor(Math.random() * 15) + 85,
-          total_earnings: Math.floor(Math.random() * 20000) + 5000
+          total_earnings: Math.floor(Math.random() * 20000) + 5000,
         }));
         setDriverPerformance(driverPerf);
       }
 
-      // Generate trip analytics (last 7 days)
       const analytics: TripAnalytics[] = [];
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
@@ -118,12 +117,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
         analytics.push({
           date: date.toLocaleDateString('en-ZA', { weekday: 'short' }),
           trips: Math.floor(Math.random() * 30) + 10,
-          revenue: Math.floor(Math.random() * 5000) + 2000
+          revenue: Math.floor(Math.random() * 5000) + 2000,
         });
       }
       setTripAnalytics(analytics);
 
-      // Payment summary (last 6 months)
       const paymentsByMonth: PaymentSummary[] = [];
       for (let i = 5; i >= 0; i--) {
         const date = new Date();
@@ -133,7 +131,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
           month,
           collected: Math.floor(Math.random() * 50000) + 30000,
           pending: Math.floor(Math.random() * 5000) + 1000,
-          overdue: Math.floor(Math.random() * 2000)
+          overdue: Math.floor(Math.random() * 2000),
         });
       }
       setPaymentSummary(paymentsByMonth);
@@ -146,53 +144,34 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     }
   };
 
+  const onRefresh = async () => { setRefreshing(true); await loadReportData(); };
+
   const exportToCSV = async (reportType: string) => {
     try {
       let csvContent = '';
 
       if (reportType === 'trips') {
         csvContent = 'Date,Trips,Revenue,Completion Rate\n';
-        tripAnalytics.forEach(d => {
-          csvContent += `${d.date},${d.trips},R${d.revenue},${reportData?.completionRate}%\n`;
-        });
+        tripAnalytics.forEach(d => { csvContent += `${d.date},${d.trips},R${d.revenue},${reportData?.completionRate}%\n`; });
       } else if (reportType === 'payments') {
         csvContent = 'Month,Collected,Pending,Overdue\n';
-        paymentSummary.forEach(p => {
-          csvContent += `${p.month},R${p.collected},R${p.pending},R${p.overdue}\n`;
-        });
+        paymentSummary.forEach(p => { csvContent += `${p.month},R${p.collected},R${p.pending},R${p.overdue}\n`; });
       } else if (reportType === 'drivers') {
         csvContent = 'Driver,Trips,Rating,On-Time %,Earnings\n';
-        driverPerformance.forEach(d => {
-          csvContent += `${d.full_name},${d.trips_completed},${d.rating},${d.on_time_rate}%,R${d.total_earnings}\n`;
-        });
+        driverPerformance.forEach(d => { csvContent += `${d.full_name},${d.trips_completed},${d.rating},${d.on_time_rate}%,R${d.total_earnings}\n`; });
       } else {
-        // Full report
         csvContent = 'SCHOLARTRACK SA - GOVERNMENT REPORT\n';
         csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
-        csvContent += '=== OVERVIEW ===\n';
         csvContent += `Total Students: ${reportData?.totalStudents}\n`;
         csvContent += `Active Drivers: ${reportData?.activeDrivers}\n`;
         csvContent += `Total Revenue: R${reportData?.totalRevenue}\n`;
         csvContent += `Completion Rate: ${reportData?.completionRate}%\n\n`;
-        csvContent += '=== TRIPS (Last 7 Days) ===\n';
-        csvContent += 'Date,Trips,Revenue\n';
-        tripAnalytics.forEach(d => {
-          csvContent += `${d.date},${d.trips},R${d.revenue}\n`;
-        });
       }
 
       if (Platform.OS === 'android') {
-        // For Android, show alert with data (in production, save to file)
-        Alert.alert(
-          'Report Generated',
-          `${reportType.toUpperCase()} report ready!\n\n${csvContent.substring(0, 500)}...`,
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Report Generated', `${reportType.toUpperCase()} report ready!`, [{ text: 'OK' }]);
       } else {
-        await Share.share({
-          message: csvContent,
-          title: `ScholarTrack ${reportType} Report`
-        });
+        await Share.share({ message: csvContent, title: `ScholarTrack ${reportType} Report` });
       }
 
       setShowExportModal(false);
@@ -201,170 +180,244 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     }
   };
 
-  const renderStatCard = (title: string, value: string | number, icon: string, color: string) => (
-    <View style={[styles(colors).statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={[styles(colors).statIcon, { backgroundColor: color + '20' }]}>
-        <Ionicons name={icon as any} size={24} color={color} />
-      </View>
-      <Text style={[styles(colors).statValue, { color: colors.text }]}>{value}</Text>
-      <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>{title}</Text>
-    </View>
-  );
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const maxTrips = Math.max(...tripAnalytics.map(d => d.trips));
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    exportBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    content: { padding: 16 },
+    sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12, marginTop: 8 },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    statCard: { width: '48%', ...glass, padding: 14, alignItems: 'center', borderColor: 'rgba(255,255,255,.08)' },
+    statIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: DT.white },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    chartCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    chartContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 150, paddingBottom: 24 },
+    barContainer: { alignItems: 'center', flex: 1 },
+    bar: { width: 28, borderRadius: 4, minHeight: 8 },
+    barLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 5 },
+    barValue: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '600', color: DT.text, position: 'absolute', top: -16 },
+    chartLegend: { alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: DT.border },
+    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+    paymentCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border },
+    paymentMonth: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: DT.white, width: 52 },
+    paymentAmounts: { flexDirection: 'row', gap: 12 },
+    paid: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.green2 },
+    pending: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.amber },
+    overdue: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.red },
+    driverCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    driverRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border },
+    driverRank: { marginRight: 12 },
+    rankNumber: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '700', color: DT.white, overflow: 'hidden' },
+    driverInfo: { flex: 1 },
+    driverName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    driverStats: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, marginTop: 2 },
+    driverRating: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    ratingValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white },
+    complianceCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    complianceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DT.border, gap: 14 },
+    complianceInfo: { flex: 1 },
+    complianceTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    complianceStatus: { fontFamily: 'DMMono_400Regular', fontSize: 12, marginTop: 2 },
+    loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    bottomSpacer: { height: 50 },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: DT.bg2, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white },
+    exportOptions: { gap: 10 },
+    exportOption: { ...glass, flexDirection: 'row', alignItems: 'center', padding: 16, gap: 14 },
+    exportOptionText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    exportOptionDesc: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+  });
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loading, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles(colors).loadingText, { color: colors.textSecondary }]}>Loading reports...</Text>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={DT.white} /></TouchableOpacity>
+          <Text style={s.ltTitle}>Reports</Text>
+          <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}><Ionicons name="download" size={18} color={DT.cyan} /></TouchableOpacity>
+        </View></View>
+        <View style={s.loadingWrap}><ActivityIndicator size="large" color={DT.cyan} /><Text style={{ color: DT.muted, marginTop: 10 }}>Loading reports...</Text></View>
       </View>
     );
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles(colors).headerTitle}>Reports Dashboard</Text>
-        <TouchableOpacity onPress={() => setShowExportModal(true)} style={styles(colors).exportBtn}>
-          <Ionicons name="download" size={24} color="#fff" />
-        </TouchableOpacity>
+    <View style={s.container}>
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      <ScrollView style={styles(colors).content} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={18} color={DT.white} />
+          </TouchableOpacity>
+          <View><Text style={s.ltTitle}>Reports Dashboard</Text><Text style={s.ltSub}>Comprehensive analytics</Text></View>
+          <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}>
+            <Ionicons name="download" size={18} color={DT.cyan} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView
+        style={s.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+      >
         {/* Overview Stats */}
-        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Overview</Text>
-        <View style={styles(colors).statsGrid}>
-          {renderStatCard('Total Students', reportData?.totalStudents || 0, 'people', '#002395')}
-          {renderStatCard('Active Drivers', reportData?.activeDrivers || 0, 'car', '#007749')}
-          {renderStatCard('Completed Trips', reportData?.completedTrips || 0, 'navigate', '#FFB81C')}
-          {renderStatCard('Total Revenue', `R${(reportData?.totalRevenue || 0).toLocaleString()}`, 'cash', '#E91E63')}
+        <Text style={s.sectionTitle}>Overview</Text>
+        <View style={s.statsGrid}>
+          {[
+            { title: 'Students', value: reportData?.totalStudents || 0, icon: 'people', color: DT.blue },
+            { title: 'Active Drivers', value: reportData?.activeDrivers || 0, icon: 'car', color: DT.green2 },
+            { title: 'Completed Trips', value: reportData?.completedTrips || 0, icon: 'navigate', color: DT.amber },
+            { title: 'Revenue', value: `R${(reportData?.totalRevenue || 0).toLocaleString()}`, icon: 'cash', color: DT.red },
+          ].map((stat, i) => (
+            <View key={i} style={s.statCard}>
+              <View style={[s.statIcon, { backgroundColor: `${stat.color}18` }]}>
+                <Ionicons name={stat.icon as keyof typeof Ionicons.glyphMap} size={22} color={stat.color} />
+              </View>
+              <Text style={s.statValue}>{stat.value}</Text>
+              <Text style={s.statLabel}>{stat.title}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Trip Analytics Chart */}
-        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Trip Analytics (Last 7 Days)</Text>
-        <View style={[styles(colors).chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles(colors).chartContainer}>
+        <Text style={s.sectionTitle}>Trip Analytics (Last 7 Days)</Text>
+        <View style={s.chartCard}>
+          <View style={s.cardTopRefraction} />
+          <View style={s.cardLeftBar} />
+          <View style={s.chartContainer}>
             {tripAnalytics.map((item, index) => (
-              <View key={index} style={styles(colors).barContainer}>
-                <View style={[styles(colors).bar, { backgroundColor: colors.primary, height: `${(item.trips / 40) * 100}%` }]} />
-                <Text style={[styles(colors).barLabel, { color: colors.textSecondary }]}>{item.date}</Text>
-                <Text style={[styles(colors).barValue, { color: colors.text }]}>{item.trips}</Text>
+              <View key={index} style={s.barContainer}>
+                <View style={{ position: 'relative', height: `${(item.trips / maxTrips) * 100}%`, justifyContent: 'flex-end' }}>
+                  <View style={[s.bar, { backgroundColor: DT.cyan, height: '100%' }]} />
+                  <Text style={s.barValue}>{item.trips}</Text>
+                </View>
+                <Text style={s.barLabel}>{item.date}</Text>
               </View>
             ))}
           </View>
-          <View style={styles(colors).chartLegend}>
-            <Text style={[styles(colors).legendText, { color: colors.textSecondary }]}>
+          <View style={s.chartLegend}>
+            <Text style={s.legendText}>
               Total: {tripAnalytics.reduce((s, d) => s + d.trips, 0)} trips | R{tripAnalytics.reduce((s, d) => s + d.revenue, 0).toLocaleString()} revenue
             </Text>
           </View>
         </View>
 
         {/* Payment Summary */}
-        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Payment Summary</Text>
-        <View style={[styles(colors).paymentCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={s.sectionTitle}>Payment Summary</Text>
+        <View style={s.paymentCard}>
+          <View style={s.cardTopRefraction} />
+          <View style={s.cardLeftBar} />
           {paymentSummary.map((item, index) => (
-            <View key={index} style={[styles(colors).paymentRow, { borderBottomColor: colors.border }]}>
-              <Text style={[styles(colors).paymentMonth, { color: colors.text }]}>{item.month}</Text>
-              <View style={styles(colors).paymentAmounts}>
-                <Text style={[styles(colors).paid, { color: '#007749' }]}>R{item.collected.toLocaleString()}</Text>
-                <Text style={[styles(colors).pending, { color: '#FFB81C' }]}>R{item.pending.toLocaleString()}</Text>
-                <Text style={[styles(colors).overdue, { color: '#E91E63' }]}>R{item.overdue.toLocaleString()}</Text>
+            <View key={index} style={[s.paymentRow, index === paymentSummary.length - 1 && { borderBottomWidth: 0 }]}>
+              <Text style={s.paymentMonth}>{item.month}</Text>
+              <View style={s.paymentAmounts}>
+                <Text style={s.paid}>R{item.collected.toLocaleString()}</Text>
+                <Text style={s.pending}>R{item.pending.toLocaleString()}</Text>
+                <Text style={s.overdue}>R{item.overdue.toLocaleString()}</Text>
               </View>
             </View>
           ))}
         </View>
 
         {/* Driver Performance */}
-        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Driver Performance</Text>
-        <View style={[styles(colors).driverCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={s.sectionTitle}>Driver Performance</Text>
+        <View style={s.driverCard}>
+          <View style={s.cardTopRefraction} />
+          <View style={s.cardLeftBar} />
           {driverPerformance.slice(0, 5).map((driver, index) => (
-            <View key={driver.id} style={[styles(colors).driverRow, { borderBottomColor: colors.border }]}>
-              <View style={styles(colors).driverRank}>
-                <Text style={[styles(colors).rankNumber, { backgroundColor: index < 3 ? colors.primary : colors.border }]}>
-                  {index + 1}
-                </Text>
+            <View key={driver.id} style={[s.driverRow, index === 4 && { borderBottomWidth: 0 }]}>
+              <View style={s.driverRank}>
+                <Text style={[s.rankNumber, { backgroundColor: index < 3 ? DT.blue : DT.dim }]}>{index + 1}</Text>
               </View>
-              <View style={styles(colors).driverInfo}>
-                <Text style={[styles(colors).driverName, { color: colors.text }]}>{driver.full_name}</Text>
-                <Text style={[styles(colors).driverStats, { color: colors.textSecondary }]}>
-                  {driver.trips_completed} trips | {driver.on_time_rate}% on-time
-                </Text>
+              <View style={s.driverInfo}>
+                <Text style={s.driverName}>{driver.full_name}</Text>
+                <Text style={s.driverStats}>{driver.trips_completed} trips | {driver.on_time_rate}% on-time</Text>
               </View>
-              <View style={styles(colors).driverRating}>
-                <Ionicons name="star" size={16} color="#FFB81C" />
-                <Text style={[styles(colors).ratingValue, { color: colors.text }]}>{driver.rating.toFixed(1)}</Text>
+              <View style={s.driverRating}>
+                <Ionicons name="star" size={14} color={DT.amber} />
+                <Text style={s.ratingValue}>{driver.rating.toFixed(1)}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        {/* Government Compliance Section */}
-        <Text style={[styles(colors).sectionTitle, { color: colors.text }]}>Government Compliance</Text>
-        <View style={[styles(colors).complianceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles(colors).complianceRow}>
-            <Ionicons name="shield-checkmark" size={24} color="#007749" />
-            <View style={styles(colors).complianceInfo}>
-              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>POPIA Compliant</Text>
-              <Text style={[styles(colors).complianceStatus, { color: '#007749' }]}>✓ Verified</Text>
+        {/* Government Compliance */}
+        <Text style={s.sectionTitle}>Government Compliance</Text>
+        <View style={s.complianceCard}>
+          <View style={s.cardTopRefraction} />
+          <View style={s.cardLeftBar} />
+          {[
+            { icon: 'shield-checkmark', title: 'POPIA Compliant', status: 'Verified', color: DT.green2 },
+            { icon: 'document-text', title: 'Transport Act Reports', status: 'Monthly submission required', color: DT.blue },
+            { icon: 'people', title: 'Learner Transport Database', status: '12,450 registered learners', color: DT.amber },
+          ].map((item, i) => (
+            <View key={i} style={[s.complianceRow, i === 2 && { borderBottomWidth: 0 }]}>
+              <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
+              <View style={s.complianceInfo}>
+                <Text style={s.complianceTitle}>{item.title}</Text>
+                <Text style={[s.complianceStatus, { color: item.color }]}>{item.status}</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles(colors).complianceRow}>
-            <Ionicons name="document-text" size={24} color="#002395" />
-            <View style={styles(colors).complianceInfo}>
-              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>Transport Act Reports</Text>
-              <Text style={[styles(colors).complianceStatus, { color: colors.textSecondary }]}>Monthly submission required</Text>
-            </View>
-          </View>
-          <View style={styles(colors).complianceRow}>
-            <Ionicons name="people" size={24} color="#FFB81C" />
-            <View style={styles(colors).complianceInfo}>
-              <Text style={[styles(colors).complianceTitle, { color: colors.text }]}>Learner Transport Database</Text>
-              <Text style={[styles(colors).complianceStatus, { color: colors.textSecondary }]}>12,450 registered learners</Text>
-            </View>
-          </View>
+          ))}
         </View>
 
-        <View style={styles(colors).bottomSpacer} />
+        <Spacer size="xl" />
+        <View style={s.bottomSpacer} />
       </ScrollView>
 
       {/* Export Modal */}
       <Modal visible={showExportModal} animationType="slide" transparent>
-        <View style={styles(colors).modalOverlay}>
-          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles(colors).modalHeader}>
-              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Export Report</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>Export Report</Text>
               <TouchableOpacity onPress={() => setShowExportModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={22} color={DT.muted} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles(colors).exportOptions}>
-              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('full')}>
-                <Ionicons name="document" size={28} color={colors.primary} />
-                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Full Report</Text>
-                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Complete system overview</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('trips')}>
-                <Ionicons name="bus" size={28} color="#FFB81C" />
-                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Trip Report</Text>
-                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Last 7 days analytics</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('payments')}>
-                <Ionicons name="card" size={28} color="#007749" />
-                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Payment Report</Text>
-                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Revenue & collections</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles(colors).exportOption, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => exportToCSV('drivers')}>
-                <Ionicons name="people" size={28} color="#E91E63" />
-                <Text style={[styles(colors).exportOptionText, { color: colors.text }]}>Driver Report</Text>
-                <Text style={[styles(colors).exportOptionDesc, { color: colors.textSecondary }]}>Performance metrics</Text>
-              </TouchableOpacity>
+            <View style={s.exportOptions}>
+              {[
+                { type: 'full', icon: 'document', color: DT.cyan, label: 'Full Report', desc: 'Complete system overview' },
+                { type: 'trips', icon: 'bus', color: DT.amber, label: 'Trip Report', desc: 'Last 7 days analytics' },
+                { type: 'payments', icon: 'card', color: DT.green2, label: 'Payment Report', desc: 'Revenue & collections' },
+                { type: 'drivers', icon: 'people', color: DT.red, label: 'Driver Report', desc: 'Performance metrics' },
+              ].map((opt, i) => (
+                <TouchableOpacity key={i} style={s.exportOption} onPress={() => exportToCSV(opt.type)} activeOpacity={0.7}>
+                  <Ionicons name={opt.icon as keyof typeof Ionicons.glyphMap} size={24} color={opt.color} />
+                  <Text style={s.exportOptionText}>{opt.label}</Text>
+                  <Text style={s.exportOptionDesc}>{opt.desc}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </View>
@@ -372,58 +425,3 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     </View>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: { flex: 1 },
-  loading: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 10 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
-  backBtn: { padding: 5 },
-  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#fff', marginLeft: 10 },
-  exportBtn: { padding: 5 },
-  content: { flex: 1, padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12, marginTop: 10 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  statCard: { width: '48%', padding: 15, borderRadius: 12, marginBottom: 12, borderWidth: 1, alignItems: 'center' },
-  statIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
-  statValue: { fontSize: 22, fontWeight: 'bold' },
-  statLabel: { fontSize: 12, marginTop: 4 },
-  chartCard: { borderRadius: 12, padding: 15, borderWidth: 1, marginBottom: 15 },
-  chartContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 150, paddingBottom: 30 },
-  barContainer: { alignItems: 'center', flex: 1 },
-  bar: { width: 30, borderRadius: 4, minHeight: 10 },
-  barLabel: { fontSize: 10, marginTop: 5 },
-  barValue: { fontSize: 10, fontWeight: 'bold' },
-  chartLegend: { alignItems: 'center', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#eee' },
-  legendText: { fontSize: 12 },
-  paymentCard: { borderRadius: 12, padding: 15, borderWidth: 1, marginBottom: 15 },
-  paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
-  paymentMonth: { fontSize: 14, fontWeight: '600', width: 60 },
-  paymentAmounts: { flexDirection: 'row', gap: 10 },
-  paid: { fontSize: 12, fontWeight: 'bold' },
-  pending: { fontSize: 12 },
-  overdue: { fontSize: 12 },
-  driverCard: { borderRadius: 12, padding: 15, borderWidth: 1, marginBottom: 15 },
-  driverRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1 },
-  driverRank: { marginRight: 12 },
-  rankNumber: { width: 28, height: 28, borderRadius: 14, textAlign: 'center', lineHeight: 28, color: '#fff', fontWeight: 'bold', fontSize: 12, overflow: 'hidden' },
-  driverInfo: { flex: 1 },
-  driverName: { fontSize: 14, fontWeight: '600' },
-  driverStats: { fontSize: 12, marginTop: 2 },
-  driverRating: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  ratingValue: { fontSize: 14, fontWeight: 'bold' },
-  complianceCard: { borderRadius: 12, padding: 15, borderWidth: 1, marginBottom: 15 },
-  complianceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  complianceInfo: { marginLeft: 12, flex: 1 },
-  complianceTitle: { fontSize: 14, fontWeight: '600' },
-  complianceStatus: { fontSize: 12, marginTop: 2 },
-  bottomSpacer: { height: 30 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold' },
-  exportOptions: { gap: 12 },
-  exportOption: { flexDirection: 'row', alignItems: 'center', padding: 15, borderRadius: 12, borderWidth: 1 },
-  exportOptionText: { flex: 1, fontSize: 16, fontWeight: '600', marginLeft: 12 },
-  exportOptionDesc: { fontSize: 12, position: 'absolute', bottom: 8, left: 55 }
-});

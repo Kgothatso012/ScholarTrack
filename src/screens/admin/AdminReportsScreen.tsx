@@ -1,20 +1,43 @@
+// Admin Reports Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
-import { ThemeColors } from '../../context/ThemeContext';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const AdminReportsScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
+export default function AdminReportsScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
@@ -61,7 +84,7 @@ const AdminReportsScreen = ({ navigation }: Props) => {
         activeDrivers: driversCount || 0,
         schools: schoolsCount || 0,
         tripsToday: tripsCount || 0,
-        revenue: revenue,
+        revenue,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -70,9 +93,7 @@ const AdminReportsScreen = ({ navigation }: Props) => {
     }
   };
 
-  useEffect(() => {
-    loadStats();
-  }, []);
+  useEffect(() => { loadStats(); }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -108,7 +129,6 @@ const AdminReportsScreen = ({ navigation }: Props) => {
           break;
       }
 
-      // In production, this would generate a CSV/PDF and download
       Alert.alert(
         'Export Ready',
         `${type} report prepared with ${description}.\n\nIn production, this would download as a CSV file.`,
@@ -120,112 +140,131 @@ const AdminReportsScreen = ({ navigation }: Props) => {
   };
 
   const reportTypes = [
-    { name: 'Student Report', icon: 'school', color: colors.primary, action: () => exportReport('Student') },
-    { name: 'Driver Report', icon: 'car', color: colors.success, action: () => exportReport('Driver') },
-    { name: 'Revenue Report', icon: 'cash', color: colors.accent, action: () => exportReport('Revenue') },
-    { name: 'Trip Report', icon: 'bus', color: colors.secondary, action: () => exportReport('Trip') },
+    { name: 'Student Report', icon: 'school', color: DT.blue, action: () => exportReport('Student') },
+    { name: 'Driver Report', icon: 'car', color: DT.green2, action: () => exportReport('Driver') },
+    { name: 'Revenue Report', icon: 'cash', color: DT.amber, action: () => exportReport('Revenue') },
+    { name: 'Trip Report', icon: 'bus', color: DT.cyan, action: () => exportReport('Trip') },
   ];
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', elevation: 2 },
-    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.h2, color: colors.accent, marginTop: spacing.xs },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    reportCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    reportIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-    reportInfo: { flex: 1, marginLeft: spacing.md },
-    reportName: { ...typography.label, color: colors.text },
-    reportDesc: { ...typography.bodySmall, color: colors.textSecondary },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 6 },
+    sbIcon: { fontSize: 14 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    statsGrid: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
+    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.amber },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    revenueCard: { ...glass, marginHorizontal: 16, marginTop: 12, padding: 20, borderTopWidth: 1, borderTopColor: 'rgba(255,183,0,.3)' },
+    revenueRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    revenueLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
+    revenueValue: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: DT.amber },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
+    reportCard: { ...glass, padding: 16, marginBottom: 10 },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    reportRow: { flexDirection: 'row', alignItems: 'center' },
+    reportIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+    reportInfo: { flex: 1, marginLeft: 14 },
+    reportName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    reportDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', padding: 20 },
+    loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading reports...</Text>
-        </Card>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Reports</Text><Text style={s.ltSub}>Loading...</Text></View></View>
+        <View style={s.loadingWrap}><Text style={s.emptyText}>Loading reports...</Text></View>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles(colors).container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
+      style={s.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.green2} colors={[DT.green2]} />}
     >
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+      </View>
+
       {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Reports</Text>
-        <Text style={styles(colors).headerSubtext}>Analytics and insights</Text>
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Reports</Text><Text style={s.ltSub}>Analytics and insights</Text></View>
+        </View>
       </View>
 
       {/* Stats Grid */}
-      <View style={styles(colors).statsGrid}>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Students</Text>
-            <Text style={styles(colors).statValue}>{stats.totalStudents}</Text>
-          </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Drivers</Text>
-            <Text style={styles(colors).statValue}>{stats.activeDrivers}</Text>
-          </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Schools</Text>
-            <Text style={styles(colors).statValue}>{stats.schools}</Text>
-          </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Trips Today</Text>
-            <Text style={styles(colors).statValue}>{stats.tripsToday}</Text>
-          </View>
-        </Card>
+      <View style={s.statsGrid}>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{stats.totalStudents}</Text>
+          <Text style={s.statLabel}>Students</Text>
+        </View>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{stats.activeDrivers}</Text>
+          <Text style={s.statLabel}>Drivers</Text>
+        </View>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{stats.schools}</Text>
+          <Text style={s.statLabel}>Schools</Text>
+        </View>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{stats.tripsToday}</Text>
+          <Text style={s.statLabel}>Trips Today</Text>
+        </View>
       </View>
 
       {/* Revenue Card */}
-      <View style={styles(colors).section}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).statLabel}>Total Revenue</Text>
-          <Text style={styles(colors).statValue}>R{(stats.revenue / 100).toLocaleString()}</Text>
-        </Card>
+      <View style={s.revenueCard}>
+        <View style={s.revenueRow}>
+          <Text style={s.revenueLabel}>Total Revenue</Text>
+          <Text style={s.revenueValue}>R{(stats.revenue / 100).toLocaleString()}</Text>
+        </View>
       </View>
 
       {/* Report Types */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Generate Reports</Text>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Generate Reports</Text>
         {reportTypes.map((report, index) => (
-          <TouchableOpacity key={index} onPress={report.action}>
-            <Card variant="elevated" padding="medium">
-              <View style={styles(colors).reportCard}>
-                <View style={[styles(colors).reportIcon, { backgroundColor: report.color + '20' }]}>
-                  <Ionicons name={report.icon as any} size={24} color={report.color} />
+          <TouchableOpacity key={index} onPress={report.action} activeOpacity={0.7}>
+            <View style={s.reportCard}>
+              <View style={s.cardTopRefraction} />
+              <View style={s.reportRow}>
+                <View style={[s.reportIcon, { backgroundColor: `${report.color}18`, borderWidth: 1, borderColor: `${report.color}35` }]}>
+                  <Ionicons name={report.icon as keyof typeof Ionicons.glyphMap} size={22} color={report.color} />
                 </View>
-                <View style={styles(colors).reportInfo}>
-                  <Text style={styles(colors).reportName}>{report.name}</Text>
-                  <Text style={styles(colors).reportDesc}>Export and view details</Text>
+                <View style={s.reportInfo}>
+                  <Text style={s.reportName}>{report.name}</Text>
+                  <Text style={s.reportDesc}>Export and view details</Text>
                 </View>
-                <Ionicons name="download" size={20} color={colors.textSecondary} />
+                <Ionicons name="download" size={20} color={DT.muted} />
               </View>
-            </Card>
+            </View>
           </TouchableOpacity>
         ))}
       </View>
 
       <Spacer size="xl" />
+      <View style={s.bottomPadding} />
     </ScrollView>
   );
-};
-
-export default AdminReportsScreen;
+}

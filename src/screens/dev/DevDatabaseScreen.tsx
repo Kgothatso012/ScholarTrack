@@ -1,149 +1,255 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
+} from 'react-native';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withSpring,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
-
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#00e676',
+  red: '#ff3d5a',
+  white: '#ffffff',
+  text: '#9bbdd4',
+  muted: '#4a6a8a',
+  dim: '#2a4060',
+};
+
+const SPRING = { damping: 15, stiffness: 150 };
+
+const glassCard = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(0,229,255,.10)',
+  borderRadius: 18,
+  overflow: 'hidden' as const,
+};
+
+const SpringTouchable = ({
+  children, onPress, style,
+}: { children: React.ReactNode; onPress: () => void; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 const DevDatabaseScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
 
   const tables = [
-    { name: 'users', rows: 245, size: '1.2 MB' },
-    { name: 'drivers', rows: 24, size: '156 KB' },
-    { name: 'parents', rows: 156, size: '420 KB' },
-    { name: 'trips', rows: 1245, size: '2.1 MB' },
-    { name: 'payments', rows: 890, size: '890 KB' },
-    { name: 'schools', rows: 12, size: '24 KB' },
+    { name: 'users', rows: 245, size: '1.2 MB', icon: 'people' as const, color: DT.cyan },
+    { name: 'drivers', rows: 24, size: '156 KB', icon: 'car' as const, color: DT.green },
+    { name: 'parents', rows: 156, size: '420 KB', icon: 'person' as const, color: DT.amber },
+    { name: 'trips', rows: 1245, size: '2.1 MB', icon: 'navigate' as const, color: DT.cyan },
+    { name: 'payments', rows: 890, size: '890 KB', icon: 'card' as const, color: DT.amber },
+    { name: 'schools', rows: 12, size: '24 KB', icon: 'school' as const, color: DT.green },
+  ];
+
+  const actions = [
+    { label: 'Sync DB', icon: 'sync' as const, color: DT.green },
+    { label: 'Backup', icon: 'cloud-download' as const, color: DT.cyan },
+    { label: 'Migrate', icon: 'git-branch' as const, color: DT.amber },
   ];
 
   const runQuery = () => {
-    if (!query.trim()) {
-      Alert.alert('Error', 'Please enter a query');
-      return;
-    }
+    if (!query.trim()) { Alert.alert('Error', 'Please enter a query'); return; }
     Alert.alert('Query Executed', `Running: ${query}`);
   };
 
-  const syncDb = () => {
-    Alert.alert('Sync Database', 'Synchronizing database with server...', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sync', onPress: () => Alert.alert('Success', 'Database synchronized!') },
-    ]);
-  };
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: insets.top + spacing.lg,
+      borderBottomWidth: 4,
+      borderBottomColor: DT.cyan,
+    },
+    headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: DT.white },
+    headerSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, marginTop: 2 },
+    backBtn: { padding: spacing.xs },
+    section: { padding: spacing.lg },
+    sectionLabel: {
+      fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5,
+      textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: spacing.md,
+    },
+    statusCard: { ...glassCard },
+    statusTop: { height: 1, backgroundColor: 'rgba(0,229,255,.15)' },
+    statusRow: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingVertical: spacing.sm, paddingHorizontal: spacing.lg,
+      borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,.05)',
+    },
+    statusDot: {
+      width: 8, height: 8, borderRadius: 4, backgroundColor: DT.green, marginRight: spacing.sm,
+    },
+    statusText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: DT.green },
+    statusField: { flexDirection: 'row', alignItems: 'center' },
+    statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, width: 72 },
+    statusValue: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.text },
+    queryCard: { ...glassCard },
+    queryTop: { height: 1, backgroundColor: 'rgba(0,229,255,.15)' },
+    queryInput: {
+      fontFamily: 'DMMono_400Regular', fontSize: 13, color: '#d4d4d4',
+      minHeight: 80, padding: spacing.lg, textAlignVertical: 'top',
+      backgroundColor: 'rgba(0,0,0,.3)',
+    },
+    runBtn: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+      paddingVertical: spacing.md, backgroundColor: DT.green,
+    },
+    runBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.bg },
+    tableCard: {
+      ...glassCard,
+      flexDirection: 'row', alignItems: 'center',
+      padding: spacing.md, marginBottom: spacing.sm,
+    },
+    tableIconBox: {
+      width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
+    },
+    tableInfo: { flex: 1, marginLeft: spacing.md },
+    tableName: { fontFamily: 'DMMono_400Regular', fontSize: 13, color: DT.white },
+    tableMeta: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted, marginTop: 2 },
+    viewBtn: { padding: spacing.xs },
+    actionRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+    actionBtn: {
+      ...glassCard,
+      flex: 1, alignItems: 'center',
+      paddingVertical: spacing.lg,
+    },
+    actionLabel: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: DT.white, marginTop: spacing.xs },
+  });
 
   return (
-    <ScrollView style={styles(colors).container}>
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>🗄️ Database</Text>
-        <Text style={styles(colors).headerSubtext}>Query & manage database</Text>
-      </View>
-
-      <View style={styles(colors).statusCard}>
-        <View style={styles(colors).statusRow}>
-          <View style={styles(colors).statusDot} />
-          <Text style={styles(colors).statusText}>Connected to PostgreSQL</Text>
-        </View>
-        <View style={styles(colors).statusRow}>
-          <Text style={styles(colors).statusLabel}>Host:</Text>
-          <Text style={styles(colors).statusValue}>localhost:5432</Text>
-        </View>
-        <View style={styles(colors).statusRow}>
-          <Text style={styles(colors).statusLabel}>Database:</Text>
-          <Text style={styles(colors).statusValue}>scholartrack_dev</Text>
+    <ScrollView style={s.container}>
+      {/* Header */}
+      <View style={s.header}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+            <Ionicons name="chevron-back" size={22} color={DT.white} />
+          </TouchableOpacity>
+          <View>
+            <View style={s.headerRow}>
+              <Ionicons name="server" size={20} color={DT.cyan} />
+              <Text style={s.headerTitle}>Database</Text>
+            </View>
+            <Text style={s.headerSub}>Query and manage Supabase</Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>SQL Query</Text>
-        <View style={styles(colors).queryCard}>
+      {/* Connection Status */}
+      <View style={s.section}>
+        <Text style={s.sectionLabel}>Connection</Text>
+        <View style={s.statusCard}>
+          <View style={s.statusTop} />
+          <View style={s.statusRow}>
+            <View style={s.statusDot} />
+            <Text style={s.statusText}>Connected to PostgreSQL</Text>
+          </View>
+          <View style={s.statusRow}>
+            <View style={s.statusField}>
+              <Text style={s.statusLabel}>Host:</Text>
+              <Text style={s.statusValue}>zjcribmwgavpzycgpwva.supabase.co</Text>
+            </View>
+          </View>
+          <View style={[s.statusRow, { borderBottomWidth: 0 }]}>
+            <View style={s.statusField}>
+              <Text style={s.statusLabel}>DB:</Text>
+              <Text style={s.statusValue}>scholartrack_prod</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* SQL Query */}
+      <View style={s.section}>
+        <Text style={s.sectionLabel}>SQL Query</Text>
+        <View style={s.queryCard}>
+          <View style={s.queryTop} />
           <TextInput
-            style={styles(colors).queryInput}
+            style={s.queryInput}
             placeholder="SELECT * FROM users LIMIT 10;"
+            placeholderTextColor={DT.muted}
             value={query}
             onChangeText={setQuery}
             multiline
           />
-          <TouchableOpacity style={styles(colors).runBtn} onPress={runQuery}>
-            <Ionicons name="play" size={16} color="#fff" />
-            <Text style={styles(colors).runBtnText}>Run</Text>
-          </TouchableOpacity>
+          <SpringTouchable onPress={runQuery} style={s.runBtn}>
+            <Ionicons name="play" size={16} color={DT.bg} />
+            <Text style={s.runBtnText}>Run Query</Text>
+          </SpringTouchable>
         </View>
       </View>
 
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Tables</Text>
-        {tables.map((table) => (
-          <TouchableOpacity key={table.name} style={styles(colors).tableCard}>
-            <View style={styles(colors).tableIcon}>
-              <Ionicons name="server" size={20} color="#002395" />
+      {/* Tables */}
+      <View style={s.section}>
+        <Text style={s.sectionLabel}>Tables</Text>
+        {tables.map((table, i) => (
+          <SpringTouchable
+            key={i}
+            onPress={() => Alert.alert(table.name, `${table.rows} rows, ${table.size}`)}
+            style={s.tableCard}
+          >
+            <View style={[s.tableIconBox, { backgroundColor: table.color + '20' }]}>
+              <Ionicons name={table.icon} size={20} color={table.color} />
             </View>
-            <View style={styles(colors).tableInfo}>
-              <Text style={styles(colors).tableName}>{table.name}</Text>
-              <Text style={styles(colors).tableMeta}>{table.rows} rows • {table.size}</Text>
+            <View style={s.tableInfo}>
+              <Text style={s.tableName}>{table.name}</Text>
+              <Text style={s.tableMeta}>{table.rows} rows · {table.size}</Text>
             </View>
-            <TouchableOpacity style={styles(colors).actionBtn} onPress={() => Alert.alert('View Table', `Viewing ${table.name}...`)}>
-              <Ionicons name="eye" size={16} color="#002395" />
+            <TouchableOpacity style={s.viewBtn}>
+              <Ionicons name="eye-outline" size={18} color={DT.muted} />
             </TouchableOpacity>
-          </TouchableOpacity>
+          </SpringTouchable>
         ))}
       </View>
 
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Actions</Text>
-        <View style={styles(colors).actionsRow}>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={syncDb}>
-            <Ionicons name="sync" size={24} color="#007749" />
-            <Text style={styles(colors).actionText}>Sync DB</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => Alert.alert('Backup', 'Creating backup...')}>
-            <Ionicons name="cloud-download" size={24} color="#002395" />
-            <Text style={styles(colors).actionText}>Backup</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).actionCard} onPress={() => Alert.alert('Migrate', 'Running migrations...')}>
-            <Ionicons name="git-branch" size={24} color="#FFB81C" />
-            <Text style={styles(colors).actionText}>Migrate</Text>
-          </TouchableOpacity>
+      {/* Actions */}
+      <View style={s.section}>
+        <Text style={s.sectionLabel}>Actions</Text>
+        <View style={s.actionRow}>
+          {actions.map((action, i) => (
+            <SpringTouchable
+              key={i}
+              onPress={() => Alert.alert(action.label, 'Coming soon.')}
+              style={s.actionBtn}
+            >
+              <Ionicons name={action.icon} size={24} color={action.color} />
+              <Text style={s.actionLabel}>{action.label}</Text>
+            </SpringTouchable>
+          ))}
         </View>
       </View>
     </ScrollView>
   );
 };
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { backgroundColor: '#002395', padding: 20, paddingTop: 40 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  headerSubtext: { fontSize: 14, color: '#FFB81C', marginTop: 5 },
-  statusCard: { backgroundColor: '#fff', margin: 15, padding: 15, borderRadius: 10, elevation: 2 },
-  statusRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  statusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#007749', marginRight: 8 },
-  statusText: { fontSize: 14, fontWeight: 'bold', color: '#007749' },
-  statusLabel: { fontSize: 13, color: '#666', width: 80 },
-  statusValue: { fontSize: 13, color: '#333', fontWeight: '500' },
-  section: { padding: 15 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-  queryCard: { backgroundColor: '#1e1e1e', borderRadius: 10, padding: 15 },
-  queryInput: { color: '#d4d4d4', fontSize: 14, minHeight: 80, textAlignVertical: 'top', fontFamily: 'monospace' },
-  runBtn: { backgroundColor: '#007749', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8, marginTop: 10 },
-  runBtnText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
-  tableCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-  tableIcon: { width: 36, height: 36, borderRadius: 8, backgroundColor: '#e3f2fd', justifyContent: 'center', alignItems: 'center' },
-  tableInfo: { flex: 1, marginLeft: 12 },
-  tableName: { fontSize: 14, fontWeight: 'bold', color: '#333' },
-  tableMeta: { fontSize: 12, color: '#666', marginTop: 2 },
-  actionBtn: { padding: 8 },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  actionCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, alignItems: 'center', width: '30%', elevation: 2 },
-  actionText: { fontSize: 12, color: '#333', marginTop: 5, fontWeight: '600' },
-});
 
 export default DevDatabaseScreen;

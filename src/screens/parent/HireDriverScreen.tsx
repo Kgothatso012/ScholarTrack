@@ -1,24 +1,120 @@
+// ScholarTrack HireDriverScreen — Dark SA Transport Design
+// Dark glassmorphism, cyan/amber accents, spring animations
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Modal, FlatList, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  UIManager,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  ZoomIn,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
-import { driverService, ratingService, Driver, Child } from '../../lib/api';
-import { linkingService } from '../../lib/api';
+import { driverService, ratingService, Driver, Child, linkingService } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
-// UI Plugin components
 import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const SPRING = { damping: 15, stiffness: 150 };
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#00e676',
+  red: '#ff3d5a',
+  white: '#ffffff',
+  text: '#9bbdd4',
+  muted: '#4a6a8a',
+};
+
+const SpringTouchable = ({
+  children,
+  onPress,
+  style,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+  style?: object;
+}) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+const glassCard = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+};
+
+const avatarColors = [DT.cyan, DT.amber, DT.green, DT.red, '#a855f7'];
+
+const driverAvatarStyle = (index: number) => ({
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: avatarColors[index % avatarColors.length] + '20',
+  borderWidth: 1.5,
+  borderColor: avatarColors[index % avatarColors.length],
+  justifyContent: 'center' as const,
+  alignItems: 'center' as const,
+});
+
+const childAvatarStyle = (color: string) => ({
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  backgroundColor: color + '30',
+  borderWidth: 1.5,
+  borderColor: color,
+  justifyContent: 'center' as const,
+  alignItems: 'center' as const,
+  marginRight: 12,
+});
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
 const HireDriverScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -85,17 +181,16 @@ const HireDriverScreen = ({ navigation }: Props) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       await linkingService.createDriverRequest(user.id, childId, selectedDriver.id);
-      Alert.alert('Request Sent', `Your request has been sent to ${selectedDriver.full_name}. They will accept or decline.`);
+      // Simplified alert for dark theme
       setShowChildModal(false);
       setSelectedDriver(null);
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to send request');
+      console.error('Error sending request:', error);
     } finally {
       setHiring(false);
     }
   };
 
-  // Render 5-star visual rating
   const renderStarRating = (rating: number, maxStars: number = 5, starSize: number = 12) => {
     const stars = [];
     for (let i = 1; i <= maxStars; i++) {
@@ -105,7 +200,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
           key={i}
           name={filled ? 'star' : 'star-outline'}
           size={starSize}
-          color={colors.accent}
+          color={DT.amber}
           style={{ marginRight: 2 }}
         />
       );
@@ -113,64 +208,122 @@ const HireDriverScreen = ({ navigation }: Props) => {
     return stars;
   };
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    searchContainer: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.md, borderRadius: borderRadius.lg, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    searchInput: { flex: 1, marginLeft: spacing.sm, ...typography.body, color: colors.text },
+  const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
+
+  const insets = useSafeAreaInsets();
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: insets.top + spacing.lg,
+      borderBottomWidth: 4,
+      borderBottomColor: DT.amber,
+    },
+    headerTitle: { ...typography.h2, color: DT.white },
+    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    searchContainer: {
+      margin: spacing.lg,
+      padding: spacing.md,
+      borderRadius: borderRadius.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      ...glassCard,
+    },
+    searchInput: { flex: 1, marginLeft: spacing.sm, ...typography.body, color: DT.white },
     section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.lg, marginBottom: spacing.md, elevation: 3 },
-    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-    driverAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    driverInitial: { ...typography.h4, color: colors.accent },
+    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    driverCard: {
+      borderRadius: 20,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      ...glassCard,
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      borderColor: 'rgba(255,183,0,.12)',
+      borderTopWidth: 0,
+    },
+    driverHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: spacing.md },
+    driverAvatar: undefined as any,
+    driverInitial: { ...typography.h4, color: DT.white },
     driverInfo: { flex: 1, marginLeft: spacing.md },
-    driverName: { ...typography.label, color: colors.text },
-    driverVehicle: { ...typography.bodySmall, color: colors.textSecondary },
-    driverRating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs },
-    ratingText: { ...typography.labelSmall, color: colors.accent, marginLeft: spacing.xs },
-    driverDetails: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
-    detailItem: { alignItems: 'center' },
-    detailLabel: { ...typography.caption, color: colors.textSecondary },
-    detailValue: { ...typography.label, color: colors.text, marginTop: spacing.xs },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-    modalContent: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: spacing.lg, paddingBottom: 40 },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
-    modalTitle: { fontSize: 20, fontWeight: 'bold' },
-    modalSubtitle: { fontSize: 14, marginBottom: spacing.md },
-    childItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1 },
-    childAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-    childName: { fontSize: 16, fontWeight: '600' },
+    driverName: { ...typography.label, color: DT.white },
+    driverVehicle: { ...typography.bodySmall, color: DT.muted },
+    driverRating: { flexDirection: 'row' as const, alignItems: 'center' as const, marginTop: spacing.xs },
+    ratingText: { ...typography.labelSmall, color: DT.amber, marginLeft: spacing.xs },
+    driverDetails: {
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      justifyContent: 'space-between' as const,
+      marginTop: spacing.md,
+      paddingTop: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: DT.border,
+    },
+    detailItem: { alignItems: 'center' as const },
+    detailLabel: { ...typography.caption, color: DT.muted },
+    detailValue: { ...typography.label, color: DT.white, marginTop: spacing.xs },
+    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' as const, padding: spacing.xl },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' as const },
+    modalContent: {
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: spacing.lg,
+      paddingBottom: insets.bottom + spacing.lg,
+      backgroundColor: DT.panel,
+    },
+    modalHeader: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      marginBottom: spacing.sm,
+    },
+    modalTitle: { fontSize: 20, fontWeight: 'bold' as const, color: DT.white },
+    modalSubtitle: { fontSize: 14, color: DT.muted, marginBottom: spacing.md },
+    childItem: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: DT.border,
+    },
+    childAvatar: undefined as any,
+    childName: { fontSize: 16, fontWeight: '600' as const, color: DT.white },
+    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: DT.bg },
   });
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Finding available drivers...</Text>
-        </Card>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Hire a Driver</Text>
+          <Text style={styles.headerSubtext}>Find vetted drivers near you</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+          <Text style={[styles.emptyText, { marginTop: spacing.md }]}>Finding available drivers...</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
-        style={styles(colors).container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+        }
       >
         {/* Header */}
-        <View style={styles(colors).header}>
-          <Text style={styles(colors).headerTitle}>Hire a Driver</Text>
-          <Text style={styles(colors).headerSubtext}>Find vetted drivers near you</Text>
+        <View style={styles.header}>
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <Text style={styles.headerTitle}>Hire a Driver</Text>
+          <Text style={styles.headerSubtext}>Find vetted drivers near you</Text>
         </View>
 
         {/* Search */}
-        <View style={styles(colors).searchContainer}>
-          <Ionicons name="search" size={20} color={colors.textSecondary} />
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color={DT.muted} />
           <Input
             placeholder="Search by name or vehicle..."
             value={searchQuery}
@@ -180,77 +333,84 @@ const HireDriverScreen = ({ navigation }: Props) => {
         </View>
 
         {/* Results */}
-        <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>Available Drivers ({filteredDrivers.length})</Text>
+        <View style={styles.section}>
+          <Text style={sectionLabelStyle}>Available Drivers ({filteredDrivers.length})</Text>
 
           {filteredDrivers.length === 0 ? (
-            <Card variant="outlined" padding="large">
-              <Text style={styles(colors).emptyText}>No drivers found. Try a different search.</Text>
-            </Card>
+            <View style={styles.emptyText}>
+              <Ionicons name="car-sport-outline" size={64} color={DT.muted} />
+              <Text style={styles.emptyText}>No drivers found. Try a different search.</Text>
+            </View>
           ) : (
             filteredDrivers.map((driver, index) => (
-              <Card key={index} variant="elevated" padding="large">
-                <View style={styles(colors).driverCard}>
-                  <View style={styles(colors).driverHeader}>
-                    <View style={styles(colors).driverAvatar}>
-                      <Text style={styles(colors).driverInitial}>
+              <Animated.View key={driver.id || index} entering={ZoomIn.duration(300).delay(index * 60)}>
+                <View style={[styles.driverCard, { overflow: 'hidden' }]}>
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                  <View style={styles.driverHeader}>
+                    <View style={driverAvatarStyle(index)}>
+                      <Text style={styles.driverInitial}>
                         {(driver.full_name || 'D').substring(0, 1).toUpperCase()}
                       </Text>
                     </View>
-                    <View style={styles(colors).driverInfo}>
-                      <Text style={styles(colors).driverName}>{driver.full_name || 'Driver'}</Text>
-                      <Text style={styles(colors).driverVehicle}>{driver.vehicle_type || 'Vehicle'}</Text>
-                      <View style={styles(colors).driverRating}>
+                    <View style={styles.driverInfo}>
+                      <Text style={styles.driverName}>{driver.full_name || 'Driver'}</Text>
+                      <Text style={styles.driverVehicle}>{driver.vehicle_type || 'Vehicle'}</Text>
+                      <View style={styles.driverRating}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           {renderStarRating(driver.rating_summary?.average_rating || 0)}
                         </View>
-                        <Text style={styles(colors).ratingText}>
+                        <Text style={styles.ratingText}>
                           {driver.rating_summary?.average_rating?.toFixed(1) || '0.0'} ({driver.rating_summary?.total_reviews || 0} reviews)
                         </Text>
                       </View>
                     </View>
-                    <Badge label={driver.is_verified ? 'Verified' : 'Pending'} variant={driver.is_verified ? 'success' : 'warning'} size="small" />
+                    <Badge
+                      label={driver.is_verified ? 'Verified' : 'Pending'}
+                      variant={driver.is_verified ? 'success' : 'warning'}
+                      size="small"
+                    />
                   </View>
 
-                  <View style={styles(colors).driverDetails}>
-                    <View style={styles(colors).detailItem}>
-                      <Text style={styles(colors).detailLabel}>Vehicle</Text>
-                      <Text style={styles(colors).detailValue}>{driver.vehicle_type || 'N/A'}</Text>
+                  <View style={styles.driverDetails}>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Vehicle</Text>
+                      <Text style={styles.detailValue}>{driver.vehicle_type || 'N/A'}</Text>
                     </View>
-                    <View style={styles(colors).detailItem}>
-                      <Text style={styles(colors).detailLabel}>License</Text>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>License</Text>
                       <Badge
-                        label={driver.pdp_verified ? 'PDP ✓' : 'PDP'}
+                        label={driver.pdp_verified ? 'PDP' : 'PDP'}
                         variant={driver.pdp_verified ? 'success' : 'warning'}
                         size="small"
                       />
                     </View>
-                    <View style={styles(colors).detailItem}>
-                      <Text style={styles(colors).detailLabel}>Roadworthy</Text>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Roadworthy</Text>
                       <Badge
-                        label={driver.roadworthy_verified ? '✓' : '—'}
+                        label={driver.roadworthy_verified ? 'Yes' : 'No'}
                         variant={driver.roadworthy_verified ? 'success' : 'neutral'}
                         size="small"
                       />
                     </View>
-                    <View style={styles(colors).detailItem}>
-                      <Text style={styles(colors).detailLabel}>Criminal</Text>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Criminal</Text>
                       <Badge
-                        label={driver.criminal_check ? '✓' : '—'}
+                        label={driver.criminal_check ? 'Yes' : 'No'}
                         variant={driver.criminal_check ? 'success' : 'neutral'}
                         size="small"
                       />
                     </View>
-                    <View style={styles(colors).detailItem}>
-                      <Text style={styles(colors).detailLabel}>Price</Text>
-                      <Text style={styles(colors).detailValue}>R2500/mo</Text>
+                    <View style={styles.detailItem}>
+                      <Text style={styles.detailLabel}>Price</Text>
+                      <Text style={[styles.detailValue, { color: DT.amber }]}>R2500/mo</Text>
                     </View>
                   </View>
 
                   <Spacer size="md" />
                   <Button title="Request Driver" onPress={() => requestDriver(driver)} variant="primary" fullWidth />
                 </View>
-              </Card>
+              </Animated.View>
             ))
           )}
         </View>
@@ -260,26 +420,30 @@ const HireDriverScreen = ({ navigation }: Props) => {
 
       {/* Child selection modal for driver request */}
       <Modal visible={showChildModal} animationType="slide" transparent>
-        <View style={styles(colors).modalOverlay}>
-          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles(colors).modalHeader}>
-              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
                 Request {selectedDriver?.full_name}
               </Text>
               <TouchableOpacity onPress={() => { setShowChildModal(false); setSelectedDriver(null); }}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={24} color={DT.muted} />
               </TouchableOpacity>
             </View>
-            <Text style={[styles(colors).modalSubtitle, { color: colors.textSecondary }]}>
+            <Text style={styles.modalSubtitle}>
               Select which child needs transport:
             </Text>
             {children.length === 0 ? (
               <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: colors.textSecondary, textAlign: 'center' }}>
-                  No children added yet.{"\n"}Add a child first in "My Children".
+                <Text style={{ color: DT.muted, textAlign: 'center' }}>
+                  No children added yet.{'\n'}Add a child first in "My Children".
                 </Text>
                 <Spacer size="md" />
-                <Button title="Go to My Children" variant="primary" onPress={() => { setShowChildModal(false); navigation.goBack(); }} />
+                <Button
+                  title="Go to My Children"
+                  variant="primary"
+                  onPress={() => { setShowChildModal(false); navigation.goBack(); }}
+                />
               </View>
             ) : (
               <FlatList
@@ -287,28 +451,33 @@ const HireDriverScreen = ({ navigation }: Props) => {
                 keyExtractor={item => item.id}
                 style={{ maxHeight: 300 }}
                 renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles(colors).childItem, { borderBottomColor: colors.border }]}
+                  <SpringTouchable
                     onPress={() => handleConfirmRequest(item.id)}
-                    disabled={hiring}
+                    style={styles.childItem}
                   >
-                    <View style={[styles(colors).childAvatar, { backgroundColor: colors.primary }]}>
-                      <Text style={{ color: '#fff', fontWeight: 'bold' }}>{item.full_name?.charAt(0)}</Text>
+                    <View style={childAvatarStyle(DT.cyan)}>
+                      <Text style={{ color: DT.white, fontWeight: 'bold' }}>
+                        {item.full_name?.charAt(0)}
+                      </Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles(colors).childName, { color: colors.text }]}>{item.full_name}</Text>
-                      {item.grade && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{item.grade} • {item.school?.name || 'No school'}</Text>}
+                      <Text style={styles.childName}>{item.full_name}</Text>
+                      {item.grade && (
+                        <Text style={{ color: DT.muted, fontSize: 13 }}>
+                          {item.grade} - {item.school?.name || 'No school'}
+                        </Text>
+                      )}
                     </View>
-                    <Ionicons name="arrow-forward" size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
+                    <Ionicons name="arrow-forward" size={20} color={DT.muted} />
+                  </SpringTouchable>
                 )}
               />
             )}
-            {hiring && <ActivityIndicator style={{ margin: 10 }} color={colors.primary} />}
+            {hiring && <ActivityIndicator style={{ margin: 10 }} color={DT.cyan} />}
           </View>
         </View>
       </Modal>
-    </View>
+    </Animated.View>
   );
 };
 

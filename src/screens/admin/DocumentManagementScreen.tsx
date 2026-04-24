@@ -1,14 +1,37 @@
+// Document Management Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, ActivityIndicator, Image, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { documentService, DriverDocument, ParentDocument } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -16,7 +39,7 @@ interface Props {
 
 type TabType = 'drivers' | 'parents';
 
-const documentTypes = {
+const documentTypes: Record<string, string> = {
   id_card: 'ID Card',
   drivers_license: "Driver's License",
   pdp_certificate: 'PDP Certificate',
@@ -26,11 +49,11 @@ const documentTypes = {
   permit: 'Transport Permit',
   proof_of_residence: 'Proof of Residence',
   birth_certificate: 'Birth Certificate',
-  consent_form: 'Consent Form'
+  consent_form: 'Consent Form',
 };
 
 export default function DocumentManagementScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('drivers');
@@ -40,16 +63,14 @@ export default function DocumentManagementScreen({ navigation }: Props) {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  useEffect(() => { loadDocuments(); }, []);
 
   const loadDocuments = async () => {
     try {
       setLoading(true);
       const [drivers, parents] = await Promise.all([
         documentService.getAllDriverDocuments(),
-        documentService.getAllParentDocuments()
+        documentService.getAllParentDocuments(),
       ]);
       setDriverDocs(drivers || []);
       setParentDocs(parents || []);
@@ -61,11 +82,12 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     }
   };
 
+  const onRefresh = async () => { setRefreshing(true); await loadDocuments(); };
+
   const handleReview = async (docId: string, status: 'approved' | 'rejected') => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       await documentService.reviewDriverDocument(docId, status, user.id, reviewNotes);
       Alert.alert('Success', `Document ${status} successfully`);
       setShowReviewModal(false);
@@ -76,195 +98,260 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     }
   };
 
-  const renderDriverDoc = ({ item }: { item: DriverDocument }) => (
-    <TouchableOpacity
-      style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => setSelectedDoc(item)}
-    >
-      <View style={styles(colors).docHeader}>
-        <View style={[styles(colors).docIcon, { backgroundColor: colors.primary + '20' }]}>
-          <Ionicons name="document-text" size={24} color={colors.primary} />
-        </View>
-        <View style={styles(colors).docInfo}>
-          <Text style={[styles(colors).docType, { color: colors.text }]}>
-            {documentTypes[item.document_type as keyof typeof documentTypes] || item.document_type}
-          </Text>
-          <Text style={[styles(colors).docDriver, { color: colors.textSecondary }]}>
-            {item.driver?.full_name || 'Unknown Driver'}
-          </Text>
-        </View>
-        <View style={[
-          styles(colors).statusBadge,
-          { backgroundColor: item.status === 'approved' ? '#007749' : item.status === 'rejected' ? '#E91E63' : '#FFB81C' }
-        ]}>
-          <Text style={styles(colors).statusText}>{item.status}</Text>
-        </View>
-      </View>
-      <View style={styles(colors).docFooter}>
-        <Text style={[styles(colors).docDate, { color: colors.textSecondary }]}>
-          {new Date(item.uploaded_at).toLocaleDateString()}
-        </Text>
-        {item.status === 'pending' && (
-          <View style={styles(colors).actionButtons}>
-            <TouchableOpacity
-              style={[styles(colors).approveBtn, { backgroundColor: '#007749' }]}
-              onPress={() => {
-                setSelectedDoc(item);
-                setShowReviewModal(true);
-              }}
-            >
-              <Ionicons name="checkmark" size={16} color="#fff" />
-              <Text style={styles(colors).btnText}>Review</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return DT.green2;
+      case 'rejected': return DT.red;
+      default: return DT.amber;
+    }
+  };
 
-  const renderParentDoc = ({ item }: { item: ParentDocument }) => (
-    <TouchableOpacity
-      style={[styles(colors).docCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => setSelectedDoc(item)}
-    >
-      <View style={styles(colors).docHeader}>
-        <View style={[styles(colors).docIcon, { backgroundColor: '#FFB81C' + '20' }]}>
-          <Ionicons name="people" size={24} color="#FFB81C" />
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const pendingDriver = driverDocs.filter(d => d.status === 'pending').length;
+  const pendingParent = parentDocs.filter(d => d.status === 'pending').length;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 6 },
+    sbIcon: { fontSize: 14 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    refreshBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, borderRadius: 16 },
+    tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 6 },
+    tabText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600' },
+    tabBadge: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+    tabBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.white },
+    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
+    statItem: { flex: 1, ...glass, paddingVertical: 14, alignItems: 'center' },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: DT.amber },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, color: DT.muted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    list: { padding: 16 },
+    docCard: { ...glass, padding: 16, marginBottom: 12 },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    docHeader: { flexDirection: 'row', alignItems: 'center' },
+    docIcon: { width: 50, height: 50, borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+    docInfo: { flex: 1, marginLeft: 14 },
+    docType: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    docMeta: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.white, textTransform: 'uppercase' },
+    docFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: DT.border },
+    docDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted },
+    reviewBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, gap: 6 },
+    reviewBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white },
+    empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
+    emptyIcon: { marginBottom: 12 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: DT.bg2, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: DT.border },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white },
+    modalBody: { padding: 20 },
+    previewCard: { height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 16, ...glass },
+    previewImage: { width: '100%', height: '100%', borderRadius: 16 },
+    filePreview: { alignItems: 'center' },
+    fileName: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.text, marginTop: 10 },
+    docDetail: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.text, marginBottom: 8 },
+    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.amber, marginBottom: 8, marginTop: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+    notesInput: { ...glass, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white, minHeight: 80, textAlignVertical: 'top' },
+    modalActions: { flexDirection: 'row', padding: 20, gap: 12 },
+    rejectBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, gap: 8 },
+    approveBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, gap: 8 },
+    actionBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.white },
+    bottomPadding: { height: 50 },
+  });
+
+  const renderDriverDoc = ({ item }: { item: DriverDocument }) => {
+    const statusColor = getStatusColor(item.status);
+    return (
+      <TouchableOpacity style={s.docCard} onPress={() => setSelectedDoc(item)} activeOpacity={0.7}>
+        <View style={s.cardTopRefraction} />
+        <View style={s.docHeader}>
+          <View style={[s.docIcon, { backgroundColor: `${DT.cyan}15`, borderColor: `${DT.cyan}35` }]}>
+            <Ionicons name="document-text" size={22} color={DT.cyan} />
+          </View>
+          <View style={s.docInfo}>
+            <Text style={s.docType}>{documentTypes[item.document_type] || item.document_type}</Text>
+            <Text style={s.docMeta}>{item.driver?.full_name || 'Unknown Driver'}</Text>
+          </View>
+          <View style={[s.statusBadge, { backgroundColor: statusColor }]}>
+            <Text style={s.statusText}>{item.status}</Text>
+          </View>
         </View>
-        <View style={styles(colors).docInfo}>
-          <Text style={[styles(colors).docType, { color: colors.text }]}>
-            {documentTypes[item.document_type as keyof typeof documentTypes] || item.document_type}
-          </Text>
-          <Text style={[styles(colors).docDriver, { color: colors.textSecondary }]}>
-            {item.parent?.full_name || 'Unknown Parent'}
-            {item.child ? ` - ${item.child.full_name}` : ''}
-          </Text>
+        <View style={s.docFooter}>
+          <Text style={s.docDate}>{new Date(item.uploaded_at).toLocaleDateString()}</Text>
+          {item.status === 'pending' && (
+            <TouchableOpacity
+              style={[s.reviewBtn, { backgroundColor: `${DT.cyan}20`, borderWidth: 1, borderColor: `${DT.cyan}40` }]}
+              onPress={() => { setSelectedDoc(item); setShowReviewModal(true); }}
+            >
+              <Ionicons name="checkmark" size={14} color={DT.cyan} />
+              <Text style={[s.reviewBtnText, { color: DT.cyan }]}>Review</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        <View style={[
-          styles(colors).statusBadge,
-          { backgroundColor: item.status === 'approved' ? '#007749' : item.status === 'rejected' ? '#E91E63' : '#FFB81C' }
-        ]}>
-          <Text style={styles(colors).statusText}>{item.status}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderParentDoc = ({ item }: { item: ParentDocument }) => {
+    const statusColor = getStatusColor(item.status);
+    return (
+      <TouchableOpacity style={s.docCard} onPress={() => setSelectedDoc(item)} activeOpacity={0.7}>
+        <View style={s.cardTopRefraction} />
+        <View style={s.docHeader}>
+          <View style={[s.docIcon, { backgroundColor: `${DT.amber}15`, borderColor: `${DT.amber}35` }]}>
+            <Ionicons name="people" size={22} color={DT.amber} />
+          </View>
+          <View style={s.docInfo}>
+            <Text style={s.docType}>{documentTypes[item.document_type] || item.document_type}</Text>
+            <Text style={s.docMeta}>
+              {item.parent?.full_name || 'Unknown Parent'}
+              {item.child ? ` — ${item.child.full_name}` : ''}
+            </Text>
+          </View>
+          <View style={[s.statusBadge, { backgroundColor: statusColor }]}>
+            <Text style={s.statusText}>{item.status}</Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
+
+  const activeDocs = activeTab === 'drivers' ? driverDocs : parentDocs;
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
+    <View style={s.container}>
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View>
+      </View>
+
       {/* Header */}
-      <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles(colors).headerTitle}>📁 Document Management</Text>
-        <TouchableOpacity onPress={loadDocuments} style={styles(colors).refreshBtn}>
-          <Ionicons name="refresh" size={24} color="#fff" />
-        </TouchableOpacity>
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={18} color={DT.white} />
+          </TouchableOpacity>
+          <View><Text style={s.ltTitle}>Documents</Text><Text style={s.ltSub}>Manage uploaded files</Text></View>
+          <TouchableOpacity style={s.refreshBtn} onPress={loadDocuments}>
+            <Ionicons name="refresh" size={18} color={DT.cyan} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Tabs */}
-      <View style={[styles(colors).tabs, { backgroundColor: colors.card }]}>
+      <View style={s.tabs}>
         <TouchableOpacity
-          style={[styles(colors).tab, activeTab === 'drivers' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
+          style={[s.tab, activeTab === 'drivers' && { borderBottomWidth: 2, borderBottomColor: DT.cyan }]}
           onPress={() => setActiveTab('drivers')}
         >
-          <Text style={[styles(colors).tabText, { color: activeTab === 'drivers' ? colors.primary : colors.textSecondary }]}>
-            <Ionicons name="car" size={16} color={activeTab === 'drivers' ? colors.primary : colors.textSecondary} /> Driver Documents
-          </Text>
-          <View style={[styles(colors).badge, { backgroundColor: colors.danger || '#E91E63' }]}>
-            <Text style={styles(colors).badgeText}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
-          </View>
+          <Ionicons name="car" size={14} color={activeTab === 'drivers' ? DT.cyan : DT.muted} />
+          <Text style={[s.tabText, { color: activeTab === 'drivers' ? DT.cyan : DT.muted }]}>Drivers</Text>
+          {pendingDriver > 0 && (
+            <View style={[s.tabBadge, { backgroundColor: DT.red }]}>
+              <Text style={s.tabBadgeText}>{pendingDriver}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles(colors).tab, activeTab === 'parents' && { borderBottomColor: colors.primary, borderBottomWidth: 3 }]}
+          style={[s.tab, activeTab === 'parents' && { borderBottomWidth: 2, borderBottomColor: DT.cyan }]}
           onPress={() => setActiveTab('parents')}
         >
-          <Text style={[styles(colors).tabText, { color: activeTab === 'parents' ? colors.primary : colors.textSecondary }]}>
-            <Ionicons name="people" size={16} color={activeTab === 'parents' ? colors.primary : colors.textSecondary} /> Parent Parent Documents
-          </Text>
-          <View style={[styles(colors).badge, { backgroundColor: colors.danger || '#E91E63' }]}>
-            <Text style={styles(colors).badgeText}>{parentDocs.filter(d => d.status === 'pending').length}</Text>
-          </View>
+          <Ionicons name="people" size={14} color={activeTab === 'parents' ? DT.cyan : DT.muted} />
+          <Text style={[s.tabText, { color: activeTab === 'parents' ? DT.cyan : DT.muted }]}>Parents</Text>
+          {pendingParent > 0 && (
+            <View style={[s.tabBadge, { backgroundColor: DT.red }]}>
+              <Text style={s.tabBadgeText}>{pendingParent}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
       {/* Stats */}
-      <View style={[styles(colors).statsRow, { backgroundColor: colors.card }]}>
-        <View style={styles(colors).statItem}>
-          <Text style={[styles(colors).statNumber, { color: colors.primary }]}>{driverDocs.length}</Text>
-          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Total</Text>
+      <View style={s.statsRow}>
+        <View style={s.statItem}>
+          <Text style={[s.statNumber, { color: DT.cyan }]}>{activeDocs.length}</Text>
+          <Text style={s.statLabel}>Total</Text>
         </View>
-        <View style={styles(colors).statItem}>
-          <Text style={[styles(colors).statNumber, { color: '#007749' }]}>{driverDocs.filter(d => d.status === 'approved').length}</Text>
-          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Approved</Text>
+        <View style={s.statItem}>
+          <Text style={[s.statNumber, { color: DT.green2 }]}>{activeDocs.filter(d => d.status === 'approved').length}</Text>
+          <Text style={s.statLabel}>Approved</Text>
         </View>
-        <View style={styles(colors).statItem}>
-          <Text style={[styles(colors).statNumber, { color: '#FFB81C' }]}>{driverDocs.filter(d => d.status === 'pending').length}</Text>
-          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Pending</Text>
+        <View style={s.statItem}>
+          <Text style={[s.statNumber, { color: DT.amber }]}>{activeDocs.filter(d => d.status === 'pending').length}</Text>
+          <Text style={s.statLabel}>Pending</Text>
         </View>
-        <View style={styles(colors).statItem}>
-          <Text style={[styles(colors).statNumber, { color: '#E91E63' }]}>{driverDocs.filter(d => d.status === 'rejected').length}</Text>
-          <Text style={[styles(colors).statLabel, { color: colors.textSecondary }]}>Rejected</Text>
+        <View style={s.statItem}>
+          <Text style={[s.statNumber, { color: DT.red }]}>{activeDocs.filter(d => d.status === 'rejected').length}</Text>
+          <Text style={s.statLabel}>Rejected</Text>
         </View>
       </View>
 
       {/* Document List */}
       {loading ? (
-        <View style={styles(colors).loading}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={s.loading}><ActivityIndicator size="large" color={DT.cyan} /></View>
       ) : (
         <FlatList
-          data={(activeTab === 'drivers' ? driverDocs : parentDocs) as (DriverDocument | ParentDocument)[]}
+          data={activeDocs as (DriverDocument | ParentDocument)[]}
           renderItem={activeTab === 'drivers' ? (renderDriverDoc as ({ item }: { item: DriverDocument | ParentDocument }) => React.ReactElement) : (renderParentDoc as ({ item }: { item: DriverDocument | ParentDocument }) => React.ReactElement)}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles(colors).list}
+          contentContainerStyle={s.list}
           ListEmptyComponent={
-            <View style={styles(colors).empty}>
-              <Ionicons name="folder-open" size={64} color={colors.textSecondary} />
-              <Text style={[styles(colors).emptyText, { color: colors.textSecondary }]}>
-                No documents yet
-              </Text>
+            <View style={s.empty}>
+              <Ionicons name="folder-open" size={64} color={DT.muted} style={s.emptyIcon} />
+              <Text style={s.emptyText}>No documents yet</Text>
             </View>
           }
+          ListFooterComponent={<View style={s.bottomPadding} />}
         />
       )}
 
       {/* Review Modal */}
       <Modal visible={showReviewModal} animationType="slide" transparent>
-        <View style={styles(colors).modalOverlay}>
-          <View style={[styles(colors).modalContent, { backgroundColor: colors.card }]}>
-            <View style={styles(colors).modalHeader}>
-              <Text style={[styles(colors).modalTitle, { color: colors.text }]}>Review Document</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>Review Document</Text>
               <TouchableOpacity onPress={() => setShowReviewModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close" size={22} color={DT.muted} />
               </TouchableOpacity>
             </View>
 
             {selectedDoc && (
-              <ScrollView style={styles(colors).modalBody}>
-                <View style={[styles(colors).previewCard, { backgroundColor: colors.background }]}>
+              <ScrollView style={s.modalBody} showsVerticalScrollIndicator={false}>
+                <View style={s.previewCard}>
                   {selectedDoc.file_url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                    <Image source={{ uri: selectedDoc.file_url }} style={styles(colors).previewImage} resizeMode="contain" />
+                    <Image source={{ uri: selectedDoc.file_url }} style={s.previewImage} resizeMode="contain" />
                   ) : (
-                    <View style={styles(colors).filePreview}>
-                      <Ionicons name="document" size={48} color={colors.primary} />
-                      <Text style={[styles(colors).fileName, { color: colors.text }]}>{selectedDoc.file_name}</Text>
+                    <View style={s.filePreview}>
+                      <Ionicons name="document" size={48} color={DT.cyan} />
+                      <Text style={s.fileName}>{selectedDoc.file_name}</Text>
                     </View>
                   )}
                 </View>
 
-                <Text style={[styles(colors).docDetail, { color: colors.text }]}>
-                  Type: {documentTypes[selectedDoc.document_type as keyof typeof documentTypes]}
-                </Text>
-                <Text style={[styles(colors).docDetail, { color: colors.text }]}>
-                  Submitted: {new Date(selectedDoc.uploaded_at).toLocaleString()}
-                </Text>
+                <Text style={s.docDetail}>Type: {documentTypes[selectedDoc.document_type]}</Text>
+                <Text style={s.docDetail}>Submitted: {new Date(selectedDoc.uploaded_at).toLocaleString()}</Text>
 
-                <Text style={[styles(colors).inputLabel, { color: colors.text }]}>Notes (Optional)</Text>
+                <Text style={s.inputLabel}>Notes (Optional)</Text>
                 <TextInput
-                  style={[styles(colors).notesInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                  style={s.notesInput}
                   placeholder="Add notes about this document..."
-                  placeholderTextColor={colors.textSecondary}
+                  placeholderTextColor={DT.muted}
                   value={reviewNotes}
                   onChangeText={setReviewNotes}
                   multiline
@@ -273,20 +360,20 @@ export default function DocumentManagementScreen({ navigation }: Props) {
               </ScrollView>
             )}
 
-            <View style={styles(colors).modalActions}>
+            <View style={s.modalActions}>
               <TouchableOpacity
-                style={[styles(colors).rejectBtn, { backgroundColor: '#E91E63' }]}
+                style={[s.rejectBtn, { backgroundColor: DT.red }]}
                 onPress={() => selectedDoc && handleReview(selectedDoc.id, 'rejected')}
               >
-                <Ionicons name="close" size={20} color="#fff" />
-                <Text style={styles(colors).actionBtnText}>Reject</Text>
+                <Ionicons name="close" size={18} color={DT.white} />
+                <Text style={s.actionBtnText}>Reject</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles(colors).approveActionBtn, { backgroundColor: '#007749' }]}
+                style={[s.approveBtn, { backgroundColor: DT.green2 }]}
                 onPress={() => selectedDoc && handleReview(selectedDoc.id, 'approved')}
               >
-                <Ionicons name="checkmark" size={20} color="#fff" />
-                <Text style={styles(colors).actionBtnText}>Approve</Text>
+                <Ionicons name="checkmark" size={18} color={DT.bg} />
+                <Text style={[s.actionBtnText, { color: DT.bg }]}>Approve</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -295,53 +382,3 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     </View>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
-  backBtn: { padding: 5 },
-  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#fff', marginLeft: 10 },
-  refreshBtn: { padding: 5 },
-  tabs: { flexDirection: 'row', paddingHorizontal: 15, paddingVertical: 10 },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: 10, flexDirection: 'row', justifyContent: 'center', gap: 8 },
-  tabText: { fontSize: 14, fontWeight: '600' },
-  badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  statsRow: { flexDirection: 'row', padding: 15, marginHorizontal: 15, marginTop: 10, borderRadius: 12, justifyContent: 'space-around' },
-  statItem: { alignItems: 'center' },
-  statNumber: { fontSize: 24, fontWeight: 'bold' },
-  statLabel: { fontSize: 12 },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 15 },
-  docCard: { borderRadius: 12, padding: 15, marginBottom: 12, borderWidth: 1 },
-  docHeader: { flexDirection: 'row', alignItems: 'center' },
-  docIcon: { width: 50, height: 50, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  docInfo: { flex: 1, marginLeft: 12 },
-  docType: { fontSize: 16, fontWeight: '600' },
-  docDriver: { fontSize: 14, marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  statusText: { color: '#fff', fontSize: 12, fontWeight: 'bold', textTransform: 'capitalize' },
-  docFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#eee' },
-  docDate: { fontSize: 12 },
-  actionButtons: { flexDirection: 'row', gap: 10 },
-  approveBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
-  btnText: { color: '#fff', fontSize: 12, fontWeight: '600', marginLeft: 4 },
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 16, marginTop: 10 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '80%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold' },
-  modalBody: { padding: 20 },
-  previewCard: { height: 200, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  previewImage: { width: '100%', height: '100%' },
-  filePreview: { alignItems: 'center' },
-  fileName: { marginTop: 10, fontSize: 14 },
-  docDetail: { fontSize: 14, marginBottom: 8 },
-  inputLabel: { fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 10 },
-  notesInput: { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 14, minHeight: 80, textAlignVertical: 'top' },
-  modalActions: { flexDirection: 'row', padding: 20, gap: 15, borderTopWidth: 1, borderTopColor: '#eee' },
-  rejectBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10 },
-  approveActionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 10 },
-  actionBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginLeft: 8 }
-});

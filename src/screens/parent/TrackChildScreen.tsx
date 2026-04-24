@@ -1,19 +1,66 @@
-// TrackChildScreen - Track child location
+// ScholarTrack TrackChildScreen — Dark SA Transport Design
+// Dark glassmorphism, cyan/amber accents, spring animations, real-time map tracking
+
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, ActivityIndicator, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
+  UIManager,
+  RefreshControl,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  ZoomIn,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../context/ThemeContext';
 import { childrenService } from '../../lib/services/children';
 import { driverTrackingService } from '../../lib/services/tripEnhanced';
+import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
-import { ThemeColors } from '../../context/ThemeContext';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge, SkeletonTrackingCard, SkeletonCard } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const SPRING = { damping: 15, stiffness: 150 };
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#00e676',
+  red: '#ff3d5a',
+  white: '#ffffff',
+  text: '#9bbdd4',
+  muted: '#4a6a8a',
+};
+
+const glassCard = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+};
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -24,56 +71,100 @@ interface DriverLocation {
   latitude: number;
   longitude: number;
   speed?: number;
-  last_updated: string;
-}
-
-interface ChildFromService {
-  id: string;
-  full_name: string;
-  school_id?: string;
-  grade?: string;
-  pickup_address?: string;
-  status: 'active' | 'inactive';
-  school?: { name: string };
-  driver?: { id: string; full_name: string; phone?: string };
+  last_updated: number;
 }
 
 interface EnrichedChild {
   id: string;
   name: string;
   full_name: string;
-  school_id?: string;
   home_address: string;
   grade?: string;
   pickup_address?: string;
+  pickup_lat?: number;
+  pickup_lng?: number;
   status: 'active' | 'inactive';
-  school?: { name: string };
+  school?: { name: string; latitude?: number; longitude?: number };
   driver?: { id: string; name: string; vehicle_plate: string; phone?: string };
   driver_id?: string;
 }
 
+// ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
+const childChipStyle = (selected: boolean) => ({
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
+  borderRadius: borderRadius.full,
+  marginRight: spacing.sm,
+  flexDirection: 'row' as const,
+  alignItems: 'center' as const,
+  backgroundColor: selected ? DT.cyan + '25' : DT.panel,
+  borderWidth: 1,
+  borderColor: selected ? DT.cyan : DT.border,
+});
+
+const childChipTextStyle = (selected: boolean) => ({
+  ...typography.labelSmall,
+  marginLeft: spacing.xs,
+  color: selected ? DT.cyan : DT.muted,
+});
+
+const SpringTouchable = ({
+  children,
+  onPress,
+  style,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+  style?: object;
+}) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+const BreathingDot = ({ color = DT.green, size = 8 }: { color?: string; size?: number }) => {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    scale.value = withRepeat(withSequence(withTiming(1.5, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+    opacity.value = withRepeat(withSequence(withTiming(0.3, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+  }, []);
+  const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }], opacity: opacity.value }));
+  return (
+    <Animated.View style={[{ width: size, height: size, borderRadius: size / 2, backgroundColor: color }, aStyle]} />
+  );
+};
+
 export default function TrackChildScreen({ navigation }: Props) {
-  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [children, setChildren] = useState<EnrichedChild[]>([]);
   const [selectedChild, setSelectedChild] = useState<EnrichedChild | null>(null);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
   const mapRef = useRef<MapView>(null);
   const { width } = Dimensions.get('window');
 
-  // Multi-child: Track all children
   useEffect(() => {
     loadChildren();
   }, []);
 
-  // Load driver location when child is selected
   useEffect(() => {
     if (selectedChild?.driver_id) {
       loadDriverLocation(selectedChild.driver_id);
-
-      // Subscribe to real-time updates
       const channel = supabase
         .channel('driver-location-' + selectedChild.driver_id)
         .on(
@@ -92,41 +183,52 @@ export default function TrackChildScreen({ navigation }: Props) {
           }
         )
         .subscribe();
-
       return () => {
         supabase.removeChannel(channel);
       };
     }
   }, [selectedChild?.driver_id]);
 
+  // Calculate real ETA when driver location or selected child changes
+  useEffect(() => {
+    if (!driverLocation || !selectedChild) {
+      setEtaMinutes(null);
+      return;
+    }
+    // Use pickup_lat/pickup_lng if available, otherwise fall back to school coordinates
+    const destLat = selectedChild.pickup_lat ?? (selectedChild as any).school?.latitude;
+    const destLng = selectedChild.pickup_lng ?? (selectedChild as any).school?.longitude;
+    if (!destLat || !destLng) {
+      setEtaMinutes(null); // No coordinates — show "Locating..." or component handles null
+      return;
+    }
+    const distanceKm = locationService.calculateDistance(
+      driverLocation.latitude, driverLocation.longitude,
+      destLat, destLng
+    );
+    setEtaMinutes(locationService.getETA(distanceKm));
+  }, [driverLocation, selectedChild]);
+
   const loadChildren = async () => {
     try {
       setLoading(true);
       const userId = await AsyncStorage.getItem('userId');
-      if (!userId) {
-        Alert.alert('Error', 'Please login first');
-        setLoading(false);
-        return;
-      }
+      if (!userId) { setLoading(false); return; }
       const data = await childrenService.getChildren(userId);
-
-      // Enrich with driver info from driver_assignments
       const enrichedChildren: EnrichedChild[] = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data || []).map(async (child: any) => {
           try {
-            // Get driver assignment for this child
             const { data: assignment } = await supabase
               .from('driver_assignments')
               .select('driver:drivers(id, full_name, phone, vehicle_type)')
               .eq('child_id', child.id)
               .eq('status', 'active')
               .limit(1);
-
             if (assignment && assignment.length > 0) {
               const driverData = assignment[0].driver as unknown as { id: string; full_name: string; phone?: string; vehicle_type?: string } | undefined;
               if (driverData) {
-                const enriched: EnrichedChild = {
+                return {
                   ...child,
                   name: child.full_name,
                   home_address: child.pickup_address || '',
@@ -137,8 +239,7 @@ export default function TrackChildScreen({ navigation }: Props) {
                     phone: driverData.phone,
                     vehicle_plate: driverData.vehicle_type || 'N/A',
                   },
-                };
-                return enriched;
+                } as EnrichedChild;
               }
             }
           } catch (e) {
@@ -147,15 +248,12 @@ export default function TrackChildScreen({ navigation }: Props) {
           return { ...child, name: child.full_name, home_address: child.pickup_address || '' } as EnrichedChild;
         })
       );
-
       setChildren(enrichedChildren || []);
-      // Auto-select first child if none selected
       if (enrichedChildren?.length > 0 && !selectedChild) {
         setSelectedChild(enrichedChildren[0]);
       }
     } catch (error) {
       console.error('Error loading children:', error);
-      Alert.alert('Error', 'Failed to load children');
     } finally {
       setLoading(false);
     }
@@ -164,82 +262,24 @@ export default function TrackChildScreen({ navigation }: Props) {
   const loadDriverLocation = async (driverId: string) => {
     try {
       const location = await driverTrackingService.getDriverLocation(driverId);
-      if (location) {
-        setDriverLocation(location);
-      }
+      if (location) setDriverLocation(location);
     } catch (error) {
       console.error('Error loading driver location:', error);
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadChildren();
+    setRefreshing(false);
+  };
+
   const handleCallDriver = () => {
-    if (selectedChild?.driver?.phone) {
-      Linking.openURL(`tel:${selectedChild.driver.phone}`);
-    }
+    if (selectedChild?.driver?.phone) Linking.openURL(`tel:${selectedChild.driver.phone}`);
   };
 
   const handleMessageDriver = () => {
-    if (selectedChild?.driver?.phone) {
-      Linking.openURL(`sms:${selectedChild.driver.phone}`);
-    }
-  };
-
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: spacing.xl, borderBottomWidth: 4, borderBottomColor: colors.accent },
-    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
-    content: { flex: 1 },
-    contentPad: { padding: spacing.lg },
-    childSelector: { marginBottom: spacing.lg },
-    childScroll: { flexDirection: 'row' },
-    childChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, marginRight: spacing.sm, flexDirection: 'row', alignItems: 'center' },
-    childChipSelected: { backgroundColor: colors.accent },
-    childChipUnselected: { backgroundColor: colors.card },
-    childChipText: { ...typography.labelSmall, marginLeft: spacing.xs },
-    childChipTextSelected: { color: colors.textInverse },
-    childChipTextUnselected: { color: colors.text },
-    placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
-    placeholderIcon: { marginBottom: spacing.md },
-    placeholderTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.sm },
-    placeholderText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
-    infoCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    infoTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.sm },
-    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
-    infoLabel: { ...typography.bodySmall, color: colors.textSecondary, width: 100 },
-    infoValue: { ...typography.body, color: colors.text, flex: 1 },
-    mapContainer: { height: 280, marginBottom: spacing.md },
-    map: { flex: 1, borderRadius: borderRadius.card, borderTopWidth: 3, borderTopColor: colors.accent },
-    mapOverlay: { position: 'absolute', top: spacing.md, left: spacing.md, right: spacing.md },
-    liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, alignSelf: 'flex-start' },
-    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.textInverse, marginRight: spacing.xs },
-    liveText: { ...typography.labelSmall, color: colors.textInverse },
-    driverCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-    driverAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    driverInitial: { ...typography.h3, color: colors.accent },
-    driverInfo: { flex: 1, marginLeft: spacing.md },
-    driverName: { ...typography.label, color: colors.text },
-    driverVehicle: { ...typography.bodySmall, color: colors.textSecondary },
-    driverActions: { flexDirection: 'row', justifyContent: 'space-around', marginTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
-    actionBtn: { alignItems: 'center' },
-    actionText: { ...typography.labelSmall, color: colors.primary, marginTop: spacing.xs },
-    statusCard: { backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.lg, marginBottom: spacing.md, borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.success, marginRight: spacing.sm },
-    statusText: { ...typography.label, color: colors.text },
-    etaText: { ...typography.h4, color: colors.accent },
-    etaLabel: { ...typography.bodySmall, color: colors.textSecondary },
-    quickActions: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: borderRadius.card, padding: spacing.md, justifyContent: 'space-around', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    quickBtn: { alignItems: 'center', flex: 1 },
-    quickBtnText: { ...typography.labelSmall, color: colors.text, marginTop: spacing.xs, textAlign: 'center' },
-  });
-
-  const DEFAULT_REGION = {
-    latitude: driverLocation?.latitude || -25.7479,
-    longitude: driverLocation?.longitude || 28.2292,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    if (selectedChild?.driver?.phone) Linking.openURL(`sms:${selectedChild.driver.phone}`);
   };
 
   const centerOnDriver = () => {
@@ -253,65 +293,185 @@ export default function TrackChildScreen({ navigation }: Props) {
     }
   };
 
+  const DEFAULT_REGION = {
+    latitude: driverLocation?.latitude || -25.7479,
+    longitude: driverLocation?.longitude || 28.2292,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.02,
+  };
+
+  const sectionLabelStyle = { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.25)', marginBottom: spacing.sm };
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: insets.top + spacing.lg,
+      borderBottomWidth: 4,
+      borderBottomColor: DT.amber,
+    },
+    headerTitle: { ...typography.h2, color: DT.white },
+    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    content: { flex: 1 },
+    contentPad: { padding: spacing.lg },
+    childSelector: { marginBottom: spacing.lg },
+    childScroll: { flexDirection: 'row' as const },
+    childChip: undefined as any,
+    childChipText: undefined as any,
+    placeholder: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xxl },
+    placeholderIcon: { marginBottom: spacing.md },
+    placeholderTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.sm },
+    placeholderText: { ...typography.body, color: DT.muted, textAlign: 'center' },
+    infoCard: {
+      borderRadius: 20,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      ...glassCard,
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      borderColor: 'rgba(255,183,0,.12)',
+      borderTopWidth: 0,
+    },
+    infoTitle: { ...typography.h4, color: DT.white, marginBottom: spacing.sm },
+    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+    infoLabel: { ...typography.bodySmall, color: DT.muted, width: 80 },
+    infoValue: { ...typography.body, color: DT.white, flex: 1 },
+    mapContainer: { height: 280, marginBottom: spacing.md, marginHorizontal: spacing.lg, borderRadius: borderRadius.lg, overflow: 'hidden' },
+    map: { flex: 1, borderRadius: borderRadius.lg },
+    mapOverlay: { position: 'absolute', top: spacing.md, left: spacing.md, right: spacing.md },
+    liveBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: DT.green,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.full,
+      alignSelf: 'flex-start',
+    },
+    liveDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: DT.white,
+      marginRight: spacing.xs,
+    },
+    liveText: { ...typography.labelSmall, color: DT.bg, fontWeight: '700' },
+    driverCard: {
+      marginHorizontal: spacing.lg,
+      borderRadius: 20,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      ...glassCard,
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      borderColor: 'rgba(255,183,0,.12)',
+      borderTopWidth: 0,
+    },
+    driverHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+    driverAvatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: DT.cyan + '20',
+      borderWidth: 1.5,
+      borderColor: DT.cyan,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    driverInitial: { ...typography.h3, color: DT.cyan },
+    driverInfo: { flex: 1, marginLeft: spacing.md },
+    driverName: { ...typography.label, color: DT.white },
+    driverVehicle: { ...typography.bodySmall, color: DT.muted },
+    driverActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginTop: spacing.md,
+      paddingTop: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: DT.border,
+    },
+    actionBtn: { alignItems: 'center' },
+    actionText: { ...typography.labelSmall, color: DT.cyan, marginTop: spacing.xs },
+    statusCard: {
+      marginHorizontal: spacing.lg,
+      borderRadius: 20,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      ...glassCard,
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      borderColor: 'rgba(255,183,0,.12)',
+    },
+    statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: DT.green, marginRight: spacing.sm },
+    statusText: { ...typography.label, color: DT.white },
+    etaText: { ...typography.h4, color: DT.amber },
+    etaLabel: { ...typography.bodySmall, color: DT.muted },
+    quickActions: {
+      marginHorizontal: spacing.lg,
+      flexDirection: 'row',
+      borderRadius: 20,
+      padding: spacing.md,
+      justifyContent: 'space-around',
+      ...glassCard,
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+      borderColor: 'rgba(255,183,0,.12)',
+    },
+    quickBtn: { alignItems: 'center', flex: 1 },
+    quickBtnText: { ...typography.labelSmall, color: DT.white, marginTop: spacing.xs, textAlign: 'center' },
+  });
+
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <View style={styles(colors).header}>
-          <Text style={styles(colors).headerTitle}>Track Child</Text>
-          <Text style={styles(colors).headerSubtext}>Real-time location tracking</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Track Child</Text>
+          <Text style={styles.headerSubtext}>Real-time location tracking</Text>
         </View>
-        <ScrollView style={styles(colors).content}>
-          <View style={styles(colors).contentPad}>
-            <SkeletonTrackingCard />
-            <SkeletonCard />
-          </View>
-        </ScrollView>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+          <Text style={{ ...typography.body, color: DT.muted, marginTop: spacing.md }}>Loading...</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles(colors).container}>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Track Child</Text>
-        <Text style={styles(colors).headerSubtext}>Real-time location tracking</Text>
+      <View style={styles.header}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+        <Text style={styles.headerTitle}>Track Child</Text>
+        <Text style={styles.headerSubtext}>Real-time location tracking</Text>
       </View>
 
-      <ScrollView style={styles(colors).content}>
-        <View style={styles(colors).contentPad}>
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+        }
+      >
+        <View style={styles.contentPad}>
           {/* Multi-Child Selector */}
           {children.length > 1 && (
-            <View style={styles(colors).childSelector}>
-              <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.sm }}>
+            <View style={styles.childSelector}>
+              <Text style={{ ...typography.label, color: DT.white, marginBottom: spacing.sm }}>
                 Select Child:
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {children.map((child) => {
                   const isSelected = selectedChild?.id === child.id;
                   return (
-                    <TouchableOpacity
+                    <SpringTouchable
                       key={child.id}
-                      style={[
-                        styles(colors).childChip,
-                        isSelected ? styles(colors).childChipSelected : styles(colors).childChipUnselected,
-                      ]}
                       onPress={() => setSelectedChild(child)}
+                      style={childChipStyle(isSelected)}
                     >
-                      <Ionicons
-                        name="person"
-                        size={16}
-                        color={isSelected ? colors.textInverse : colors.text}
-                      />
-                      <Text
-                        style={[
-                          styles(colors).childChipText,
-                          isSelected ? styles(colors).childChipTextSelected : styles(colors).childChipTextUnselected,
-                        ]}
-                      >
-                        {child.name}
-                      </Text>
-                    </TouchableOpacity>
+                      <Ionicons name="person" size={16} color={isSelected ? DT.cyan : DT.muted} />
+                      <Text style={childChipTextStyle(isSelected)}>{child.name}</Text>
+                    </SpringTouchable>
                   );
                 })}
               </ScrollView>
@@ -322,139 +482,147 @@ export default function TrackChildScreen({ navigation }: Props) {
         {selectedChild ? (
           <>
             {/* Live Map */}
-            <View style={styles(colors).mapContainer}>
+            <Animated.View entering={ZoomIn.duration(300)} style={styles.mapContainer}>
               <MapView
                 ref={mapRef}
                 provider={PROVIDER_GOOGLE}
-                style={styles(colors).map}
+                style={styles.map}
                 initialRegion={DEFAULT_REGION}
                 showsUserLocation={true}
                 showsMyLocationButton={true}
                 onMapReady={centerOnDriver}
               >
-                {/* Driver Marker */}
                 {driverLocation && (
                   <Marker
-                    coordinate={{
-                      latitude: driverLocation.latitude,
-                      longitude: driverLocation.longitude,
-                    }}
+                    coordinate={{ latitude: driverLocation.latitude, longitude: driverLocation.longitude }}
                     title={selectedChild.driver?.name || 'Driver'}
                     description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
                   >
-                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: '#fff' }}>
-                      <Ionicons name="bus" size={24} color="#fff" />
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: DT.cyan, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: DT.panel }}>
+                      <Ionicons name="bus" size={24} color={DT.bg} />
                     </View>
                   </Marker>
                 )}
               </MapView>
-              {/* Live badge */}
-              <View style={styles(colors).mapOverlay}>
-                <View style={styles(colors).liveBadge}>
-                  <View style={styles(colors).liveDot} />
-                  <Text style={styles(colors).liveText}>LIVE</Text>
+              <View style={styles.mapOverlay}>
+                <View style={styles.liveBadge}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>LIVE</Text>
                 </View>
               </View>
-            </View>
+            </Animated.View>
 
-            <View style={styles(colors).contentPad}>
-              {/* Driver Info Card */}
-              {selectedChild.driver && (
-                <View style={styles(colors).driverCard}>
-                  <View style={styles(colors).driverHeader}>
-                    <View style={styles(colors).driverAvatar}>
-                      <Text style={styles(colors).driverInitial}>
+            {/* Driver Info Card */}
+            {selectedChild.driver && (
+              <Animated.View entering={ZoomIn.duration(300).delay(100)}>
+                <View style={[styles.driverCard, { overflow: 'hidden' }]}>
+                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                  <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                  <View style={styles.driverHeader}>
+                    <View style={styles.driverAvatar}>
+                      <Text style={styles.driverInitial}>
                         {(selectedChild.driver.name || 'D').substring(0, 1).toUpperCase()}
                       </Text>
                     </View>
-                    <View style={styles(colors).driverInfo}>
-                      <Text style={styles(colors).driverName}>{selectedChild.driver.name}</Text>
-                      <Text style={styles(colors).driverVehicle}>{selectedChild.driver.vehicle_plate}</Text>
+                    <View style={styles.driverInfo}>
+                      <Text style={styles.driverName}>{selectedChild.driver.name}</Text>
+                      <Text style={styles.driverVehicle}>{selectedChild.driver.vehicle_plate}</Text>
                     </View>
                     <Badge label="Verified" variant="success" size="small" />
                   </View>
-                  {/* Driver Actions */}
-                  <View style={styles(colors).driverActions}>
-                    <TouchableOpacity style={styles(colors).actionBtn} onPress={handleCallDriver}>
-                      <Ionicons name="call" size={24} color={colors.success} />
-                      <Text style={styles(colors).actionText}>Call</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles(colors).actionBtn} onPress={handleMessageDriver}>
-                      <Ionicons name="chatbubble" size={24} color={colors.primary} />
-                      <Text style={styles(colors).actionText}>Message</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles(colors).actionBtn} onPress={() => navigation?.navigate?.('LiveTrack')}>
-                      <Ionicons name="expand" size={24} color={colors.accent} />
-                      <Text style={styles(colors).actionText}>Full Map</Text>
-                    </TouchableOpacity>
+                  <View style={styles.driverActions}>
+                    <SpringTouchable onPress={handleCallDriver} style={styles.actionBtn}>
+                      <Ionicons name="call" size={24} color={DT.green} />
+                      <Text style={styles.actionText}>Call</Text>
+                    </SpringTouchable>
+                    <SpringTouchable onPress={handleMessageDriver} style={styles.actionBtn}>
+                      <Ionicons name="chatbubble" size={24} color={DT.cyan} />
+                      <Text style={styles.actionText}>Message</Text>
+                    </SpringTouchable>
+                    <SpringTouchable onPress={() => navigation?.navigate?.('LiveTrack')} style={styles.actionBtn}>
+                      <Ionicons name="expand" size={24} color={DT.amber} />
+                      <Text style={styles.actionText}>Full Map</Text>
+                    </SpringTouchable>
                   </View>
                 </View>
-              )}
+              </Animated.View>
+            )}
 
-              {/* Status Card */}
-              <View style={styles(colors).statusCard}>
-                <View style={styles(colors).statusRow}>
+            {/* Status Card */}
+            <Animated.View entering={ZoomIn.duration(300).delay(150)}>
+              <View style={[styles.statusCard, { overflow: 'hidden' }]}>
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <View style={styles.statusRow}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={styles(colors).statusDot} />
-                    <Text style={styles(colors).statusText}>
+                    <BreathingDot color={DT.green} size={12} />
+                    <Text style={styles.statusText}>
                       {driverLocation ? 'Driver is moving' : 'Locating driver...'}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles(colors).etaText}>ETA</Text>
-                    <Text style={styles(colors).etaLabel}>15 mins</Text>
+                    <Text style={styles.etaText}>ETA</Text>
+                    {etaMinutes !== null ? (
+                      <Text style={styles.etaLabel}>{etaMinutes} mins</Text>
+                    ) : (
+                      <Text style={[styles.etaLabel, { color: DT.muted }]}>--</Text>
+                    )}
                   </View>
                 </View>
               </View>
+            </Animated.View>
 
-              {/* Child Info */}
-              <Card variant="elevated" padding="large">
-                <View style={styles(colors).infoCard}>
-                  <Text style={styles(colors).infoTitle}>{selectedChild.name}</Text>
-                  <View style={styles(colors).infoRow}>
-                    <Text style={styles(colors).infoLabel}>School:</Text>
-                    <Text style={styles(colors).infoValue}>{selectedChild.school?.name || 'N/A'}</Text>
-                  </View>
-                  <View style={styles(colors).infoRow}>
-                    <Text style={styles(colors).infoLabel}>Address:</Text>
-                    <Text style={styles(colors).infoValue}>{selectedChild.home_address || 'N/A'}</Text>
-                  </View>
+            {/* Child Info */}
+            <View style={styles.contentPad}>
+              <View style={[styles.infoCard, { overflow: 'hidden' }]}>
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <Text style={styles.infoTitle}>{selectedChild.name}</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>School:</Text>
+                  <Text style={styles.infoValue}>{selectedChild.school?.name || 'N/A'}</Text>
                 </View>
-              </Card>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Address:</Text>
+                  <Text style={styles.infoValue}>{selectedChild.home_address || 'N/A'}</Text>
+                </View>
+              </View>
 
               {/* Quick Actions */}
-              <View style={styles(colors).quickActions}>
-                <TouchableOpacity style={styles(colors).quickBtn} onPress={() => Alert.alert('SOS', 'Emergency services will be notified')}>
-                  <Ionicons name="warning" size={24} color={colors.error} />
-                  <Text style={styles(colors).quickBtnText}>Emergency</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles(colors).quickBtn} onPress={() => navigation?.navigate?.('LiveTrack')}>
-                  <Ionicons name="map" size={24} color={colors.primary} />
-                  <Text style={styles(colors).quickBtnText}>Full Map</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles(colors).quickBtn} onPress={() => navigation?.navigate?.('TripHistory')}>
-                  <Ionicons name="time" size={24} color={colors.accent} />
-                  <Text style={styles(colors).quickBtnText}>History</Text>
-                </TouchableOpacity>
+              <View style={[styles.quickActions, { overflow: 'hidden' }]}>
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
+                <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: DT.amber, borderRadius: 2 }} />
+                <SpringTouchable style={styles.quickBtn} onPress={() => {}}>
+                  <Ionicons name="warning" size={24} color={DT.red} />
+                  <Text style={styles.quickBtnText}>Emergency</Text>
+                </SpringTouchable>
+                <SpringTouchable style={styles.quickBtn} onPress={() => navigation?.navigate?.('LiveTrack')}>
+                  <Ionicons name="map" size={24} color={DT.cyan} />
+                  <Text style={styles.quickBtnText}>Full Map</Text>
+                </SpringTouchable>
+                <SpringTouchable style={styles.quickBtn} onPress={() => navigation?.navigate?.('TripHistory')}>
+                  <Ionicons name="time" size={24} color={DT.amber} />
+                  <Text style={styles.quickBtnText}>History</Text>
+                </SpringTouchable>
               </View>
             </View>
           </>
         ) : (
-          <View style={styles(colors).placeholder}>
-            <View style={styles(colors).placeholderIcon}>
-              <Ionicons name="map" size={64} color={colors.textSecondary} />
+          <Animated.View entering={ZoomIn.duration(300)} style={styles.placeholder}>
+            <View style={styles.placeholderIcon}>
+              <Ionicons name="map" size={64} color={DT.muted} />
             </View>
-            <Text style={styles(colors).placeholderTitle}>No Child Selected</Text>
-            <Text style={styles(colors).placeholderText}>
+            <Text style={styles.placeholderTitle}>No Child Selected</Text>
+            <Text style={styles.placeholderText}>
               Select a child from the dashboard to track their bus location in real-time.
             </Text>
             <Spacer size="lg" />
             <Button title="Go to Dashboard" onPress={() => navigation?.goBack()} variant="primary" />
-          </View>
+          </Animated.View>
         )}
 
         <Spacer size="xl" />
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }

@@ -1,9 +1,8 @@
+// Admin Dashboard Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {
@@ -18,26 +17,48 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
 
-const SA_GOLD = '#FFB81C';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
+
 const SPRING = { damping: 15, stiffness: 150 };
 
 // Shimmer skeleton rect
-const SkeletonRect = ({ width, height, style }: { width: number | string; height: number; style?: object }) => {
+const SkeletonRect = ({ width, height, br = 16 }: { width: number | string; height: number; br?: number }) => {
   const shimmer = useSharedValue(0);
   useEffect(() => { shimmer.value = withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 900 })), -1, false); }, []);
   const animStyle = useAnimatedStyle(() => ({ opacity: 0.15 + interpolate(shimmer.value, [0, 1], [0, 0.55]) }));
-  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: borderRadius.lg, width, height }, style, animStyle]} />;
+  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: br, width: width as any, height }, animStyle]} />;
 };
 
 // Spring press wrapper
 const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
   const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
-  }));
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }] }));
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -78,8 +99,7 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const AdminDashboardScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
+export default function AdminDashboardScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -151,10 +171,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
 
   const onRefresh = useCallback(async () => { setRefreshing(true); await loadDashboardData(); }, []);
 
-  const switchTab = (tab: string) => {
-    // Spring tab transition — Reanimated worklets handle the animation thread
-    setActiveTab(tab);
-  };
+  const switchTab = (tab: string) => { setActiveTab(tab); };
 
   const getStatusVariant = (status: string, verified: boolean): 'success' | 'warning' | 'error' | 'neutral' => {
     if (!verified) return 'warning';
@@ -167,97 +184,110 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
     switch (status) { case 'completed': case 'paid': return 'success'; case 'pending': return 'warning'; case 'failed': return 'error'; default: return 'neutral'; }
   };
 
-  // Styles
-  const s = (c: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.background },
-    header: { backgroundColor: c.secondary, padding: spacing.lg, paddingTop: insets.top + spacing.lg, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, position: 'relative', overflow: 'hidden' },
-    headerGlow1: { position: 'absolute', top: -50, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,184,28,0.08)' },
-    headerGlow2: { position: 'absolute', bottom: -40, left: -20, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(0,119,73,0.2)' },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 6 },
+    sbIcon: { fontSize: 14 },
+    header: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
+    headerGlow1: { position: 'absolute', top: -50, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,184,28,.08)' },
+    headerGlow2: { position: 'absolute', bottom: -40, left: -20, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(0,119,73,.2)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
-    headerTitle: { ...typography.h2, color: c.textInverse, fontWeight: '700' },
-    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.65)', marginTop: spacing.xs },
-    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: borderRadius.lg, marginLeft: spacing.xs },
-    tabsOuter: { flexDirection: 'row', marginHorizontal: spacing.md, marginTop: spacing.md, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: borderRadius.xxl, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,0.08)' },
-    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.sm, borderRadius: borderRadius.xxl, gap: 6 },
-    tabBtnActive: { backgroundColor: c.secondary },
-    tabText: { ...typography.labelSmall, color: 'rgba(255,255,255,0.45)' },
-    tabTextActive: { color: c.textInverse, fontWeight: '600' },
-    glass: { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.12)', borderRadius: borderRadius.xxl, overflow: 'hidden' },
-    glassRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,184,28,0.2)' },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.xs, paddingTop: spacing.md },
-    statCard: { paddingVertical: spacing.lg, paddingHorizontal: spacing.md, position: 'relative', overflow: 'hidden' },
-    statLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2 },
-    statLabel: { ...typography.labelSmall, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1.2 },
-    statValue: { ...typography.h2, color: '#FFB81C', marginTop: spacing.xs, fontWeight: '700' },
-    section: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
-    sectionTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.md, fontWeight: '600', letterSpacing: 0.2 },
-    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 4 },
-    quickCardInner: { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.12)', borderRadius: borderRadius.xxl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    headerSubtext: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
+    headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', marginLeft: 8 },
+    tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,.08)' },
+    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, gap: 6 },
+    tabBtnActive: { backgroundColor: DT.amber },
+    tabText: { fontFamily: 'Syne_600SemiBold', fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,.45)' },
+    tabTextActive: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.bg },
+    section: { paddingHorizontal: 16, paddingTop: 16 },
+    sectionLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    statCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
+    statCard: { ...glass, paddingVertical: 18, paddingHorizontal: 16, position: 'relative', overflow: 'hidden' },
+    statTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    statLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1.2 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.amber, marginTop: 4 },
+    statCardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    statCardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingTop: 12 },
+    quickGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+    quickCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
+    quickCardInner: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
     quickIconWrap: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
-    quickText: { ...typography.label, color: colors.text },
-    listItem: { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,184,28,0.12)', borderRadius: borderRadius.xxl, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-    listAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,35,149,0.25)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,0.3)' },
-    listInfo: { flex: 1 },
-    listName: { ...typography.label, color: colors.text, fontWeight: '600' },
-    listMeta: { ...typography.bodySmall, color: 'rgba(255,255,255,0.45)' },
-    amount: { ...typography.h4, color: '#FFB81C', fontWeight: '700' },
-    sortRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.sm },
-    sortChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, borderWidth: 1, gap: 4 },
-    filterRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
-    filterChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full, borderWidth: 1 },
-    emptyGlass: { padding: spacing.xl, alignItems: 'center' },
-    emptyText: { ...typography.body, color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
-    emptyTitle: { ...typography.h4, color: colors.text, marginBottom: spacing.xs, textAlign: 'center' },
+    quickText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: DT.white },
+    searchWrap: { marginBottom: 12 },
+    sortRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+    sortChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, gap: 4 },
+    sortChipText: { fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '600' },
+    filterRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+    filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+    filterChipText: { fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '600' },
+    listItem: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', position: 'relative', overflow: 'hidden' },
+    listTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    listLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    listAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
+    listInitial: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.blue },
+    listInfo: { flex: 1, marginLeft: 12 },
+    listName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    listMeta: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, marginTop: 2 },
+    amount: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.amber },
+    emptyGlass: { ...glass, padding: 30, alignItems: 'center' },
+    emptyIcon: { marginBottom: 12 },
+    emptyTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white, textAlign: 'center', marginBottom: 6 },
+    emptyText: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, textAlign: 'center' },
+    bottomPadding: { height: 50 },
   });
 
   const quickActions = [
-    { name: 'Add Driver', icon: 'person-add', color: '#007749', route: 'ManageDrivers' },
-    { name: 'Documents', icon: 'document-text', color: '#002395', route: 'Documents' },
-    { name: 'Reports', icon: 'analytics', color: '#FFB81C', route: 'EnhancedReports' },
-    { name: 'Settings', icon: 'settings', color: '#607D8B', route: 'Settings' },
+    { name: 'Add Driver', icon: 'person-add', color: DT.green2, route: 'ManageDrivers' },
+    { name: 'Documents', icon: 'document-text', color: DT.blue, route: 'Documents' },
+    { name: 'Reports', icon: 'analytics', color: DT.amber, route: 'EnhancedReports' },
+    { name: 'Settings', icon: 'settings', color: DT.muted, route: 'Settings' },
   ];
 
   if (loading) {
     return (
-      <View style={s(colors).container}>
-        {/* Header skeleton */}
-        <View style={s(colors).header}>
-          <View style={s(colors).headerGlow1} />
-          <View style={s(colors).headerGlow2} />
-          <View style={s(colors).headerRow}>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.header}>
+          <View style={s.headerGlow1} />
+          <View style={s.headerGlow2} />
+          <View style={s.headerRow}>
             <View>
-              <SkeletonRect width={160} height={24} style={{ marginBottom: 8 }} />
-              <SkeletonRect width={120} height={14} />
+              <SkeletonRect width={160} height={24} br={8} />
+              <SkeletonRect width={120} height={14} br={8} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              {[0, 1, 2].map(i => <SkeletonRect key={i} width={36} height={36} style={{ borderRadius: 12 }} />)}
+              {[0, 1, 2].map(i => <SkeletonRect key={i} width={36} height={36} br={12} />)}
             </View>
           </View>
         </View>
-        {/* Tabs skeleton */}
-        <View style={s(colors).tabsOuter}>
-          {[0, 1, 2].map(i => <SkeletonRect key={i} width={'33%'} height={36} style={{ borderRadius: borderRadius.xxl }} />)}
+        <View style={s.tabsOuter}>
+          {[0, 1, 2].map(i => <SkeletonRect key={i} width={'33%'} height={36} br={12} />)}
         </View>
-        {/* Stats skeleton */}
-        <View style={s(colors).statsGrid}>
+        <View style={s.statsGrid}>
           {[0, 1, 2, 3].map(i => (
-            <View key={i} style={{ width: i < 2 ? '55%' : '43%', paddingHorizontal: 4, paddingVertical: 4 }}>
-              <View style={s(colors).glass}>
-                <View style={s(colors).glassRefraction} />
-                <View style={[s(colors).statLeftBar, { backgroundColor: 'rgba(255,184,28,0.3)' }]} />
-                <View style={s(colors).statCard}>
-                  <SkeletonRect width={80} height={10} style={{ marginBottom: 8 }} />
-                  <SkeletonRect width={100} height={28} />
-                </View>
+            <View key={i} style={s.statCardOuter}>
+              <View style={s.statCard}>
+                <View style={s.statCardTopRefraction} />
+                <View style={s.statCardLeftBar} />
+                <SkeletonRect width={80} height={10} br={8} />
+                <SkeletonRect width={100} height={26} br={8} />
               </View>
             </View>
           ))}
         </View>
-        {/* Quick actions skeleton */}
-        <View style={s(colors).section}>
-          <SkeletonRect width={120} height={18} style={{ marginBottom: 12 }} />
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {[0, 1, 2, 3].map(i => <SkeletonRect key={i} width={'24%'} height={72} style={{ borderRadius: borderRadius.xxl }} />)}
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Quick Actions</Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+            {[0, 1, 2, 3].map(i => <SkeletonRect key={i} width={'25%'} height={72} br={20} />)}
           </View>
         </View>
         <Spacer size="xl" />
@@ -266,80 +296,77 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <ScrollView style={s(colors).container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFB81C']} tintColor={'#FFB81C'} />}>
-      {/* HEADER */}
-      <View style={s(colors).header}>
-        <View style={s(colors).headerGlow1} />
-        <View style={s(colors).headerGlow2} />
-        <View style={s(colors).headerRow}>
+    <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />} showsVerticalScrollIndicator={false}>
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+      </View>
+
+      {/* Header */}
+      <View style={s.header}>
+        <View style={s.headerGlow1} />
+        <View style={s.headerGlow2} />
+        <View style={s.headerRow}>
           <View>
-            <Text style={s(colors).headerTitle}>Admin Dashboard</Text>
-            <Text style={s(colors).headerSubtext}>{userName || 'Admin'} — Real-time data</Text>
+            <Text style={s.headerTitle}>Admin Dashboard</Text>
+            <Text style={s.headerSubtext}>{userName || 'Admin'} — Real-time data</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
             {[{ icon: 'location', route: 'FleetTracking' }, { icon: 'settings-outline', route: 'Settings' }, { icon: 'refresh', action: 'refresh' }].map((btn, i) => (
-              <TouchableOpacity key={i} style={s(colors).headerBtn} onPress={() => btn.action === 'refresh' ? onRefresh() : navigation?.navigate?.(btn.route as string)}>
-                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={20} color={colors.textInverse} />
+              <TouchableOpacity key={i} style={s.headerBtn} onPress={() => btn.action === 'refresh' ? onRefresh() : navigation.navigate(btn.route as string)}>
+                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={18} color={DT.white} />
               </TouchableOpacity>
             ))}
           </View>
         </View>
       </View>
 
-      {/* TABS */}
-      <View style={s(colors).tabsOuter}>
+      {/* Tabs */}
+      <View style={s.tabsOuter}>
         {[{ tab: 'overview', label: 'Overview', icon: 'grid' }, { tab: 'drivers', label: 'Drivers', icon: 'car' }, { tab: 'payments', label: 'Payments', icon: 'card' }].map(t => (
-          <TouchableOpacity key={t.tab} onPress={() => switchTab(t.tab)} style={[s(colors).tabBtn, activeTab === t.tab && s(colors).tabBtnActive]}>
-            <Ionicons name={t.icon as keyof typeof Ionicons.glyphMap} size={18} color={activeTab === t.tab ? colors.textInverse : 'rgba(255,255,255,0.45)'} />
-            <Text style={activeTab === t.tab ? s(colors).tabTextActive : s(colors).tabText}>{t.label}</Text>
+          <TouchableOpacity key={t.tab} onPress={() => switchTab(t.tab)} style={[s.tabBtn, activeTab === t.tab && s.tabBtnActive]}>
+            <Ionicons name={t.icon as keyof typeof Ionicons.glyphMap} size={16} color={activeTab === t.tab ? DT.bg : 'rgba(255,255,255,.45)'} />
+            <Text style={activeTab === t.tab ? s.tabTextActive : s.tabText}>{t.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {activeTab === 'overview' && (
         <>
-          {/* Stats — asymmetric bento: first 2 wide, last 2 narrow */}
-          <View style={s(colors).statsGrid}>
-            {stats.map((stat, index) => {
-              const wide = index < 2;
-              return (
-                <View key={index} style={{ width: wide ? '55%' : '43%', paddingHorizontal: 4, paddingVertical: 4 }}>
-                  <View style={s(colors).glass}>
-                    <View style={s(colors).glassRefraction} />
-                    <View style={[s(colors).statLeftBar, { backgroundColor: stat.positive !== false ? 'rgba(255,184,28,0.6)' : 'rgba(224,60,49,0.6)' }]} />
-                    <View style={s(colors).statCard}>
-                      <Text style={s(colors).statLabel}>{stat.label}</Text>
-                      <Text style={s(colors).statValue}>{stat.value}</Text>
-                    </View>
-                  </View>
+          {/* Stats */}
+          <View style={s.statsGrid}>
+            {stats.map((stat, index) => (
+              <View key={index} style={s.statCardOuter}>
+                <View style={s.statCard}>
+                  <View style={s.statCardTopRefraction} />
+                  <View style={[s.statCardLeftBar, { backgroundColor: stat.positive !== false ? 'rgba(255,183,0,.6)' : 'rgba(255,61,90,.6)' }]} />
+                  <Text style={s.statLabel}>{stat.label}</Text>
+                  <Text style={s.statValue}>{stat.value}</Text>
                 </View>
-              );
-            })}
+              </View>
+            ))}
           </View>
 
-          {/* Quick Actions — asymmetric bento */}
-          <View style={s(colors).section}>
-            <Text style={s(colors).sectionTitle}>Quick Actions</Text>
-            <View style={s(colors).quickGrid}>
-              <View style={{ width: '52%', paddingHorizontal: 4, paddingVertical: 4 }}>
-                <SpringTouchable onPress={() => navigation?.navigate?.(quickActions[0].route)} style={s(colors).quickCardInner}>
-                  <View style={[s(colors).quickIconWrap, { backgroundColor: `${quickActions[0].color}20`, borderColor: `${quickActions[0].color}40` }]}>
-                    <Ionicons name={quickActions[0].icon as keyof typeof Ionicons.glyphMap} size={22} color={quickActions[0].color} />
+          {/* Quick Actions */}
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Quick Actions</Text>
+            <View style={s.quickGrid}>
+              <View style={{ width: '52%' }}>
+                <SpringTouchable onPress={() => navigation.navigate(quickActions[0].route)} style={s.quickCardInner}>
+                  <View style={[s.quickIconWrap, { backgroundColor: `${quickActions[0].color}20`, borderColor: `${quickActions[0].color}40` }]}>
+                    <Ionicons name={quickActions[0].icon as keyof typeof Ionicons.glyphMap} size={20} color={quickActions[0].color} />
                   </View>
-                  <Text style={s(colors).quickText}>{quickActions[0].name}</Text>
+                  <Text style={s.quickText}>{quickActions[0].name}</Text>
                 </SpringTouchable>
               </View>
               {quickActions.slice(1).map((action, index) => (
-                <Animated.View
-                  key={index}
-                  entering={FadeIn.delay(index * 60).springify()}
-                  style={{ width: '48%', paddingHorizontal: 4, paddingVertical: 4 }}
-                >
-                  <SpringTouchable onPress={() => navigation?.navigate?.(action.route)} style={s(colors).quickCardInner}>
-                    <View style={[s(colors).quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
-                      <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={action.color} />
+                <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()} style={{ width: '48%' }}>
+                  <SpringTouchable onPress={() => navigation.navigate(action.route)} style={s.quickCardInner}>
+                    <View style={[s.quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
+                      <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.color} />
                     </View>
-                    <Text style={s(colors).quickText}>{action.name}</Text>
+                    <Text style={s.quickText}>{action.name}</Text>
                   </SpringTouchable>
                 </Animated.View>
               ))}
@@ -349,42 +376,42 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
       )}
 
       {activeTab === 'drivers' && (
-        <View style={s(colors).section}>
-          <Text style={s(colors).sectionTitle}>All Drivers ({filteredDrivers.length})</Text>
-          <SearchBar value={driverSearch} onChangeText={setDriverSearch} placeholder="Search drivers..." />
-          <View style={s(colors).sortRow}>
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>All Drivers ({filteredDrivers.length})</Text>
+          <View style={s.searchWrap}>
+            <SearchBar value={driverSearch} onChangeText={setDriverSearch} placeholder="Search drivers..." />
+          </View>
+          <View style={s.sortRow}>
             {(['name', 'status', 'date'] as const).map(sort => (
               <TouchableOpacity
                 key={sort}
-                style={{ ...s(colors).sortChip, backgroundColor: driverSortBy === sort ? colors.primary : 'rgba(255,255,255,0.05)', borderColor: driverSortBy === sort ? colors.primary : 'rgba(255,184,28,0.12)' }}
+                style={{ ...s.sortChip, backgroundColor: driverSortBy === sort ? DT.amber : DT.panel, borderColor: driverSortBy === sort ? DT.amber : DT.border }}
                 onPress={() => { if (driverSortBy === sort) setDriverSortAsc(!driverSortAsc); else { setDriverSortBy(sort); setDriverSortAsc(false); }}}
               >
-                <Text style={{ ...typography.labelSmall, color: driverSortBy === sort ? colors.textInverse : colors.text }}>{sort.charAt(0).toUpperCase() + sort.slice(1)}</Text>
-                {driverSortBy === sort && <Ionicons name={driverSortAsc ? 'arrow-up' : 'arrow-down'} size={12} color={colors.textInverse} />}
+                <Text style={{ ...s.sortChipText, color: driverSortBy === sort ? DT.bg : DT.text }}>{sort.charAt(0).toUpperCase() + sort.slice(1)}</Text>
+                {driverSortBy === sort && <Ionicons name={driverSortAsc ? 'arrow-up' : 'arrow-down'} size={12} color={DT.bg} />}
               </TouchableOpacity>
             ))}
           </View>
 
           {filteredDrivers.length === 0 ? (
-            <View style={[s(colors).glass, s(colors).emptyGlass]}>
-              <Ionicons name="car-outline" size={48} color="rgba(255,255,255,0.2)" />
-              <Text style={s(colors).emptyTitle}>{driverSearch ? 'No drivers match your search' : 'No drivers yet'}</Text>
-              <Text style={s(colors).emptyText}>{driverSearch ? 'Try a different search term' : 'Add your first driver to get started'}</Text>
+            <View style={s.emptyGlass}>
+              <Ionicons name="car-outline" size={52} color={DT.dim} style={s.emptyIcon} />
+              <Text style={s.emptyTitle}>{driverSearch ? 'No drivers match your search' : 'No drivers yet'}</Text>
+              <Text style={s.emptyText}>{driverSearch ? 'Try a different search term' : 'Add your first driver to get started'}</Text>
             </View>
           ) : (
             <>
               {paginatedDrivers.map((driver, index) => (
-                <Animated.View
-                  key={driver.id}
-                  entering={FadeIn.delay(index * 60).springify()}
-                  style={s(colors).listItem}
-                >
-                  <View style={s(colors).listAvatar}>
-                    <Text style={{ color: '#002395', fontWeight: 'bold', fontSize: 14 }}>{(driver.full_name || 'D').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</Text>
+                <Animated.View key={driver.id} entering={FadeIn.delay(index * 60).springify()} style={s.listItem}>
+                  <View style={s.listTopRefraction} />
+                  <View style={s.listLeftBar} />
+                  <View style={[s.listAvatar, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
+                    <Text style={s.listInitial}>{(driver.full_name || 'D').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}</Text>
                   </View>
-                  <View style={s(colors).listInfo}>
-                    <Text style={s(colors).listName}>{driver.full_name}</Text>
-                    <Text style={s(colors).listMeta}>{driver.phone || 'No phone'}</Text>
+                  <View style={s.listInfo}>
+                    <Text style={s.listName}>{driver.full_name}</Text>
+                    <Text style={s.listMeta}>{driver.phone || 'No phone'}</Text>
                   </View>
                   <Badge label={getStatusText(driver.status, driver.is_verified)} variant={getStatusVariant(driver.status, driver.is_verified)} size="small" />
                 </Animated.View>
@@ -396,42 +423,40 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
       )}
 
       {activeTab === 'payments' && (
-        <View style={s(colors).section}>
-          <Text style={s(colors).sectionTitle}>Recent Payments ({filteredPayments.length})</Text>
-          <View style={s(colors).filterRow}>
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Recent Payments ({filteredPayments.length})</Text>
+          <View style={s.filterRow}>
             {(['all', 'pending', 'completed', 'failed'] as const).map(filter => (
               <TouchableOpacity
                 key={filter}
-                style={{ ...s(colors).filterChip, backgroundColor: paymentFilter === filter ? colors.primary : 'rgba(255,255,255,0.05)', borderColor: paymentFilter === filter ? colors.primary : 'rgba(255,184,28,0.12)' }}
+                style={{ ...s.filterChip, backgroundColor: paymentFilter === filter ? DT.blue : DT.panel, borderColor: paymentFilter === filter ? DT.blue : DT.border }}
                 onPress={() => { setPaymentFilter(filter); setPaymentPage(1); }}
               >
-                <Text style={{ ...typography.labelSmall, color: paymentFilter === filter ? colors.textInverse : colors.text }}>{filter.charAt(0).toUpperCase() + filter.slice(1)}</Text>
+                <Text style={{ ...s.filterChipText, color: paymentFilter === filter ? DT.white : DT.text }}>{filter.charAt(0).toUpperCase() + filter.slice(1)}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {filteredPayments.length === 0 ? (
-            <View style={[s(colors).glass, s(colors).emptyGlass]}>
-              <Ionicons name="card-outline" size={48} color="rgba(255,255,255,0.2)" />
-              <Text style={s(colors).emptyTitle}>No {paymentFilter === 'all' ? '' : paymentFilter} payments</Text>
-              <Text style={s(colors).emptyText}>Payments will appear here once recorded</Text>
+            <View style={s.emptyGlass}>
+              <Ionicons name="card-outline" size={48} color={DT.muted} style={s.emptyIcon} />
+              <Text style={s.emptyTitle}>No {paymentFilter === 'all' ? '' : paymentFilter} payments</Text>
+              <Text style={s.emptyText}>Payments will appear here once recorded</Text>
             </View>
           ) : (
             <>
               {paginatedPayments.map((payment, index) => (
-                <Animated.View
-                  key={payment.id}
-                  entering={FadeIn.delay(index * 60).springify()}
-                  style={s(colors).listItem}
-                >
-                  <View style={[s(colors).listAvatar, { backgroundColor: 'rgba(0,119,73,0.25)', borderColor: 'rgba(0,119,73,0.3)' }]}>
-                    <Ionicons name="card" size={20} color="#007749" />
+                <Animated.View key={payment.id} entering={FadeIn.delay(index * 60).springify()} style={s.listItem}>
+                  <View style={s.listTopRefraction} />
+                  <View style={s.listLeftBar} />
+                  <View style={[s.listAvatar, { backgroundColor: 'rgba(0,119,73,.15)', borderColor: 'rgba(0,119,73,.3)' }]}>
+                    <Ionicons name="card" size={20} color={DT.green2} />
                   </View>
-                  <View style={s(colors).listInfo}>
-                    <Text style={s(colors).listName}>Payment #{payment.id.substring(0, 8)}</Text>
+                  <View style={s.listInfo}>
+                    <Text style={s.listName}>Payment #{payment.id.substring(0, 8)}</Text>
                     <Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" />
                   </View>
-                  <Text style={s(colors).amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+                  <Text style={s.amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
                 </Animated.View>
               ))}
               {totalPaymentPages > 1 && <Pagination currentPage={paymentPage} totalPages={totalPaymentPages} onPageChange={setPaymentPage} itemsPerPage={PAYMENTS_PER_PAGE} totalItems={filteredPayments.length} />}
@@ -441,8 +466,7 @@ const AdminDashboardScreen = ({ navigation }: Props) => {
       )}
 
       <Spacer size="xl" />
+      <View style={s.bottomPadding} />
     </ScrollView>
   );
-};
-
-export default AdminDashboardScreen;
+}

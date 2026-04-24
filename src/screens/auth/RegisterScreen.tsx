@@ -1,32 +1,101 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// ScholarTrack RegisterScreen — Design System: Dark SA Transport
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, Easing } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
-
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void };
   onLogin?: (role: string) => void;
 }
 
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  muted: '#4a6a8a',
+  white: '#e8f4ff',
+};
+
+const SPRING = { damping: 15, stiffness: 150 };
+
+// Breathing dot
+const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    scale.value = withRepeat(withSequence(withTiming(1.5, { duration: 1600, easing: Easing.inOut(Easing.ease) }), withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) })), -1, false);
+    opacity.value = withRepeat(withSequence(withTiming(0.3, { duration: 1600, easing: Easing.inOut(Easing.ease) }), withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) })), -1, false);
+  }, []);
+  const ringStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }], opacity: opacity.value }));
+  return (
+    <View style={{ width: size + 10, height: size + 10, justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color }, ringStyle]} />
+      <View style={{ width: size * 0.7, height: size * 0.7, borderRadius: size * 0.35, backgroundColor: color }} />
+    </View>
+  );
+};
+
+// Spring press wrapper
+const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }] }));
+  return (
+    <TouchableOpacity onPress={onPress} onPressIn={() => { pressed.value = 1; }} onPressOut={() => { pressed.value = 0; }} activeOpacity={1} style={style}>
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+// Role card
+const RoleCard = ({ role, selected, onPress }: { role: { id: string; name: string; icon: string; description: string }; selected: boolean; onPress: () => void }) => {
+  const cardStyle = {
+    backgroundColor: selected ? 'rgba(255,183,0,.08)' : 'rgba(255,255,255,.04)',
+    borderWidth: 1,
+    borderColor: selected ? 'rgba(255,183,0,.4)' : 'rgba(255,255,255,.08)',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 8,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+  };
+  const iconStyle = {
+    width: 44, height: 44, borderRadius: 12,
+    backgroundColor: selected ? 'rgba(255,183,0,.2)' : 'rgba(255,255,255,.06)',
+    borderWidth: 1,
+    borderColor: selected ? 'rgba(255,183,0,.35)' : 'rgba(255,255,255,.08)',
+    justifyContent: 'center' as const, alignItems: 'center' as const,
+  };
+  const nameStyle = { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '600' as const, color: selected ? DT.amber : DT.white };
+  const descStyle = { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 };
+
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <View style={cardStyle}>
+        <View style={iconStyle}>
+          <Ionicons name={role.icon as keyof typeof Ionicons.glyphMap} size={22} color={selected ? DT.amber : DT.muted} />
+        </View>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={nameStyle}>{role.name}</Text>
+          <Text style={descStyle}>{role.description}</Text>
+        </View>
+        {selected && <Ionicons name="checkmark-circle" size={22} color={DT.amber} />}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 export default function RegisterScreen({ navigation, onLogin }: Props) {
-  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,18 +120,14 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
     if (password.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
-
-    // Validate phone number (South African format)
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     if (cleanPhone.length < 10) {
       Alert.alert('Error', 'Please enter a valid phone number');
@@ -71,7 +136,6 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
 
     setLoading(true);
     try {
-      // Format phone for South Africa
       let formattedPhone = cleanPhone;
       if (cleanPhone.startsWith('0')) {
         formattedPhone = '+27' + cleanPhone.substring(1);
@@ -79,31 +143,23 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         formattedPhone = '+27' + cleanPhone;
       }
 
-      // Sign up with phone - Supabase will send OTP
       const { data, error } = await supabase.auth.signUp({
         phone: formattedPhone,
         password,
         options: {
-          data: {
-            full_name: name,
-            role: selectedRole
-          },
+          data: { full_name: name, role: selectedRole },
           emailRedirectTo: 'scholartrack://confirm'
         }
       });
 
       if (error) {
-        // If phone auth fails (no SMS provider), fall back to email
         if (error.message.includes('phone') || error.message.includes('SMS') || error.message.includes('disabled')) {
           Alert.alert(
             'SMS Not Available',
             'Phone verification requires SMS provider setup. Would you like to register with email instead?',
             [
               { text: 'Cancel', style: 'cancel' },
-              { text: 'Use Email', onPress: () => {
-                setUsePhoneAuth(false);
-                handleEmailRegister();
-              }}
+              { text: 'Use Email', onPress: () => { setUsePhoneAuth(false); handleEmailRegister(); }}
             ]
           );
           setLoading(false);
@@ -113,23 +169,14 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       }
 
       if (data.session) {
-        // No OTP needed, auto-confirmed
         await AsyncStorage.setItem('userRole', selectedRole);
         await AsyncStorage.setItem('userName', name);
         await AsyncStorage.setItem('userEmail', formattedPhone);
-        if (data.user) {
-          await AsyncStorage.setItem('userId', data.user.id);
-        }
-
+        if (data.user) { await AsyncStorage.setItem('userId', data.user.id); }
         Alert.alert('Success', 'You have successfully registered!', [
-          { text: 'OK', onPress: () => {
-            if (onLogin) {
-              onLogin(selectedRole);
-            }
-          }}
+          { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
         ]);
       } else {
-        // OTP required - show OTP screen
         setPendingPhone(formattedPhone);
         setStep('otp');
       }
@@ -146,12 +193,10 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
     if (password.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
@@ -163,18 +208,13 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         email,
         password,
         options: {
-          data: {
-            full_name: name,
-            phone: phone || '',
-            role: selectedRole
-          },
+          data: { full_name: name, phone: phone || '', role: selectedRole },
           emailRedirectTo: 'scholartrack://confirm'
         }
       });
 
       if (error) throw error;
 
-      // Check if email confirmation required
       if (!data.session) {
         Alert.alert('Registration Successful', 'Please check your email to confirm your account, then login.', [
           { text: 'OK', onPress: () => navigation.goBack() }
@@ -183,26 +223,16 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         return;
       }
 
-      // Auto login
       await AsyncStorage.setItem('userRole', selectedRole);
       await AsyncStorage.setItem('userName', name);
       await AsyncStorage.setItem('userEmail', email);
-      if (data.user) {
-        await AsyncStorage.setItem('userId', data.user.id);
-      }
-
+      if (data.user) { await AsyncStorage.setItem('userId', data.user.id); }
       Alert.alert('Success', 'You have successfully registered!', [
-        { text: 'OK', onPress: () => {
-          if (onLogin) {
-            onLogin(selectedRole);
-          }
-        }}
+        { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
       ]);
     } catch (error) {
       console.error('Registration error:', error);
       const errorMsg = error instanceof Error ? error.message : (error as { error_description?: string })?.error_description || '';
-
-      // Check for specific error cases
       if (errorMsg.toLowerCase().includes('already registered') ||
           errorMsg.toLowerCase().includes('already exists') ||
           errorMsg.toLowerCase().includes('user already')) {
@@ -223,7 +253,6 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       Alert.alert('Error', 'Please enter the 6-digit code');
       return;
     }
-
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({
@@ -231,22 +260,13 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         token: otpCode,
         type: 'sms'
       });
-
       if (error) throw error;
-
       await AsyncStorage.setItem('userRole', selectedRole);
       await AsyncStorage.setItem('userName', name);
       await AsyncStorage.setItem('userEmail', pendingPhone);
-      if (data.user) {
-        await AsyncStorage.setItem('userId', data.user.id);
-      }
-
+      if (data.user) { await AsyncStorage.setItem('userId', data.user.id); }
       Alert.alert('Success', 'Phone verified! Welcome to ScholarTrack.', [
-        { text: 'OK', onPress: () => {
-          if (onLogin) {
-            onLogin(selectedRole);
-          }
-        }}
+        { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
       ]);
     } catch (error) {
       Alert.alert('Error', 'Invalid verification code. Please try again.');
@@ -257,11 +277,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
 
   const handleResendOTP = async () => {
     try {
-      const { error } = await supabase.auth.signUp({
-        phone: pendingPhone,
-        password,
-      });
-
+      const { error } = await supabase.auth.signUp({ phone: pendingPhone, password });
       if (error) throw error;
       Alert.alert('OTP Resent', 'A new verification code has been sent');
     } catch (error) {
@@ -269,29 +285,101 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
     }
   };
 
-  // OTP Verification Screen
+  // Styles
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    scroll: { flex: 1 },
+    // HEADER
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: spacing.xxl,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    headerGlow1: { position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,183,0,.06)' },
+    headerGlow2: { position: 'absolute', bottom: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,35,149,.1)' },
+    backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    headerSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.amber, marginTop: spacing.xs },
+    headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.sm },
+    headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.4)' },
+    // FORM
+    form: { padding: spacing.lg, flex: 1 },
+    sectionLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.2)', marginBottom: spacing.sm, marginTop: spacing.md },
+    // AUTH TOGGLE
+    authToggle: { flexDirection: 'row' as const, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 14, padding: 4, marginBottom: spacing.md, borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    authToggleBtn: { flex: 1, flexDirection: 'row' as const, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 11, gap: 6 },
+    authToggleActive: { backgroundColor: DT.amber },
+    authToggleText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600' as const, color: DT.muted },
+    authToggleTextActive: { color: DT.bg },
+    // INPUT
+    inputWrap: { flexDirection: 'row' as const, alignItems: 'center', backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(255,183,0,.1)', borderRadius: 14, paddingHorizontal: 14, marginBottom: 12, height: 52 },
+    inputIcon: { marginRight: 10 },
+    input: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.white },
+    inputPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.muted },
+    // REGISTER BTN
+    registerBtn: {
+      backgroundColor: DT.amber, borderRadius: 14, height: 52,
+      justifyContent: 'center', alignItems: 'center', marginTop: spacing.md,
+      shadowColor: DT.amber, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
+    },
+    registerBtnDisabled: { backgroundColor: DT.muted },
+    registerBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.bg },
+    // TERMS
+    termsContainer: { marginTop: spacing.lg, alignItems: 'center' },
+    termsText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, textAlign: 'center', lineHeight: 18 },
+    termsLink: { color: DT.amber, fontWeight: '600' },
+    // LOGIN LINK
+    loginContainer: { alignItems: 'center', marginTop: spacing.lg, marginBottom: spacing.xl },
+    loginText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    loginLink: { color: DT.cyan, fontWeight: '700' },
+    // OTP
+    otpContainer: { flexDirection: 'row' as const, justifyContent: 'center', marginVertical: spacing.xl },
+    otpInput: {
+      width: 48, height: 54, borderWidth: 1, borderColor: 'rgba(255,183,0,.3)',
+      borderRadius: 12, marginHorizontal: 4, fontFamily: 'Syne_700Bold', fontSize: 22,
+      fontWeight: '700', color: DT.white, textAlign: 'center' as const,
+      backgroundColor: 'rgba(255,255,255,.04)',
+    },
+    resendContainer: { flexDirection: 'row' as const, justifyContent: 'center', marginTop: spacing.lg },
+    resendText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    resendLink: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.cyan, fontWeight: '600' },
+    goBackContainer: { alignItems: 'center', marginTop: spacing.lg },
+    goBackText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    goBackLink: { color: DT.amber, fontWeight: '600' },
+  });
+
+  // ─── OTP Verification Screen ────────────────────────────────────────────────
   if (step === 'otp') {
     return (
-      <KeyboardAvoidingView
-        style={styles(colors).container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles(colors).scrollView} keyboardShouldPersistTaps="handled">
-          <View style={styles(colors).header}>
-            <TouchableOpacity onPress={() => setStep('register')} style={styles(colors).backButton}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
+      <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Animated.View entering={FadeIn.springify()}>
+          <View style={s.header}>
+            <View style={s.headerGlow1} />
+            <View style={s.headerGlow2} />
+            <TouchableOpacity onPress={() => setStep('register')} style={s.backBtn}>
+              <Ionicons name="arrow-back" size={20} color={DT.white} />
             </TouchableOpacity>
-            <Text style={styles(colors).headerTitle}>Verify Phone</Text>
-            <Text style={styles(colors).headerSubtitle}>Enter the code sent to {pendingPhone}</Text>
+            <Text style={s.headerTitle}>Verify Phone</Text>
+            <Text style={s.headerSub}>Enter the code sent to {pendingPhone}</Text>
+            <View style={s.headerBadge}>
+              <BreathingDot color={DT.amber} size={7} />
+              <Text style={s.headerBadgeText}>Verification</Text>
+            </View>
           </View>
+        </Animated.View>
 
-          <View style={styles(colors).formContainer}>
-            <View style={styles(colors).otpContainer}>
+        <View style={s.form}>
+          <Animated.View entering={FadeIn.delay(100).springify()}>
+            <View style={s.otpContainer}>
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={(el: TextInput | null) => { otpInputRefs.current[index] = el; }}
-                  style={styles(colors).otpInput}
+                  style={s.otpInput}
                   value={digit}
                   onChangeText={(value) => {
                     const newOtp = [...otp];
@@ -309,440 +397,210 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
                   keyboardType="numeric"
                   maxLength={1}
                   placeholder="0"
-                  placeholderTextColor="#666"
+                  placeholderTextColor={DT.muted}
                 />
               ))}
             </View>
+          </Animated.View>
 
+          <Animated.View entering={FadeIn.delay(150).springify()}>
             <TouchableOpacity
-              style={[styles(colors).registerButton, loading && styles(colors).registerButtonDisabled]}
               onPress={handleVerifyOTP}
               disabled={loading}
+              style={[s.registerBtn, loading && s.registerBtnDisabled]}
             >
-              <Text style={styles(colors).registerButtonText}>
-                {loading ? 'Verifying...' : 'Verify Code'}
-              </Text>
+              <Text style={s.registerBtnText}>{loading ? 'Verifying…' : 'Verify Code'}</Text>
             </TouchableOpacity>
+          </Animated.View>
 
-            <View style={styles(colors).resendContainer}>
-              <Text style={styles(colors).resendText}>Didn't receive the code?</Text>
+          <Animated.View entering={FadeIn.delay(200).springify()}>
+            <View style={s.resendContainer}>
+              <Text style={s.resendText}>Didn't receive the code?</Text>
               <TouchableOpacity onPress={handleResendOTP}>
-                <Text style={styles(colors).resendLink}> Resend</Text>
+                <Text style={s.resendLink}> Resend</Text>
               </TouchableOpacity>
             </View>
+          </Animated.View>
 
-            <TouchableOpacity onPress={() => setStep('register')} style={styles(colors).loginContainer}>
-              <Text style={styles(colors).loginText}>
-                Wrong number? <Text style={styles(colors).loginLink}>Go Back</Text>
+          <Animated.View entering={FadeIn.delay(250).springify()}>
+            <View style={s.goBackContainer}>
+              <Text style={s.goBackText}>
+                Wrong number? <Text style={s.goBackLink} onPress={() => setStep('register')}>Go Back</Text>
               </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+            </View>
+          </Animated.View>
+        </View>
       </KeyboardAvoidingView>
     );
   }
 
-  // Registration Screen
+  // ─── Registration Screen ────────────────────────────────────────────────────
   return (
-    <KeyboardAvoidingView
-      style={styles(colors).container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView contentContainerStyle={styles(colors).scrollView} keyboardShouldPersistTaps="handled">
-        <View style={styles(colors).header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backButton}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles(colors).headerTitle}>Create Account</Text>
-          <Text style={styles(colors).headerSubtitle}>Join ScholarTrack SA</Text>
-        </View>
-
-        <View style={styles(colors).formContainer}>
-          <Text style={styles(colors).sectionTitle}>I am a...</Text>
-          <View style={styles(colors).roleContainer}>
-            {roles.map((role) => (
-              <TouchableOpacity
-                key={role.id}
-                style={[
-                  styles(colors).roleCard,
-                  selectedRole === role.id && styles(colors).roleCardSelected
-                ]}
-                onPress={() => setSelectedRole(role.id as 'parent' | 'driver')}
-              >
-                <View style={[
-                  styles(colors).roleIcon,
-                  selectedRole === role.id && styles(colors).roleIconSelected
-                ]}>
-                  <Ionicons
-                    name={role.icon as keyof typeof Ionicons.glyphMap}
-                    size={24}
-                    color={selectedRole === role.id ? '#fff' : '#002395'}
-                  />
-                </View>
-                <View style={styles(colors).roleInfo}>
-                  <Text style={[
-                    styles(colors).roleName,
-                    selectedRole === role.id && styles(colors).roleNameSelected
-                  ]}>{role.name}</Text>
-                  <Text style={styles(colors).roleDesc}>{role.description}</Text>
-                </View>
-                {selectedRole === role.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#FFB81C" />
-                )}
-              </TouchableOpacity>
-            ))}
+    <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView style={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Animated.View entering={FadeIn.springify()}>
+          <View style={s.header}>
+            <View style={s.headerGlow1} />
+            <View style={s.headerGlow2} />
+            <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+              <Ionicons name="arrow-back" size={20} color={DT.white} />
+            </TouchableOpacity>
+            <Text style={s.headerTitle}>Create Account</Text>
+            <Text style={s.headerSub}>Join ScholarTrack SA</Text>
+            <View style={s.headerBadge}>
+              <BreathingDot color={DT.green2} size={7} />
+              <Text style={s.headerBadgeText}>Get Started</Text>
+            </View>
           </View>
+        </Animated.View>
 
-          <Text style={styles(colors).sectionTitle}>Personal Details</Text>
+        <View style={s.form}>
+          {/* Role Selection */}
+          <Text style={s.sectionLabel}>I am a…</Text>
+          {roles.map((role, index) => (
+            <Animated.View key={role.id} entering={FadeIn.delay(index * 60).springify()}>
+              <RoleCard
+                role={role}
+                selected={selectedRole === role.id}
+                onPress={() => setSelectedRole(role.id as 'parent' | 'driver')}
+              />
+            </Animated.View>
+          ))}
+
+          <Text style={s.sectionLabel}>Personal Details</Text>
 
           {/* Auth Method Toggle */}
-          <View style={styles(colors).authToggle}>
-            <TouchableOpacity
-              style={[styles(colors).authToggleBtn, usePhoneAuth && styles(colors).authToggleActive]}
-              onPress={() => setUsePhoneAuth(true)}
-            >
-              <Ionicons name="call-outline" size={18} color={usePhoneAuth ? '#000' : '#666'} />
-              <Text style={[styles(colors).authToggleText, usePhoneAuth && styles(colors).authToggleTextActive]}>Phone</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles(colors).authToggleBtn, !usePhoneAuth && styles(colors).authToggleActive]}
-              onPress={() => setUsePhoneAuth(false)}
-            >
-              <Ionicons name="mail-outline" size={18} color={!usePhoneAuth ? '#000' : '#666'} />
-              <Text style={[styles(colors).authToggleText, !usePhoneAuth && styles(colors).authToggleTextActive]}>Email</Text>
-            </TouchableOpacity>
-          </View>
+          <Animated.View entering={FadeIn.delay(100).springify()}>
+            <View style={s.authToggle}>
+              <TouchableOpacity
+                style={[s.authToggleBtn, usePhoneAuth && s.authToggleActive]}
+                onPress={() => setUsePhoneAuth(true)}
+              >
+                <Ionicons name="call-outline" size={16} color={usePhoneAuth ? DT.bg : DT.muted} />
+                <Text style={usePhoneAuth ? s.authToggleTextActive : s.authToggleText}>Phone</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.authToggleBtn, !usePhoneAuth && s.authToggleActive]}
+                onPress={() => setUsePhoneAuth(false)}
+              >
+                <Ionicons name="mail-outline" size={16} color={!usePhoneAuth ? DT.bg : DT.muted} />
+                <Text style={!usePhoneAuth ? s.authToggleTextActive : s.authToggleText}>Email</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
 
-          <View style={styles(colors).inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
-            <TextInput
-              style={styles(colors).input}
-              placeholder="Full Name"
-              placeholderTextColor="#666666"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-            />
-          </View>
+          {/* Name Input */}
+          <Animated.View entering={FadeIn.delay(130).springify()}>
+            <View style={s.inputWrap}>
+              <Ionicons name="person-outline" size={18} color={DT.amber} style={s.inputIcon} />
+              <TextInput
+                style={name ? s.input : s.inputPlaceholder}
+                placeholder="Full Name"
+                placeholderTextColor={DT.muted}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
+            </View>
+          </Animated.View>
 
-          {usePhoneAuth ? (
-          <View style={styles(colors).inputWrapper}>
-            <Ionicons name="call-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
-            <TextInput
-              style={styles(colors).input}
-              placeholder="Phone Number (e.g., 0821234567)"
-              placeholderTextColor="#666666"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-          </View>
-          ) : (
-          <View style={styles(colors).inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
-            <TextInput
-              style={styles(colors).input}
-              placeholder="Email Address"
-              placeholderTextColor="#666666"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-          )}
+          {/* Phone / Email Input */}
+          <Animated.View entering={FadeIn.delay(160).springify()}>
+            {usePhoneAuth ? (
+              <View style={s.inputWrap}>
+                <Ionicons name="call-outline" size={18} color={DT.cyan} style={s.inputIcon} />
+                <TextInput
+                  style={phone ? s.input : s.inputPlaceholder}
+                  placeholder="Phone Number (e.g., 0821234567)"
+                  placeholderTextColor={DT.muted}
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            ) : (
+              <View style={s.inputWrap}>
+                <Ionicons name="mail-outline" size={18} color={DT.cyan} style={s.inputIcon} />
+                <TextInput
+                  style={email ? s.input : s.inputPlaceholder}
+                  placeholder="Email Address"
+                  placeholderTextColor={DT.muted}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+            )}
+          </Animated.View>
 
-          <View style={styles(colors).inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
-            <TextInput
-              style={styles(colors).input}
-              placeholder="Password"
-              placeholderTextColor="#666666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles(colors).eyeIcon}>
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
+          {/* Password Input */}
+          <Animated.View entering={FadeIn.delay(190).springify()}>
+            <View style={s.inputWrap}>
+              <Ionicons name="lock-closed-outline" size={18} color={DT.amber} style={s.inputIcon} />
+              <TextInput
+                style={password ? s.input : s.inputPlaceholder}
+                placeholder="Password"
+                placeholderTextColor={DT.muted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={DT.muted} />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
 
-          <View style={styles(colors).inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#FFB81C" style={styles(colors).inputIcon} />
-            <TextInput
-              style={styles(colors).input}
-              placeholder="Confirm Password"
-              placeholderTextColor="#666666"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showPassword}
-            />
-          </View>
+          {/* Confirm Password Input */}
+          <Animated.View entering={FadeIn.delay(220).springify()}>
+            <View style={s.inputWrap}>
+              <Ionicons name="lock-closed-outline" size={18} color={DT.amber} style={s.inputIcon} />
+              <TextInput
+                style={confirmPassword ? s.input : s.inputPlaceholder}
+                placeholder="Confirm Password"
+                placeholderTextColor={DT.muted}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showPassword}
+              />
+            </View>
+          </Animated.View>
 
-          <TouchableOpacity
-            style={[styles(colors).registerButton, loading && styles(colors).registerButtonDisabled]}
-            onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()}
-            disabled={loading}
-          >
-            <Text style={styles(colors).registerButtonText}>
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </Text>
-          </TouchableOpacity>
+          {/* Register Button */}
+          <Animated.View entering={FadeIn.delay(250).springify()}>
+            <SpringTouchable onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()} style={{}}>
+              <TouchableOpacity
+                disabled={loading}
+                style={[s.registerBtn, loading && s.registerBtnDisabled]}
+              >
+                <Text style={s.registerBtnText}>{loading ? 'Creating Account…' : 'Create Account'}</Text>
+              </TouchableOpacity>
+            </SpringTouchable>
+          </Animated.View>
 
-          <View style={styles(colors).termsContainer}>
-            <Text style={styles(colors).termsText}>
-              By signing up, you agree to our{' '}
-              <Text style={styles(colors).termsLink}>Terms of Service</Text> and{' '}
-              <Text style={styles(colors).termsLink}>Privacy Policy</Text>
-            </Text>
-          </View>
+          {/* Terms */}
+          <Animated.View entering={FadeIn.delay(280).springify()}>
+            <View style={s.termsContainer}>
+              <Text style={s.termsText}>
+                By signing up, you agree to our{' '}
+                <Text style={s.termsLink}>Terms of Service</Text> and{' '}
+                <Text style={s.termsLink}>Privacy Policy</Text>
+              </Text>
+            </View>
+          </Animated.View>
 
-          <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles(colors).loginContainer}>
-            <Text style={styles(colors).loginText}>
-              Already have an account? <Text style={styles(colors).loginLink}>Login</Text>
-            </Text>
-          </TouchableOpacity>
+          {/* Login Link */}
+          <Animated.View entering={FadeIn.delay(310).springify()}>
+            <View style={s.loginContainer}>
+              <Text style={s.loginText}>
+                Already have an account?{' '}
+                <Text style={s.loginLink} onPress={() => navigation.navigate('Login')}>Login</Text>
+              </Text>
+            </View>
+          </Animated.View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface || '#1a1a1a',
-  },
-  scrollView: {
-    flexGrow: 1,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 50,
-  },
-  backButton: {
-    marginBottom: 15,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#FFB81C',
-    marginTop: 5,
-  },
-  formContainer: {
-    backgroundColor: '#1a1a1a',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 24,
-    paddingTop: 25,
-    paddingBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFB81C',
-    marginBottom: 12,
-    marginTop: 10,
-  },
-  roleContainer: {
-    marginBottom: 20,
-  },
-  roleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#333333',
-    marginBottom: 10,
-    backgroundColor: '#0a0a0a',
-  },
-  roleCardSelected: {
-    borderColor: '#FFB81C',
-    backgroundColor: '#1a1a1a',
-  },
-  roleIcon: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    backgroundColor: '#333333',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  roleIconSelected: {
-    backgroundColor: '#FFB81C',
-  },
-  roleInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  roleName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  roleNameSelected: {
-    color: '#FFB81C',
-  },
-  roleDesc: {
-    fontSize: 12,
-    color: '#999999',
-    marginTop: 2,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#333333',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    backgroundColor: '#0a0a0a',
-    height: 50,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#333',
-  },
-  orText: {
-    color: '#666',
-    marginHorizontal: 15,
-    fontSize: 12,
-  },
-  registerButton: {
-    backgroundColor: '#FFB81C',
-    borderRadius: 12,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#FFB81C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  registerButtonDisabled: {
-    backgroundColor: '#666666',
-  },
-  registerButtonText: {
-    color: '#000000',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  termsContainer: {
-    marginTop: 20,
-    textAlign: 'center',
-  },
-  termsText: {
-    fontSize: 12,
-    color: '#999999',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  termsLink: {
-    color: '#FFB81C',
-    fontWeight: '600',
-  },
-  loginContainer: {
-    alignItems: 'center',
-    marginTop: 25,
-    marginBottom: 10,
-  },
-  loginText: {
-    fontSize: 14,
-    color: '#999999',
-  },
-  loginLink: {
-    color: '#FFB81C',
-    fontWeight: '700',
-  },
-  // OTP Styles
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 30,
-  },
-  otpInput: {
-    width: 50,
-    height: 55,
-    borderWidth: 2,
-    borderColor: '#FFB81C',
-    borderRadius: 12,
-    marginHorizontal: 4,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    backgroundColor: '#0a0a0a',
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  resendText: {
-    color: '#999999',
-    fontSize: 14,
-  },
-  resendLink: {
-    color: '#FFB81C',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Auth Toggle
-  authToggle: {
-    flexDirection: 'row',
-    backgroundColor: '#0a0a0a',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 15,
-  },
-  authToggleBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 10,
-    gap: 8,
-  },
-  authToggleActive: {
-    backgroundColor: '#FFB81C',
-  },
-  authToggleText: {
-    color: '#666',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  authToggleTextActive: {
-    color: '#000',
-  },
-});

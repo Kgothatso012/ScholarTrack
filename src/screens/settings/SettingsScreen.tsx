@@ -1,16 +1,37 @@
-// Comprehensive Settings Screen for All User Roles
+// Settings Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Platform, Linking, RefreshControl, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Linking, RefreshControl, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, ThemeMode } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface UserProfile {
   name: string;
@@ -24,7 +45,6 @@ interface Props {
 }
 
 export default function SettingsScreen({ navigation }: Props) {
-  const { colors, themeMode, setThemeMode } = useTheme();
   const insets = useSafeAreaInsets();
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', email: '', phone: '', role: 'parent' });
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -48,15 +68,13 @@ export default function SettingsScreen({ navigation }: Props) {
     language: 'English',
     emergencyAlert: true,
     autoRefresh: true,
-    darkMode: themeMode === 'dark',
+    darkMode: true,
   });
 
   const isDriver = userProfile.role === 'driver';
   const isParent = userProfile.role === 'parent';
 
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
+  useEffect(() => { loadUserProfile(); }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -64,40 +82,19 @@ export default function SettingsScreen({ navigation }: Props) {
       const email = await AsyncStorage.getItem('userEmail');
       const phone = await AsyncStorage.getItem('userPhone');
       const role = await AsyncStorage.getItem('userRole');
-
-      setUserProfile({
-        name: name || '',
-        email: email || '',
-        phone: phone || '',
-        role: role || 'parent',
-      });
-
+      setUserProfile({ name: name || '', email: email || '', phone: phone || '', role: role || 'parent' });
       setEditProfile({ name: name || '', phone: phone || '' });
-    } catch (error) {
-      return;
-    }
+    } catch (error) { /* silent */ }
   };
 
   const handleSaveProfile = async () => {
     try {
       await AsyncStorage.setItem('userName', editProfile.name);
       await AsyncStorage.setItem('userPhone', editProfile.phone);
-
       setUserProfile(prev => ({ ...prev, name: editProfile.name, phone: editProfile.phone }));
       setShowProfileModal(false);
       Alert.alert('Success', 'Profile updated successfully');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile');
-    }
-  };
-
-  const handleThemeChange = async (mode: ThemeMode) => {
-    try {
-      await setThemeMode(mode);
-      setAppSettings(prev => ({ ...prev, darkMode: mode === 'dark' }));
-    } catch (error) {
-      return;
-    }
+    } catch (error) { Alert.alert('Error', 'Failed to update profile'); }
   };
 
   const handleLogout = () => {
@@ -109,12 +106,9 @@ export default function SettingsScreen({ navigation }: Props) {
         onPress: async () => {
           await supabase.auth.signOut();
           await AsyncStorage.clear();
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Auth' }],
-          });
-        }
-      }
+          navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
+        },
+      },
     ]);
   };
 
@@ -122,319 +116,227 @@ export default function SettingsScreen({ navigation }: Props) {
     Linking.openURL(url).catch(() => Alert.alert('Error', 'Cannot open link'));
   };
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg, borderBottomWidth: 4, borderBottomColor: colors.accent },
-    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    headerTitle: { ...typography.displayMedium, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs },
-    headerActions: { flexDirection: 'row' },
-    headerBtn: { padding: spacing.sm, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: borderRadius.md },
-    section: { paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, fontWeight: '700', marginBottom: spacing.lg, paddingLeft: spacing.xs },
-    profileCard: { backgroundColor: colors.card, padding: spacing.lg, borderRadius: borderRadius.card, flexDirection: 'row', alignItems: 'center', borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 3 },
-    profileAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
-    profileInitial: { ...typography.h3, color: colors.accent },
-    profileInfo: { flex: 1, marginLeft: spacing.md },
-    profileName: { ...typography.h4, color: colors.text },
-    profileEmail: { ...typography.bodySmall, color: colors.textSecondary },
-    profileRole: { marginTop: spacing.xs },
-    settingRow: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, borderLeftWidth: 3, borderLeftColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
+    headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    section: { paddingHorizontal: 16, paddingTop: 20 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    profileCard: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.4)' },
+    profileAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(0,229,255,.3)' },
+    profileInitial: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: DT.cyan },
+    profileInfo: { flex: 1, marginLeft: 14 },
+    profileName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white },
+    profileEmail: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 2 },
+    badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
+    badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.white, textTransform: 'capitalize' },
+    settingCard: { ...glass, padding: 0, overflow: 'visible' },
+    settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: DT.border },
     settingInfo: { flex: 1 },
-    settingLabel: { ...typography.label, color: colors.text },
-    settingDesc: { ...typography.caption, color: colors.textSecondary, marginTop: spacing.xs },
-    settingAction: { marginLeft: spacing.md },
-    divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.md },
-    dangerBtn: { backgroundColor: colors.danger, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', marginTop: spacing.lg, borderTopWidth: 2, borderTopColor: 'rgba(255,255,255,0.2)', shadowColor: colors.danger, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    dangerBtnText: { ...typography.button, color: colors.textInverse },
-    modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: colors.card, padding: spacing.xl, borderRadius: borderRadius.lg, width: '85%' },
-    modalTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.lg },
-    input: { backgroundColor: colors.background, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.md, ...typography.body, color: colors.text, borderWidth: 1, borderColor: colors.border },
+    settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    settingDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    settingRowBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: DT.border },
+    settingRowBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    themeRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 8 },
+    themeOption: { alignItems: 'center', padding: 12, borderRadius: 14, gap: 6 },
+    themeIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
+    themeLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.muted },
+    dangerBtn: { ...glass, padding: 16, marginHorizontal: 16, marginTop: 20, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)' },
+    dangerText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.red },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'center', alignItems: 'center' },
+    modalContent: { ...glass, padding: 24, width: '85%', borderRadius: 24 },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white, marginBottom: 20 },
+    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.amber, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    input: { ...glass, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white, marginBottom: 16, borderColor: DT.border },
+    modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+    saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+    saveBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg },
+    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.border },
+    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.muted },
+    bottomPadding: { height: 50 },
   });
 
   const SettingRow = ({ label, description, value, onValueChange }: { label: string; description?: string; value: boolean; onValueChange: (v: boolean) => void }) => (
-    <View style={styles(colors).settingRow}>
-      <View style={styles(colors).settingInfo}>
-        <Text style={styles(colors).settingLabel}>{label}</Text>
-        {description && <Text style={styles(colors).settingDesc}>{description}</Text>}
+    <View style={s.settingRow}>
+      <View style={s.settingInfo}>
+        <Text style={s.settingLabel}>{label}</Text>
+        {description && <Text style={s.settingDesc}>{description}</Text>}
       </View>
-      <View style={styles(colors).settingAction}>
-        <Switch
-          value={value}
-          onValueChange={onValueChange}
-          trackColor={{ false: colors.border, true: colors.primary }}
-          thumbColor={colors.card}
-        />
-      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: DT.border, true: `${DT.cyan}60` }}
+        thumbColor={value ? DT.cyan : DT.muted}
+      />
     </View>
   );
 
-  const SettingRealTimeToggle = () => (
-    <View style={styles(colors).settingRow}>
-      <View style={styles(colors).settingInfo}>
-        <Text style={styles(colors).settingLabel}>Real-Time Tracking</Text>
-        <Text style={styles(colors).settingDesc}>Enable live location updates</Text>
-      </View>
-      <View style={styles(colors).settingAction}>
-        <Switch
-          value={privacy.shareLocation}
-          onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, shareLocation: v }))}
-          trackColor={{ false: colors.border, true: colors.primary }}
-          thumbColor={colors.card}
-        />
-      </View>
-    </View>
+  const SettingRowBtn = ({ label, onPress }: { label: string; onPress: () => void }) => (
+    <TouchableOpacity style={s.settingRowBtn} onPress={onPress} activeOpacity={0.7}>
+      <Text style={s.settingRowBtnText}>{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color={DT.muted} />
+    </TouchableOpacity>
   );
 
   return (
     <ScrollView
-      style={styles(colors).container}
-      refreshControl={
-        <RefreshControl
-          refreshing={false}
-          onRefresh={loadUserProfile}
-          colors={[colors.accent]}
-          tintColor={colors.accent}
-        />
-      }
+      style={s.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={loadUserProfile} tintColor={DT.cyan} colors={[DT.cyan]} />}
     >
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <View style={styles(colors).headerTop}>
-          <Text style={styles(colors).headerTitle}>Settings</Text>
-          <View style={styles(colors).headerActions}>
-            <TouchableOpacity style={styles(colors).headerBtn} onPress={loadUserProfile}>
-              <Ionicons name="refresh" size={20} color={colors.textInverse} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Text style={styles(colors).headerSubtext}>{userProfile.name || 'User'} - {userProfile.role || 'Parent'}</Text>
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      {/* Profile Section */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Profile</Text>
-        <TouchableOpacity onPress={() => setShowProfileModal(true)}>
-          <Card variant="elevated" padding="large">
-            <View style={styles(colors).profileCard}>
-              <View style={styles(colors).profileAvatar}>
-                <Text style={styles(colors).profileInitial}>
-                  {(userProfile.name || 'U').substring(0, 1).toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles(colors).profileInfo}>
-                <Text style={styles(colors).profileName}>{userProfile.name || 'User'}</Text>
-                <Text style={styles(colors).profileEmail}>{userProfile.email || 'No email'}</Text>
-                <Badge label={userProfile.role} variant="primary" size="small" />
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+      {/* Header */}
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Settings</Text><Text style={s.ltSub}>{userProfile.name || 'User'} — {userProfile.role || 'Parent'}</Text></View>
+          <TouchableOpacity style={s.headerBtn} onPress={loadUserProfile}>
+            <Ionicons name="refresh" size={18} color={DT.white} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Profile */}
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Profile</Text>
+        <TouchableOpacity style={s.profileCard} onPress={() => setShowProfileModal(true)} activeOpacity={0.8}>
+          <View style={s.cardTopRefraction} />
+          <View style={[s.profileAvatar, { backgroundColor: `${DT.cyan}15` }]}>
+            <Text style={s.profileInitial}>{(userProfile.name || 'U').substring(0, 1).toUpperCase()}</Text>
+          </View>
+          <View style={s.profileInfo}>
+            <Text style={s.profileName}>{userProfile.name || 'User'}</Text>
+            <Text style={s.profileEmail}>{userProfile.email || 'No email'}</Text>
+            <View style={[s.badge, { backgroundColor: DT.blue }]}>
+              <Text style={s.badgeText}>{userProfile.role}</Text>
             </View>
-          </Card>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={DT.muted} />
         </TouchableOpacity>
       </View>
 
       {/* Notifications */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Notifications</Text>
-        <Card variant="elevated" padding="none">
-          <SettingRow
-            label="Trip Updates"
-            description="Get notified about trip status changes"
-            value={notifications.trips}
-            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, trips: v }))}
-          />
-          <SettingRow
-            label="Payment Alerts"
-            description="Payment confirmations and reminders"
-            value={notifications.payments}
-            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, payments: v }))}
-          />
-          <SettingRow
-            label="Safety Alerts"
-            description="Emergency and safety notifications"
-            value={notifications.safety}
-            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, safety: v }))}
-          />
-          <SettingRow
-            label="Email Notifications"
-            description="Receive updates via email"
-            value={notifications.email}
-            onValueChange={(v: boolean) => setNotifications(n => ({ ...n, email: v }))}
-          />
-        </Card>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Notifications</Text>
+        <View style={s.settingCard}>
+          <SettingRow label="Trip Updates" description="Get notified about trip status changes" value={notifications.trips} onValueChange={v => setNotifications(n => ({ ...n, trips: v }))} />
+          <SettingRow label="Payment Alerts" description="Payment confirmations and reminders" value={notifications.payments} onValueChange={v => setNotifications(n => ({ ...n, payments: v }))} />
+          <SettingRow label="Safety Alerts" description="Emergency and safety notifications" value={notifications.safety} onValueChange={v => setNotifications(n => ({ ...n, safety: v }))} />
+          <SettingRow label="Email Notifications" description="Receive updates via email" value={notifications.email} onValueChange={v => setNotifications(n => ({ ...n, email: v }))} />
+        </View>
       </View>
 
       {/* Privacy */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Privacy</Text>
-        <Card variant="elevated" padding="none">
-          <SettingRow
-            label="Share Location"
-            description="Allow tracking for safety features"
-            value={privacy.shareLocation}
-            onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, shareLocation: v }))}
-          />
-          <SettingRow
-            label="Show Profile"
-            description="Allow others to see your profile"
-            value={privacy.showProfile}
-            onValueChange={(v: boolean) => setPrivacy(p => ({ ...p, showProfile: v }))}
-          />
-        </Card>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Privacy</Text>
+        <View style={s.settingCard}>
+          <SettingRow label="Share Location" description="Allow tracking for safety features" value={privacy.shareLocation} onValueChange={v => setPrivacy(p => ({ ...p, shareLocation: v }))} />
+          <SettingRow label="Show Profile" description="Allow others to see your profile" value={privacy.showProfile} onValueChange={v => setPrivacy(p => ({ ...p, showProfile: v }))} />
+        </View>
       </View>
 
       {/* App Settings */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>App</Text>
-        <Card variant="elevated" padding="none">
-          <SettingRow
-            label="Emergency Alert"
-            description="Enable SOS button"
-            value={appSettings.emergencyAlert}
-            onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, emergencyAlert: v }))}
-          />
-          <SettingRow
-            label="Auto Refresh"
-            description="Automatically refresh data"
-            value={appSettings.autoRefresh}
-            onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, autoRefresh: v }))}
-          />
-        </Card>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>App</Text>
+        <View style={s.settingCard}>
+          <SettingRow label="Emergency Alert" description="Enable SOS button" value={appSettings.emergencyAlert} onValueChange={v => setAppSettings(s => ({ ...s, emergencyAlert: v }))} />
+          <SettingRow label="Auto Refresh" description="Automatically refresh data" value={appSettings.autoRefresh} onValueChange={v => setAppSettings(s => ({ ...s, autoRefresh: v }))} />
+        </View>
       </View>
 
-      {/* Driver-specific Settings */}
+      {/* Role-specific */}
       {isDriver && (
-        <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>Driver Settings</Text>
-          <Card variant="elevated" padding="none">
-            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('VehicleChecklist')}>
-              <Text style={styles(colors).settingLabel}>Vehicle Checklist</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Compliance')}>
-              <Text style={styles(colors).settingLabel}>Compliance Documents</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-            <SettingRow
-              label="Accept Auto-Assigned Routes"
-              description="Automatically accept assigned routes"
-              value={appSettings.autoRefresh}
-              onValueChange={(v: boolean) => setAppSettings(s => ({ ...s, autoRefresh: v }))}
-            />
-          </Card>
-        </View>
-      )}
-
-      {/* Parent-specific Settings */}
-      {isParent && (
-        <View style={styles(colors).section}>
-          <Text style={styles(colors).sectionTitle}>Parent Settings</Text>
-          <Card variant="elevated" padding="none">
-            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Children')}>
-              <Text style={styles(colors).settingLabel}>Manage Children</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('EmergencyContacts')}>
-              <Text style={styles(colors).settingLabel}>Emergency Contacts</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-            <SettingRealTimeToggle />
-          </Card>
-        </View>
-      )}
-
-      {/* Theme */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Appearance</Text>
-        <Card variant="elevated" padding="medium">
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-            <TouchableOpacity
-              onPress={() => handleThemeChange('light')}
-              style={{ alignItems: 'center', padding: spacing.md }}
-            >
-              <Ionicons name="sunny" size={24} color={themeMode === 'light' ? colors.primary : colors.textSecondary} />
-              <Text style={{ ...typography.labelSmall, color: themeMode === 'light' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Light</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleThemeChange('dark')}
-              style={{ alignItems: 'center', padding: spacing.md }}
-            >
-              <Ionicons name="moon" size={24} color={themeMode === 'dark' ? colors.primary : colors.textSecondary} />
-              <Text style={{ ...typography.labelSmall, color: themeMode === 'dark' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Dark</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleThemeChange('blue')}
-              style={{ alignItems: 'center', padding: spacing.md }}
-            >
-              <Ionicons name="settings" size={24} color={themeMode === 'blue' ? colors.primary : colors.textSecondary} />
-              <Text style={{ ...typography.labelSmall, color: themeMode === 'blue' ? colors.primary : colors.textSecondary, marginTop: spacing.xs }}>Blue</Text>
-            </TouchableOpacity>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Driver Settings</Text>
+          <View style={s.settingCard}>
+            <SettingRowBtn label="Vehicle Checklist" onPress={() => navigation.navigate('VehicleChecklist')} />
+            <SettingRowBtn label="Compliance Documents" onPress={() => navigation.navigate('Compliance')} />
+            <SettingRow label="Auto-Assigned Routes" description="Automatically accept assigned routes" value={appSettings.autoRefresh} onValueChange={v => setAppSettings(s => ({ ...s, autoRefresh: v }))} />
           </View>
-        </Card>
-      </View>
+        </View>
+      )}
 
-      {/* About & Support */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>About</Text>
-        <Card variant="elevated" padding="none">
-          <TouchableOpacity style={styles(colors).settingRow} onPress={() => handleLink('https://scholartrack.co.za/privacy')}>
-            <Text style={styles(colors).settingLabel}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).settingRow} onPress={() => handleLink('https://scholartrack.co.za/terms')}>
-            <Text style={styles(colors).settingLabel}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles(colors).settingRow} onPress={() => navigation?.navigate?.('Support')}>
-            <Text style={styles(colors).settingLabel}>Contact Support</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </Card>
+      {isParent && (
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Parent Settings</Text>
+          <View style={s.settingCard}>
+            <SettingRowBtn label="Manage Children" onPress={() => navigation.navigate('Children')} />
+            <SettingRowBtn label="Emergency Contacts" onPress={() => navigation.navigate('EmergencyContacts')} />
+            <SettingRow label="Real-Time Tracking" description="Enable live location updates" value={privacy.shareLocation} onValueChange={v => setPrivacy(p => ({ ...p, shareLocation: v }))} />
+          </View>
+        </View>
+      )}
+
+      {/* About */}
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>About</Text>
+        <View style={s.settingCard}>
+          <SettingRowBtn label="Privacy Policy" onPress={() => handleLink('https://scholartrack.co.za/privacy')} />
+          <SettingRowBtn label="Terms of Service" onPress={() => handleLink('https://scholartrack.co.za/terms')} />
+          <SettingRowBtn label="Contact Support" onPress={() => navigation.navigate('Support')} />
+        </View>
       </View>
 
       {/* Logout */}
-      <View style={styles(colors).section}>
-        <TouchableOpacity style={styles(colors).dangerBtn} onPress={handleLogout}>
-          <Text style={styles(colors).dangerBtnText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={s.dangerBtn} onPress={handleLogout} activeOpacity={0.7}>
+        <View style={s.cardTopRefraction} />
+        <Text style={s.dangerText}>Logout</Text>
+      </TouchableOpacity>
 
       <Spacer size="xl" />
+      <View style={s.bottomPadding} />
 
       {/* Profile Edit Modal */}
       <Modal visible={showProfileModal} transparent animationType="fade">
-        <View style={styles(colors).modalOverlay}>
-          <Card variant="elevated" padding="large">
-            <View style={styles(colors).modalContent}>
-              <Text style={styles(colors).modalTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ position: 'absolute', top: spacing.md, right: spacing.md }}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ position: 'absolute', top: 16, right: 16 }}>
+              <Ionicons name="close" size={22} color={DT.muted} />
+            </TouchableOpacity>
+            <Text style={s.modalTitle}>Edit Profile</Text>
+            <Text style={s.inputLabel}>Name</Text>
+            <TextInput
+              style={s.input}
+              value={editProfile.name}
+              onChangeText={text => setEditProfile(prev => ({ ...prev, name: text }))}
+              placeholder="Enter your name"
+              placeholderTextColor={DT.muted}
+            />
+            <Text style={s.inputLabel}>Phone</Text>
+            <TextInput
+              style={s.input}
+              value={editProfile.phone}
+              onChangeText={text => setEditProfile(prev => ({ ...prev, phone: text }))}
+              placeholder="Enter your phone"
+              placeholderTextColor={DT.muted}
+              keyboardType="phone-pad"
+            />
+            <View style={s.modalActions}>
+              <TouchableOpacity style={s.cancelBtn} onPress={() => setShowProfileModal(false)}>
+                <Text style={s.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <View style={{ marginBottom: spacing.md }}>
-                <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.xs }}>Name</Text>
-                <TextInput
-                  style={styles(colors).input}
-                  value={editProfile.name}
-                  onChangeText={(text) => setEditProfile(prev => ({ ...prev, name: text }))}
-                  placeholder="Enter your name"
-                  placeholderTextColor={colors.textSecondary}
-                />
-              </View>
-              <View style={{ marginBottom: spacing.lg }}>
-                <Text style={{ ...typography.label, color: colors.text, marginBottom: spacing.xs }}>Phone</Text>
-                <TextInput
-                  style={styles(colors).input}
-                  value={editProfile.phone}
-                  onChangeText={(text) => setEditProfile(prev => ({ ...prev, phone: text }))}
-                  placeholder="Enter your phone"
-                  placeholderTextColor={colors.textSecondary}
-                  keyboardType="phone-pad"
-                />
-              </View>
-              <Button title="Save" onPress={handleSaveProfile} variant="primary" fullWidth />
+              <TouchableOpacity style={[s.saveBtn, { backgroundColor: DT.cyan }]} onPress={handleSaveProfile}>
+                <Text style={s.saveBtnText}>Save</Text>
+              </TouchableOpacity>
             </View>
-          </Card>
+          </View>
         </View>
       </Modal>
     </ScrollView>

@@ -1,13 +1,34 @@
+// Compliance Dashboard Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { supabase } from '../../lib/supabase';
+import { Spacer } from '../../ui-plugin/components';
 
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1, borderColor: 'rgba(255,183,0,.10)',
+  borderRadius: 20, overflow: 'hidden' as const,
+};
 
 interface ComplianceStats {
   totalDrivers: number;
@@ -15,21 +36,6 @@ interface ComplianceStats {
   expiringSoon: number;
   expired: number;
   pendingReview: number;
-}
-
-interface DriverCompliance {
-  id: string;
-  driver_name: string;
-  documents: Record<string, { status: string; expiry_date?: string }>;
-}
-
-interface RawDriverDocument {
-  driver_id: string;
-  document_type: string;
-  status: string;
-  expiry_date?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  drivers?: any;
 }
 
 interface DriverMapEntry {
@@ -43,7 +49,7 @@ interface Props {
 }
 
 export default function ComplianceDashboardScreen({ navigation }: Props) {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<ComplianceStats>({
@@ -63,7 +69,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     try {
       setLoading(true);
 
-      // Fetch all driver documents
       const { data: documents, error } = await supabase
         .from('driver_documents')
         .select(`
@@ -78,7 +83,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
 
       if (error) throw error;
 
-      // Process documents to get compliance status per driver
       const driverMap = new Map<string, { id: string; driver_name: string; documents: Record<string, { status: string; expiry_date?: string }> }>();
 
       documents?.forEach((doc) => {
@@ -109,7 +113,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       const driverList = Array.from(driverMap.values());
       setDrivers(driverList);
 
-      // Calculate stats
       let compliant = 0;
       let expiringSoon = 0;
       let expired = 0;
@@ -124,7 +127,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
         const hasAllDocs = requiredDocs.every(docType => docs[docType]?.status === 'approved');
 
         if (hasAllDocs) {
-          // Check expiry dates
           let isExpired = false;
           let isExpiringSoon = false;
 
@@ -147,7 +149,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
             compliant++;
           }
         } else {
-          // Check if any are pending
           const hasPending = requiredDocs.some(docType => docs[docType]?.status === 'pending');
           if (hasPending) {
             pendingReview++;
@@ -155,13 +156,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
         }
       });
 
-      setStats({
-        totalDrivers: driverList.length,
-        compliant,
-        expiringSoon,
-        expired,
-        pendingReview,
-      });
+      setStats({ totalDrivers: driverList.length, compliant, expiringSoon, expired, pendingReview });
 
     } catch (error) {
       console.error('Error fetching compliance data:', error);
@@ -171,12 +166,14 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     }
   };
 
-  const getDriverStatus = (driver: DriverCompliance) => {
+  const onRefresh = async () => { setRefreshing(true); await fetchComplianceData(); setRefreshing(false); };
+
+  const getDriverStatus = (driver: DriverMapEntry) => {
     const docs = driver.documents;
     const requiredDocs = ['pdp_certificate', 'roadworthy', 'drivers_license', 'insurance', 'operating_license'];
     const hasAllDocs = requiredDocs.every(docType => docs[docType]?.status === 'approved');
 
-    if (!hasAllDocs) return { status: 'pending', color: '#FF9500', label: 'Pending' };
+    if (!hasAllDocs) return { status: 'pending', color: DT.amber, label: 'Pending' };
 
     const today = new Date();
     const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -185,263 +182,180 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       if (docs[docType]?.expiry_date) {
         const expiryDate = new Date(docs[docType].expiry_date);
         if (expiryDate < today) {
-          return { status: 'expired', color: '#E03C31', label: 'Expired' };
+          return { status: 'expired', color: DT.red, label: 'Expired' };
         }
         if (expiryDate <= thirtyDaysFromNow) {
-          return { status: 'expiring', color: '#FFB81C', label: 'Expiring Soon' };
+          return { status: 'expiring', color: DT.amber, label: 'Expiring Soon' };
         }
       }
     }
 
-    return { status: 'compliant', color: '#007749', label: 'Compliant' };
+    return { status: 'compliant', color: DT.green2, label: 'Compliant' };
   };
+
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 6 },
+    sbIcon: { fontSize: 14 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
+    refreshBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    statsGrid: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
+    statCard: { flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    statIcon: { marginBottom: 6 },
+    statNumber: { fontFamily: 'Syne_700Bold', fontSize: 30, fontWeight: '800', color: DT.white },
+    statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, color: 'rgba(255,255,255,.8)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    summaryCard: { ...glass, marginHorizontal: 16, marginTop: 12, padding: 20, position: 'relative', overflow: 'hidden' },
+    cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
+    cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
+    summaryTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 14, letterSpacing: 0.5 },
+    summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+    summaryLabel: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted },
+    summaryValue: { fontFamily: 'Syne_600SemiBold', fontSize: 12, fontWeight: '600', color: DT.white },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
+    driverCard: { ...glass, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
+    driverAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.2)' },
+    driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: DT.amber },
+    driverInfo: { flex: 1, marginLeft: 12 },
+    driverName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginTop: 4 },
+    badgeText: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '700', color: DT.white, textTransform: 'uppercase' },
+    emptyState: { alignItems: 'center', padding: 40 },
+    emptyIcon: { marginBottom: 12 },
+    emptyText: { fontFamily: 'DMMono_400Regular', fontSize: 13, color: DT.muted, textAlign: 'center' },
+    loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    bottomPadding: { height: 50 },
+  });
 
   if (loading) {
     return (
-      <View style={[styles(colors).container, styles(colors).loadingContainer, { backgroundColor: colors.surface || '#1a1a1a' }]}>
-        <ActivityIndicator size="large" color="#FFB81C" />
-        <Text style={styles(colors).loadingText}>Loading compliance data...</Text>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={DT.white} /></TouchableOpacity>
+          <Text style={s.ltTitle}>Compliance</Text>
+          <View style={{ width: 36 }} />
+        </View></View>
+        <View style={s.loadingWrap}><ActivityIndicator size="large" color={DT.amber} /><Text style={{ color: DT.muted, fontSize: 14, marginTop: 10 }}>Loading compliance data...</Text></View>
       </View>
     );
   }
 
   return (
-    <View style={[styles(colors).container, { backgroundColor: colors.surface || '#1a1a1a' }]}>
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles(colors).backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles(colors).headerTitle}>Compliance Dashboard</Text>
-        <TouchableOpacity onPress={fetchComplianceData} style={styles(colors).refreshButton}>
-          <Ionicons name="refresh" size={24} color="#fff" />
-        </TouchableOpacity>
+    <ScrollView
+      style={s.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />}
+    >
+      {/* Status Bar */}
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      <ScrollView style={styles(colors).scrollView} showsVerticalScrollIndicator={false}>
-        {/* Stats Cards */}
-        <View style={styles(colors).statsContainer}>
-          <View style={[styles(colors).statCard, { backgroundColor: '#007749' }]}>
-            <Ionicons name="checkmark-circle" size={32} color="#fff" />
-            <Text style={styles(colors).statNumber}>{stats.compliant}</Text>
-            <Text style={styles(colors).statLabel}>Compliant</Text>
-          </View>
-
-          <View style={[styles(colors).statCard, { backgroundColor: '#FFB81C' }]}>
-            <Ionicons name="time" size={32} color="#fff" />
-            <Text style={styles(colors).statNumber}>{stats.expiringSoon}</Text>
-            <Text style={styles(colors).statLabel}>Expiring Soon</Text>
-          </View>
-
-          <View style={[styles(colors).statCard, { backgroundColor: '#E03C31' }]}>
-            <Ionicons name="warning" size={32} color="#fff" />
-            <Text style={styles(colors).statNumber}>{stats.expired}</Text>
-            <Text style={styles(colors).statLabel}>Expired</Text>
-          </View>
-
-          <View style={[styles(colors).statCard, { backgroundColor: '#FF9500' }]}>
-            <Ionicons name="hourglass" size={32} color="#fff" />
-            <Text style={styles(colors).statNumber}>{stats.pendingReview}</Text>
-            <Text style={styles(colors).statLabel}>Pending Review</Text>
-          </View>
+      {/* Header */}
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={18} color={DT.white} />
+          </TouchableOpacity>
+          <View><Text style={s.ltTitle}>Compliance Dashboard</Text><Text style={s.ltSub}>{stats.totalDrivers} drivers tracked</Text></View>
+          <TouchableOpacity style={s.refreshBtn} onPress={fetchComplianceData}>
+            <Ionicons name="refresh" size={18} color={DT.amber} />
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Summary */}
-        <View style={styles(colors).summaryCard}>
-          <Text style={styles(colors).summaryTitle}>Fleet Overview</Text>
-          <View style={styles(colors).summaryRow}>
-            <Text style={styles(colors).summaryLabel}>Total Drivers:</Text>
-            <Text style={styles(colors).summaryValue}>{stats.totalDrivers}</Text>
-          </View>
-          <View style={styles(colors).summaryRow}>
-            <Text style={styles(colors).summaryLabel}>Compliance Rate:</Text>
-            <Text style={[styles(colors).summaryValue, { color: '#007749' }]}>
-              {stats.totalDrivers > 0
-                ? Math.round((stats.compliant / stats.totalDrivers) * 100)
-                : 0}%
-            </Text>
-          </View>
+      {/* Stats Cards */}
+      <View style={s.statsGrid}>
+        <View style={[s.statCard, { backgroundColor: 'rgba(0,230,118,.15)', borderColor: 'rgba(0,230,118,.2)' }]}>
+          <Ionicons name="checkmark-circle" size={28} color={DT.green2} style={s.statIcon} />
+          <Text style={s.statNumber}>{stats.compliant}</Text>
+          <Text style={s.statLabel}>Compliant</Text>
         </View>
+        <View style={[s.statCard, { backgroundColor: 'rgba(255,183,0,.15)', borderColor: 'rgba(255,183,0,.2)' }]}>
+          <Ionicons name="time" size={28} color={DT.amber} style={s.statIcon} />
+          <Text style={s.statNumber}>{stats.expiringSoon}</Text>
+          <Text style={s.statLabel}>Expiring</Text>
+        </View>
+        <View style={[s.statCard, { backgroundColor: 'rgba(255,61,90,.15)', borderColor: 'rgba(255,61,90,.2)' }]}>
+          <Ionicons name="warning" size={28} color={DT.red} style={s.statIcon} />
+          <Text style={s.statNumber}>{stats.expired}</Text>
+          <Text style={s.statLabel}>Expired</Text>
+        </View>
+        <View style={[s.statCard, { backgroundColor: 'rgba(255,183,0,.1)', borderColor: 'rgba(255,183,0,.15)' }]}>
+          <Ionicons name="hourglass" size={28} color={DT.amber} style={s.statIcon} />
+          <Text style={s.statNumber}>{stats.pendingReview}</Text>
+          <Text style={s.statLabel}>Pending</Text>
+        </View>
+      </View>
 
-        {/* Driver List */}
-        <View style={styles(colors).driverListSection}>
-          <Text style={styles(colors).sectionTitle}>Driver Compliance Status</Text>
+      {/* Summary Card */}
+      <View style={s.summaryCard}>
+        <View style={s.cardTopRefraction} />
+        <View style={s.cardLeftBar} />
+        <Text style={s.summaryTitle}>Fleet Overview</Text>
+        <View style={s.summaryRow}>
+          <Text style={s.summaryLabel}>Total Drivers:</Text>
+          <Text style={s.summaryValue}>{stats.totalDrivers}</Text>
+        </View>
+        <View style={s.summaryRow}>
+          <Text style={s.summaryLabel}>Compliance Rate:</Text>
+          <Text style={[s.summaryValue, { color: DT.green2 }]}>
+            {stats.totalDrivers > 0 ? Math.round((stats.compliant / stats.totalDrivers) * 100) : 0}%
+          </Text>
+        </View>
+      </View>
 
-          {drivers.length === 0 ? (
-            <View style={styles(colors).emptyState}>
-              <Ionicons name="document-text-outline" size={48} color="#999" />
-              <Text style={styles(colors).emptyText}>No driver documents yet</Text>
-            </View>
-          ) : (
-            drivers.map((driver) => {
-              const status = getDriverStatus(driver);
-              return (
-                <TouchableOpacity
-                  key={driver.id}
-                  style={styles(colors).driverCard}
-                  onPress={() => {
-                    // Navigate to driver detail - would need implementation
-                    Alert.alert('Driver Details', `Driver: ${driver.driver_name}\nStatus: ${status.label}`);
-                  }}
-                >
-                  <View style={styles(colors).driverInfo}>
-                    <Text style={styles(colors).driverName}>{driver.driver_name}</Text>
-                    <View style={[styles(colors).statusBadge, { backgroundColor: status.color }]}>
-                      <Text style={styles(colors).statusBadgeText}>{status.label}</Text>
-                    </View>
+      {/* Driver List */}
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Driver Compliance Status</Text>
+        {drivers.length === 0 ? (
+          <View style={s.emptyState}>
+            <Ionicons name="document-text-outline" size={48} color={DT.muted} style={s.emptyIcon} />
+            <Text style={s.emptyText}>No driver documents yet</Text>
+          </View>
+        ) : (
+          drivers.map((driver) => {
+            const status = getDriverStatus(driver);
+            return (
+              <TouchableOpacity
+                key={driver.id}
+                style={s.driverCard}
+                onPress={() => Alert.alert('Driver Details', `Driver: ${driver.driver_name}\nStatus: ${status.label}`)}
+                activeOpacity={0.7}
+              >
+                <View style={s.cardTopRefraction} />
+                <View style={s.cardLeftBar} />
+                <View style={[s.driverAvatar, { backgroundColor: `${status.color}15` }]}>
+                  <Text style={s.driverInitial}>{(driver.driver_name || 'D').substring(0, 1).toUpperCase()}</Text>
+                </View>
+                <View style={s.driverInfo}>
+                  <Text style={s.driverName}>{driver.driver_name}</Text>
+                  <View style={[s.badge, { backgroundColor: status.color }]}>
+                    <Text style={s.badgeText}>{status.label}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#999" />
-                </TouchableOpacity>
-              );
-            })
-          )}
-        </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={DT.dim} />
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </View>
 
-        <View style={styles(colors).bottomPadding} />
-      </ScrollView>
-    </View>
+      <Spacer size="xl" />
+      <View style={s.bottomPadding} />
+    </ScrollView>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: '#007749',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  refreshButton: {
-    padding: 8,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#888',
-    marginTop: 10,
-    fontSize: 16,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 16,
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    width: '48%',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
-    marginTop: 4,
-  },
-  summaryCard: {
-    backgroundColor: '#1a1a1a',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 20,
-    borderRadius: 12,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#888888',
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  driverListSection: {
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 12,
-  },
-  driverCard: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  driverInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  driverName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1a1a1a',
-    flex: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 12,
-  },
-  statusBadgeText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    color: '#999',
-    marginTop: 12,
-    fontSize: 16,
-  },
-  bottomPadding: {
-    height: 40,
-  },
-});

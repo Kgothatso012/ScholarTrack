@@ -1,15 +1,37 @@
+// Earnings Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../context/ThemeContext';
-import { ThemeColors } from '../../context/ThemeContext';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
-// UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const glass = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+};
 
 interface EarningsData {
   thisMonth: number;
@@ -24,7 +46,7 @@ interface Props {
 }
 
 const EarningsScreen = ({ navigation }: Props) => {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -42,11 +64,7 @@ const EarningsScreen = ({ navigation }: Props) => {
       setLoading(true);
       const userId = await AsyncStorage.getItem('userId');
       const driverId = await AsyncStorage.getItem('driverId') || userId;
-
-      if (!driverId) {
-        setLoading(false);
-        return;
-      }
+      if (!driverId) { setLoading(false); return; }
 
       const paymentsData = await paymentService.getPaymentsForDriver(driverId);
       setPayments(paymentsData || []);
@@ -59,22 +77,10 @@ const EarningsScreen = ({ navigation }: Props) => {
         p.status === 'paid' && p.month.startsWith(currentMonth)
       );
       const thisMonth = thisMonthPayments.reduce((sum, p) => sum + p.amount, 0);
+      const pending = allPayments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
+      const available = allPayments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
 
-      const pending = allPayments
-        .filter(p => p.status === 'pending')
-        .reduce((sum, p) => sum + p.amount, 0);
-
-      const available = allPayments
-        .filter(p => p.status === 'paid')
-        .reduce((sum, p) => sum + p.amount, 0);
-
-      setEarnings({
-        thisMonth,
-        pending,
-        available,
-        totalTrips: allPayments.length,
-        rating: 4.8,
-      });
+      setEarnings({ thisMonth, pending, available, totalTrips: allPayments.length, rating: 4.8 });
     } catch (error) {
       console.error('Error fetching earnings:', error);
     } finally {
@@ -82,9 +88,7 @@ const EarningsScreen = ({ navigation }: Props) => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -94,10 +98,7 @@ const EarningsScreen = ({ navigation }: Props) => {
 
   const handleWithdraw = async () => {
     if (processing) return;
-    if (earnings.available <= 0) {
-      Alert.alert('No Funds', 'You have no available balance to withdraw.');
-      return;
-    }
+    if (earnings.available <= 0) { Alert.alert('No Funds', 'You have no available balance to withdraw.'); return; }
 
     Alert.alert(
       'Withdraw Funds',
@@ -109,15 +110,9 @@ const EarningsScreen = ({ navigation }: Props) => {
           onPress: async () => {
             setProcessing(true);
             try {
-              // Get driver info for bank details
               const { data: { user } } = await supabase.auth.getUser();
-              if (!user) {
-                Alert.alert('Error', 'Please login first');
-                return;
-              }
+              if (!user) { Alert.alert('Error', 'Please login first'); setProcessing(false); return; }
 
-              // In production, this would integrate with a payment provider
-              // For now, create a withdrawal record
               const { error } = await supabase.from('driver_withdrawals').insert({
                 driver_id: user.id,
                 amount: earnings.available,
@@ -126,12 +121,7 @@ const EarningsScreen = ({ navigation }: Props) => {
               });
 
               if (error) throw error;
-
-              Alert.alert(
-                'Withdrawal Requested',
-                'Your withdrawal request has been submitted. Funds will be processed within 2-3 business days.',
-                [{ text: 'OK' }]
-              );
+              Alert.alert('Withdrawal Requested', 'Your withdrawal request has been submitted. Funds will be processed within 2-3 business days.', [{ text: 'OK' }]);
             } catch (error: unknown) {
               Alert.alert('Error', error instanceof Error ? error.message || 'Failed to process withdrawal' : 'Failed to process withdrawal');
             } finally {
@@ -143,122 +133,144 @@ const EarningsScreen = ({ navigation }: Props) => {
     );
   };
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
-    balanceCard: { backgroundColor: colors.card, margin: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.lg, alignItems: 'center', borderTopWidth: 3, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    balanceLabel: { ...typography.label, color: colors.textSecondary },
-    balanceAmount: { ...typography.displayLarge, color: colors.accent, marginVertical: spacing.sm },
-    balanceSubtext: { ...typography.bodySmall, color: colors.textSecondary },
-    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.sm },
-    statCard: { width: '48%', backgroundColor: colors.card, margin: '1%', padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
-    statLabel: { ...typography.labelSmall, color: colors.textSecondary },
-    statValue: { ...typography.h3, color: colors.text, marginTop: spacing.xs },
-    section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    paymentCard: { backgroundColor: colors.card, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderRadius: borderRadius.md, borderTopWidth: 2, borderTopColor: colors.accent, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 },
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
+    ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
+    balanceCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(255,183,0,.2)', borderWidth: 1 },
+    balanceTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' },
+    balanceLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
+    balanceAmount: { fontFamily: 'Syne_700Bold', fontSize: 42, fontWeight: '800', color: DT.amber, marginVertical: 8, letterSpacing: -1 },
+    balanceSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
+    withdrawBtn: { marginHorizontal: 16, marginTop: 20, paddingVertical: 16, borderRadius: 16, backgroundColor: DT.green2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    withdrawBtnDisabled: { opacity: 0.4 },
+    withdrawBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.bg, letterSpacing: 0.5, textTransform: 'uppercase' },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, marginTop: 16, gap: 10 },
+    statCard: { width: '47%', ...glass, padding: 16, alignItems: 'center', borderColor: 'rgba(255,183,0,.12)' },
+    statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: DT.muted, textTransform: 'uppercase', letterSpacing: 1 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: DT.white, marginTop: 6 },
+    section: { padding: 16 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    paymentCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    paymentTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     paymentInfo: { flex: 1 },
-    paymentMonth: { ...typography.label, color: colors.text },
-    paymentDate: { ...typography.bodySmall, color: colors.textSecondary },
-    paymentAmount: { ...typography.h4, color: colors.accent },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+    paymentMonth: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
+    paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.amber },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
+    statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 40 },
+    bottomPadding: { height: 50 },
   });
 
   if (loading) {
     return (
-      <View style={styles(colors).container}>
-        <Card variant="elevated" padding="large">
-          <Text style={styles(colors).emptyText}>Loading earnings...</Text>
-        </Card>
+      <View style={s.container}>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Earnings</Text><Text style={s.ltSub}>Loading...</Text></View></View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={s.emptyText}>Loading earnings...</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles(colors).container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} tintColor={colors.accent} />}
-    >
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Earnings</Text>
-        <Text style={styles(colors).headerSubtext}>Your income overview</Text>
+    <View style={s.container}>
+      <View style={s.statusBar}>
+        <Text style={s.sbTime}>{timeStr}</Text>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
       </View>
 
-      {/* Balance Card */}
-      <Card variant="elevated" padding="large">
-        <View style={styles(colors).balanceCard}>
-          <Text style={styles(colors).balanceLabel}>Available Balance</Text>
-          <Text style={styles(colors).balanceAmount}>R{(earnings.available / 100).toFixed(2)}</Text>
-          <Text style={styles(colors).balanceSubtext}>Ready to withdraw</Text>
-          <Spacer size="md" />
-          <Button title={processing ? 'Processing...' : 'Withdraw'} onPress={handleWithdraw} variant="primary" fullWidth disabled={processing || earnings.available <= 0} />
+      <View style={s.ltHeader}>
+        <View style={s.ltHeaderBg} />
+        <View style={s.ltTop}>
+          <View><Text style={s.ltTitle}>Earnings</Text><Text style={s.ltSub}>Your income overview</Text></View>
         </View>
-      </Card>
+      </View>
 
-      {/* Stats Grid */}
-      <View style={styles(colors).statsGrid}>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>This Month</Text>
-            <Text style={styles(colors).statValue}>R{(earnings.thisMonth / 100).toFixed(0)}</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />}
+      >
+        {/* Balance Card */}
+        <View style={s.balanceCard}>
+          <View style={s.balanceTopRefraction} />
+          <Text style={s.balanceLabel}>Available Balance</Text>
+          <Text style={s.balanceAmount}>R{(earnings.available / 100).toFixed(2)}</Text>
+          <Text style={s.balanceSubtext}>Ready to withdraw</Text>
+          <TouchableOpacity
+            style={[s.withdrawBtn, processing && s.withdrawBtnDisabled]}
+            onPress={handleWithdraw}
+            disabled={processing || earnings.available <= 0}
+          >
+            <Ionicons name="arrow-up" size={18} color={DT.bg} />
+            <Text style={s.withdrawBtnText}>{processing ? 'Processing...' : 'Withdraw Funds'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats Grid */}
+        <View style={s.statsGrid}>
+          <View style={s.statCard}>
+            <Text style={s.statLabel}>This Month</Text>
+            <Text style={s.statValue}>R{(earnings.thisMonth / 100).toFixed(0)}</Text>
           </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Pending</Text>
-            <Text style={styles(colors).statValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
+          <View style={s.statCard}>
+            <Text style={s.statLabel}>Pending</Text>
+            <Text style={s.statValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
           </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Total Trips</Text>
-            <Text style={styles(colors).statValue}>{earnings.totalTrips}</Text>
+          <View style={s.statCard}>
+            <Text style={s.statLabel}>Total Trips</Text>
+            <Text style={s.statValue}>{earnings.totalTrips}</Text>
           </View>
-        </Card>
-        <Card variant="elevated" padding="medium">
-          <View style={styles(colors).statCard}>
-            <Text style={styles(colors).statLabel}>Rating</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
-              <Ionicons name="star" size={16} color={colors.accent} />
-              <Text style={{ ...typography.h3, color: colors.text, marginLeft: spacing.xs }}>{earnings.rating}</Text>
+          <View style={s.statCard}>
+            <Text style={s.statLabel}>Rating</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 }}>
+              <Ionicons name="star" size={16} color={DT.amber} />
+              <Text style={[s.statValue, { fontSize: 20 }]}>{earnings.rating}</Text>
             </View>
           </View>
-        </Card>
-      </View>
+        </View>
 
-      {/* Payment History */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Recent Payments</Text>
-
-        {payments.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No payments yet</Text>
-          </Card>
-        ) : (
-          payments.slice(0, 10).map((payment, index) => (
-            <Card key={index} variant="elevated" padding="medium">
-              <View style={styles(colors).paymentCard}>
-                <View style={styles(colors).paymentInfo}>
-                  <Text style={styles(colors).paymentMonth}>{payment.month}</Text>
-                  <Text style={styles(colors).paymentDate}>
+        {/* Payment History */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Recent Payments</Text>
+          {payments.length === 0 ? (
+            <Text style={s.emptyText}>No payments yet</Text>
+          ) : (
+            payments.slice(0, 10).map((payment, index) => (
+              <View key={index} style={s.paymentCard}>
+                <View style={s.paymentTopRefraction} />
+                <View style={s.paymentInfo}>
+                  <Text style={s.paymentMonth}>{payment.month}</Text>
+                  <Text style={s.paymentDate}>
                     {payment.paid_at ? new Date(payment.paid_at).toLocaleDateString('en-ZA') : 'Pending'}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={styles(colors).paymentAmount}>R{payment.amount}</Text>
-                  <Badge label={payment.status === 'paid' ? 'Paid' : 'Pending'} variant={payment.status === 'paid' ? 'success' : 'warning'} size="small" />
+                  <Text style={s.paymentAmount}>R{payment.amount}</Text>
+                  <View style={[s.statusBadge, { backgroundColor: payment.status === 'paid' ? DT.green2 : DT.amber }]}>
+                    <Text style={s.statusText}>{payment.status === 'paid' ? 'Paid' : 'Pending'}</Text>
+                  </View>
                 </View>
               </View>
-            </Card>
-          ))
-        )}
-      </View>
+            ))
+          )}
+        </View>
 
-      <Spacer size="xl" />
-    </ScrollView>
+        <View style={s.bottomPadding} />
+      </ScrollView>
+    </View>
   );
 };
 

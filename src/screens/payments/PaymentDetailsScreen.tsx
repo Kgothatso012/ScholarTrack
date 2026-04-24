@@ -1,13 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { supabase } from '../../lib/supabase';
-import { ThemeColors } from '../../context/ThemeContext';
+// ScholarTrack PaymentDetailsScreen — Dark SA Transport Design
+// Glassmorphism, dark theme, cyan/amber accents
 
-// UI Plugin components
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  UIManager,
+} from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  ZoomIn,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
+
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const SPRING = { damping: 15, stiffness: 150 };
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#00e676',
+  red: '#ff3d5a',
+  white: '#ffffff',
+  text: '#9bbdd4',
+  muted: '#4a6a8a',
+};
+
+const SpringTouchable = ({
+  children,
+  onPress,
+  style,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+  style?: object;
+}) => {
+  const pressed = useSharedValue(0);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
+  }));
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={() => { pressed.value = 1; }}
+      onPressOut={() => { pressed.value = 0; }}
+      activeOpacity={1}
+      style={style}
+    >
+      <Animated.View style={animStyle}>{children}</Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+const glassCard = {
+  backgroundColor: 'rgba(255,255,255,.04)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,.08)',
+};
 
 interface Payment {
   id: string;
@@ -25,7 +98,6 @@ interface Props {
 }
 
 export default function PaymentDetailsScreen({ navigation }: Props) {
-  const { colors } = useTheme();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('card');
   const [currentAmount, setCurrentAmount] = useState(800);
@@ -43,9 +115,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
   const loadUserInfo = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserEmail(user.email || '');
-      }
+      if (user) setUserEmail(user.email || '');
     } catch (error) {
       console.error('Error loading user:', error);
     }
@@ -55,14 +125,12 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       const { data: payments } = await supabase
         .from('payments')
         .select('*')
         .eq('parent_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
-
       setPaymentHistory(payments || []);
     } catch (error) {
       console.error('Error loading payments:', error);
@@ -71,9 +139,10 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     }
   };
 
-  const addPaymentMethod = () => {
-    Alert.alert('Add Payment Method', 'Payment method added');
-    setShowAddModal(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadPaymentHistory();
+    setRefreshing(false);
   };
 
   const getStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
@@ -87,140 +156,179 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
 
   const handlePayment = async () => {
     if (processing) return;
-
-    Alert.alert(
-      'Confirm Payment',
-      `Pay R${currentAmount} for transport services?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Pay Now',
-          onPress: async () => {
-            setProcessing(true);
-            try {
-              // Create payment record in Supabase
-              const { data: { user } } = await supabase.auth.getUser();
-              if (!user) {
-                Alert.alert('Error', 'Please login first');
-                return;
-              }
-
-              const { error } = await supabase.from('payments').insert({
-                parent_id: user.id,
-                amount: currentAmount * 100, // Store in cents
-                status: 'pending',
-                description: 'Transport payment',
-                method: selectedMethod,
-              });
-
-              if (error) throw error;
-
-              Alert.alert(
-                'Payment Initiated',
-                'Your payment has been initiated. You will be redirected to the payment gateway.',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
-              );
-            } catch (error) {
-              Alert.alert('Error', error instanceof Error ? error.message : 'Failed to process payment');
-            } finally {
-              setProcessing(false);
-            }
-          },
-        },
-      ]
-    );
+    setProcessing(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setProcessing(false); return; }
+      const { error } = await supabase.from('payments').insert({
+        parent_id: user.id,
+        amount: currentAmount * 100,
+        status: 'pending',
+        description: 'Transport payment',
+        method: selectedMethod,
+      });
+      if (error) throw error;
+      setProcessing(false);
+    } catch (error) {
+      console.error('Payment error:', error);
+      setProcessing(false);
+    }
   };
 
-  const styles = (colors: ThemeColors) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    header: { backgroundColor: colors.primary, padding: spacing.lg },
-    headerTitle: { ...typography.h2, color: colors.textInverse },
-    headerSubtext: { ...typography.bodySmall, color: colors.accent, marginTop: spacing.xs },
+  const insets = useSafeAreaInsets();
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    header: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: insets.top + spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: DT.border,
+    },
+    headerTitle: { ...typography.h2, color: DT.white },
+    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
     section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
-    balanceCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.xl, alignItems: 'center', elevation: 3 },
-    balanceLabel: { ...typography.label, color: colors.textSecondary },
-    balanceAmount: { ...typography.displayLarge, color: colors.accent, marginVertical: spacing.sm },
-    methodCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', alignItems: 'center', elevation: 2 },
-    methodIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    balanceCard: {
+      borderRadius: borderRadius.lg,
+      padding: spacing.xl,
+      alignItems: 'center',
+      ...glassCard,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255,255,255,.12)',
+    },
+    balanceLabel: { ...typography.label, color: DT.muted },
+    balanceAmount: { ...typography.displayLarge, color: DT.amber, marginVertical: spacing.sm },
+    methodCard: {
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      ...glassCard,
+    },
+    methodIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: DT.cyan + '20',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     methodInfo: { flex: 1, marginLeft: spacing.md },
-    methodName: { ...typography.label, color: colors.text },
-    methodDetail: { ...typography.bodySmall, color: colors.textSecondary },
-    paymentCard: { backgroundColor: colors.card, borderRadius: borderRadius.lg, padding: spacing.md, marginBottom: spacing.sm, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', elevation: 2 },
+    methodName: { ...typography.label, color: DT.white },
+    methodDetail: { ...typography.bodySmall, color: DT.muted },
+    paymentCard: {
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      ...glassCard,
+    },
     paymentInfo: { flex: 1 },
-    paymentDesc: { ...typography.label, color: colors.text },
-    paymentDate: { ...typography.bodySmall, color: colors.textSecondary },
-    paymentAmount: { ...typography.h4, color: colors.accent },
-    emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center', padding: spacing.xl },
+    paymentDesc: { ...typography.label, color: DT.white },
+    paymentDate: { ...typography.bodySmall, color: DT.muted },
+    paymentAmount: { ...typography.h4, color: DT.amber },
+    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' as const, padding: spacing.xl },
+    emptyCard: { ...glassCard, padding: spacing.xl, alignItems: 'center' as const, justifyContent: 'center' as const, borderRadius: borderRadius.lg },
+    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: DT.bg },
+    payBtn: {
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      borderRadius: borderRadius.md,
+      marginTop: spacing.md,
+      backgroundColor: DT.green,
+      alignSelf: 'stretch',
+    },
+    payBtnText: { ...typography.button, color: DT.bg, fontWeight: '700', textAlign: 'center' },
   });
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Payment Details</Text>
+          <Text style={styles.headerSubtext}>{userEmail}</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={DT.cyan} />
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles(colors).container}>
-      {/* Header */}
-      <View style={styles(colors).header}>
-        <Text style={styles(colors).headerTitle}>Payment Details</Text>
-        <Text style={styles(colors).headerSubtext}>{userEmail}</Text>
-      </View>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <Text style={styles.headerTitle}>Payment Details</Text>
+          <Text style={styles.headerSubtext}>{userEmail}</Text>
+        </View>
 
-      {/* Current Balance */}
-      <View style={styles(colors).section}>
-        <Card variant="elevated" padding="large">
-          <View style={styles(colors).balanceCard}>
-            <Text style={styles(colors).balanceLabel}>Current Amount Due</Text>
-            <Text style={styles(colors).balanceAmount}>R{currentAmount}</Text>
-            <Spacer size="md" />
-            <Button title={processing ? 'Processing...' : 'Pay Now'} onPress={handlePayment} variant="primary" fullWidth disabled={processing} />
+        {/* Current Balance */}
+        <View style={styles.section}>
+          <View style={[styles.balanceCard, { overflow: 'hidden' }]}>
+            <Text style={styles.balanceLabel}>Current Amount Due</Text>
+            <Text style={styles.balanceAmount}>R{currentAmount}</Text>
+            <SpringTouchable onPress={handlePayment} style={styles.payBtn}>
+              <Text style={styles.payBtnText}>{processing ? 'Processing...' : 'Pay Now'}</Text>
+            </SpringTouchable>
           </View>
-        </Card>
-      </View>
+        </View>
 
-      {/* Payment Methods */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Payment Methods</Text>
-        <TouchableOpacity onPress={() => setShowAddModal(true)}>
-          <Card variant="elevated" padding="medium">
-            <View style={styles(colors).methodCard}>
-              <View style={[styles(colors).methodIcon, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="add" size={20} color={colors.primary} />
-              </View>
-              <View style={styles(colors).methodInfo}>
-                <Text style={styles(colors).methodName}>Add Payment Method</Text>
-                <Text style={styles(colors).methodDetail}>Card, EFT, or Zapper</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        {/* Payment Methods */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Methods</Text>
+          <SpringTouchable onPress={() => setShowAddModal(true)} style={styles.methodCard}>
+            <View style={styles.methodIcon}>
+              <Ionicons name="add" size={20} color={DT.cyan} />
             </View>
-          </Card>
-        </TouchableOpacity>
-      </View>
+            <View style={styles.methodInfo}>
+              <Text style={styles.methodName}>Add Payment Method</Text>
+              <Text style={styles.methodDetail}>Card, EFT, or Zapper</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={DT.muted} />
+          </SpringTouchable>
+        </View>
 
-      {/* Payment History */}
-      <View style={styles(colors).section}>
-        <Text style={styles(colors).sectionTitle}>Payment History</Text>
-        {paymentHistory.length === 0 ? (
-          <Card variant="outlined" padding="large">
-            <Text style={styles(colors).emptyText}>No payment history</Text>
-          </Card>
-        ) : (
-          paymentHistory.map((payment) => (
-            <Card key={payment.id} variant="elevated" padding="medium">
-              <View style={styles(colors).paymentCard}>
-                <View style={styles(colors).paymentInfo}>
-                  <Text style={styles(colors).paymentDesc}>{payment.description || 'Payment'}</Text>
-                  <Text style={styles(colors).paymentDate}>
-                    {payment.created_at ? new Date(payment.created_at).toLocaleDateString('en-ZA') : 'Date unknown'}
-                  </Text>
+        {/* Payment History */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment History</Text>
+          {paymentHistory.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Ionicons name="receipt-outline" size={48} color={DT.muted} />
+              <Text style={styles.emptyText}>No payment history</Text>
+            </View>
+          ) : (
+            paymentHistory.map((payment, index) => (
+              <Animated.View key={payment.id} entering={ZoomIn.duration(300).delay(index * 40)}>
+                <View style={[styles.paymentCard, { overflow: 'hidden' }]}>
+                  <View style={styles.paymentInfo}>
+                    <Text style={styles.paymentDesc}>{payment.description || 'Payment'}</Text>
+                    <Text style={styles.paymentDate}>
+                      {payment.created_at ? new Date(payment.created_at).toLocaleDateString('en-ZA') : 'Date unknown'}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={styles.paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+                    <Badge label={payment.status || 'unknown'} variant={getStatusVariant(payment.status)} size="small" />
+                  </View>
                 </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={styles(colors).paymentAmount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
-                  <Badge label={payment.status || 'unknown'} variant={getStatusVariant(payment.status)} size="small" />
-                </View>
-              </View>
-            </Card>
-          ))
-        )}
-      </View>
+              </Animated.View>
+            ))
+          )}
+        </View>
 
-      <Spacer size="xl" />
-    </ScrollView>
+        <Spacer size="xl" />
+      </ScrollView>
+    </Animated.View>
   );
 }

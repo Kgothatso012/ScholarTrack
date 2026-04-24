@@ -4,7 +4,7 @@ import { Child, DriverAssignment } from './types';
 
 type ChildWithRelations = Child & {
   driver_assignments?: DriverAssignment[];
-  school?: { name: string };
+  school?: { name: string; latitude?: number; longitude?: number };
 };
 
 export const childrenService = {
@@ -12,7 +12,7 @@ export const childrenService = {
     // Get children with driver assignments in single query
     const { data, error } = await supabase
       .from('children')
-      .select('*, school:schools(name), driver_assignments(*, driver:drivers(id, full_name, phone, is_available))')
+      .select('*, school:schools(name, latitude, longitude), driver_assignments(*, driver:drivers(id, full_name, phone, is_available))')
       .eq('parent_id', parentId)
       .eq('status', 'active');
 

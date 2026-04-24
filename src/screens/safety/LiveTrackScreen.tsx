@@ -1,22 +1,63 @@
+// ScholarTrack Live Track Screen — Design System: Dark SA Transport
+// Aesthetic: Industrial Dark + Cyan/Amber/SA Flag accents
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LayoutAnimation, UIManager, View, Text, StyleSheet, TouchableOpacity, Alert, Share, Linking, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming, FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Share,
+  Linking,
+  RefreshControl,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  FadeIn,
+  ZoomIn,
+  Easing,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MapView, { Marker, Circle } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../context/ThemeContext';
 import { childrenService } from '../../lib/services/children';
 import { locationService } from '../../services/location';
-import { notificationService } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
-import { Card, Button, Spacer, Badge, SkeletonCard, SkeletonMap } from '../../ui-plugin/components';
-import { ThemeColors } from '../../context/ThemeContext';
+import { spacing } from '../../ui-plugin/theme';
+import { Spacer, Badge } from '../../ui-plugin/components';
 
-if (UIManager.setLayoutAnimationEnabledExperimental) {
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const DT = {
+  bg: '#050810',
+  bg2: '#080d1a',
+  panel: '#0b1120',
+  border: '#1a2a40',
+  cyan: '#00e5ff',
+  amber: '#ffb700',
+  green: '#007749',
+  green2: '#00e676',
+  blue: '#002395',
+  red: '#ff3d5a',
+  dim: '#2e4a6e',
+  muted: '#4a6a8a',
+  text: '#9bbdd4',
+  white: '#e8f4ff',
+};
+
+const DEFAULT_REGION = { latitude: -25.7479, longitude: 28.2292, latitudeDelta: 0.05, longitudeDelta: 0.05 };
 
 interface DriverLocation {
   driver_id: string;
@@ -47,10 +88,178 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
-const DEFAULT_REGION = { latitude: -25.7479, longitude: 28.2292, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+// ─── Animated Bus Marker ──────────────────────────────────────────────────────
+const BusMarkerAnimated = () => {
+  const scale = useSharedValue(1);
+  const opacityRing1 = useSharedValue(1);
+  const opacityRing2 = useSharedValue(1);
 
+  useEffect(() => {
+    scale.value = withRepeat(withSequence(withTiming(1.08, { duration: 1200, easing: Easing.ease }), withTiming(1, { duration: 1200 })), -1, false);
+    opacityRing1.value = withRepeat(withSequence(withTiming(0.25, { duration: 1200 }), withTiming(1, { duration: 1200 })), -1, false);
+    opacityRing2.value = withRepeat(withSequence(withTiming(0.1, { duration: 1500 }), withTiming(1, { duration: 1200 })), -1, false);
+  }, []);
+
+  const dotStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const ring1Style = useAnimatedStyle(() => ({ opacity: opacityRing1.value }));
+  const ring2Style = useAnimatedStyle(() => ({ opacity: opacityRing2.value }));
+
+  return (
+    <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={[busStyles.ring2, ring2Style]} />
+      <Animated.View style={[busStyles.ring1, ring1Style]} />
+      <Animated.View style={[busStyles.busDot, dotStyle]}>
+        <Ionicons name="bus" size={18} color={DT.bg} />
+      </Animated.View>
+    </View>
+  );
+};
+
+// Styles for BusMarkerAnimated (outside main StyleSheet to avoid naming conflicts)
+const busStyles = StyleSheet.create({
+  busDot: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: DT.cyan,
+    borderWidth: 3,
+    borderColor: DT.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    zIndex: 2,
+  },
+  ring1: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,229,255,.25)',
+  },
+  ring2: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,255,.1)',
+  },
+});
+
+// ─── Breathing Dot ───────────────────────────────────────────────────────────
+const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    scale.value = withRepeat(withSequence(withTiming(1.4, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+    opacity.value = withRepeat(withSequence(withTiming(0.4, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
+  }, []);
+
+  const ringStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }], opacity: opacity.value }));
+
+  return (
+    <View style={{ width: size + 8, height: size + 8, justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color }, ringStyle]} />
+      <View style={{ width: size * 0.75, height: size * 0.75, borderRadius: size * 0.375, backgroundColor: color }} />
+    </View>
+  );
+};
+
+// ─── Map Placeholder (animated) ──────────────────────────────────────────────
+const MapPlaceholder = ({
+  driverLocation,
+  pickupLat,
+  pickupLng,
+}: {
+  driverLocation: DriverLocation | null;
+  pickupLat?: number;
+  pickupLng?: number;
+}) => {
+  const busX = useSharedValue(52);
+  const busY = useSharedValue(50);
+
+  useEffect(() => {
+    busX.value = withRepeat(withSequence(withTiming(68, { duration: 8000, easing: Easing.linear }), withTiming(36, { duration: 8000, easing: Easing.linear })), -1, true);
+    busY.value = withRepeat(withSequence(withTiming(45, { duration: 8000, easing: Easing.linear }), withTiming(55, { duration: 8000, easing: Easing.linear })), -1, true);
+  }, []);
+
+  const busPosStyle = useAnimatedStyle(() => ({
+    position: 'absolute' as const,
+    left: `${busX.value}%`,
+    top: `${busY.value}%`,
+    transform: [{ translateX: -20 }, { translateY: -20 }],
+  }));
+
+  return (
+    <View style={mapStyles.mapContainer}>
+      {/* grid overlay */}
+      <View style={mapStyles.gridOverlay} />
+      {/* route line */}
+      <View style={mapStyles.routeLine} />
+      {/* home marker */}
+      <View style={mapStyles.homeMarker}>
+        <Ionicons name="home" size={18} color={DT.amber} />
+      </View>
+      {/* pickup zone */}
+      <View style={mapStyles.pickupZone}>
+        <Ionicons name="school" size={18} color={DT.amber} />
+      </View>
+      {/* pulsing bus */}
+      <Animated.View style={[mapStyles.busMarkerWrap, busPosStyle]}>
+        <BusMarkerAnimated />
+      </Animated.View>
+    </View>
+  );
+};
+
+const mapStyles = StyleSheet.create({
+  mapContainer: {
+    height: 220,
+    backgroundColor: DT.panel,
+    position: 'relative',
+  },
+  gridOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: DT.panel,
+  },
+  routeLine: {
+    position: 'absolute',
+    top: '50%',
+    left: '15%',
+    right: '20%',
+    height: 2,
+    backgroundColor: DT.green2,
+    opacity: 0.7,
+  },
+  homeMarker: {
+    position: 'absolute',
+    top: '18%',
+    left: '13%',
+  },
+  pickupZone: {
+    position: 'absolute',
+    top: '30%',
+    right: '22%',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,119,73,.12)',
+    borderWidth: 2,
+    borderColor: 'rgba(0,119,73,.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  busMarkerWrap: {
+    width: 40,
+    height: 40,
+  },
+});
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function LiveTrackScreen({ navigation }: Props) {
-  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const pollingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -62,21 +271,9 @@ export default function LiveTrackScreen({ navigation }: Props) {
   const [selectedChild, setSelectedChild] = useState<ChildWithDriver | null>(null);
   const [driverRating, setDriverRating] = useState<number>(0);
   const [driverReviewsCount, setDriverReviewsCount] = useState<number>(0);
-  const [showRating, setShowRating] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
   const [rating, setRating] = useState(0);
-  const [isFullscreenMap, setIsFullscreenMap] = useState(false);
   const [region, setRegion] = useState(DEFAULT_REGION);
-
-  // Bus marker pulse animation
-  const busScale = useSharedValue(1);
-  const busOpacity = useSharedValue(1);
-
-  useEffect(() => {
-    busScale.value = withRepeat(withSequence(withTiming(1.15, { duration: 1200 }), withTiming(1, { duration: 1200 })), -1, false);
-    busOpacity.value = withRepeat(withSequence(withTiming(0.6, { duration: 1200 }), withTiming(1, { duration: 1200 })), -1, false);
-  }, []);
-
-  const busMarkerStyle = useAnimatedStyle(() => ({ transform: [{ scale: busScale.value }], opacity: busOpacity.value }));
 
   const fetchChildren = useCallback(async () => {
     try {
@@ -98,7 +295,6 @@ export default function LiveTrackScreen({ navigation }: Props) {
       const location = await locationService.getDriverLocation(driverId);
       if (location) {
         setDriverLocation(location);
-        // Center map on driver
         setRegion(prev => ({
           ...prev,
           latitude: location.latitude,
@@ -138,7 +334,6 @@ export default function LiveTrackScreen({ navigation }: Props) {
     loadData().finally(() => setLoading(false));
   }, [loadData]);
 
-  // Poll driver location every 30 seconds
   useEffect(() => {
     if (!selectedChild?.driver?.id) return;
     const driverId = selectedChild.driver.id;
@@ -201,12 +396,12 @@ export default function LiveTrackScreen({ navigation }: Props) {
 
   const handleShare = async () => {
     if (!driverLocation) return;
+    const childName = selectedChild?.full_name || 'your child';
+    const driverName = selectedChild?.driver?.full_name || 'the driver';
+    const lat = driverLocation.latitude.toFixed(5);
+    const lng = driverLocation.longitude.toFixed(5);
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
     try {
-      const childName = selectedChild?.full_name || 'your child';
-      const driverName = selectedChild?.driver?.full_name || 'the driver';
-      const lat = driverLocation.latitude.toFixed(5);
-      const lng = driverLocation.longitude.toFixed(5);
-      const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
       await Share.share({
         message: `Live location of ${driverName} for ${childName}: ${mapsUrl}`,
         title: 'Bus Location',
@@ -235,7 +430,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         month,
       });
       Alert.alert('Thanks!', 'Your rating has been submitted.');
-      setShowRating(false);
+      setShowRatingModal(false);
       setRating(0);
       await fetchDriverRating(selectedChild.driver.id);
     } catch (err) {
@@ -244,245 +439,500 @@ export default function LiveTrackScreen({ navigation }: Props) {
     }
   };
 
-  const renderStarRating = (r: number, size: number = 14) => (
-    <>{[1,2,3,4,5].map(i => (
-      <Ionicons key={i} name={i <= Math.round(r) ? 'star' : 'star-outline'} size={size} color={colors.accent} style={{ marginRight: 2 }} />
-    ))}</>
-  );
-
-  // ---------- FULLSCREEN MAP ----------
-  if (isFullscreenMap) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.lg, paddingTop: insets.top + spacing.md, backgroundColor: colors.card }}>
-          <TouchableOpacity onPress={() => setIsFullscreenMap(false)} style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="close" size={28} color={colors.text} />
-            <Text style={{ ...typography.h3, color: colors.text, marginLeft: spacing.md }}>Live Map</Text>
-          </TouchableOpacity>
-        </View>
-        <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} showsUserLocation showsMyLocationButton>
-          {driverLocation && (
-            <Marker coordinate={{ latitude: driverLocation.latitude, longitude: driverLocation.longitude }} anchor={{ x: 0.5, y: 0.5 }}>
-              <Animated.View style={[styles(colors).busMarker, busMarkerStyle]}>
-                <Ionicons name="bus" size={24} color="#fff" />
-              </Animated.View>
-            </Marker>
-          )}
-          {selectedChild?.pickup_lat && (
-            <Marker coordinate={{ latitude: selectedChild.pickup_lat, longitude: selectedChild.pickup_lng || 0 }} title="Pickup Point" pinColor={colors.success} />
-          )}
-          {selectedChild?.school && (
-            <Circle
-              center={{ latitude: selectedChild.pickup_lat || 0, longitude: selectedChild.pickup_lng || 0 }}
-              radius={200}
-              fillColor={colors.success + '30'}
-              strokeColor={colors.success}
-              strokeWidth={2}
-            />
-          )}
-        </MapView>
-      </View>
-    );
-  }
-
-  // ---------- LOADING ----------
-  if (loading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <View style={{ backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
-          <Text style={{ ...typography.displayMedium, color: colors.textInverse }}>Live Tracking</Text>
-          <Text style={{ ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs }}>Real-time bus location</Text>
-        </View>
-        <SkeletonMap />
-        <SkeletonCard />
-        <SkeletonCard />
-      </View>
-    );
-  }
-
-  // ---------- NO CHILDREN / NO DRIVER ----------
-  if (children.length === 0 || !selectedChild?.driver) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <View style={{ backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
-          <Text style={{ ...typography.displayMedium, color: colors.textInverse }}>Live Tracking</Text>
-          <Text style={{ ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs }}>Real-time bus location</Text>
-        </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }}>
-          <Ionicons name="location-outline" size={64} color={colors.textMuted} />
-          <Text style={{ ...typography.h3, color: colors.text, marginTop: spacing.lg, textAlign: 'center' }}>No Active Driver</Text>
-          <Text style={{ ...typography.body, color: colors.textSecondary, marginTop: spacing.sm, textAlign: 'center' }}>
-            Link a child to a driver to start tracking their bus in real-time.
-          </Text>
-          <Spacer size="lg" />
-          <Button title="Link a Child" variant="primary" onPress={() => navigation.navigate('LinkChild')} />
-          <Spacer size="md" />
-          <Button title="Go Back" variant="ghost" onPress={() => navigation.goBack()} />
-        </View>
-      </View>
-    );
-  }
-
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   const child = selectedChild;
 
-  return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
-    >
-      {/* Header */}
-      <View style={{ backgroundColor: colors.primary, padding: spacing.lg, paddingTop: insets.top + spacing.lg, borderBottomWidth: 4, borderBottomColor: colors.accent }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <View>
-            <Text style={{ ...typography.displayMedium, color: colors.textInverse }}>Live Tracking</Text>
-            <Text style={{ ...typography.bodySmall, color: 'rgba(255,255,255,0.7)', marginTop: spacing.xs }}>
-              Updated {getLastUpdated()} · {getStatus()}
-            </Text>
+  // ─── Styles ────────────────────────────────────────────────────────────────
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: DT.bg },
+    statusBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: insets.top + 8,
+      paddingBottom: 4,
+      backgroundColor: DT.bg,
+    },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.white, letterSpacing: 0.5 },
+    sbIcons: { flexDirection: 'row', gap: 4 },
+    sbIcon: { fontSize: 12 },
+    ltHeader: {
+      backgroundColor: DT.bg2,
+      padding: spacing.lg,
+      paddingTop: 0,
+      borderBottomWidth: 4,
+      borderBottomColor: DT.cyan,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    ltHeaderBg: {
+      position: 'absolute',
+      top: -40,
+      right: -40,
+      width: 160,
+      height: 160,
+      borderRadius: 80,
+      backgroundColor: 'rgba(0,229,255,.05)',
+    },
+    ltTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      position: 'relative',
+      zIndex: 1,
+    },
+    ltTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 26, color: DT.white, letterSpacing: -0.5 },
+    ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 1.5, textTransform: 'uppercase' as const },
+    ltBack: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255,255,255,.07)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    childChips: {
+      flexDirection: 'row',
+      gap: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    childChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    childChipText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 0.8 },
+    childChipActive: { backgroundColor: DT.blue, borderColor: DT.cyan, color: DT.cyan },
+    childChipInactive: { backgroundColor: 'rgba(255,255,255,.03)', borderColor: DT.border, color: DT.muted },
+    mapWrap: { marginHorizontal: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: DT.border },
+    mapFooter: {
+      backgroundColor: DT.panel,
+      borderTopWidth: 1,
+      borderTopColor: DT.border,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    mapLegend: { flexDirection: 'row', gap: 12 },
+    legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    legendDot: { width: 8, height: 8, borderRadius: 4 },
+    legendText: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.muted },
+    mapExpand: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: DT.cyan, flexDirection: 'row' as const, alignItems: 'center', gap: 4 },
+    driverCard: {
+      marginHorizontal: 16,
+      marginTop: 10,
+      backgroundColor: DT.panel,
+      borderWidth: 1,
+      borderColor: DT.border,
+      borderTopWidth: 3,
+      borderTopColor: DT.cyan,
+      borderRadius: 18,
+      padding: 16,
+      overflow: 'hidden',
+    },
+    driverCardRefraction: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 1,
+      backgroundColor: 'rgba(0,229,255,.15)',
+    },
+    dcTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    dcName: { fontFamily: 'Syne_800ExtraBold', fontSize: 17, color: DT.white },
+    dcMeta: { flexDirection: 'column', gap: 6 },
+    dcRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    dcIcon: { fontSize: 14 },
+    dcRowText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted },
+    dcStars: { flexDirection: 'row', gap: 2 },
+    coordRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginHorizontal: 16,
+      marginTop: 6,
+    },
+    coordIcon: { fontSize: 14 },
+    coordText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.cyan },
+    quickRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginHorizontal: 16,
+      marginTop: 8,
+      backgroundColor: DT.panel,
+      borderWidth: 1,
+      borderColor: DT.border,
+      borderTopWidth: 2,
+      borderTopColor: DT.cyan,
+      borderRadius: 18,
+      paddingVertical: 14,
+      paddingHorizontal: 8,
+      overflow: 'hidden',
+    },
+    qaItem: { alignItems: 'center', gap: 5 },
+    qaCircle: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+    },
+    qaLbl: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' as const, color: DT.muted },
+    rateBtn: {
+      marginHorizontal: 16,
+      marginTop: 8,
+      marginBottom: 20,
+      paddingVertical: 13,
+      borderWidth: 1.5,
+      borderColor: DT.border,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row' as const,
+      gap: 6,
+    },
+    rateBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' as const, color: DT.muted },
+    modalOverlay: {
+      position: 'absolute' as const,
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,.72)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 100,
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: DT.panel,
+      borderWidth: 1,
+      borderColor: DT.border,
+      borderRadius: 24,
+      padding: 28,
+      width: '100%',
+      alignItems: 'center',
+    },
+    modalTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 19, color: DT.white, marginBottom: 4 },
+    modalSub: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, marginBottom: 20 },
+    modalStars: { flexDirection: 'row', gap: 8, marginBottom: 24 },
+    modalStarBtn: { padding: 4 },
+    modalBtns: { flexDirection: 'row', gap: 8, width: '100%' },
+    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: DT.border, alignItems: 'center' },
+    modalBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: DT.muted },
+    modalBtnPrimary: { backgroundColor: DT.cyan, borderColor: DT.cyan },
+    modalBtnPrimaryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.bg },
+    emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
+    emptyTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 18, color: DT.white, marginTop: 16, textAlign: 'center' },
+    emptyText: { fontFamily: 'Syne_400Regular', fontSize: 14, color: DT.text, marginTop: 8, textAlign: 'center' },
+    statusBadge: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 999,
+      borderWidth: 1,
+      backgroundColor: 'rgba(0,230,118,.08)',
+      borderColor: 'rgba(0,230,118,.25)',
+    },
+    statusBadgeText: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: DT.green2 },
+  });
+
+  // ─── Loading ─────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <View style={s.container}>
+        <View style={s.statusBar}>
+          <Text style={s.sbTime}>{timeStr}</Text>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        </View>
+        <View style={[s.ltHeader, { paddingTop: 12 }]}>
+          <View style={s.ltHeaderBg} />
+          <View style={s.ltTop}>
+            <View>
+              <Text style={s.ltTitle}>Live Tracking</Text>
+              <Text style={s.ltSub}>Real-time bus location</Text>
+            </View>
           </View>
-          <Badge label={getStatus()} variant={driverLocation ? 'success' : 'warning'} size="small" />
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Ionicons name="bus" size={40} color={DT.cyan} />
+          <Text style={{ fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, letterSpacing: 2, textTransform: 'uppercase', marginTop: 12 }}>Loading location…</Text>
         </View>
       </View>
+    );
+  }
 
-      {/* Child Selector */}
-      {children.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: spacing.md, paddingHorizontal: spacing.lg }} contentContainerStyle={{ gap: spacing.sm, flexDirection: 'row' }}>
-          {children.map((c, index) => (
-            <Animated.View key={c.id} entering={FadeIn.delay(index * 50).springify()}>
-              <TouchableOpacity onPress={() => handleSelectChild(c)} style={{ backgroundColor: c.id === child.id ? colors.primary : colors.card, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, borderWidth: 1, borderColor: c.id === child.id ? colors.primary : colors.border }}>
-                <Text style={{ ...typography.label, color: c.id === child.id ? colors.textInverse : colors.text }}>{c.full_name}</Text>
+  // ─── No children / no driver ─────────────────────────────────────────────
+  if (children.length === 0 || !child?.driver) {
+    return (
+      <View style={s.container}>
+        <View style={s.statusBar}>
+          <Text style={s.sbTime}>{timeStr}</Text>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        </View>
+        <View style={s.ltHeader}>
+          <View style={s.ltHeaderBg} />
+          <View style={s.ltTop}>
+            <View>
+              <Text style={s.ltTitle}>Live Tracking</Text>
+              <Text style={s.ltSub}>Real-time bus location</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={s.ltBack}>
+              <Ionicons name="chevron-back" size={18} color={DT.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={s.emptyWrap}>
+          <Ionicons name="location" size={48} color={DT.dim} />
+          <Text style={s.emptyTitle}>No Active Driver</Text>
+          <Text style={s.emptyText}>Link a child to a driver to start{'\n'}tracking their bus in real-time.</Text>
+          <Spacer size="lg" />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('LinkChild')}
+            style={{ backgroundColor: DT.cyan, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+          >
+            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.bg, letterSpacing: 1, textTransform: 'uppercase' }}>Link a Child</Text>
+          </TouchableOpacity>
+          <Spacer size="md" />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingVertical: 8 }}>
+            <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted }}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={s.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />
+        }
+      >
+        {/* STATUS BAR */}
+        <View style={s.statusBar}>
+          <Text style={s.sbTime}>{timeStr}</Text>
+          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        </View>
+
+        {/* HEADER */}
+        <View style={s.ltHeader}>
+          <View style={s.ltHeaderBg} />
+          <View style={[s.ltTop, { marginBottom: 0 }]}>
+            <View>
+              <Text style={s.ltTitle}>Live Tracking</Text>
+              <Text style={s.ltSub}>Updated {getLastUpdated()} · {getStatus()}</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={s.ltBack}>
+              <Ionicons name="chevron-back" size={18} color={DT.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* STATUS BADGE */}
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 0 }}>
+          <View style={[s.statusBadge]}>
+            <Ionicons name="radio" size={8} color={DT.green2} />
+            <Text style={s.statusBadgeText}>{getStatus()}</Text>
+          </View>
+        </View>
+
+        {/* CHILD CHIPS */}
+        {children.length > 1 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.childChips} contentContainerStyle={{ gap: 8 }}>
+            {children.map((c) => (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => handleSelectChild(c)}
+                style={[s.childChip, c.id === child.id ? s.childChipActive : s.childChipInactive]}
+              >
+                <Text style={[s.childChipText, c.id === child.id ? { color: DT.cyan } : {}]}>{c.full_name}</Text>
               </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </ScrollView>
-      )}
+            ))}
+          </ScrollView>
+        )}
 
-      {/* Map */}
-      <View style={{ padding: spacing.lg }}>
-        <Card variant="elevated" padding="none">
+        {/* MAP */}
+        <View style={s.mapWrap}>
           <MapView
             ref={mapRef}
-            style={{ height: 240, borderRadius: borderRadius.card }}
-            initialRegion={region}
-            showsUserLocation
-            showsMyLocationButton
-            showsCompass
+            style={{ flex: 1 }}
+            region={region}
+            showsUserLocation={false}
+            showsMyLocationButton={false}
+            showsCompass={false}
+            mapType="standard"
           >
             {driverLocation && (
-              <Marker coordinate={{ latitude: driverLocation.latitude, longitude: driverLocation.longitude }} anchor={{ x: 0.5, y: 0.5 }}>
-                <Animated.View style={[styles(colors).busMarker, busMarkerStyle]}>
-                  <Ionicons name="bus" size={24} color="#fff" />
-                </Animated.View>
+              <Marker
+                coordinate={{
+                  latitude: driverLocation.latitude,
+                  longitude: driverLocation.longitude,
+                }}
+                title={child.driver?.full_name ?? 'Driver'}
+                description="School Bus"
+              >
+                <View style={{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }}>
+                  <BusMarkerAnimated />
+                </View>
               </Marker>
             )}
-            {child.pickup_lat && (
+            {child.pickup_lat && child.pickup_lng && (
               <>
-                <Marker coordinate={{ latitude: child.pickup_lat, longitude: child.pickup_lng || 0 }} title="Pickup Point" pinColor={colors.success} />
-                <Circle center={{ latitude: child.pickup_lat, longitude: child.pickup_lng || 0 }} radius={200} fillColor={colors.success + '30'} strokeColor={colors.success} strokeWidth={2} />
+                <Circle
+                  center={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
+                  radius={200}
+                  fillColor="rgba(0,119,73,0.15)"
+                  strokeColor="rgba(0,119,73,0.5)"
+                  strokeWidth={2}
+                />
+                <Marker
+                  coordinate={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
+                  title="Pickup Zone"
+                  description={child.school?.name ?? 'School'}
+                >
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: DT.green2, alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="school" size={16} color={DT.cyan} />
+                  </View>
+                </Marker>
               </>
             )}
           </MapView>
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }}>
-            <TouchableOpacity onPress={() => setIsFullscreenMap(true)} style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="expand" size={16} color={colors.primary} />
-              <Text style={{ ...typography.labelSmall, color: colors.primary, marginLeft: spacing.xs }}>Fullscreen</Text>
+          <View style={s.mapFooter}>
+            <View style={s.mapLegend}>
+              <View style={s.legendItem}>
+                <View style={[s.legendDot, { backgroundColor: DT.cyan }]} />
+                <Text style={s.legendText}>Bus</Text>
+              </View>
+              <View style={s.legendItem}>
+                <View style={[s.legendDot, { backgroundColor: DT.green2 }]} />
+                <Text style={s.legendText}>Pickup Zone</Text>
+              </View>
+            </View>
+            <TouchableOpacity>
+              <Text style={s.mapExpand}><Ionicons name="expand" size={14} color={DT.cyan} /> Fullscreen</Text>
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: spacing.lg }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary, marginRight: spacing.xs }} />
-              <Text style={{ ...typography.caption, color: colors.textSecondary }}>Bus</Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: spacing.lg }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.success, marginRight: spacing.xs }} />
-              <Text style={{ ...typography.caption, color: colors.textSecondary }}>Pickup Zone</Text>
-            </View>
           </View>
-        </Card>
-      </View>
+        </View>
 
-      {/* Driver Info Card */}
-      <View style={{ paddingHorizontal: spacing.lg }}>
-        <Card variant="elevated" padding="large" style={{ borderTopWidth: 3, borderTopColor: colors.accent }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
-            <Text style={{ ...typography.h4, color: colors.text, fontWeight: '700' }}>{child.driver?.full_name}</Text>
+        {/* DRIVER CARD */}
+        <View style={s.driverCard}>
+          <View style={s.driverCardRefraction} />
+          <View style={s.dcTop}>
+            <Text style={s.dcName}>{child.driver?.full_name ?? 'Driver'}</Text>
             <Badge label={child.driver?.is_available ? 'Available' : 'Unavailable'} variant={child.driver?.is_available ? 'success' : 'warning'} size="small" />
           </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-            <Ionicons name="star" size={16} color={colors.accent} />
-            <Text style={{ ...typography.label, color: colors.text, marginLeft: spacing.xs }}>
-              {driverRating > 0 ? `${driverRating.toFixed(1)} (${driverReviewsCount} reviews)` : 'No reviews yet'}
-            </Text>
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-            <Ionicons name="school" size={16} color={colors.primary} />
-            <Text style={{ ...typography.body, color: colors.textSecondary, marginLeft: spacing.sm }}>{child.school?.name || 'School not set'}</Text>
-          </View>
-
-          {driverLocation && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-              <Ionicons name="navigate" size={16} color={colors.primary} />
-              <Text style={{ ...typography.body, color: colors.textSecondary, marginLeft: spacing.sm }}>
-                {driverLocation.latitude.toFixed(5)}, {driverLocation.longitude.toFixed(5)}
+          <View style={s.dcMeta}>
+            <View style={s.dcRow}>
+              <Ionicons name="star" size={12} color={DT.amber} />
+              <View style={s.dcStars}>
+                {[1,2,3,4,5].map(i => (
+                  <Ionicons
+                    key={i}
+                    name={i <= Math.round(driverRating) ? 'star' : 'star-outline'}
+                    size={13}
+                    color={i <= Math.round(driverRating) ? DT.amber : DT.dim}
+                  />
+                ))}
+              </View>
+              <Text style={[s.dcRowText, { color: DT.amber }]}>
+                {driverRating > 0 ? `${driverRating.toFixed(1)} (${driverReviewsCount} reviews)` : 'No reviews yet'}
               </Text>
             </View>
-          )}
-        </Card>
-      </View>
+            <View style={s.dcRow}>
+              <Ionicons name="school" size={12} color={DT.cyan} />
+              <Text style={s.dcRowText}>{child.school?.name || 'School not set'}</Text>
+            </View>
+          </View>
+        </View>
 
-      {/* Quick Actions */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', backgroundColor: colors.card, marginHorizontal: spacing.lg, marginTop: spacing.md, padding: spacing.md, borderRadius: borderRadius.card, borderTopWidth: 2, borderTopColor: colors.accent }}>
-        {[
-          { icon: 'call', label: 'Call', color: colors.success, onPress: handleCallDriver },
-          { icon: 'chatbubble', label: 'Message', color: colors.primary, onPress: handleMessageDriver },
-          { icon: 'share-social', label: 'Share', color: colors.primary, onPress: handleShare },
-          { icon: 'warning', label: 'Alert', color: colors.error, onPress: () => navigation.navigate('Emergency') },
-        ].map((action, index) => (
-          <Animated.View key={action.label} entering={FadeIn.delay(index * 40).springify()}>
-            <TouchableOpacity onPress={action.onPress} style={{ alignItems: 'center', padding: spacing.sm }}>
-              <Ionicons name={action.icon as any} size={24} color={action.color} />
-              <Text style={{ ...typography.labelSmall, color: colors.text, marginTop: spacing.xs }}>{action.label}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
-      </View>
+        {/* COORDINATES */}
+        {driverLocation && (
+          <View style={s.coordRow}>
+            <Ionicons name="navigate-outline" size={14} color={DT.dim} />
+            <Text style={s.coordText}>{driverLocation.latitude.toFixed(5)}, {driverLocation.longitude.toFixed(5)}</Text>
+          </View>
+        )}
 
-      {/* Rate Driver */}
-      <View style={{ marginHorizontal: spacing.lg, marginTop: spacing.md, marginBottom: spacing.xl }}>
-        <Button title="Rate Driver" variant="outline" onPress={() => setShowRating(true)} fullWidth />
-      </View>
+        {/* QUICK ACTIONS */}
+        <View style={s.quickRow}>
+          <View style={{ position: 'absolute' as const, top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.15)' }} />
+          <TouchableOpacity onPress={handleCallDriver} style={s.qaItem}>
+            <View style={[s.qaCircle, { backgroundColor: 'rgba(0,119,73,.15)', borderColor: 'rgba(0,119,73,.35)' }]}>
+              <Ionicons name="call-outline" size={20} color={DT.green2} />
+            </View>
+            <Text style={s.qaLbl}>Call</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleMessageDriver} style={s.qaItem}>
+            <View style={[s.qaCircle, { backgroundColor: 'rgba(0,35,149,.15)', borderColor: 'rgba(0,35,149,.35)' }]}>
+              <Ionicons name="chatbubble-outline" size={20} color="#6699ff" />
+            </View>
+            <Text style={s.qaLbl}>Message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleShare} style={s.qaItem}>
+            <View style={[s.qaCircle, { backgroundColor: 'rgba(0,35,149,.15)', borderColor: 'rgba(0,35,149,.35)' }]}>
+              <Ionicons name="share-social-outline" size={20} color="#6699ff" />
+            </View>
+            <Text style={s.qaLbl}>Share</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Emergency')} style={s.qaItem}>
+            <View style={[s.qaCircle, { backgroundColor: 'rgba(255,61,90,.15)', borderColor: 'rgba(255,61,90,.35)' }]}>
+              <Ionicons name="warning" size={18} color={DT.amber} />
+            </View>
+            <Text style={s.qaLbl}>Alert</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Rating Modal */}
-      {showRating && (
-        <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: spacing.lg, zIndex: 100 }}>
-          <Card variant="elevated" padding="large">
-            <Text style={{ ...typography.h3, color: colors.text, textAlign: 'center', fontWeight: '700', marginBottom: spacing.xs }}>Rate Your Driver</Text>
-            <Text style={{ ...typography.body, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg }}>How was your trip experience?</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.lg }}>
-              {[1,2,3,4,5].map((star, index) => (
-                <Animated.View key={star} entering={FadeIn.delay(index * 40).springify()}>
-                  <TouchableOpacity onPress={() => setRating(star)} style={{ marginHorizontal: 4 }}>
-                    <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={40} color={star <= rating ? colors.accent : colors.textMuted} />
-                  </TouchableOpacity>
-                </Animated.View>
+        {/* RATE DRIVER BUTTON */}
+        <TouchableOpacity onPress={() => setShowRatingModal(true)} style={s.rateBtn}>
+          <Ionicons name="star-outline" size={14} color={DT.muted} />
+          <Text style={s.rateBtnText}>Rate Driver</Text>
+        </TouchableOpacity>
+
+        <Spacer size="xxl" />
+      </ScrollView>
+
+      {/* RATING MODAL */}
+      {showRatingModal && (
+        <View style={s.modalOverlay}>
+          <Animated.View entering={ZoomIn.springify()} style={s.modalCard}>
+            <Text style={s.modalTitle}>Rate Your Driver</Text>
+            <Text style={s.modalSub}>
+              {child.driver?.full_name ? `How was ${child.driver.full_name.split(' ')[0]} on this trip?` : 'How was your trip experience?'}
+            </Text>
+            <View style={s.modalStars}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => setRating(star)} style={s.modalStarBtn}>
+                  <Ionicons name={star <= rating ? 'star' : 'star-outline'} size={36} color={DT.amber} style={{ opacity: star <= rating ? 1 : 0.35 }} />
+                </TouchableOpacity>
               ))}
             </View>
-            <View style={{ flexDirection: 'row' }}>
-              <Button title="Cancel" variant="outline" onPress={() => { setRating(0); setShowRating(false); }} style={{ flex: 1, marginRight: spacing.sm }} />
-              <Button title="Submit" variant="primary" onPress={handleSubmitRating} style={{ flex: 1 }} />
+            <View style={s.modalBtns}>
+              <TouchableOpacity
+                onPress={() => { setRating(0); setShowRatingModal(false); }}
+                style={[s.modalBtn, { flex: 1 }]}
+              >
+                <Text style={s.modalBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSubmitRating}
+                style={[s.modalBtn, s.modalBtnPrimary, { flex: 1 }]}
+              >
+                <Text style={[s.modalBtnText, s.modalBtnPrimaryText]}>Submit</Text>
+              </TouchableOpacity>
             </View>
-          </Card>
+          </Animated.View>
         </View>
       )}
-
-      <Spacer size="xl" />
-    </ScrollView>
+    </View>
   );
 }
-
-const styles = (colors: ThemeColors) => StyleSheet.create({
-  busMarker: {
-    width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary,
-    justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: '#fff',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4,
-  },
-});
