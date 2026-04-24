@@ -6,24 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, getTheme } from '../../ui-plugin/theme';
+
+const { colors: C, spacing: S } = getTheme('dark');
 
 const { width } = Dimensions.get('window');
-
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  muted: '#4a6a8a',
-  white: '#e8f4ff',
-};
 
 interface OnboardingData {
   id: string;
@@ -41,7 +28,7 @@ const onboardingData: OnboardingData[] = [
     title: 'Safe Student Transport',
     description: 'ScholarTrack ensures your children travel safely to and from school with verified, trusted drivers.',
     icon: 'shield-checkmark',
-    color: DT.green2,
+    color: C.success,
     bgColor: 'rgba(0,230,118,.12)',
     borderColor: 'rgba(0,230,118,.25)',
   },
@@ -50,7 +37,7 @@ const onboardingData: OnboardingData[] = [
     title: 'Live Bus Tracking',
     description: "Track your child's bus in real-time. Know exactly where they are at all times.",
     icon: 'location',
-    color: DT.blue,
+    color: C.info,
     bgColor: 'rgba(0,35,149,.2)',
     borderColor: 'rgba(0,35,149,.4)',
   },
@@ -59,14 +46,14 @@ const onboardingData: OnboardingData[] = [
     title: 'Emergency Response',
     description: 'One-tap panic button alerts emergency services and parents instantly when needed.',
     icon: 'warning',
-    color: DT.red,
+    color: C.error,
     bgColor: 'rgba(255,61,90,.12)',
     borderColor: 'rgba(255,61,90,.25)',
   },
 ];
 
 // Breathing dot
-const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   React.useEffect(() => {
@@ -115,41 +102,41 @@ export default function OnboardingScreen({ onComplete }: Props) {
   };
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     // HEADER
     header: {
-      paddingTop: insets.top + spacing.md,
-      paddingHorizontal: spacing.lg,
-      paddingBottom: spacing.md,
+      paddingTop: insets.top + S.md,
+      paddingHorizontal: S.lg,
+      paddingBottom: S.md,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    brand: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
-    brandDot: { color: DT.cyan },
-    skipBtn: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
-    skipText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
+    brand: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    brandDot: { color: C.cyan },
+    skipBtn: { paddingVertical: S.sm, paddingHorizontal: S.md, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    skipText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
     // SLIDE
-    slide: { width, flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
+    slide: { width, flex: 1, justifyContent: 'center', alignItems: 'center', padding: S.xl },
     iconWrap: {
       width: 140, height: 140, borderRadius: 36,
       justifyContent: 'center', alignItems: 'center',
       backgroundColor: 'rgba(255,255,255,.04)',
       borderWidth: 1, borderColor: 'rgba(255,255,255,.08)',
-      marginBottom: spacing.xxl,
-      shadowColor: DT.cyan, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.15, shadowRadius: 40, elevation: 4,
+      marginBottom: S.xxl,
+      shadowColor: C.cyan, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.15, shadowRadius: 40, elevation: 4,
     },
-    title: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '800', color: DT.white, textAlign: 'center', marginBottom: spacing.md, letterSpacing: -0.5 },
-    description: { fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.muted, textAlign: 'center', paddingHorizontal: spacing.xl, lineHeight: 22 },
+    title: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '800', color: C.text, textAlign: 'center', marginBottom: S.md, letterSpacing: -0.5 },
+    description: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, textAlign: 'center', paddingHorizontal: S.xl, lineHeight: 22 },
     // DOTS
-    dotsContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.xl },
+    dotsContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: S.xl },
     dot: { height: 6, borderRadius: 3, marginHorizontal: 4 },
-    dotActive: { backgroundColor: DT.cyan, width: 24 },
+    dotActive: { backgroundColor: C.cyan, width: 24 },
     dotInactive: { backgroundColor: 'rgba(255,255,255,.12)', width: 6 },
     // BOTTOM
     bottomArea: {
-      paddingHorizontal: spacing.xl,
-      paddingBottom: insets.bottom + spacing.xl,
+      paddingHorizontal: S.xl,
+      paddingBottom: insets.bottom + S.xl,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -160,15 +147,15 @@ export default function OnboardingScreen({ onComplete }: Props) {
       justifyContent: 'center', alignItems: 'center',
     },
     nextBtn: {
-      backgroundColor: DT.cyan, borderRadius: 16, height: 52, paddingHorizontal: spacing.xl,
+      backgroundColor: C.cyan, borderRadius: 16, height: 52, paddingHorizontal: S.xl,
       justifyContent: 'center', alignItems: 'center',
       flexDirection: 'row', gap: 8,
-      shadowColor: DT.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
+      shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
     },
-    nextBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: DT.bg },
+    nextBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.background },
     pageIndicator: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    pageText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
-    pageActive: { color: DT.cyan, fontWeight: '700' },
+    pageText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
+    pageActive: { color: C.cyan, fontWeight: '700' },
   });
 
   const renderItem = ({ item, index }: { item: OnboardingData; index: number }) => (
@@ -240,7 +227,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
           onPress={currentIndex > 0 ? () => { flatListRef.current?.scrollToIndex({ index: currentIndex - 1 }); setCurrentIndex(currentIndex - 1); } : handleSkip}
           style={s.backBtn}
         >
-          <Ionicons name={currentIndex > 0 ? 'arrow-back' : 'close'} size={20} color={DT.muted} />
+          <Ionicons name={currentIndex > 0 ? 'arrow-back' : 'close'} size={20} color={C.textMuted} />
         </TouchableOpacity>
 
         <View style={s.pageIndicator}>
@@ -252,7 +239,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
 
         <TouchableOpacity onPress={handleNext} style={s.nextBtn}>
           <Text style={s.nextBtnText}>{isLast ? 'Get Started' : 'Next'}</Text>
-          {!isLast && <Ionicons name="arrow-forward" size={18} color={DT.bg} />}
+          {!isLast && <Ionicons name="arrow-forward" size={18} color={C.background} />}
         </TouchableOpacity>
       </View>
     </View>
