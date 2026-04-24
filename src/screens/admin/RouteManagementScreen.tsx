@@ -4,9 +4,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { routeService, driverService, linkingService, Route, Driver } from '../../lib/api';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
-const { colors: C, spacing: S } = getTheme('dark');
+const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',

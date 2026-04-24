@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
-const { colors: C, spacing: S } = getTheme('dark');
+const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
