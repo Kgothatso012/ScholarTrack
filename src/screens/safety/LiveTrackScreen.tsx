@@ -35,7 +35,7 @@ import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
 import { spacing } from '../../ui-plugin/theme';
 import { Spacer, Badge } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);

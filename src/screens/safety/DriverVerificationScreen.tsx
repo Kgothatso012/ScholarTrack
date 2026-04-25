@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -52,7 +52,7 @@ export default function DriverVerificationScreen() {
     switch (status) {
       case 'active': return C.success;
       case 'pending': return C.accent;
-      case 'suspended': return C.danger;
+      case 'suspended': return C.error;
       default: return C.accent;
     }
   };
@@ -140,22 +140,22 @@ export default function DriverVerificationScreen() {
               {selectedDriver?.id === driver.id && (
                 <View style={s.verifyList}>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.id ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.id ? C.success : C.danger} />
+                    <Ionicons name={driver.verified.id ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.id ? C.success : C.error} />
                     <Text style={s.verifyText}>ID Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.id ? 'Valid' : 'Missing'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.license ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.license ? C.success : C.danger} />
+                    <Ionicons name={driver.verified.license ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.license ? C.success : C.error} />
                     <Text style={s.verifyText}>License Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.license ? 'Valid' : 'Missing'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.criminal ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.criminal ? C.success : C.danger} />
+                    <Ionicons name={driver.verified.criminal ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.criminal ? C.success : C.error} />
                     <Text style={s.verifyText}>Criminal Check</Text>
                     <Text style={s.verifyLabel}>{driver.verified.criminal ? 'Clear' : 'Pending'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.vehicle ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.vehicle ? C.success : C.danger} />
+                    <Ionicons name={driver.verified.vehicle ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.vehicle ? C.success : C.error} />
                     <Text style={s.verifyText}>Vehicle Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.vehicle ? 'Approved' : 'Pending'}</Text>
                   </View>

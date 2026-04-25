@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -40,7 +40,7 @@ export default function IncidentReportScreen() {
   ]);
 
   const incidentTypes = [
-    { id: 'safety', name: 'Safety Concern', icon: 'warning', color: C.danger },
+    { id: 'safety', name: 'Safety Concern', icon: 'warning', color: C.error },
     { id: 'vehicle', name: 'Vehicle Issue', icon: 'car', color: C.accent },
     { id: 'conduct', name: 'Driver Conduct', icon: 'person', color: C.primary },
     { id: 'route', name: 'Route Deviation', icon: 'navigate', color: C.success },
@@ -81,7 +81,7 @@ export default function IncidentReportScreen() {
     sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.danger, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.error, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,61,90,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
@@ -118,7 +118,7 @@ export default function IncidentReportScreen() {
     inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.accent, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
     typeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 4 },
     typeButton: { width: '31%', padding: 12, borderRadius: 12, alignItems: 'center', marginBottom: 10, backgroundColor: C.card, borderWidth: 1, borderColor: C.border },
-    typeButtonSelected: { backgroundColor: C.danger, borderColor: C.danger },
+    typeButtonSelected: { backgroundColor: C.error, borderColor: C.error },
     typeText: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 5, textAlign: 'center' },
     typeTextSelected: { color: C.text },
     textArea: { backgroundColor: C.card, borderRadius: 12, padding: 14, height: 90, textAlignVertical: 'top', fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border },
@@ -127,7 +127,7 @@ export default function IncidentReportScreen() {
     checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: C.border, justifyContent: 'center', alignItems: 'center' },
     checkboxChecked: { backgroundColor: C.success, borderColor: C.success },
     anonymousText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted },
-    submitButton: { backgroundColor: C.danger, paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 20, marginBottom: 30 },
+    submitButton: { backgroundColor: C.error, paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 20, marginBottom: 30 },
     submitButtonText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, letterSpacing: 0.5 },
     bottomPadding: { height: 50 },
   });
@@ -149,7 +149,7 @@ export default function IncidentReportScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Report Button */}
         <View style={s.reportSection}>
-          <TouchableOpacity style={[s.reportButton, { backgroundColor: C.danger }]} onPress={() => setShowReportModal(true)}>
+          <TouchableOpacity style={[s.reportButton, { backgroundColor: C.error }]} onPress={() => setShowReportModal(true)}>
             <Ionicons name="warning" size={22} color="#fff" />
             <Text style={s.reportButtonText}>Report Incident</Text>
           </TouchableOpacity>

@@ -11,7 +11,7 @@ import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { RSA_EMERGENCY } from '../../constants/app';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -134,7 +134,7 @@ export default function SettingsScreen({ navigation }: Props) {
     themeIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
     themeLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
     dangerBtn: { ...glass, padding: 16, marginHorizontal: 16, marginTop: 20, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)' },
-    dangerText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.danger },
+    dangerText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.error },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'center', alignItems: 'center' },
     modalContent: { ...glass, padding: 24, width: '85%', borderRadius: 24 },
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 20 },

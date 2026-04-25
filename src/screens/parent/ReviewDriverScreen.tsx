@@ -32,7 +32,7 @@ import { supabase } from '../../lib/supabase';
 import { ratingService } from '../../lib/services';
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -186,7 +186,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
   const getRatingColor = (r: number) => {
     if (r >= 4) return C.success;
     if (r >= 3) return AMBER;
-    if (r > 0) return C.danger;
+    if (r > 0) return C.error;
     return C.textMuted;
   };
 
@@ -245,15 +245,15 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       padding: spacing.md,
       borderRadius: borderRadius.md,
       borderWidth: 1,
-      borderColor: C.danger + '40',
-      backgroundColor: C.danger + '10',
+      borderColor: C.error + '40',
+      backgroundColor: C.error + '10',
       marginTop: spacing.md,
     },
     warningText: {
       flex: 1,
       marginLeft: spacing.sm,
       ...typography.caption,
-      color: C.danger,
+      color: C.error,
     },
     feedbackSection: {
       margin: spacing.lg,
@@ -318,10 +318,10 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       paddingVertical: 3,
       borderRadius: borderRadius.sm,
       marginTop: spacing.xs,
-      backgroundColor: C.danger + '15',
+      backgroundColor: C.error + '15',
       alignSelf: 'flex-start',
     },
-    flaggedText: { ...typography.caption, color: C.danger, marginLeft: 4 },
+    flaggedText: { ...typography.caption, color: C.error, marginLeft: 4 },
     infoSection: {
       margin: spacing.lg,
       marginTop: 0,
@@ -412,7 +412,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                 </Text>
                 {rating > 0 && rating < 4 && (
                   <View style={styles.warningBox}>
-                    <Ionicons name="warning" size={18} color={C.danger} />
+                    <Ionicons name="warning" size={18} color={C.error} />
                     <Text style={styles.warningText}>
                       Ratings below 4 stars will flag the payment for admin review
                     </Text>
@@ -490,7 +490,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                   )}
                   {review.status === 'flagged' && (
                     <View style={styles.flaggedBadge}>
-                      <Ionicons name="flag" size={12} color={C.danger} />
+                      <Ionicons name="flag" size={12} color={C.error} />
                       <Text style={styles.flaggedText}>Flagged for review</Text>
                     </View>
                   )}

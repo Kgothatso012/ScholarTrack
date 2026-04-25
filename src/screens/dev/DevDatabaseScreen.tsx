@@ -8,7 +8,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing } from '../../ui-plugin/theme';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationService } from '../../services/NotificationService';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -119,7 +119,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
 
   const notificationTypes = [
     { key: 'tripUpdates' as keyof NotificationSettings, label: 'Trip Updates', desc: 'Driver assigned, trip started, arrived', color: C.accent },
-    { key: 'safetyAlerts' as keyof NotificationSettings, label: 'Safety Alerts', desc: 'Panic button, emergency alerts', color: C.danger },
+    { key: 'safetyAlerts' as keyof NotificationSettings, label: 'Safety Alerts', desc: 'Panic button, emergency alerts', color: C.error },
     { key: 'paymentNotifications' as keyof NotificationSettings, label: 'Payment Notifications', desc: 'Payment received, due reminders', color: C.success },
     { key: 'routeChanges' as keyof NotificationSettings, label: 'Route Changes', desc: 'Route updates, delays', color: C.primary },
     { key: 'driverMessages' as keyof NotificationSettings, label: 'Driver Messages', desc: 'Direct messages from drivers', color: C.accent },
@@ -151,7 +151,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
           <View style={s.cardTopRefraction} />
           <View style={s.statusRow}>
             <Text style={s.statusLabel}>Push Notifications</Text>
-            <View style={[s.badge, { backgroundColor: notificationsEnabled ? C.success : C.danger }]}>
+            <View style={[s.badge, { backgroundColor: notificationsEnabled ? C.success : C.error }]}>
               <Text style={s.badgeText}>{notificationsEnabled ? 'Enabled' : 'Disabled'}</Text>
             </View>
           </View>

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -59,7 +59,7 @@ export default function TripHistoryScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return C.success;
-      case 'cancelled': return C.danger;
+      case 'cancelled': return C.error;
       case 'delayed': return C.accent;
       case 'in_progress': return C.accent;
       default: return C.textMuted;

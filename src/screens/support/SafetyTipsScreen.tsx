@@ -5,15 +5,15 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../lib/theme';
-import { getTheme } from '../../lib/theme';
+import { spacing } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
 const tips = [
   { icon: 'person-add', title: 'Verify Your Driver', description: 'Always check driver details before starting a trip.', color: C.accent },
   { icon: 'location', title: 'Share Your Location', description: 'Share your live location with family members during trips.', color: C.success },
-  { icon: 'warning', title: 'Know Emergency Numbers', description: 'Police 10111, Ambulance 10177, Crime Stop 08600 10111.', color: C.danger },
+  { icon: 'warning', title: 'Know Emergency Numbers', description: 'Police 10111, Ambulance 10177, Crime Stop 08600 10111.', color: C.error },
   { icon: 'chatbubbles', title: 'Communicate Openly', description: 'Maintain open communication with your driver and children.', color: C.accent },
   { icon: 'eye', title: 'Monitor Trips', description: 'Use the live tracking feature to monitor journeys.', color: C.primary },
   { icon: 'shield-checkmark', title: 'Report Suspicious Activity', description: 'Report any concerning behavior immediately.', color: C.accent },
@@ -71,7 +71,7 @@ export default function SafetyTipsScreen() {
       borderTopWidth: 2, borderTopColor: 'rgba(255,61,90,.25)',
     },
     emergencyItem: { flexDirection: 'row' as const, alignItems: 'center', marginBottom: spacing.sm },
-    emergencyBullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.danger, marginRight: spacing.sm },
+    emergencyBullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.error, marginRight: spacing.sm },
     emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.text, flex: 1, lineHeight: 20 },
     // WARNING BADGE
     warningBadge: {

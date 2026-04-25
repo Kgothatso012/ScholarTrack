@@ -5,8 +5,8 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, w
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../lib/theme';
-import { getTheme } from '../../lib/theme';
+import { spacing } from '../../ui-plugin/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -96,7 +96,7 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
       borderRadius: 16, padding: spacing.lg, marginTop: spacing.md, flexDirection: 'row',
       alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
     },
-    reportBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.danger },
+    reportBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.error },
     // FOOTER
     footer: { padding: spacing.xl, alignItems: 'center' },
     footerText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.2)', marginBottom: 4 },
@@ -180,7 +180,7 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
             onPress={() => navigation?.navigate?.('Chat')}
             activeOpacity={0.7}
           >
-            <Ionicons name="warning" size={20} color={C.danger} />
+            <Ionicons name="warning" size={20} color={C.error} />
             <Text style={s.reportBtnText}>Report an Issue</Text>
           </TouchableOpacity>
         </View>

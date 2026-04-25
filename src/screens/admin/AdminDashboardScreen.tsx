@@ -18,7 +18,7 @@ import Animated, {
 
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
-import { getTheme } from '../../lib/theme';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
