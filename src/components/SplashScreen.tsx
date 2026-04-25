@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   appNameLetter: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#F5F5F5',
+    color: C.textInverse,
     letterSpacing: 0.5,
   },
   appNameSpace: {

@@ -28,7 +28,9 @@ export default function CallButton({ phoneNumber, driverName }: Props) {
   );
 }
 
-export function CallIconButton({ phoneNumber, size = 20, color = '#000000' }: { phoneNumber: string; size?: number; color?: string }) {
+export function CallIconButton({ phoneNumber, size = 20, color }: { phoneNumber: string; size?: number; color?: string }) {
+  const { colors: C } = getTheme('dark');
+  const iconColor = color ?? C.text;
   const handleCall = async () => {
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
     const telUrl = Platform.OS === 'android' ? `tel:${cleanPhone}` : `telprompt:${cleanPhone}`;
@@ -40,7 +42,7 @@ export function CallIconButton({ phoneNumber, size = 20, color = '#000000' }: { 
       accessibilityLabel="Call"
       accessibilityHint="Opens phone dialer"
     >
-      <Ionicons name="call" size={size} color={color} />
+      <Ionicons name="call" size={size} color={iconColor} />
     </TouchableOpacity>
   );
 }

@@ -49,9 +49,9 @@ export default function TripStatusTracker({ status, driverName, estimatedArrival
 }
 
 export function TripStatusBadge({ status }: { status: TripStatus }) {
-  const colors: Record<TripStatus, string> = { arriving: C.warning, pickup: C.info, in_transit: C.success, dropoff: '#9C27B0', completed: C.success, pending: C.textMuted };
+  const statusColors: Record<TripStatus, string> = { arriving: C.warning, pickup: C.info, in_transit: C.success, dropoff: C.secondary, completed: C.success, pending: C.textMuted };
   const labels: Record<TripStatus, string> = { arriving: 'Arriving', pickup: 'Pickup', in_transit: 'In Transit', dropoff: 'Dropoff', completed: 'Completed', pending: 'Pending' };
-  return <View style={[s.badge, { backgroundColor: colors[status] }]}><Text style={s.badgeText}>{labels[status]}</Text></View>;
+  return <View style={[s.badge, { backgroundColor: statusColors[status] }]}><Text style={[s.badgeText, { color: C.textInverse }]}>{labels[status]}</Text></View>;
 }
 
 const s = StyleSheet.create({
@@ -63,8 +63,8 @@ const s = StyleSheet.create({
   stepContainer: { alignItems: 'center', flex: 1 },
   iconContainer: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   stepLabel: { fontSize: 10, marginTop: 4, textAlign: 'center' },
-  connector: { position: 'absolute', top: 16, left: '50%', width: '100%', height: 2, backgroundColor: '#eee', zIndex: -1 },
-  etaContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#eee' },
+  connector: { position: 'absolute', top: 16, left: '50%', width: '100%', height: 2, backgroundColor: C.borderLight, zIndex: -1 },
+  etaContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.borderLight },
   etaText: { fontSize: 14, fontWeight: '600', marginLeft: 8 },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },

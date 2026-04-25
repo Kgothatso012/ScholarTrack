@@ -1,30 +1,24 @@
 // Driver Availability - theme aware
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getTheme } from '../ui-plugin/theme';
 
 interface Props { driverId: string; onStatusChange?: (b: boolean) => void; }
 
 export default function DriverAvailability({ driverId, onStatusChange }: Props) {
   const [isAvailable, setIsAvailable] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem('darkMode').then(d => setDarkMode(d === 'dark'));
-  }, []);
-
-  const COLORS = darkMode ? { bg: '#1a1a1a', text: '#fff', green: '#4CAF50', red: '#f44336' } : { bg: '#fff', text: '#333', green: '#007749', red: '#d32f2f' };
+  const { colors: C } = getTheme('dark');
 
   return (
-    <View style={[s.container, { backgroundColor: COLORS.bg }]}>
+    <View style={[s.container, { backgroundColor: C.surface }]}>
       <View style={s.statusContainer}>
-        <View style={[s.statusIndicator, { backgroundColor: isAvailable ? COLORS.green : COLORS.red }]} />
-        <Text style={[s.statusText, { color: COLORS.text }]}>{isAvailable ? 'Available' : 'Busy'}</Text>
+        <View style={[s.statusIndicator, { backgroundColor: isAvailable ? C.success : C.error }]} />
+        <Text style={[s.statusText, { color: C.text }]}>{isAvailable ? 'Available' : 'Busy'}</Text>
       </View>
-      <TouchableOpacity style={[s.toggleButton, { backgroundColor: isAvailable ? COLORS.green : COLORS.red }]} onPress={() => { setIsAvailable(!isAvailable); onStatusChange?.(!isAvailable); }}>
-        <Ionicons name={isAvailable ? 'checkmark-circle' : 'close-circle'} size={20} color="#fff" />
-        <Text style={s.toggleText}>{isAvailable ? 'Go Online' : 'Go Offline'}</Text>
+      <TouchableOpacity style={[s.toggleButton, { backgroundColor: isAvailable ? C.success : C.error }]} onPress={() => { setIsAvailable(!isAvailable); onStatusChange?.(!isAvailable); }}>
+        <Ionicons name={isAvailable ? 'checkmark-circle' : 'close-circle'} size={20} color={C.textInverse} />
+        <Text style={[s.toggleText, { color: C.textInverse }]}>{isAvailable ? 'Go Online' : 'Go Offline'}</Text>
       </TouchableOpacity>
     </View>
   );
