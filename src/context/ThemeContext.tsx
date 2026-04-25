@@ -1,6 +1,7 @@
 // Theme Context - Supports Dark (Black/Yellow), Blue, and Light themes
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getTheme } from '../ui-plugin/theme';
 
 // Define all possible theme colors for type safety
 export type ThemeColors = {
@@ -52,129 +53,6 @@ export type ThemeColors = {
 
 export type ThemeMode = 'dark' | 'blue' | 'light';
 
-// Dark theme (Black/Yellow/Green) - SA Transport
-const darkColors: ThemeColors = {
-  primary: '#007749',      // SA Green - main brand
-  accent: '#FFB81C',       // SA Gold
-  secondary: '#FFB81C',    // Gold for accents
-
-  background: '#000000',   // Pure black
-  card: '#121212',         // Slightly lighter for subtle depth
-  inputBg: '#1a1a1a',
-  surface: '#1a1a1a',
-  backgroundAlt: '#1f1f1f',
-  primaryMuted: '#00774930',
-
-  text: '#ffffff',
-  textSecondary: '#a0a0a0',
-  textMuted: '#707070',
-  textInverse: '#ffffff',
-
-  border: '#2a2a2a',
-  divider: '#1f1f1f',
-
-  success: '#007749',
-  error: '#E03C31',
-  warning: '#FFB81C',
-  info: '#FFB81C',
-  danger: '#E91E63',
-
-  disabled: '#333333',
-  pressed: '#ffffff15',
-  selected: '#00774930',
-
-  shadow: 'rgba(0,0,0,0.3)',
-  shadowStrong: 'rgba(0,0,0,0.5)',
-  overlay: 'rgba(0,0,0,0.5)',
-  overlayLight: 'rgba(0,0,0,0.25)',
-  primaryLight: '#007749',
-  primaryDark: '#005533',
-  secondaryLight: '#FFB81C',
-  secondaryDark: '#CC9600',
-};
-
-// Blue theme (SA Blue/Yellow)
-const blueColors: ThemeColors = {
-  primary: '#002395',      // SA Blue
-  accent: '#FFB81C',       // SA Gold
-  secondary: '#007749',    // SA Green
-
-  background: '#f5f5f5',
-  card: '#ffffff',
-  inputBg: '#ffffff',
-  surface: '#f0f0f0',
-  backgroundAlt: '#e8e8e8',
-  primaryMuted: '#00239520',
-
-  text: '#333333',
-  textSecondary: '#666666',
-  textMuted: '#8C8CA1',
-  textInverse: '#ffffff',
-
-  border: '#dddddd',
-  divider: '#eeeeee',
-
-  success: '#007749',
-  error: '#d32f2f',
-  warning: '#FFB81C',
-  info: '#002395',
-  danger: '#E91E63',
-
-  disabled: '#cccccc',
-  pressed: 'rgba(0,0,0,0.1)',
-  selected: '#00239520',
-
-  shadow: 'rgba(0,0,0,0.15)',
-  shadowStrong: 'rgba(0,0,0,0.25)',
-  overlay: 'rgba(0,0,0,0.5)',
-  overlayLight: 'rgba(0,0,0,0.25)',
-  primaryLight: '#002395',
-  primaryDark: '#001870',
-  secondaryLight: '#007749',
-  secondaryDark: '#005533',
-};
-
-// Light theme
-const lightColors: ThemeColors = {
-  primary: '#ffffff',
-  accent: '#FFB81C',
-  secondary: '#007749',
-
-  background: '#f5f5f5',
-  card: '#ffffff',
-  inputBg: '#f8f8f8',
-  surface: '#f0f0f0',
-  backgroundAlt: '#e8e8e8',
-  primaryMuted: '#00000010',
-
-  text: '#333333',
-  textSecondary: '#666666',
-  textMuted: '#8C8CA1',
-  textInverse: '#ffffff',
-
-  border: '#e0e0e0',
-  divider: '#eeeeee',
-
-  success: '#007749',
-  error: '#d32f2f',
-  warning: '#FFB81C',
-  info: '#2196f3',
-  danger: '#E91E63',
-
-  disabled: '#cccccc',
-  pressed: 'rgba(0,0,0,0.1)',
-  selected: '#00000010',
-
-  shadow: 'rgba(0,0,0,0.1)',
-  shadowStrong: 'rgba(0,0,0,0.2)',
-  overlay: 'rgba(0,0,0,0.5)',
-  overlayLight: 'rgba(0,0,0,0.25)',
-  primaryLight: '#ffffff',
-  primaryDark: '#cccccc',
-  secondaryLight: '#007749',
-  secondaryDark: '#005533',
-};
-
 // Theme context type
 type ThemeContextType = {
   themeMode: ThemeMode;
@@ -183,9 +61,10 @@ type ThemeContextType = {
 };
 
 const themeColors: Record<ThemeMode, ThemeColors> = {
-  dark: darkColors,
-  blue: blueColors,
-  light: lightColors,
+  dark: { ...getTheme('dark').colors, danger: getTheme('dark').colors.error },
+  // Blue mode maps to ui-plugin dark palette (SA Blue/Yellow feel)
+  blue: { ...getTheme('dark').colors, danger: getTheme('dark').colors.error },
+  light: { ...getTheme('light').colors, danger: getTheme('light').colors.error },
 };
 
 // Create context

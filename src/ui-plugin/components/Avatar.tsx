@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle } from 'react-native';
 import { colors, borderRadius, typography, spacing } from '../theme';
+import { getTheme } from '../theme';
 
 type AvatarSize = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge';
 type AvatarShape = 'circle' | 'rounded' | 'square';
@@ -72,15 +73,16 @@ const getShapeRadius = (shape: AvatarShape): number => {
 };
 
 const stringToColor = (str: string): string => {
+  const C = getTheme('dark').colors;
   const palette = [
-    colors.primary,
-    colors.secondary,
-    colors.accent,
-    colors.success,
-    colors.warning,
-    '#9B59B6',
-    '#3498DB',
-    '#E67E22',
+    C.primary,
+    C.accent,
+    C.secondary,
+    C.success,
+    C.warning,
+    C.error,
+    C.cyan,
+    C.info,
   ];
 
   let hash = 0;
