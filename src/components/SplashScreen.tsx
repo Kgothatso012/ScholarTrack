@@ -14,15 +14,18 @@ import Animated, {
   useFrameCallback,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { getTheme } from '../ui-plugin/theme';
+
+const { colors: C } = getTheme('dark');
 
 const { width } = Dimensions.get('window');
 
-// Taste-skill calibrated palette
-const SA_GOLD = '#D4A012';
-const SA_GOLD_LIGHT = '#F5C842';
-const SA_BLUE = '#002395';
-const SA_GREEN = '#007749';
-const OFF_BLACK = '#0A0A0B';
+// Taste-skill calibrated palette (theme tokens from dark mode)
+const SA_GOLD = C.primary;
+const SA_GOLD_LIGHT = C.accent;
+const SA_BLUE = C.info;
+const SA_GREEN = C.secondary;
+const OFF_BLACK = C.background;
 
 interface SplashScreenProps {
   onFinish?: () => void;
@@ -424,7 +427,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
         {/* SA flag dots */}
         <View style={styles.flagDots}>
-          {[SA_GOLD, SA_GREEN, SA_BLUE, '#C8102E', '#FFFFFF'].map((color, i) => (
+          {[SA_GOLD, SA_GREEN, SA_BLUE, C.error, C.textInverse].map((color, i) => (
             <View key={i} style={[styles.flagDot, { backgroundColor: color }]} />
           ))}
         </View>

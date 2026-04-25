@@ -4,9 +4,9 @@
 import React, { ReactNode } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors as themeColors } from './theme';
+import { getTheme } from '../ui-plugin/theme';
 
-type ThemeColors = typeof themeColors;
+const { colors: C } = getTheme('dark');
 
 interface LoadingProps {
   message?: string;
@@ -39,9 +39,9 @@ interface StateWrapperProps {
 
 export function Loading({ message = 'Loading...' }: LoadingProps) {
   return (
-    <View style={styles(themeColors).center}>
-      <ActivityIndicator size="large" color={themeColors.accent} />
-      <Text style={styles(themeColors).loadingText}>{message}</Text>
+    <View style={styles(C).center}>
+      <ActivityIndicator size="large" color={C.accent} />
+      <Text style={styles(C).loadingText}>{message}</Text>
     </View>
   );
 }
@@ -54,13 +54,13 @@ export function Empty({
   onAction
 }: EmptyProps) {
   return (
-    <View style={styles(themeColors).center}>
-      <Text style={styles(themeColors).emptyIcon}>{icon}</Text>
-      <Text style={styles(themeColors).emptyTitle}>{title}</Text>
-      {message && <Text style={styles(themeColors).emptyMessage}>{message}</Text>}
+    <View style={styles(C).center}>
+      <Text style={styles(C).emptyIcon}>{icon}</Text>
+      <Text style={styles(C).emptyTitle}>{title}</Text>
+      {message && <Text style={styles(C).emptyMessage}>{message}</Text>}
       {actionLabel && onAction && (
-        <TouchableOpacity style={styles(themeColors).actionButton} onPress={onAction}>
-          <Text style={styles(themeColors).actionText}>{actionLabel}</Text>
+        <TouchableOpacity style={styles(C).actionButton} onPress={onAction}>
+          <Text style={styles(C).actionText}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -73,13 +73,13 @@ export function Error({
   onRetry
 }: ErrorProps) {
   return (
-    <View style={styles(themeColors).center}>
-      <Ionicons name="warning" size={32} color="#f59e0b" />
-      <Text style={styles(themeColors).errorTitle}>{title}</Text>
-      <Text style={styles(themeColors).errorMessage}>{message}</Text>
+    <View style={styles(C).center}>
+      <Ionicons name="warning" size={32} color={C.primary} />
+      <Text style={styles(C).errorTitle}>{title}</Text>
+      <Text style={styles(C).errorMessage}>{message}</Text>
       {onRetry && (
-        <TouchableOpacity style={styles(themeColors).retryButton} onPress={onRetry}>
-          <Text style={styles(themeColors).retryText}>Try Again</Text>
+        <TouchableOpacity style={styles(C).retryButton} onPress={onRetry}>
+          <Text style={styles(C).retryText}>Try Again</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -117,18 +117,18 @@ export function StateWrapper({
   return <>{children}</>;
 }
 
-const styles = (colors: ThemeColors) => StyleSheet.create({
+const styles = (colors: typeof C) => StyleSheet.create({
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: colors.dark.background,
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: colors.dark.textSecondary,
+    color: colors.textSecondary,
   },
   emptyIcon: {
     fontSize: 48,
@@ -137,13 +137,13 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.dark.text,
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   emptyMessage: {
     fontSize: 14,
-    color: colors.dark.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -164,12 +164,12 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.dark.text,
+    color: colors.text,
     marginBottom: 8,
   },
   errorMessage: {
     fontSize: 14,
-    color: colors.dark.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },

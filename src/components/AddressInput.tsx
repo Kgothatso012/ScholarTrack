@@ -12,16 +12,16 @@ import {
   ActivityIndicator,
   Modal,
   Keyboard,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors as themeColors } from '../lib/theme';
-import type { ThemeColors } from '../context/ThemeContext';
+import { getTheme } from '../ui-plugin/theme';
 import {
   placesService,
   PlacePrediction,
   createPlacesAutocomplete,
 } from '../services/PlacesService';
+
+const { colors: C } = getTheme('dark');
 
 interface AddressInputProps {
   value: string;
@@ -51,10 +51,6 @@ export default function AddressInput({
 
   const autocomplete = useRef(createPlacesAutocomplete()).current;
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const COLORS = darkMode
-    ? { bg: '#0a0a0a', card: '#1a1a1a', text: '#fff', textSec: '#888', primary: '#FFB81C', border: '#333', error: '#ff6b6b' }
-    : { bg: '#f5f5f5', card: '#fff', text: '#333', textSec: '#666', primary: '#007749', border: '#ddd', error: '#dc3545' };
 
   const handleTextChange = useCallback(
     async (text: string) => {
@@ -127,16 +123,16 @@ export default function AddressInput({
 
   const renderPrediction = ({ item }: { item: PlacePrediction }) => (
     <TouchableOpacity
-      style={[styles(COLORS).predictionItem, { borderBottomColor: COLORS.border }]}
+      style={[styles(C).predictionItem, { borderBottomColor: C.border }]}
       onPress={() => handleSelect(item)}
       accessibilityLabel={item.description}
     >
-      <Ionicons name="location" size={18} color={COLORS.primary} style={styles(COLORS).predictionIcon} />
-      <View style={styles(COLORS).predictionTextContainer}>
-        <Text style={[styles(COLORS).predictionMain]} numberOfLines={1}>
+      <Ionicons name="location" size={18} color={C.primary} style={styles(C).predictionIcon} />
+      <View style={styles(C).predictionTextContainer}>
+        <Text style={[styles(C).predictionMain]} numberOfLines={1}>
           {item.main_text}
         </Text>
-        <Text style={[styles(COLORS).predictionSecondary]} numberOfLines={1}>
+        <Text style={[styles(C).predictionSecondary]} numberOfLines={1}>
           {item.secondary_text}
         </Text>
       </View>
@@ -144,28 +140,28 @@ export default function AddressInput({
   );
 
   return (
-    <View style={styles(COLORS).container}>
+    <View style={styles(C).container}>
       {label && (
-        <Text style={[styles(COLORS).label, { color: COLORS.text }]}>
+        <Text style={[styles(C).label, { color: C.text }]}>
           {label}
-          {required && <Text style={{ color: COLORS.error }}> *</Text>}
+          {required && <Text style={{ color: C.error }}> *</Text>}
         </Text>
       )}
 
-      <View style={styles(COLORS).inputWrapper}>
+      <View style={styles(C).inputWrapper}>
         <TextInput
           style={[
-            styles(COLORS).input,
+            styles(C).input,
             {
-              backgroundColor: COLORS.card,
-              color: COLORS.text,
-              borderColor: error ? COLORS.error : COLORS.border,
+              backgroundColor: C.card,
+              color: C.text,
+              borderColor: error ? C.error : C.border,
             },
           ]}
           value={value}
           onChangeText={handleTextChange}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textSec}
+          placeholderTextColor={C.textMuted}
           onFocus={() => value.length >= 2 && setShowDropdown(true)}
           onBlur={() => {
             // Delay hiding to allow tap on prediction
@@ -174,22 +170,22 @@ export default function AddressInput({
           accessibilityLabel={label || 'Address input'}
         />
 
-        <View style={styles(COLORS).inputIcons}>
-          {isSearching && <ActivityIndicator size="small" color={COLORS.primary} />}
+        <View style={styles(C).inputIcons}>
+          {isSearching && <ActivityIndicator size="small" color={C.primary} />}
           {value.length > 0 && !isSearching && (
             <TouchableOpacity onPress={handleClear} accessibilityLabel="Clear address">
-              <Ionicons name="close-circle" size={20} color={COLORS.textSec} />
+              <Ionicons name="close-circle" size={20} color={C.textMuted} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
-      {error && <Text style={[styles(COLORS).errorText, { color: COLORS.error }]}>{error}</Text>}
+      {error && <Text style={[styles(C).errorText, { color: C.error }]}>{error}</Text>}
 
       {selectedCoords && (
-        <View style={[styles(COLORS).coordsBadge, { backgroundColor: COLORS.card }]}>
-          <Ionicons name="checkmark-circle" size={14} color={COLORS.primary} />
-          <Text style={[styles(COLORS).coordsText, { color: COLORS.textSec }]}>
+        <View style={[styles(C).coordsBadge, { backgroundColor: C.card }]}>
+          <Ionicons name="checkmark-circle" size={14} color={C.primary} />
+          <Text style={[styles(C).coordsText, { color: C.textMuted }]}>
             Location verified
           </Text>
         </View>
@@ -202,20 +198,20 @@ export default function AddressInput({
         onRequestClose={() => setShowDropdown(false)}
       >
         <TouchableOpacity
-          style={styles(COLORS).modalOverlay}
+          style={styles(C).modalOverlay}
           activeOpacity={1}
           onPress={() => {
             Keyboard.dismiss();
             setShowDropdown(false);
           }}
         >
-          <View style={[styles(COLORS).dropdown, { backgroundColor: COLORS.card }]}>
-            <View style={[styles(COLORS).dropdownHeader, { borderBottomColor: COLORS.border }]}>
-              <Text style={[styles(COLORS).dropdownTitle, { color: COLORS.text }]}>
+          <View style={[styles(C).dropdown, { backgroundColor: C.card }]}>
+            <View style={[styles(C).dropdownHeader, { borderBottomColor: C.border }]}>
+              <Text style={[styles(C).dropdownTitle, { color: C.text }]}>
                 Select Address
               </Text>
               <TouchableOpacity onPress={() => setShowDropdown(false)}>
-                <Ionicons name="close" size={20} color={COLORS.textSec} />
+                <Ionicons name="close" size={20} color={C.textMuted} />
               </TouchableOpacity>
             </View>
 
@@ -224,10 +220,10 @@ export default function AddressInput({
               renderItem={renderPrediction}
               keyExtractor={(item) => item.place_id}
               keyboardShouldPersistTaps="handled"
-              style={styles(COLORS).predictionsList}
+              style={styles(C).predictionsList}
               ListEmptyComponent={
-                <View style={styles(COLORS).emptyContainer}>
-                  <Text style={[styles(COLORS).emptyText, { color: COLORS.textSec }]}>
+                <View style={styles(C).emptyContainer}>
+                  <Text style={[styles(C).emptyText, { color: C.textMuted }]}>
                     No addresses found
                   </Text>
                 </View>
@@ -240,15 +236,7 @@ export default function AddressInput({
   );
 }
 
-type StyleColors = {
-  bg: string;
-  card: string;
-  text: string;
-  textSec: string;
-  primary: string;
-  border: string;
-  error: string;
-};
+type StyleColors = typeof C;
 
 const styles = (COLORS: StyleColors) =>
   StyleSheet.create({
@@ -299,7 +287,7 @@ const styles = (COLORS: StyleColors) =>
     modalOverlay: {
       flex: 1,
       justifyContent: 'flex-start',
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: COLORS.overlay,
       paddingTop: 120,
     },
     dropdown: {
@@ -345,7 +333,7 @@ const styles = (COLORS: StyleColors) =>
     },
     predictionSecondary: {
       fontSize: 12,
-      color: COLORS.textSec,
+      color: COLORS.textMuted,
       marginTop: 2,
     },
     emptyContainer: {

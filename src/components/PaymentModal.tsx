@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useTheme, ThemeColors } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
+import { getTheme } from '../ui-plugin/theme';
 import { payStackService, paymentHelper } from '../lib/paystack';
 
 const SPRING = { damping: 15, stiffness: 150 };
@@ -43,6 +44,7 @@ interface Props {
 
 export default function PaymentModal({ visible, onClose, amount, description, paymentType, childId, onSuccess, onFailure }: Props) {
   const { colors } = useTheme();
+  const { colors: C } = getTheme('dark');
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -75,8 +77,8 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
 
       // Open Paystack checkout in-app browser
       await WebBrowser.openBrowserAsync(authorization_url, {
-        toolbarColor: '#007749',
-        controlsColor: '#FFFFFF',
+        toolbarColor: C.secondary,
+        controlsColor: C.textInverse,
       });
 
       // After browser closes, verify the payment
@@ -154,7 +156,7 @@ export default function PaymentModal({ visible, onClose, amount, description, pa
               </View>
 
               <View style={[styles(colors).secureBadge, { backgroundColor: colors.background }]}>
-                <Ionicons name="lock-closed" size={16} color="#007749" />
+                <Ionicons name="lock-closed" size={16} color={C.secondary} />
                 <Text style={[styles(colors).secureText, { color: colors.textSecondary }]}>
                   Secured by PayStack
                 </Text>

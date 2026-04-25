@@ -3,7 +3,9 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
-import { colors } from './theme';
+import { getTheme } from '../ui-plugin/theme';
+
+const { colors: C } = getTheme('dark');
 
 interface NetworkContextType {
   isConnected: boolean;
@@ -81,21 +83,21 @@ export function OfflineBanner({ onRetry }: OfflineBannerProps) {
   };
 
   return (
-    <View style={styles(colors).banner}>
-      <View style={styles(colors).bannerContent}>
+    <View style={styles(C).banner}>
+      <View style={styles(C).bannerContent}>
         <Ionicons name="cloud-offline" size={20} color="#fff" />
-        <Text style={styles(colors).bannerText}>No internet connection</Text>
+        <Text style={styles(C).bannerText}>No internet connection</Text>
       </View>
-      <TouchableOpacity onPress={handleRetry} style={styles(colors).retryButton}>
-        <Text style={styles(colors).retryText}>Retry</Text>
+      <TouchableOpacity onPress={handleRetry} style={styles(C).retryButton}>
+        <Text style={styles(C).retryText}>Retry</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = (colors: any) => StyleSheet.create({
+const styles = (colors: typeof C) => StyleSheet.create({
   banner: {
-    backgroundColor: '#FF9800',
+    backgroundColor: colors.warning,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

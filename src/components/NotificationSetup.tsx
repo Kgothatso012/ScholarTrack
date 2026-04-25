@@ -2,13 +2,12 @@
 // Add this to your app's root to enable push notifications
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { notificationService } from '../services/NotificationService';
-import { colors as themeColors } from '../lib/theme';
+import { getTheme } from '../ui-plugin/theme';
 
-type ThemeColors = typeof themeColors;
+const { colors: C } = getTheme('light');
 
 interface NotificationSetupProps {
   userId: string;
@@ -49,46 +48,46 @@ export default function NotificationSetup({ userId, userRole }: NotificationSetu
   // Don't show anything if permissions granted
   if (hasPermission === true) {
     return (
-      <View style={styles(themeColors).container}>
-        <TouchableOpacity style={styles(themeColors).testButton} onPress={testNotification}>
-          <Ionicons name="paper-plane" size={20} color="#000000" />
-          <Text style={styles(themeColors).testButtonText}>Send Test</Text>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.testButton} onPress={testNotification}>
+          <Ionicons name="paper-plane" size={20} color={C.text} />
+          <Text style={styles.testButtonText}>Send Test</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles(themeColors).container}>
-      <View style={styles(themeColors).iconContainer}>
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>
         <Ionicons
           name={hasPermission === false ? "notifications-off" : "notifications"}
           size={32}
-          color={hasPermission === false ? "#d32f2f" : "#FFB81C"}
+          color={hasPermission === false ? C.error : C.primary}
         />
       </View>
 
-      <Text style={styles(themeColors).title}>
+      <Text style={styles.title}>
         {hasPermission === false ? 'Notifications Disabled' : 'Enable Notifications'}
       </Text>
 
-      <Text style={styles(themeColors).description}>
+      <Text style={styles.description}>
         {hasPermission === false
           ? 'Push notifications are disabled. Enable them in your device settings to receive trip updates.'
           : 'Enable push notifications to receive trip alerts, driver arrivals, and payment updates.'}
       </Text>
 
-      <TouchableOpacity style={styles(themeColors).button} onPress={setupNotifications}>
-        <Ionicons name="settings" size={20} color="#fff" />
-        <Text style={styles(themeColors).buttonText}>Enable Notifications</Text>
+      <TouchableOpacity style={styles.button} onPress={setupNotifications}>
+        <Ionicons name="settings" size={20} color={C.textInverse} />
+        <Text style={styles.buttonText}>Enable Notifications</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = (colors: ThemeColors) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: C.card,
     borderRadius: 12,
     padding: 20,
     margin: 16,
@@ -99,7 +98,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: C.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -107,25 +106,25 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: C.text,
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: '#666',
+    color: C.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007749',
+    backgroundColor: C.success,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: C.textInverse,
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
@@ -138,7 +137,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
     paddingVertical: 8,
   },
   testButtonText: {
-    color: '#000000',
+    color: C.text,
     fontSize: 14,
     marginLeft: 6,
   },
