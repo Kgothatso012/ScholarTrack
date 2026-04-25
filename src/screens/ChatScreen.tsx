@@ -6,9 +6,9 @@ import { useTheme } from '../context/ThemeContext';
 import { supabase, Profile, Driver, Child } from '../lib/api';
 import { ThemeColors } from '../context/ThemeContext';
 
-// UI Plugin components
-import { Card, Button, Spacer, Avatar, Badge } from '../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../ui-plugin/theme';
+import { getTheme } from '../ui-plugin/theme';
+
+const { colors: C } = getTheme('dark');
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -249,7 +249,7 @@ export default function ChatScreen({ navigation }: Props) {
         {/* Header */}
         <View style={[styles(colors).header, { backgroundColor: colors.primary }]}>
           <TouchableOpacity onPress={() => setSelectedChat(null)} style={styles(colors).backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color={colors.textInverse} />
           </TouchableOpacity>
           <View style={styles(colors).headerInfo}>
             <Text style={styles(colors).headerName}>{selectedChat.participant_name}</Text>
@@ -270,7 +270,7 @@ export default function ChatScreen({ navigation }: Props) {
         {/* Input */}
         <View style={[styles(colors).inputContainer, { backgroundColor: colors.card }]}>
           <TextInput
-            style={[styles(colors).input, { backgroundColor: '#1a1a1a', color: colors.text }]}
+            style={[styles(colors).input, { color: colors.text }]}
             placeholder="Type a message..."
             placeholderTextColor={colors.textSecondary}
             value={newMessage}
@@ -278,11 +278,11 @@ export default function ChatScreen({ navigation }: Props) {
             multiline
           />
           <TouchableOpacity
-            style={[styles(colors).sendBtn, { backgroundColor: colors.primary }]}
+            style={styles(colors).sendBtn}
             onPress={sendMessage}
             disabled={sending || !newMessage.trim()}
           >
-            <Ionicons name="send" size={20} color="#fff" />
+            <Ionicons name="send" size={20} color={colors.textInverse} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -305,7 +305,7 @@ export default function ChatScreen({ navigation }: Props) {
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles(colors).convItem, { backgroundColor: '#1a1a1a', borderColor: colors.border }]}
+            style={[styles(colors).convItem, { borderColor: colors.border }]}
             onPress={() => setSelectedChat(item)}
           >
             <View style={[styles(colors).convAvatar, { backgroundColor: colors.primary + '20' }]}>
@@ -350,20 +350,20 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 15 },
   backBtn: { padding: 5 },
-  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: '#ffffff', marginLeft: 10 },
+  headerTitle: { flex: 1, fontSize: 20, fontWeight: 'bold', color: colors.textInverse, marginLeft: 10 },
   headerInfo: { flex: 1, marginLeft: 10 },
   headerName: { fontSize: 18, fontWeight: 'bold', color: colors.text },
-  headerRole: { fontSize: 12, color: '#FFB81C' },
+  headerRole: { fontSize: 12, color: colors.primary },
   messagesList: { padding: 15 },
   messageBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 10 },
-  myMessage: { alignSelf: 'flex-end', backgroundColor: '#002395' },
+  myMessage: { alignSelf: 'flex-end', backgroundColor: C.info },
   theirMessage: { alignSelf: 'flex-start', backgroundColor: colors.card },
   messageText: { fontSize: 15 },
   messageTime: { fontSize: 10, marginTop: 4 },
   inputContainer: { flexDirection: 'row', padding: 10, alignItems: 'flex-end' },
-  input: { flex: 1, padding: 12, borderRadius: 20, fontSize: 15, maxHeight: 100 },
-  sendBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
-  convItem: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, alignItems: 'center' },
+  input: { flex: 1, padding: 12, borderRadius: 20, fontSize: 15, maxHeight: 100, backgroundColor: colors.surface },
+  sendBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginLeft: 8, backgroundColor: C.primary },
+  convItem: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border },
   convAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
   convInfo: { flex: 1, marginLeft: 12 },
   convHeader: { flexDirection: 'row', justifyContent: 'space-between' },
