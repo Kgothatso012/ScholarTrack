@@ -2,7 +2,7 @@
 // No more hardcoded hex values scattered everywhere
 
 export const colors = {
-  // Primary palette - SA Theme
+  // Primary palette - SA Theme (also available in dark/light via color alias below)
   primary: '#002395',  // SA Blue
   secondary: '#007749', // SA Green
   accent: '#FFB81C',    // SA Gold
@@ -23,8 +23,11 @@ export const colors = {
     success: '#4CAF50',
     warning: '#FF9800',
     accent: '#FFB81C',
+    primary: '#002395',
+    secondary: '#007749',
   },
-  
+
+
   // Dark mode
   dark: {
     background: '#0A0A0A',
@@ -38,6 +41,8 @@ export const colors = {
     success: '#66BB6A',
     warning: '#FFA726',
     accent: '#FFB81C',
+    primary: '#002395',
+    secondary: '#007749',
   },
 };
 
@@ -47,6 +52,15 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+};
+
+export const borderRadius = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
 };
 
 export const typography = {
@@ -61,6 +75,7 @@ export const typography = {
   label: { fontSize: 14, fontWeight: '500' as const },
   labelSmall: { fontSize: 12, fontWeight: '500' as const },
   button: { fontSize: 16, fontWeight: '600' as const },
+  displayLarge: { fontSize: 32, fontWeight: '700' as const },
 };
 
 export const shadows = {

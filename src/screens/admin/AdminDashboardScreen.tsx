@@ -18,24 +18,9 @@ import Animated, {
 
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -77,7 +62,6 @@ interface DashboardStat {
   value: string | number;
   positive?: boolean;
 }
-
 interface Driver {
   id: string;
   full_name: string;
@@ -105,7 +89,6 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [userName, setUserName] = useState('');
-
   const [stats, setStats] = useState<DashboardStat[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -147,7 +130,6 @@ export default function AdminDashboardScreen({ navigation }: Props) {
       const { data: paymentsData } = await supabase.from('payments').select('*').order('created_at', { ascending: false }).limit(10);
       const revenue = paymentsData?.filter(p => p.status === 'completed' || p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
       const { count: schoolsCount } = await supabase.from('schools').select('*', { count: 'exact', head: true });
-
       setStats([
         { label: 'Active Drivers', value: activeDrivers || 0, positive: true },
         { label: 'Total Students', value: totalStudents || 0, positive: true },
@@ -168,52 +150,47 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   useEffect(() => { loadUserInfo(); loadDashboardData(); }, []);
 
   const loadUserInfo = async () => { const name = await AsyncStorage.getItem('userName'); setUserName(name || ''); };
-
   const onRefresh = useCallback(async () => { setRefreshing(true); await loadDashboardData(); }, []);
-
   const switchTab = (tab: string) => { setActiveTab(tab); };
 
   const getStatusVariant = (status: string, verified: boolean): 'success' | 'warning' | 'error' | 'neutral' => {
     if (!verified) return 'warning';
     switch (status) { case 'active': return 'success'; case 'inactive': return 'error'; default: return 'neutral'; }
   };
-
   const getStatusText = (status: string, verified: boolean) => { if (!verified) return 'Pending'; return status || 'active'; };
 
   const getPaymentVariant = (status: string): 'success' | 'warning' | 'error' | 'neutral' => {
     switch (status) { case 'completed': case 'paid': return 'success'; case 'pending': return 'warning'; case 'failed': return 'error'; default: return 'neutral'; }
   };
-
   const now = new Date();
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
-    header: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
+    header: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
     headerGlow1: { position: 'absolute', top: -50, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,184,28,.08)' },
     headerGlow2: { position: 'absolute', bottom: -40, left: -20, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(0,119,73,.2)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     headerSubtext: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
     headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', marginLeft: 8 },
     tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,.08)' },
     tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, gap: 6 },
-    tabBtnActive: { backgroundColor: DT.amber },
+    tabBtnActive: { backgroundColor: C.accent },
     tabText: { fontFamily: 'Syne_600SemiBold', fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,.45)' },
-    tabTextActive: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.bg },
+    tabTextActive: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.background },
     section: { paddingHorizontal: 16, paddingTop: 16 },
     sectionLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     statCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
     statCard: { ...glass, paddingVertical: 18, paddingHorizontal: 16, position: 'relative', overflow: 'hidden' },
     statTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     statLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1.2 },
-    statValue: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: DT.amber, marginTop: 4 },
+    statValue: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.accent, marginTop: 4 },
     statCardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     statCardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingTop: 12 },
@@ -221,7 +198,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     quickCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
     quickCardInner: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
     quickIconWrap: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
-    quickText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: DT.white },
+    quickText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: C.text },
     searchWrap: { marginBottom: 12 },
     sortRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
     sortChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, gap: 4 },
@@ -233,29 +210,29 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     listTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     listLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     listAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
-    listInitial: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.blue },
+    listInitial: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.primary },
     listInfo: { flex: 1, marginLeft: 12 },
-    listName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white },
-    listMeta: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: DT.muted, marginTop: 2 },
-    amount: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.amber },
+    listName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
+    listMeta: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 2 },
+    amount: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.accent },
     emptyGlass: { ...glass, padding: 30, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
-    emptyTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: DT.white, textAlign: 'center', marginBottom: 6 },
-    emptyText: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: DT.muted, textAlign: 'center' },
+    emptyTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text, textAlign: 'center', marginBottom: 6 },
+    emptyText: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textMuted, textAlign: 'center' },
     bottomPadding: { height: 50 },
   });
 
   const quickActions = [
-    { name: 'Add Driver', icon: 'person-add', color: DT.green2, route: 'ManageDrivers' },
-    { name: 'Documents', icon: 'document-text', color: DT.blue, route: 'Documents' },
-    { name: 'Reports', icon: 'analytics', color: DT.amber, route: 'EnhancedReports' },
-    { name: 'Settings', icon: 'settings', color: DT.muted, route: 'Settings' },
+    { name: 'Add Driver', icon: 'person-add', color: C.success, route: 'ManageDrivers' },
+    { name: 'Documents', icon: 'document-text', color: C.primary, route: 'Documents' },
+    { name: 'Reports', icon: 'analytics', color: C.accent, route: 'EnhancedReports' },
+    { name: 'Settings', icon: 'settings', color: C.textMuted, route: 'Settings' },
   ];
 
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.green2} /><Ionicons name="battery-full" size={14} color={DT.white} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.header}>
           <View style={s.headerGlow1} />
           <View style={s.headerGlow2} />
@@ -296,11 +273,11 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   }
 
   return (
-    <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.amber} colors={[DT.amber]} />} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />} showsVerticalScrollIndicator={false}>
       {/* Status Bar */}
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       {/* Header */}
@@ -315,7 +292,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           <View style={{ flexDirection: 'row' }}>
             {[{ icon: 'location', route: 'FleetTracking' }, { icon: 'settings-outline', route: 'Settings' }, { icon: 'refresh', action: 'refresh' }].map((btn, i) => (
               <TouchableOpacity key={i} style={s.headerBtn} onPress={() => btn.action === 'refresh' ? onRefresh() : navigation.navigate(btn.route as string)}>
-                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={18} color={DT.white} />
+                <Ionicons name={btn.icon as keyof typeof Ionicons.glyphMap} size={18} color={C.text} />
               </TouchableOpacity>
             ))}
           </View>
@@ -326,7 +303,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
       <View style={s.tabsOuter}>
         {[{ tab: 'overview', label: 'Overview', icon: 'grid' }, { tab: 'drivers', label: 'Drivers', icon: 'car' }, { tab: 'payments', label: 'Payments', icon: 'card' }].map(t => (
           <TouchableOpacity key={t.tab} onPress={() => switchTab(t.tab)} style={[s.tabBtn, activeTab === t.tab && s.tabBtnActive]}>
-            <Ionicons name={t.icon as keyof typeof Ionicons.glyphMap} size={16} color={activeTab === t.tab ? DT.bg : 'rgba(255,255,255,.45)'} />
+            <Ionicons name={t.icon as keyof typeof Ionicons.glyphMap} size={16} color={activeTab === t.tab ? C.background : 'rgba(255,255,255,.45)'} />
             <Text style={activeTab === t.tab ? s.tabTextActive : s.tabText}>{t.label}</Text>
           </TouchableOpacity>
         ))}
@@ -385,18 +362,18 @@ export default function AdminDashboardScreen({ navigation }: Props) {
             {(['name', 'status', 'date'] as const).map(sort => (
               <TouchableOpacity
                 key={sort}
-                style={{ ...s.sortChip, backgroundColor: driverSortBy === sort ? DT.amber : DT.panel, borderColor: driverSortBy === sort ? DT.amber : DT.border }}
+                style={{ ...s.sortChip, backgroundColor: driverSortBy === sort ? C.accent : C.card, borderColor: driverSortBy === sort ? C.accent : C.border }}
                 onPress={() => { if (driverSortBy === sort) setDriverSortAsc(!driverSortAsc); else { setDriverSortBy(sort); setDriverSortAsc(false); }}}
               >
-                <Text style={{ ...s.sortChipText, color: driverSortBy === sort ? DT.bg : DT.text }}>{sort.charAt(0).toUpperCase() + sort.slice(1)}</Text>
-                {driverSortBy === sort && <Ionicons name={driverSortAsc ? 'arrow-up' : 'arrow-down'} size={12} color={DT.bg} />}
+                <Text style={{ ...s.sortChipText, color: driverSortBy === sort ? C.background : C.textSecondary }}>{sort.charAt(0).toUpperCase() + sort.slice(1)}</Text>
+                {driverSortBy === sort && <Ionicons name={driverSortAsc ? 'arrow-up' : 'arrow-down'} size={12} color={C.background} />}
               </TouchableOpacity>
             ))}
           </View>
 
           {filteredDrivers.length === 0 ? (
             <View style={s.emptyGlass}>
-              <Ionicons name="car-outline" size={52} color={DT.dim} style={s.emptyIcon} />
+              <Ionicons name="car-outline" size={52} color={C.textMuted} style={s.emptyIcon} />
               <Text style={s.emptyTitle}>{driverSearch ? 'No drivers match your search' : 'No drivers yet'}</Text>
               <Text style={s.emptyText}>{driverSearch ? 'Try a different search term' : 'Add your first driver to get started'}</Text>
             </View>
@@ -429,17 +406,17 @@ export default function AdminDashboardScreen({ navigation }: Props) {
             {(['all', 'pending', 'completed', 'failed'] as const).map(filter => (
               <TouchableOpacity
                 key={filter}
-                style={{ ...s.filterChip, backgroundColor: paymentFilter === filter ? DT.blue : DT.panel, borderColor: paymentFilter === filter ? DT.blue : DT.border }}
+                style={{ ...s.filterChip, backgroundColor: paymentFilter === filter ? C.primary : C.card, borderColor: paymentFilter === filter ? C.primary : C.border }}
                 onPress={() => { setPaymentFilter(filter); setPaymentPage(1); }}
               >
-                <Text style={{ ...s.filterChipText, color: paymentFilter === filter ? DT.white : DT.text }}>{filter.charAt(0).toUpperCase() + filter.slice(1)}</Text>
+                <Text style={{ ...s.filterChipText, color: paymentFilter === filter ? C.text : C.textSecondary }}>{filter.charAt(0).toUpperCase() + filter.slice(1)}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {filteredPayments.length === 0 ? (
             <View style={s.emptyGlass}>
-              <Ionicons name="card-outline" size={48} color={DT.muted} style={s.emptyIcon} />
+              <Ionicons name="card-outline" size={48} color={C.textMuted} style={s.emptyIcon} />
               <Text style={s.emptyTitle}>No {paymentFilter === 'all' ? '' : paymentFilter} payments</Text>
               <Text style={s.emptyText}>Payments will appear here once recorded</Text>
             </View>
@@ -450,7 +427,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
                   <View style={s.listTopRefraction} />
                   <View style={s.listLeftBar} />
                   <View style={[s.listAvatar, { backgroundColor: 'rgba(0,119,73,.15)', borderColor: 'rgba(0,119,73,.3)' }]}>
-                    <Ionicons name="card" size={20} color={DT.green2} />
+                    <Ionicons name="card" size={20} color={C.success} />
                   </View>
                   <View style={s.listInfo}>
                     <Text style={s.listName}>Payment #{payment.id.substring(0, 8)}</Text>

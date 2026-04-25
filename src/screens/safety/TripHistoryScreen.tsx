@@ -5,24 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -70,16 +55,14 @@ export default function TripHistoryScreen() {
   };
 
   useEffect(() => { loadTrips(); }, []);
-
   const onRefresh = useCallback(async () => { setRefreshing(true); await loadTrips(); }, []);
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return DT.green2;
-      case 'cancelled': return DT.red;
-      case 'delayed': return DT.amber;
-      case 'in_progress': return DT.cyan;
-      default: return DT.muted;
+      case 'completed': return C.success;
+      case 'cancelled': return C.danger;
+      case 'delayed': return C.accent;
+      case 'in_progress': return C.accent;
+      default: return C.textMuted;
     }
   };
 
@@ -97,7 +80,6 @@ export default function TripHistoryScreen() {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' });
   };
-
   const formatTime = (dateStr: string) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
@@ -109,38 +91,38 @@ export default function TripHistoryScreen() {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     filters: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, ...glass, padding: 6 },
     filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 12, marginHorizontal: 3 },
-    filterActive: { backgroundColor: DT.cyan },
-    filterText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.muted },
-    filterTextActive: { color: DT.bg },
+    filterActive: { backgroundColor: C.accent },
+    filterText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
+    filterTextActive: { color: C.background },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     tripCard: { ...glass, padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-    tripDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted },
+    tripDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
-    tripRoute: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white, marginBottom: 8 },
+    tripRoute: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text, marginBottom: 8 },
     tripDetails: { flexDirection: 'row', justifyContent: 'space-between' },
     tripDetail: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    tripDetailText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
+    tripDetailText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
     emptyState: { ...glass, padding: 40, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, marginTop: 12 },
+    loadingText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, marginTop: 12 },
     bottomPadding: { height: 50 },
   });
 
@@ -156,10 +138,10 @@ export default function TripHistoryScreen() {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View></View>
+        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Trip History</Text><Text style={s.ltSub}>All trips</Text></View></View>
         <View style={s.loadingContainer}>
-          <ActivityIndicator size="large" color={DT.cyan} />
+          <ActivityIndicator size="large" color={C.accent} />
           <Text style={s.loadingText}>Loading trips...</Text>
         </View>
       </View>
@@ -170,7 +152,7 @@ export default function TripHistoryScreen() {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -182,7 +164,7 @@ export default function TripHistoryScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DT.cyan} colors={[DT.cyan]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Filters */}
         <View style={s.filters}>
@@ -195,7 +177,7 @@ export default function TripHistoryScreen() {
         <View style={s.section}>
           {filteredTrips.length === 0 ? (
             <View style={s.emptyState}>
-              <View style={s.emptyIcon}><Ionicons name="bus-outline" size={44} color={DT.muted} /></View>
+              <View style={s.emptyIcon}><Ionicons name="bus-outline" size={44} color={C.textMuted} /></View>
               <Text style={s.emptyText}>No trips found</Text>
             </View>
           ) : (
@@ -211,11 +193,11 @@ export default function TripHistoryScreen() {
                 <Text style={s.tripRoute}>{trip.route_name || 'Route Trip'}</Text>
                 <View style={s.tripDetails}>
                   <View style={s.tripDetail}>
-                    <Ionicons name="person" size={13} color={DT.dim} />
+                    <Ionicons name="person" size={13} color={C.textMuted} />
                     <Text style={s.tripDetailText}>Child: {trip.child_id?.substring(0, 8)}</Text>
                   </View>
                   <View style={s.tripDetail}>
-                    <Ionicons name="location" size={13} color={DT.dim} />
+                    <Ionicons name="location" size={13} color={C.textMuted} />
                     <Text style={s.tripDetailText}>{trip.status}</Text>
                   </View>
                 </View>

@@ -6,24 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -70,12 +55,10 @@ export default function SettingsScreen({ navigation }: Props) {
     autoRefresh: true,
     darkMode: true,
   });
-
   const isDriver = userProfile.role === 'driver';
   const isParent = userProfile.role === 'parent';
 
   useEffect(() => { loadUserProfile(); }, []);
-
   const loadUserProfile = async () => {
     try {
       const name = await AsyncStorage.getItem('userName');
@@ -96,7 +79,6 @@ export default function SettingsScreen({ navigation }: Props) {
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) { Alert.alert('Error', 'Failed to update profile'); }
   };
-
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -115,56 +97,54 @@ export default function SettingsScreen({ navigation }: Props) {
   const handleLink = (url: string) => {
     Linking.openURL(url).catch(() => Alert.alert('Error', 'Cannot open link'));
   };
-
   const now = new Date();
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.cyan, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     section: { paddingHorizontal: 16, paddingTop: 20 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     profileCard: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.4)' },
     profileAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(0,229,255,.3)' },
-    profileInitial: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: DT.cyan },
+    profileInitial: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: C.accent },
     profileInfo: { flex: 1, marginLeft: 14 },
-    profileName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.white },
-    profileEmail: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 2 },
+    profileName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
+    profileEmail: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 2 },
     badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
-    badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: DT.white, textTransform: 'capitalize' },
+    badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'capitalize' },
     settingCard: { ...glass, padding: 0, overflow: 'visible' },
-    settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: DT.border },
+    settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
     settingInfo: { flex: 1 },
-    settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    settingDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
-    settingRowBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: DT.border },
-    settingRowBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
+    settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    settingDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
+    settingRowBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
+    settingRowBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     themeRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 8 },
     themeOption: { alignItems: 'center', padding: 12, borderRadius: 14, gap: 6 },
     themeIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
-    themeLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: DT.muted },
+    themeLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
     dangerBtn: { ...glass, padding: 16, marginHorizontal: 16, marginTop: 20, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)' },
-    dangerText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.red },
+    dangerText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.danger },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,.7)', justifyContent: 'center', alignItems: 'center' },
     modalContent: { ...glass, padding: 24, width: '85%', borderRadius: 24 },
-    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: DT.white, marginBottom: 20 },
-    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.amber, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-    input: { ...glass, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: DT.white, marginBottom: 16, borderColor: DT.border },
+    modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 20 },
+    inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.accent, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    input: { ...glass, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, marginBottom: 16, borderColor: C.border },
     modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
     saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-    saveBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: DT.bg },
-    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.border },
-    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.muted },
+    saveBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background },
+    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.textMuted },
     bottomPadding: { height: 50 },
   });
 
@@ -177,8 +157,8 @@ export default function SettingsScreen({ navigation }: Props) {
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: DT.border, true: `${DT.cyan}60` }}
-        thumbColor={value ? DT.cyan : DT.muted}
+        trackColor={{ false: C.border, true: `${C.accent}60` }}
+        thumbColor={value ? C.accent : C.textMuted}
       />
     </View>
   );
@@ -186,7 +166,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const SettingRowBtn = ({ label, onPress }: { label: string; onPress: () => void }) => (
     <TouchableOpacity style={s.settingRowBtn} onPress={onPress} activeOpacity={0.7}>
       <Text style={s.settingRowBtnText}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={DT.muted} />
+      <Ionicons name="chevron-forward" size={18} color={C.textMuted} />
     </TouchableOpacity>
   );
 
@@ -194,12 +174,12 @@ export default function SettingsScreen({ navigation }: Props) {
     <ScrollView
       style={s.container}
       showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={false} onRefresh={loadUserProfile} tintColor={DT.cyan} colors={[DT.cyan]} />}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={loadUserProfile} tintColor={C.accent} colors={[C.accent]} />}
     >
       {/* Status Bar */}
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       {/* Header */}
@@ -208,7 +188,7 @@ export default function SettingsScreen({ navigation }: Props) {
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Settings</Text><Text style={s.ltSub}>{userProfile.name || 'User'} — {userProfile.role || 'Parent'}</Text></View>
           <TouchableOpacity style={s.headerBtn} onPress={loadUserProfile}>
-            <Ionicons name="refresh" size={18} color={DT.white} />
+            <Ionicons name="refresh" size={18} color={C.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -218,17 +198,17 @@ export default function SettingsScreen({ navigation }: Props) {
         <Text style={s.sectionTitle}>Profile</Text>
         <TouchableOpacity style={s.profileCard} onPress={() => setShowProfileModal(true)} activeOpacity={0.8}>
           <View style={s.cardTopRefraction} />
-          <View style={[s.profileAvatar, { backgroundColor: `${DT.cyan}15` }]}>
+          <View style={[s.profileAvatar, { backgroundColor: `${C.accent}15` }]}>
             <Text style={s.profileInitial}>{(userProfile.name || 'U').substring(0, 1).toUpperCase()}</Text>
           </View>
           <View style={s.profileInfo}>
             <Text style={s.profileName}>{userProfile.name || 'User'}</Text>
             <Text style={s.profileEmail}>{userProfile.email || 'No email'}</Text>
-            <View style={[s.badge, { backgroundColor: DT.blue }]}>
+            <View style={[s.badge, { backgroundColor: C.primary }]}>
               <Text style={s.badgeText}>{userProfile.role}</Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={DT.muted} />
+          <Ionicons name="chevron-forward" size={18} color={C.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -308,7 +288,7 @@ export default function SettingsScreen({ navigation }: Props) {
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ position: 'absolute', top: 16, right: 16 }}>
-              <Ionicons name="close" size={22} color={DT.muted} />
+              <Ionicons name="close" size={22} color={C.textMuted} />
             </TouchableOpacity>
             <Text style={s.modalTitle}>Edit Profile</Text>
             <Text style={s.inputLabel}>Name</Text>
@@ -317,7 +297,7 @@ export default function SettingsScreen({ navigation }: Props) {
               value={editProfile.name}
               onChangeText={text => setEditProfile(prev => ({ ...prev, name: text }))}
               placeholder="Enter your name"
-              placeholderTextColor={DT.muted}
+              placeholderTextColor={C.textMuted}
             />
             <Text style={s.inputLabel}>Phone</Text>
             <TextInput
@@ -325,14 +305,14 @@ export default function SettingsScreen({ navigation }: Props) {
               value={editProfile.phone}
               onChangeText={text => setEditProfile(prev => ({ ...prev, phone: text }))}
               placeholder="Enter your phone"
-              placeholderTextColor={DT.muted}
+              placeholderTextColor={C.textMuted}
               keyboardType="phone-pad"
             />
             <View style={s.modalActions}>
               <TouchableOpacity style={s.cancelBtn} onPress={() => setShowProfileModal(false)}>
                 <Text style={s.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[s.saveBtn, { backgroundColor: DT.cyan }]} onPress={handleSaveProfile}>
+              <TouchableOpacity style={[s.saveBtn, { backgroundColor: C.accent }]} onPress={handleSaveProfile}>
                 <Text style={s.saveBtnText}>Save</Text>
               </TouchableOpacity>
             </View>

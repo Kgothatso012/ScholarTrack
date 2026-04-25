@@ -29,26 +29,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius } from '../../lib/theme';
+import { getTheme } from '../../lib/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#00e676',
-  red: '#ff3d5a',
-  white: '#ffffff',
-  text: '#9bbdd4',
-  muted: '#4a6a8a',
-};
+const { colors: C } = getTheme('dark');
 
 const SpringTouchable = ({
   children,
@@ -75,13 +64,11 @@ const SpringTouchable = ({
     </TouchableOpacity>
   );
 };
-
 const glassCard = {
   backgroundColor: 'rgba(255,255,255,.04)',
   borderWidth: 1,
   borderColor: 'rgba(255,255,255,.08)',
 };
-
 interface Payment {
   id: string;
   created_at?: string;
@@ -106,12 +93,10 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [processing, setProcessing] = useState(false);
-
   useEffect(() => {
     loadPaymentHistory();
     loadUserInfo();
   }, []);
-
   const loadUserInfo = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -120,7 +105,6 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       console.error('Error loading user:', error);
     }
   };
-
   const loadPaymentHistory = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -138,7 +122,6 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       setLoading(false);
     }
   };
-
   const onRefresh = async () => {
     setRefreshing(true);
     await loadPaymentHistory();
@@ -174,21 +157,20 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       setProcessing(false);
     }
   };
-
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 1,
-      borderBottomColor: DT.border,
+      borderBottomColor: C.border,
     },
-    headerTitle: { ...typography.h2, color: DT.white },
-    headerSubtext: { ...typography.bodySmall, color: DT.muted, marginTop: spacing.xs },
+    headerTitle: { ...typography.h2, color: C.text },
+    headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     section: { padding: spacing.lg },
-    sectionTitle: { ...typography.h3, color: DT.white, marginBottom: spacing.md },
+    sectionTitle: { ...typography.h3, color: C.text, marginBottom: spacing.md },
     balanceCard: {
       borderRadius: borderRadius.lg,
       padding: spacing.xl,
@@ -197,8 +179,8 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,255,255,.12)',
     },
-    balanceLabel: { ...typography.label, color: DT.muted },
-    balanceAmount: { ...typography.displayLarge, color: DT.amber, marginVertical: spacing.sm },
+    balanceLabel: { ...typography.label, color: C.textMuted },
+    balanceAmount: { ...typography.displayLarge, color: C.accent, marginVertical: spacing.sm },
     methodCard: {
       borderRadius: borderRadius.lg,
       padding: spacing.md,
@@ -211,13 +193,13 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: DT.cyan + '20',
+      backgroundColor: C.accent + '20',
       justifyContent: 'center',
       alignItems: 'center',
     },
     methodInfo: { flex: 1, marginLeft: spacing.md },
-    methodName: { ...typography.label, color: DT.white },
-    methodDetail: { ...typography.bodySmall, color: DT.muted },
+    methodName: { ...typography.label, color: C.text },
+    methodDetail: { ...typography.bodySmall, color: C.textMuted },
     paymentCard: {
       borderRadius: borderRadius.lg,
       padding: spacing.md,
@@ -228,21 +210,21 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       ...glassCard,
     },
     paymentInfo: { flex: 1 },
-    paymentDesc: { ...typography.label, color: DT.white },
-    paymentDate: { ...typography.bodySmall, color: DT.muted },
-    paymentAmount: { ...typography.h4, color: DT.amber },
-    emptyText: { ...typography.body, color: DT.muted, textAlign: 'center' as const, padding: spacing.xl },
+    paymentDesc: { ...typography.label, color: C.text },
+    paymentDate: { ...typography.bodySmall, color: C.textMuted },
+    paymentAmount: { ...typography.h4, color: C.accent },
+    emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center' as const, padding: spacing.xl },
     emptyCard: { ...glassCard, padding: spacing.xl, alignItems: 'center' as const, justifyContent: 'center' as const, borderRadius: borderRadius.lg },
-    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: DT.bg },
+    loadingContainer: { flex: 1, justifyContent: 'center' as const, alignItems: 'center' as const, backgroundColor: C.background },
     payBtn: {
       paddingHorizontal: spacing.xl,
       paddingVertical: spacing.md,
       borderRadius: borderRadius.md,
       marginTop: spacing.md,
-      backgroundColor: DT.green,
+      backgroundColor: C.secondary,
       alignSelf: 'stretch',
     },
-    payBtnText: { ...typography.button, color: DT.bg, fontWeight: '700', textAlign: 'center' },
+    payBtnText: { ...typography.button, color: C.background, fontWeight: '700', textAlign: 'center' },
   });
 
   if (loading) {
@@ -253,7 +235,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
           <Text style={styles.headerSubtext}>{userEmail}</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={DT.cyan} />
+          <ActivityIndicator size="large" color={C.accent} />
         </View>
       </View>
     );
@@ -263,12 +245,12 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[DT.cyan]} tintColor={DT.cyan} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.accent]} tintColor={C.accent} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: DT.amber, opacity: 0.06 }} />
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.accent, opacity: 0.06 }} />
           <Text style={styles.headerTitle}>Payment Details</Text>
           <Text style={styles.headerSubtext}>{userEmail}</Text>
         </View>
@@ -289,13 +271,13 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
           <Text style={styles.sectionTitle}>Payment Methods</Text>
           <SpringTouchable onPress={() => setShowAddModal(true)} style={styles.methodCard}>
             <View style={styles.methodIcon}>
-              <Ionicons name="add" size={20} color={DT.cyan} />
+              <Ionicons name="add" size={20} color={C.accent} />
             </View>
             <View style={styles.methodInfo}>
               <Text style={styles.methodName}>Add Payment Method</Text>
               <Text style={styles.methodDetail}>Card, EFT, or Zapper</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={DT.muted} />
+            <Ionicons name="chevron-forward" size={20} color={C.textMuted} />
           </SpringTouchable>
         </View>
 
@@ -304,7 +286,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
           <Text style={styles.sectionTitle}>Payment History</Text>
           {paymentHistory.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Ionicons name="receipt-outline" size={48} color={DT.muted} />
+              <Ionicons name="receipt-outline" size={48} color={C.textMuted} />
               <Text style={styles.emptyText}>No payment history</Text>
             </View>
           ) : (

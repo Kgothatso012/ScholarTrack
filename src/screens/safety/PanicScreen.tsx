@@ -10,24 +10,9 @@ import { supabase } from '../../lib/supabase';
 import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -50,7 +35,7 @@ export const PanicButton = ({
   return (
     <TouchableOpacity
       style={[
-        { width: size, height: size, borderRadius: size / 2, backgroundColor: DT.red, justifyContent: 'center', alignItems: 'center' },
+        { width: size, height: size, borderRadius: size / 2, backgroundColor: C.danger, justifyContent: 'center', alignItems: 'center' },
         pressed && { transform: [{ scale: 0.95 }] },
         style,
       ]}
@@ -58,7 +43,7 @@ export const PanicButton = ({
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <Ionicons name="warning" size={size * 0.5} color={DT.white} />
+      <Ionicons name="warning" size={size * 0.5} color={C.text} />
     </TouchableOpacity>
   );
 };
@@ -125,37 +110,37 @@ export default function PanicScreen() {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.red, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.danger, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,61,90,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    sosCard: { marginHorizontal: 16, marginTop: 20, ...glass, padding: 32, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)', borderWidth: 1, shadowColor: DT.red, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24 },
+    sosCard: { marginHorizontal: 16, marginTop: 20, ...glass, padding: 32, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)', borderWidth: 1, shadowColor: C.danger, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24 },
     sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
-    sosButton: { width: 100, height: 100, borderRadius: 50, backgroundColor: DT.red, justifyContent: 'center', alignItems: 'center', marginBottom: 16, shadowColor: DT.red, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 12 },
-    sosText: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: DT.white, marginBottom: 6 },
-    sosSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted },
+    sosButton: { width: 100, height: 100, borderRadius: 50, backgroundColor: C.danger, justifyContent: 'center', alignItems: 'center', marginBottom: 16, shadowColor: C.danger, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 12 },
+    sosText: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: C.text, marginBottom: 6 },
+    sosSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
     sosLoading: { marginTop: 12 },
     activeCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 20, borderColor: 'rgba(255,61,90,.3)', borderWidth: 1 },
     activeTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
-    activeTitle: { fontFamily: 'Syne_700Bold', fontSize: 15, color: DT.white, textAlign: 'center', marginBottom: 14 },
-    cancelBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: DT.border },
-    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.muted },
+    activeTitle: { fontFamily: 'Syne_700Bold', fontSize: 15, color: C.text, textAlign: 'center', marginBottom: 14 },
+    cancelBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     contactCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     contactIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,229,255,.3)' },
     contactInfo: { flex: 1, marginLeft: 12 },
-    contactName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: DT.white },
-    contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
+    contactName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
+    contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     callBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 30 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 30 },
     skeletonCard: { ...glass, height: 76, marginBottom: 10, borderRadius: 20 },
     bottomPadding: { height: 50 },
   });
@@ -164,7 +149,7 @@ export default function PanicScreen() {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -179,11 +164,11 @@ export default function PanicScreen() {
         <View style={s.sosCard}>
           <View style={s.sosTopRefraction} />
           <TouchableOpacity style={s.sosButton} onPress={triggerSOS} disabled={sending} activeOpacity={0.8}>
-            <Ionicons name="warning" size={44} color={DT.white} />
+            <Ionicons name="warning" size={44} color={C.text} />
           </TouchableOpacity>
           <Text style={s.sosText}>{sending ? 'SENDING...' : 'TAP TO SEND SOS'}</Text>
           <Text style={s.sosSub}>{contacts.length} contacts will be notified</Text>
-          {sending && <View style={s.sosLoading}><ActivityIndicator color={DT.red} /></View>}
+          {sending && <View style={s.sosLoading}><ActivityIndicator color={C.danger} /></View>}
         </View>
 
         {/* Active SOS State */}
@@ -215,7 +200,7 @@ export default function PanicScreen() {
               <View key={contact.id} style={s.contactCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={[s.contactIcon, { backgroundColor: 'rgba(0,229,255,.08)' }]}>
-                  <Ionicons name="person" size={18} color={DT.cyan} />
+                  <Ionicons name="person" size={18} color={C.accent} />
                 </View>
                 <View style={s.contactInfo}>
                   <Text style={s.contactName}>{contact.name}</Text>
@@ -223,7 +208,7 @@ export default function PanicScreen() {
                   {contact.is_primary && <Badge label="Primary" variant="warning" size="small" />}
                 </View>
                 <TouchableOpacity style={[s.callBtn, { backgroundColor: 'rgba(0,119,73,.15)' }]} onPress={() => callContact(contact.phone)}>
-                  <Ionicons name="call" size={18} color={DT.green2} />
+                  <Ionicons name="call" size={18} color={C.success} />
                 </TouchableOpacity>
               </View>
             ))

@@ -4,24 +4,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -49,7 +34,6 @@ export default function DriverVerificationScreen() {
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-
   const drivers: Driver[] = [
     { id: 1, name: 'Mr. John Molaba', photo: 'JM', rating: 4.8, trips: 245, verified: { id: true, license: true, criminal: true, vehicle: true }, status: 'active', phone: '078 123 4567', vehicle: 'Toyota Quantum (White)', route: 'Mamelodi Morning', price: 'R800/mo' },
     { id: 2, name: 'Mrs. Sarah Nkosi', photo: 'SN', rating: 4.9, trips: 189, verified: { id: true, license: true, criminal: true, vehicle: true }, status: 'active', phone: '082 987 6543', vehicle: 'Toyota Hiace (Silver)', route: 'Mamelodi Afternoon', price: 'R750/mo' },
@@ -57,7 +41,6 @@ export default function DriverVerificationScreen() {
   ];
 
   const selectDriver = (driver: Driver) => { setSelectedDriver(selectedDriver?.id === driver.id ? null : driver); };
-
   const verifyDriver = (driverId: number) => {
     Alert.alert('Verify Driver', 'Mark this driver as verified?', [
       { text: 'Cancel', style: 'cancel' },
@@ -67,10 +50,10 @@ export default function DriverVerificationScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return DT.green2;
-      case 'pending': return DT.amber;
-      case 'suspended': return DT.red;
-      default: return DT.amber;
+      case 'active': return C.success;
+      case 'pending': return C.accent;
+      case 'suspended': return C.danger;
+      default: return C.accent;
     }
   };
 
@@ -80,37 +63,37 @@ export default function DriverVerificationScreen() {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    ltHeader: { backgroundColor: DT.bg2, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: DT.amber, position: 'relative', overflow: 'hidden' },
+    ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     section: { padding: 16 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
-    driverCard: { ...glass, padding: 16, marginBottom: 10, borderColor: DT.border },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
+    driverCard: { ...glass, padding: 16, marginBottom: 10, borderColor: C.border },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     driverRow: { flexDirection: 'row', alignItems: 'center' },
     driverAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(255,183,0,.3)' },
-    driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.amber },
+    driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.accent },
     driverInfo: { flex: 1, marginLeft: 12 },
-    driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    driverMeta: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 3 },
+    driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    driverMeta: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
-    verifyList: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: DT.border },
+    verifyList: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: C.border },
     verifyItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 10 },
-    verifyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, flex: 1 },
-    verifyLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
+    verifyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, flex: 1 },
+    verifyLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
     verifyBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 4 },
-    verifyBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: DT.bg, letterSpacing: 0.5 },
+    verifyBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     driverExtra: { marginTop: 8, gap: 6 },
     extraRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    extraText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.dim },
+    extraText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
     bottomPadding: { height: 50 },
   });
 
@@ -118,7 +101,7 @@ export default function DriverVerificationScreen() {
     <View style={s.container}>
       <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={DT.dim} /><Ionicons name="battery-full" size={14} color={DT.dim} /></View>
+        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
 
       <View style={s.ltHeader}>
@@ -130,7 +113,7 @@ export default function DriverVerificationScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={DT.amber} colors={[DT.amber]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Drivers List */}
         <View style={s.section}>
@@ -145,7 +128,7 @@ export default function DriverVerificationScreen() {
                 <View style={s.driverInfo}>
                   <Text style={s.driverName}>{driver.name}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 6 }}>
-                    <Ionicons name="star" size={13} color={DT.amber} />
+                    <Ionicons name="star" size={13} color={C.accent} />
                     <Text style={s.driverMeta}>{driver.rating} ({driver.trips} trips)</Text>
                   </View>
                 </View>
@@ -157,43 +140,43 @@ export default function DriverVerificationScreen() {
               {selectedDriver?.id === driver.id && (
                 <View style={s.verifyList}>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.id ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.id ? DT.green2 : DT.red} />
+                    <Ionicons name={driver.verified.id ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.id ? C.success : C.danger} />
                     <Text style={s.verifyText}>ID Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.id ? 'Valid' : 'Missing'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.license ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.license ? DT.green2 : DT.red} />
+                    <Ionicons name={driver.verified.license ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.license ? C.success : C.danger} />
                     <Text style={s.verifyText}>License Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.license ? 'Valid' : 'Missing'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.criminal ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.criminal ? DT.green2 : DT.red} />
+                    <Ionicons name={driver.verified.criminal ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.criminal ? C.success : C.danger} />
                     <Text style={s.verifyText}>Criminal Check</Text>
                     <Text style={s.verifyLabel}>{driver.verified.criminal ? 'Clear' : 'Pending'}</Text>
                   </View>
                   <View style={s.verifyItem}>
-                    <Ionicons name={driver.verified.vehicle ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.vehicle ? DT.green2 : DT.red} />
+                    <Ionicons name={driver.verified.vehicle ? 'checkmark-circle' : 'close-circle'} size={18} color={driver.verified.vehicle ? C.success : C.danger} />
                     <Text style={s.verifyText}>Vehicle Verified</Text>
                     <Text style={s.verifyLabel}>{driver.verified.vehicle ? 'Approved' : 'Pending'}</Text>
                   </View>
 
                   <View style={s.driverExtra}>
                     <View style={s.extraRow}>
-                      <Ionicons name="car" size={12} color={DT.dim} />
+                      <Ionicons name="car" size={12} color={C.textMuted} />
                       <Text style={s.extraText}>{driver.vehicle}</Text>
                     </View>
                     <View style={s.extraRow}>
-                      <Ionicons name="location" size={12} color={DT.dim} />
+                      <Ionicons name="location" size={12} color={C.textMuted} />
                       <Text style={s.extraText}>{driver.route} • {driver.price}</Text>
                     </View>
                     <View style={s.extraRow}>
-                      <Ionicons name="call" size={12} color={DT.dim} />
+                      <Ionicons name="call" size={12} color={C.textMuted} />
                       <Text style={s.extraText}>{driver.phone}</Text>
                     </View>
                   </View>
 
                   {driver.status === 'pending' && (
-                    <TouchableOpacity style={[s.verifyBtn, { backgroundColor: DT.green2, marginTop: 12 }]} onPress={() => verifyDriver(driver.id)}>
+                    <TouchableOpacity style={[s.verifyBtn, { backgroundColor: C.success, marginTop: 12 }]} onPress={() => verifyDriver(driver.id)}>
                       <Text style={s.verifyBtnText}>Verify Driver</Text>
                     </TouchableOpacity>
                   )}

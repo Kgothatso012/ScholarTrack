@@ -5,32 +5,20 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing } from '../../lib/theme';
+import { getTheme } from '../../lib/theme';
 
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  muted: '#4a6a8a',
-  white: '#e8f4ff',
-};
+const { colors: C } = getTheme('dark');
 
 const tips = [
-  { icon: 'person-add', title: 'Verify Your Driver', description: 'Always check driver details before starting a trip.', color: DT.cyan },
-  { icon: 'location', title: 'Share Your Location', description: 'Share your live location with family members during trips.', color: DT.green2 },
-  { icon: 'warning', title: 'Know Emergency Numbers', description: 'Police 10111, Ambulance 10177, Crime Stop 08600 10111.', color: DT.red },
-  { icon: 'chatbubbles', title: 'Communicate Openly', description: 'Maintain open communication with your driver and children.', color: DT.amber },
-  { icon: 'eye', title: 'Monitor Trips', description: 'Use the live tracking feature to monitor journeys.', color: DT.blue },
-  { icon: 'shield-checkmark', title: 'Report Suspicious Activity', description: 'Report any concerning behavior immediately.', color: DT.cyan },
-  { icon: 'people', title: 'Establish Safe Words', description: 'Create a secret code word that your child can use if unsafe.', color: DT.green2 },
-  { icon: 'document-text', title: 'Keep Records', description: 'Save trip receipts and driver information.', color: DT.amber },
+  { icon: 'person-add', title: 'Verify Your Driver', description: 'Always check driver details before starting a trip.', color: C.accent },
+  { icon: 'location', title: 'Share Your Location', description: 'Share your live location with family members during trips.', color: C.success },
+  { icon: 'warning', title: 'Know Emergency Numbers', description: 'Police 10111, Ambulance 10177, Crime Stop 08600 10111.', color: C.danger },
+  { icon: 'chatbubbles', title: 'Communicate Openly', description: 'Maintain open communication with your driver and children.', color: C.accent },
+  { icon: 'eye', title: 'Monitor Trips', description: 'Use the live tracking feature to monitor journeys.', color: C.primary },
+  { icon: 'shield-checkmark', title: 'Report Suspicious Activity', description: 'Report any concerning behavior immediately.', color: C.accent },
+  { icon: 'people', title: 'Establish Safe Words', description: 'Create a secret code word that your child can use if unsafe.', color: C.success },
+  { icon: 'document-text', title: 'Keep Records', description: 'Save trip receipts and driver information.', color: C.accent },
 ];
 
 const emergencyTips = [
@@ -43,13 +31,12 @@ const emergencyTips = [
 
 export default function SafetyTipsScreen() {
   const insets = useSafeAreaInsets();
-
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     scroll: { flex: 1 },
     // HEADER
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomLeftRadius: 28,
@@ -60,7 +47,7 @@ export default function SafetyTipsScreen() {
     headerGlow1: { position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,61,90,.06)' },
     headerGlow2: { position: 'absolute', bottom: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.06)' },
     headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.sm },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.45)', marginTop: spacing.xs },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.4)' },
@@ -75,8 +62,8 @@ export default function SafetyTipsScreen() {
     },
     tipIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
     tipInfo: { flex: 1, marginLeft: spacing.md },
-    tipTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    tipDesc: { fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.muted, marginTop: 2, lineHeight: 18 },
+    tipTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    tipDesc: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 2, lineHeight: 18 },
     // EMERGENCY CARD
     emergencyCard: {
       backgroundColor: 'rgba(255,61,90,.06)', borderWidth: 1, borderColor: 'rgba(255,61,90,.15)',
@@ -84,8 +71,8 @@ export default function SafetyTipsScreen() {
       borderTopWidth: 2, borderTopColor: 'rgba(255,61,90,.25)',
     },
     emergencyItem: { flexDirection: 'row' as const, alignItems: 'center', marginBottom: spacing.sm },
-    emergencyBullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: DT.red, marginRight: spacing.sm },
-    emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.white, flex: 1, lineHeight: 20 },
+    emergencyBullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.danger, marginRight: spacing.sm },
+    emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.text, flex: 1, lineHeight: 20 },
     // WARNING BADGE
     warningBadge: {
       flexDirection: 'row' as const, alignItems: 'center', gap: spacing.sm,
@@ -93,7 +80,7 @@ export default function SafetyTipsScreen() {
       borderRadius: 14, paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
       marginBottom: spacing.md,
     },
-    warningText: { fontFamily: 'Syne_700Bold', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: DT.amber, fontWeight: '600' },
+    warningText: { fontFamily: 'Syne_700Bold', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: C.accent, fontWeight: '600' },
   });
 
   return (
@@ -110,7 +97,7 @@ export default function SafetyTipsScreen() {
                 <Text style={s.headerSub}>Stay safe with ScholarTrack</Text>
               </View>
               <View style={s.headerBadge}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: DT.green2 }} />
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.success }} />
                 <Text style={s.headerBadgeText}>Always Active</Text>
               </View>
             </View>
@@ -140,7 +127,7 @@ export default function SafetyTipsScreen() {
           <Text style={s.sectionLabel}>Emergency Reminders</Text>
           <Animated.View entering={FadeIn.delay(200).springify()}>
             <View style={s.warningBadge}>
-              <Ionicons name="warning" size={14} color={DT.amber} />
+              <Ionicons name="warning" size={14} color={C.accent} />
               <Text style={s.warningText}>Important Safety Information</Text>
             </View>
           </Animated.View>

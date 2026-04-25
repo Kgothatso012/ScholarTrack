@@ -11,24 +11,9 @@ import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { RSA_EMERGENCY } from '../../constants/app';
+import { getTheme } from '../../lib/theme';
 
-// ─── Design Tokens ───────────────────────────────────────────────────────────
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  dim: '#2e4a6e',
-  muted: '#4a6a8a',
-  text: '#9bbdd4',
-  white: '#e8f4ff',
-};
+const { colors: C, spacing: S } = getTheme('dark');
 
 const glass = {
   backgroundColor: 'rgba(255,255,255,.04)',
@@ -106,9 +91,9 @@ const EmergencyScreen = () => {
   const handleSOSPressOut = () => { sosScale.value = withSpring(1, { damping: 15, stiffness: 150, mass: 0.8 }); };
 
   const quickDials = [
-    { name: 'Police', phone: RSA_EMERGENCY.POLICE, icon: 'shield', color: DT.green },
+    { name: 'Police', phone: RSA_EMERGENCY.POLICE, icon: 'shield', color: C.success },
     { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, icon: 'medkit', color: '#E03C31' },
-    { name: 'Fire', phone: RSA_EMERGENCY.FIRE, icon: 'flame', color: DT.amber },
+    { name: 'Fire', phone: RSA_EMERGENCY.FIRE, icon: 'flame', color: C.accent },
   ];
 
   const tips = [
@@ -124,15 +109,15 @@ const EmergencyScreen = () => {
   const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: DT.bg },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: DT.white, letterSpacing: 0.5 },
+    container: { flex: 1, backgroundColor: C.background },
+    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
+    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
     sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
-    headerGlass: { backgroundColor: DT.bg2, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, padding: 20, paddingTop: insets.top + 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,184,28,0.15)', position: 'relative', overflow: 'hidden' },
+    headerGlass: { backgroundColor: C.surface, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, padding: 20, paddingTop: insets.top + 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,184,28,0.15)', position: 'relative', overflow: 'hidden' },
     headerGlow: { position: 'absolute', top: -60, right: -40, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(224,60,49,0.1)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: DT.white, letterSpacing: -0.5 },
+    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 4 },
     sosHero: { marginHorizontal: 16, marginTop: 20, position: 'relative' },
     sosGlass: { ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: '#E03C31', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },
@@ -140,27 +125,27 @@ const EmergencyScreen = () => {
     sosRingMid: { position: 'absolute', top: '50%', left: '50%', marginTop: -55, marginLeft: -55, width: 110, height: 110, borderRadius: 55, borderWidth: 1, borderColor: 'rgba(224,60,49,.2)' },
     sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(224,60,49,.3)' },
     sosIconWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(224,60,49,.2)', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(224,60,49,.5)', marginBottom: 14, zIndex: 1 },
-    sosLabel: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.white, zIndex: 1 },
+    sosLabel: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.text, zIndex: 1 },
     sosSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 4, zIndex: 1 },
     section: { paddingHorizontal: 16, paddingTop: 20 },
-    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: DT.white, marginBottom: 12, letterSpacing: 0.5 },
+    sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     quickDialItem: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
     dialIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     dialInfo: { flex: 1 },
-    dialName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    dialNumber: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: DT.green },
+    dialName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    dialNumber: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.success },
     callBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
     contactCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
     contactAvatar: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
-    contactInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: DT.blue },
+    contactInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.primary },
     contactInfo: { flex: 1 },
-    contactName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: DT.white },
-    contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: DT.muted, marginTop: 2 },
-    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: DT.muted, textAlign: 'center', paddingVertical: 20 },
+    contactName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
+    contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
+    emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 20 },
     emptyCard: { ...glass, padding: 20, marginBottom: 10 },
     skeletonCard: { ...glass, height: 76, marginBottom: 10, borderRadius: 20 },
     tipCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
-    tipText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 12, color: DT.text, lineHeight: 18 },
+    tipText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textSecondary, lineHeight: 18 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     bottomPadding: { height: 50 },
   });
@@ -185,9 +170,9 @@ const EmergencyScreen = () => {
             <Animated.View style={sosAnimatedStyle}>
               <View style={s.sosIconWrap}>
                 {sendingSos ? (
-                  <ActivityIndicator color={DT.white} size="large" />
+                  <ActivityIndicator color={C.text} size="large" />
                 ) : (
-                  <Ionicons name="warning" size={40} color={DT.white} />
+                  <Ionicons name="warning" size={40} color={C.text} />
                 )}
               </View>
               <Text style={s.sosLabel}>{sendingSos ? 'SENDING...' : 'SEND SOS'}</Text>
@@ -210,8 +195,8 @@ const EmergencyScreen = () => {
                 <Text style={s.dialName}>{item.name}</Text>
                 <Text style={[s.dialNumber, { color: item.color }]}>{item.phone}</Text>
               </View>
-              <View style={[s.callBtn, { backgroundColor: `${DT.green}20` }]}>
-                <Ionicons name="call" size={18} color={DT.green2} />
+              <View style={[s.callBtn, { backgroundColor: `${C.success}20` }]}>
+                <Ionicons name="call" size={18} color={C.success} />
               </View>
             </TouchableOpacity>
           </Animated.View>
@@ -240,8 +225,8 @@ const EmergencyScreen = () => {
                 <Text style={s.contactPhone}>{contact.phone}</Text>
                 <Badge label={contact.relationship} variant={contact.is_primary ? 'warning' : 'neutral'} size="small" />
               </View>
-              <TouchableOpacity onPress={() => callNumber(contact.phone)} style={[s.callBtn, { backgroundColor: `${DT.green}20` }]}>
-                <Ionicons name="call" size={18} color={DT.green2} />
+              <TouchableOpacity onPress={() => callNumber(contact.phone)} style={[s.callBtn, { backgroundColor: `${C.success}20` }]}>
+                <Ionicons name="call" size={18} color={C.success} />
               </TouchableOpacity>
             </Animated.View>
           ))
@@ -253,7 +238,7 @@ const EmergencyScreen = () => {
         <Text style={s.sectionTitle}>Safety Tips</Text>
         {tips.map((tip, index) => (
           <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()} style={s.tipCard}>
-            <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color={DT.amber} />
+            <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color={C.accent} />
             <Text style={s.tipText}>{tip.text}</Text>
           </Animated.View>
         ))}
