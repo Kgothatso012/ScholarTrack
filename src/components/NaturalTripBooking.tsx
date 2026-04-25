@@ -14,9 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { aiService } from '../services/ai';
 import { supabase } from '../lib/api';
-import { colors as themeColors } from '../lib/theme';
-
-type ThemeColors = typeof themeColors;
+import { getTheme } from '../ui-plugin/theme';
 
 interface TripDetails {
   pickup?: string;
@@ -40,9 +38,8 @@ export default function NaturalTripBooking({
   const [loading, setLoading] = useState(false);
   const [extractedDetails, setExtractedDetails] = useState<TripDetails | null>(null);
 
-  const COLORS = darkMode
-    ? { bg: '#0a0a0a', card: '#1a1a1a', text: '#fff', textSec: '#888', primary: '#FFB81C', success: '#4CAF50' }
-    : { bg: '#f5f5f5', card: '#fff', text: '#333', textSec: '#666', primary: '#000000', success: '#007749' };
+  const mode = darkMode ? 'dark' : 'light';
+  const { colors: C } = getTheme(mode);
 
   const processBooking = async () => {
     if (!inputText.trim() || loading) return;
@@ -129,21 +126,21 @@ export default function NaturalTripBooking({
   ];
 
   return (
-    <View style={[styles(themeColors).container, { backgroundColor: COLORS.bg }]}>
-      <View style={[styles(themeColors).header, { backgroundColor: COLORS.primary }]}>
-        <Ionicons name="calendar" size={24} color="#fff" />
-        <Text style={styles(themeColors).headerText}>Book a Trip</Text>
+    <View style={[styles.container, { backgroundColor: C.background }]}>
+      <View style={[styles.header, { backgroundColor: C.primary }]}>
+        <Ionicons name="calendar" size={24} color={C.textInverse} />
+        <Text style={styles.headerText}>Book a Trip</Text>
       </View>
 
-      <View style={[styles(themeColors).inputCard, { backgroundColor: COLORS.card }]}>
-        <Text style={[styles(themeColors).label, { color: COLORS.text }]}>
+      <View style={[styles.inputCard, { backgroundColor: C.card }]}>
+        <Text style={[styles.label, { color: C.text }]}>
           Describe your trip in plain English:
         </Text>
 
         <TextInput
-          style={[styles(themeColors).input, { backgroundColor: COLORS.bg, color: COLORS.text, borderColor: COLORS.textSec }]}
+          style={[styles.input, { backgroundColor: C.backgroundAlt, color: C.text, borderColor: C.border }]}
           placeholder="e.g., Pick up my child from school at 2pm"
-          placeholderTextColor={COLORS.textSec}
+          placeholderTextColor={C.textMuted}
           value={inputText}
           onChangeText={setInputText}
           multiline
@@ -153,49 +150,49 @@ export default function NaturalTripBooking({
         />
 
         <TouchableOpacity
-          style={[styles(themeColors).button, { backgroundColor: COLORS.primary }]}
+          style={[styles.button, { backgroundColor: C.primary }]}
           onPress={processBooking}
           disabled={loading || !inputText.trim()}
           accessibilityLabel="Book trip"
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={C.textInverse} />
           ) : (
             <>
-              <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles(themeColors).buttonText}>Book Trip</Text>
+              <Ionicons name="send" size={20} color={C.textInverse} />
+              <Text style={[styles.buttonText, { color: C.textInverse }]}>Book Trip</Text>
             </>
           )}
         </TouchableOpacity>
       </View>
 
       {extractedDetails && (
-        <View style={[styles(themeColors).preview, { backgroundColor: COLORS.card }]}>
-          <Text style={[styles(themeColors).previewTitle, { color: COLORS.text }]}>Detected:</Text>
+        <View style={[styles.preview, { backgroundColor: C.card }]}>
+          <Text style={[styles.previewTitle, { color: C.text }]}>Detected:</Text>
           {extractedDetails.pickup && (
-            <Text style={{ color: COLORS.textSec }}><Ionicons name="location" size={14} color={COLORS.textSec} /> Pickup: {extractedDetails.pickup}</Text>
+            <Text style={{ color: C.textMuted }}><Ionicons name="location" size={14} color={C.textMuted} /> Pickup: {extractedDetails.pickup}</Text>
           )}
           {extractedDetails.dropoff && (
-            <Text style={{ color: COLORS.textSec }}><Ionicons name="flag" size={14} color={COLORS.textSec} /> Dropoff: {extractedDetails.dropoff}</Text>
+            <Text style={{ color: C.textMuted }}><Ionicons name="flag" size={14} color={C.textMuted} /> Dropoff: {extractedDetails.dropoff}</Text>
           )}
           {extractedDetails.time && (
-            <Text style={{ color: COLORS.textSec }}><Ionicons name="time" size={14} color={COLORS.textSec} /> Time: {extractedDetails.time}</Text>
+            <Text style={{ color: C.textMuted }}><Ionicons name="time" size={14} color={C.textMuted} /> Time: {extractedDetails.time}</Text>
           )}
           {extractedDetails.childName && (
-            <Text style={{ color: COLORS.textSec }}><Ionicons name="person" size={14} color={COLORS.textSec} /> Child: {extractedDetails.childName}</Text>
+            <Text style={{ color: C.textMuted }}><Ionicons name="person" size={14} color={C.textMuted} /> Child: {extractedDetails.childName}</Text>
           )}
         </View>
       )}
 
-      <View style={styles(themeColors).examples}>
-        <Text style={[styles(themeColors).examplesTitle, { color: COLORS.textSec }]}>Try saying:</Text>
+      <View style={styles.examples}>
+        <Text style={[styles.examplesTitle, { color: C.textMuted }]}>Try saying:</Text>
         {examples.map((example, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => setInputText(example)}
-            style={[styles(themeColors).exampleChip, { backgroundColor: COLORS.card }]}
+            style={[styles.exampleChip, { backgroundColor: C.card }]}
           >
-            <Text style={{ color: COLORS.primary, fontSize: 12 }}>{example}</Text>
+            <Text style={{ color: C.primary, fontSize: 12 }}>{example}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -203,7 +200,7 @@ export default function NaturalTripBooking({
   );
 }
 
-const styles = (colors: ThemeColors) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -214,7 +211,6 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
     paddingTop: 50,
   },
   headerText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 8,
@@ -247,7 +243,6 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
     marginTop: 12,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,

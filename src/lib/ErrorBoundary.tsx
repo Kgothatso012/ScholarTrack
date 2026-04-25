@@ -1,11 +1,10 @@
 // Error Boundary Component
-// Catches React errors and displays friendly UI instead of crashing
-
 import React, { Component, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors as themeColors } from '../lib/theme';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { getTheme } from '../ui-plugin/theme';
 
-type ThemeColors = typeof themeColors;
+const { colors: C } = getTheme('dark');
 
 interface Props {
   children: ReactNode;
@@ -29,7 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    // In production, send to error tracking service (Sentry, etc.)
   }
 
   handleRetry = () => {
@@ -43,13 +41,14 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <View style={styles(themeColors).container}>
-          <Text style={styles(themeColors).title}>Something went wrong</Text>
-          <Text style={styles(themeColors).message}>
+        <View style={styles.container}>
+          <Ionicons name="warning" size={64} color={C.primary} />
+          <Text style={styles.title}>Something went wrong</Text>
+          <Text style={styles.message}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
-          <TouchableOpacity style={styles(themeColors).button} onPress={this.handleRetry}>
-            <Text style={styles(themeColors).buttonText}>Try Again</Text>
+          <TouchableOpacity style={styles.button} onPress={this.handleRetry}>
+            <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -59,39 +58,72 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-const styles = (colors: ThemeColors) => StyleSheet.create({
+export const LoadingScreen = ({ message = 'Loading...' }: { message?: string }) => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color={C.primary} />
+    <Text style={styles.loadingText}>{message}</Text>
+  </View>
+);
+
+export const ErrorFallback = ({
+  message = 'Something went wrong',
+  onRetry
+}: {
+  message?: string;
+  onRetry?: () => void;
+}) => (
+  <View style={styles.container}>
+    <Ionicons name="warning" size={64} color={C.primary} />
+    <Text style={styles.title}>{message}</Text>
+    {onRetry && (
+      <TouchableOpacity style={styles.button} onPress={onRetry}>
+        <Text style={styles.buttonText}>Try Again</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+);
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.dark.background,
+    backgroundColor: C.background,
     padding: 20,
-  },
-  emoji: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.dark.text,
+    color: C.text,
+    marginTop: 16,
     marginBottom: 8,
   },
   message: {
     fontSize: 14,
-    color: colors.dark.textSecondary,
+    color: C.textMuted,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: colors.accent,
+    backgroundColor: C.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   buttonText: {
-    color: colors.primary,
-    fontWeight: '600',
+    color: C.textInverse,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: C.background,
+  },
+  loadingText: {
+    color: C.primary,
+    marginTop: 12,
     fontSize: 16,
   },
 });
