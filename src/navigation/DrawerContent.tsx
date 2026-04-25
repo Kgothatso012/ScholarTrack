@@ -139,10 +139,10 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 
   const getRoleColor = (role: string | null) => {
     switch (role) {
-      case 'parent': return colors.primary || '#007749';
-      case 'driver': return colors.secondary || '#002395';
-      case 'admin': return colors.accent || '#FFB81C';
-      default: return colors.textSecondary || '#666666';
+      case 'parent': return colors.primary;
+      case 'driver': return colors.secondary;
+      case 'admin': return colors.accent;
+      default: return colors.textSecondary;
     }
   };
 
@@ -151,7 +151,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       {/* Header */}
       <View style={[styles(colors).header, { paddingTop: insets.top + 20 }]}>
         <View style={[styles(colors).avatar, { backgroundColor: colors.primary }]}>
-          <Ionicons name="person" size={30} color={colors.textInverse || '#fff'} />
+          <Ionicons name="person" size={30} color={colors.textInverse} />
         </View>
         <Text style={styles(colors).userName}>{userName}</Text>
         <View style={[styles(colors).roleBadge, { backgroundColor: getRoleColor(userRole) + '20' }]}>
@@ -200,7 +200,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border || '#E5E5EA',
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
   avatar: {
@@ -210,12 +210,12 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    backgroundColor: colors.primary || '#007749',
+    backgroundColor: colors.primary,
   },
   userName: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text || '#1A1A1A',
+    color: colors.text,
     marginBottom: 6,
   },
   roleBadge: {
@@ -254,7 +254,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: colors.border || '#E5E5EA',
+    borderTopColor: colors.border,
     paddingTop: 15,
     paddingHorizontal: 20,
   },
