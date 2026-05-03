@@ -33,7 +33,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { cacheService } from '../../lib/cache';
 import { ThemeColors } from '../../context/ThemeContext';
 
-import { Spacer, Badge } from '../../ui-plugin/components';
+import { Spacer, Badge, EmptyState } from '../../ui-plugin/components';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -61,7 +62,7 @@ interface PaymentRecord {
 }
 
 interface Props {
-  navigation: { goBack: () => void; navigate: (s: string) => void };
+  navigation: { goBack: () => void; navigate: (s: string) => void; openDrawer?: () => void };
 }
 
 // ─── Spring-press wrapper ──────────────────────────────────────────────────────
@@ -626,13 +627,8 @@ const ParentDashboard = ({ navigation }: Props) => {
 
   if (loading) {
     return (
-      <View style={[s.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <View style={{ alignItems: 'center', gap: S.md }}>
-          <Ionicons name="bus" size={28} color={C.textMuted} />
-          <Text style={{ ...TY.labelSmall, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>
-            Loading dashboard…
-          </Text>
-        </View>
+      <View style={s.container}>
+        <SkeletonDashboard />
       </View>
     );
   }
@@ -655,6 +651,9 @@ const ParentDashboard = ({ navigation }: Props) => {
               <Text style={s.dhSub}>{userName || userEmail || 'Welcome back'}</Text>
             </View>
             <View style={s.dhActions}>
+              <TouchableOpacity onPress={() => navigation?.openDrawer?.()} style={s.dhBtn}>
+                <Ionicons name="menu" size={17} color={C.text} />
+              </TouchableOpacity>
               <TouchableOpacity onPress={onRefresh} style={s.dhBtn}>
                 <Ionicons name="refresh" size={17} color={C.text} />
               </TouchableOpacity>
@@ -751,7 +750,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                   label={action.label}
                   bgColor={action.bgColor}
                   borderColor={action.borderColor}
-                  onPress={() => navigation?.navigate?.(action.route)}
+                  onPress={() => { console.log('[QA] nav:', typeof navigation?.navigate, 'route:', action.route); navigation?.navigate?.(action.route); }}
                   delay={i * 50}
                 />
               ))}
@@ -824,10 +823,11 @@ const ParentDashboard = ({ navigation }: Props) => {
           <Animated.View entering={FadeIn.springify()} style={{ paddingHorizontal: S.lg, paddingTop: S.md }}>
             <Text style={s.secLabel}>All Trips ({trips.length})</Text>
             {trips.length === 0 ? (
-              <View style={{ alignItems: 'center', padding: S.xxxl }}>
-                <Ionicons name="bus" size={28} color={C.textMuted} />
-                <Text style={s.emptyText}>No trips found</Text>
-              </View>
+              <EmptyState
+                icon="bus-outline"
+                title="No trips yet"
+                description="Trips will appear here once your children are linked to active drivers."
+              />
             ) : (
               trips.map((trip) => {
                 const isDropoff = !!trip.dropoff_location;

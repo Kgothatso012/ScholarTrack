@@ -14,6 +14,7 @@ import {
   RefreshControl,
   Platform,
   UIManager,
+  LayoutAnimation,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -28,7 +29,8 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker, Circle } from 'react-native-maps';
+import OSMMap from '../../components/OSMMap';
+import { SkeletonDashboard } from '../../components/SkeletonLoader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { childrenService } from '../../lib/services/children';
 import { locationService } from '../../services/location';
@@ -248,7 +250,7 @@ const mapStyles = StyleSheet.create({
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function LiveTrackScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef(null);
   const pollingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -287,8 +289,13 @@ export default function LiveTrackScreen({ navigation }: Props) {
           latitude: location.latitude,
           longitude: location.longitude,
         }));
-        if (location.latitude && location.longitude && mapRef.current) {
-          mapRef.current.animateToRegion({ latitude: location.latitude, longitude: location.longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 500);
+        // OSM map centers automatically on re-render when lat/lng props change
+        if (location.latitude && location.longitude) {
+          setRegion(prev => ({
+            ...prev,
+            latitude: location.latitude,
+            longitude: location.longitude,
+          }));
         }
       }
     } catch (err) {
@@ -325,11 +332,31 @@ export default function LiveTrackScreen({ navigation }: Props) {
     if (!selectedChild?.driver?.id) return;
     const driverId = selectedChild.driver.id;
     fetchDriverLocation(driverId);
-    pollingInterval.current = setInterval(() => {
-      fetchDriverLocation(driverId);
-    }, 30000);
+
+    // Supabase Realtime subscription — replaces 30s polling
+    const channel = supabase
+      .channel('live-track-driver-' + driverId)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'driver_tracking',
+          filter: 'driver_id=eq.' + driverId,
+        },
+        (payload) => {
+          const loc = payload.new as { latitude: number; longitude: number; speed: number; updated_at: string };
+          if (loc.latitude && loc.longitude) {
+            setDriverLocation((prev: typeof driverLocation) =>
+              prev ? { ...prev, ...loc, updated_at: loc.updated_at } : null
+            );
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
-      if (pollingInterval.current) clearInterval(pollingInterval.current);
+      supabase.removeChannel(channel);
     };
   }, [selectedChild?.driver?.id, fetchDriverLocation]);
 
@@ -340,6 +367,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
   };
 
   const handleSelectChild = async (child: ChildWithDriver) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedChild(child);
     if (child.driver?.id) {
       await fetchDriverLocation(child.driver.id);
@@ -640,7 +668,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
           <Text style={s.sbTime}>{timeStr}</Text>
           <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
         </View>
-        <View style={[s.ltHeader, { paddingTop: 12 }]}>
+        <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
             <View>
@@ -649,9 +677,8 @@ export default function LiveTrackScreen({ navigation }: Props) {
             </View>
           </View>
         </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Ionicons name="bus" size={40} color={C.success} />
-          <Text style={{ fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginTop: 12 }}>Loading location…</Text>
+        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+          <SkeletonDashboard />
         </View>
       </View>
     );
@@ -748,51 +775,17 @@ export default function LiveTrackScreen({ navigation }: Props) {
           </ScrollView>
         )}
 
-        {/* MAP */}
+        {/* OSM WebView Map — works on all Android incl. Huawei/Mobicel */}
         <View style={s.mapWrap}>
           {driverLocation ? (
-            <MapView
-              ref={mapRef}
-              style={{ width: '100%', height: 220 }}
-              region={region}
-              showsUserLocation={false}
-              showsMyLocationButton={false}
-              showsCompass={false}
-              mapType="standard"
-            >
-              <Marker
-                coordinate={{
-                  latitude: driverLocation.latitude,
-                  longitude: driverLocation.longitude,
-                }}
-                title={child.driver?.full_name ?? 'Driver'}
-                description="School Bus"
-              >
-                <View style={{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }}>
-                  <BusMarkerAnimated />
-                </View>
-              </Marker>
-              {child.pickup_lat && child.pickup_lng && (
-                <>
-                  <Circle
-                    center={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
-                    radius={200}
-                    fillColor="rgba(0,119,73,0.15)"
-                    strokeColor="rgba(0,119,73,0.5)"
-                    strokeWidth={2}
-                  />
-                  <Marker
-                    coordinate={{ latitude: child.pickup_lat, longitude: child.pickup_lng }}
-                    title="Pickup Zone"
-                    description={child.school?.name ?? 'School'}
-                  >
-                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,119,73,0.2)', borderWidth: 2, borderColor: C.success, alignItems: 'center', justifyContent: 'center' }}>
-                      <Ionicons name="school" size={16} color={C.cyan} />
-                    </View>
-                  </Marker>
-                </>
-              )}
-            </MapView>
+            <OSMMap
+              latitude={driverLocation.latitude}
+              longitude={driverLocation.longitude}
+              driverName={child.driver?.full_name}
+              speed={driverLocation.speed}
+              schoolLat={child.pickup_lat ?? undefined}
+              schoolLng={child.pickup_lng ?? undefined}
+            />
           ) : (
             <MapPlaceholder driverLocation={null} />
           )}
