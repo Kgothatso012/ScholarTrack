@@ -2,7 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { AuthStack } from './AuthStack';
-import { ParentStack } from './ParentStack';
+import { ParentDrawerStack } from './ParentDrawerStack';
 import { DriverStack } from './DriverStack';
 import { AdminStack } from './AdminStack';
 
@@ -27,7 +27,7 @@ export function RootNavigator({
   if (isAuthenticated && userRole) {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Main">
+        <Stack.Screen name="App">
           {() => {
             switch (userRole) {
               case 'driver':
@@ -35,7 +35,7 @@ export function RootNavigator({
               case 'admin':
                 return <AdminStack />;
               default:
-                return <ParentStack />;
+                return <ParentDrawerStack />;
             }
           }}
         </Stack.Screen>

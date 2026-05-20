@@ -1,11 +1,28 @@
 // Navigation type definitions
 export type RootStackParamList = {
   Auth: undefined;
-  Main: undefined;
+  App: undefined;
 };
 
 export type DrawerParamList = {
-  HomeDrawer: undefined;
+  Home: undefined;
+  Children: undefined;
+  LinkChild: undefined;
+  TrackChild: { childId?: string };
+  ParentDocs: undefined;
+  EmergencyContacts: undefined;
+  LiveTrack: undefined;
+  Emergency: undefined;
+  Panic: undefined;
+  IncidentReport: undefined;
+  SafetyTips: undefined;
+  DriverVerification: { driverId?: string };
+  Chat: undefined;
+  HireDriver: undefined;
+  Payments: undefined;
+  Support: undefined;
+  Settings: undefined;
+  ReviewDriver: { driverId?: string };
 };
 
 export type AuthStackParamList = {
@@ -17,6 +34,7 @@ export type AuthStackParamList = {
 };
 
 export type ParentStackParamList = {
+  ParentStack: undefined;
   Home: undefined;
   Children: undefined;
   LinkChild: undefined;

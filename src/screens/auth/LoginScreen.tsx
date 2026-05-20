@@ -165,7 +165,10 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
         .eq('id', data.user?.id)
         .single();
 
-      const userRole = profileData?.role || data.user?.user_metadata?.role || 'parent';
+      // Prefer user_metadata.role (set at registration) over profiles.role (DB trigger may be NULL)
+      const metaRole = data.user?.user_metadata?.role;
+      const profileRole = profileData?.role;
+      const userRole = (metaRole || profileRole || 'parent') as 'parent' | 'driver' | 'admin';
       const userName = profileData?.full_name || data.user?.user_metadata?.full_name || '';
 
       if (userRole) {
@@ -184,6 +187,9 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
               phone: data.user?.user_metadata?.phone || ''
             });
           } catch (err) {}
+        } else if (!profileData?.role && data.user) {
+          // Profile exists but role is NULL — sync from metadata
+          await supabase.from('profiles').update({ role: userRole }).eq('id', data.user.id);
         }
 
         if (onLogin) onLogin(userRole);

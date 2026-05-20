@@ -1,9 +1,9 @@
 // Fleet Tracking Screen — Design System: Dark SA Transport
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import FleetOSMMap from '../../components/FleetOSMMap';
 import { supabase } from '../../lib/supabase';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
@@ -46,7 +46,6 @@ export default function FleetTrackingScreen({ navigation }: Props) {
   const [driverLocations, setDriverLocations] = useState<DriverLocation[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<DriverLocation | null>(null);
-  const mapRef = useRef<MapView>(null);
 
   const DEFAULT_REGION = { latitude: -25.7479, longitude: 28.2292, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
@@ -92,10 +91,6 @@ export default function FleetTrackingScreen({ navigation }: Props) {
       );
 
       setDriverLocations(driversWithLocations.filter(d => d.latitude !== 0 && d.longitude !== 0));
-      const validDriver = driversWithLocations.find(d => d.latitude !== 0 && d.longitude !== 0);
-      if (validDriver && mapRef.current) {
-        mapRef.current.animateToRegion({ latitude: validDriver.latitude, longitude: validDriver.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }, 500);
-      }
     } catch (error) { console.error('Error loading fleet:', error); }
     finally { setLoading(false); }
   };
@@ -185,26 +180,14 @@ export default function FleetTrackingScreen({ navigation }: Props) {
       >
         {/* Live Map */}
         <View style={s.mapContainer}>
-          <MapView ref={mapRef} provider={PROVIDER_GOOGLE} style={s.map} initialRegion={DEFAULT_REGION} showsUserLocation={true} showsMyLocationButton={true}>
-            {driversWithLocation.map((driver) => (
-              <Marker
-                key={driver.driver_id}
-                coordinate={{ latitude: driver.latitude, longitude: driver.longitude }}
-                title={driver.driver_name}
-                description={`${driver.vehicle} • ${Math.round(driver.speed || 0)} km/h`}
-                onPress={() => setSelectedDriver(driver)}
-              >
-                <View style={{
-                  width: 40, height: 40, borderRadius: 20,
-                  backgroundColor: driver.status === 'active' ? C.success : C.primary,
-                  justifyContent: 'center', alignItems: 'center',
-                  borderWidth: 3, borderColor: selectedDriver?.driver_id === driver.driver_id ? C.cyan : C.surface,
-                }}>
-                  <Ionicons name="bus" size={20} color={C.background} />
-                </View>
-              </Marker>
-            ))}
-          </MapView>
+          <FleetOSMMap
+            drivers={driversWithLocation}
+            initialRegion={DEFAULT_REGION}
+            onDriverPress={(id) => {
+              const driver = driversWithLocation.find(d => d.driver_id === id);
+              if (driver) setSelectedDriver(driver);
+            }}
+          />
           <View style={s.mapOverlay}>
             <View style={s.liveBadge}>
               <View style={s.liveDot} />

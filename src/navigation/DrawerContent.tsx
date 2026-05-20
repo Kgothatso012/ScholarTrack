@@ -52,6 +52,11 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   const [userName, setUserName] = React.useState('');
   const [userRole, setUserRole] = React.useState<string | null>(null);
 
+  // Get the current screen name from the drawer navigator's state
+  const currentScreenName = React.useMemo(() => {
+    return state?.routes?.[state.index]?.name || 'Home';
+  }, [state]);
+
   React.useEffect(() => {
     loadUserInfo();
   }, []);
@@ -104,6 +109,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
     };
 
     const actualScreen = screenMap[screenName] || screenName;
+    console.log('[Drawer] navigate to:', actualScreen, 'nav:', typeof navigation?.navigate);
     navigation.navigate(actualScreen);
   };
 
@@ -167,7 +173,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
           <DrawerItem
             key={item.to}
             item={item}
-            isActive={state.routes[state.index]?.name === item.to}
+            isActive={currentScreenName === item.to}
             onPress={() => {
               navigateToScreen(item.to);
               navigation.closeDrawer();

@@ -27,6 +27,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import PaymentModal from '../../components/PaymentModal';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
@@ -138,24 +139,8 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
   };
 
   const handlePayment = async () => {
-    if (processing) return;
-    setProcessing(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setProcessing(false); return; }
-      const { error } = await supabase.from('payments').insert({
-        parent_id: user.id,
-        amount: currentAmount * 100,
-        status: 'pending',
-        description: 'Transport payment',
-        method: selectedMethod,
-      });
-      if (error) throw error;
-      setProcessing(false);
-    } catch (error) {
-      console.error('Payment error:', error);
-      setProcessing(false);
-    }
+    // Open Paystack modal — handles full flow (initialize → browser → verify → save)
+    setShowAddModal(true);
   };
   const insets = useSafeAreaInsets();
   const styles = StyleSheet.create({
@@ -311,6 +296,23 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
 
         <Spacer size="xl" />
       </ScrollView>
+
+      <PaymentModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        amount={currentAmount * 100}
+        description="ScholarTrack Transport Payment"
+        paymentType="monthly"
+        onSuccess={(ref) => {
+          Alert.alert('Payment Successful', `Reference: ${ref}`);
+          setShowAddModal(false);
+          loadPaymentHistory();
+        }}
+        onFailure={(err) => {
+          Alert.alert('Payment Failed', err);
+          setShowAddModal(false);
+        }}
+      />
     </Animated.View>
   );
 }

@@ -4,9 +4,12 @@
 
 import { supabase } from '../lib/supabase';
 import * as Notifications from 'expo-notifications';
+import type { PermissionResponse } from 'expo-notifications';
 import Constants from 'expo-constants';
 
-const SUPABASE_FUNCTION_URL = `${Constants.expoConfig?.extra?.SUPABASE_URL || 'https://zjcribmwgavpzycgpwva.supabase.co'}/functions/v1/send-notification`;
+const SUPABASE_URL = Constants.expoConfig?.extra?.SUPABASE_URL || 'https://zjcribmwgavpzycgpwva.supabase.co';
+const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.SUPABASE_ANON_KEY || '';
+const SUPABASE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/send-notification`;
 
 export interface NotificationPayload {
   title: string;
@@ -66,11 +69,11 @@ export const pushNotificationService = {
    */
   async getPushToken(): Promise<string | null> {
     try {
-      const { status } = await Notifications.getPermissionsAsync();
+      const existing = await Notifications.getPermissionsAsync() as PermissionResponse;
 
-      if (status !== 'granted') {
-        const { status: newStatus } = await Notifications.requestPermissionsAsync();
-        if (newStatus !== 'granted') {
+      if (existing.status !== Notifications.PermissionStatus.GRANTED) {
+        const result = await Notifications.requestPermissionsAsync() as PermissionResponse;
+        if (result.status !== Notifications.PermissionStatus.GRANTED) {
           return null;
         }
       }
@@ -143,7 +146,7 @@ export const pushNotificationService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${await getServiceRoleKey()}`,
+          Authorization: `Bearer ${await getAnonKey()}`,
         },
         body: JSON.stringify({
           token,
@@ -242,12 +245,9 @@ export const pushNotificationService = {
   },
 };
 
-// Helper to get service role key (only for edge functions - never exposed to client)
-async function getServiceRoleKey(): Promise<string> {
-  // In production, this would use the service role key from Edge Function secrets
-  // For now, we'll use the anon key (less secure but works for MVP)
-  const { data } = await supabase.auth.getSession();
-  return data.session?.access_token || '';
+// Helper: use anon key for edge function calls (no user session needed for server-side sends)
+async function getAnonKey(): Promise<string> {
+  return SUPABASE_ANON_KEY;
 }
 
 export default pushNotificationService;

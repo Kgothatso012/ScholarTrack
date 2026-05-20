@@ -2,6 +2,7 @@
 // Unified typed notification system with event emitter
 
 import * as Notifications from 'expo-notifications';
+import type { PermissionResponse } from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
@@ -103,15 +104,15 @@ export const notificationService = {
       return false;
     }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+    const existing = await Notifications.getPermissionsAsync() as PermissionResponse;
+    let finalStatus = existing.status;
 
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    if (finalStatus !== Notifications.PermissionStatus.GRANTED) {
+      const result = await Notifications.requestPermissionsAsync() as PermissionResponse;
+      finalStatus = result.status;
     }
 
-    if (finalStatus !== 'granted') {
+    if (finalStatus !== Notifications.PermissionStatus.GRANTED) {
 
       return false;
     }

@@ -106,7 +106,7 @@ const PaymentScreen = ({ navigation }: Props) => {
     setRefreshing(false);
   };
 
-  const handlePayNow = () => navigation.navigate('Payments');
+  const handlePayNow = () => navigation.navigate('PaymentDetails');
 
   const pendingPayments = payments.filter(p => p.status === 'pending');
   const paidPayments = payments.filter(p => p.status === 'paid');

@@ -1,5 +1,6 @@
 // ScholarTrack TrackChildScreen — Dark SA Transport Design
 // Dark glassmorphism, cyan/amber accents, spring animations, real-time map tracking
+// Uses OSM WebView map for universal Android compatibility (no GMS required)
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -13,6 +14,7 @@ import {
   Dimensions,
   Platform,
   UIManager,
+  LayoutAnimation,
   RefreshControl,
 } from 'react-native';
 import Animated, {
@@ -27,7 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import OSMMap from '../../components/OSMMap';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { childrenService } from '../../lib/services/children';
 import { driverTrackingService } from '../../lib/services/tripEnhanced';
@@ -144,7 +146,7 @@ export default function TrackChildScreen({ navigation }: Props) {
   const [selectedChild, setSelectedChild] = useState<EnrichedChild | null>(null);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef(null);
   const { width } = Dimensions.get('window');
 
   useEffect(() => {
@@ -271,16 +273,7 @@ export default function TrackChildScreen({ navigation }: Props) {
     if (selectedChild?.driver?.phone) Linking.openURL(`sms:${selectedChild.driver.phone}`);
   };
 
-  const centerOnDriver = () => {
-    if (driverLocation && mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: driverLocation.latitude,
-        longitude: driverLocation.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      }, 500);
-    }
-  };
+  // centerOnDriver removed — OSM map doesn't use mapRef
 
   const DEFAULT_REGION = {
     latitude: driverLocation?.latitude || -25.7479,
@@ -455,7 +448,7 @@ export default function TrackChildScreen({ navigation }: Props) {
                   return (
                     <SpringTouchable
                       key={child.id}
-                      onPress={() => setSelectedChild(child)}
+                      onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setSelectedChild(child); }}
                       style={childChipStyle(isSelected)}
                     >
                       <Ionicons name="person" size={16} color={isSelected ? C.primary : C.textMuted} />
@@ -470,29 +463,16 @@ export default function TrackChildScreen({ navigation }: Props) {
 
         {selectedChild ? (
           <>
-            {/* Live Map */}
+            {/* OSM WebView Map — works on all Android including Huawei/Mobicel */}
             <Animated.View entering={ZoomIn.duration(300)} style={styles.mapContainer}>
-              <MapView
-                ref={mapRef}
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                initialRegion={DEFAULT_REGION}
-                showsUserLocation={true}
-                showsMyLocationButton={true}
-                onMapReady={centerOnDriver}
-              >
-                {driverLocation && (
-                  <Marker
-                    coordinate={{ latitude: driverLocation.latitude, longitude: driverLocation.longitude }}
-                    title={selectedChild.driver?.name || 'Driver'}
-                    description={`Speed: ${Math.round(driverLocation.speed || 0)} km/h`}
-                  >
-                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: C.primary, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: C.surface }}>
-                      <Ionicons name="bus" size={24} color={C.background} />
-                    </View>
-                  </Marker>
-                )}
-              </MapView>
+              <OSMMap
+                latitude={driverLocation?.latitude || DEFAULT_REGION.latitude}
+                longitude={driverLocation?.longitude || DEFAULT_REGION.longitude}
+                driverName={selectedChild.driver?.name}
+                speed={driverLocation?.speed}
+                schoolLat={selectedChild.school?.latitude}
+                schoolLng={selectedChild.school?.longitude}
+              />
               <View style={styles.mapOverlay}>
                 <View style={styles.liveBadge}>
                   <View style={styles.liveDot} />
