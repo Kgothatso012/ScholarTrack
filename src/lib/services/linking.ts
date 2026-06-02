@@ -1,6 +1,7 @@
 // Linking Service
 import { supabase } from './supabase';
 import type { School, Child } from './types';
+import { assertCallerOwns, assertRecordOwner } from './ownership';
 
 export const linkingService = {
   async getSchools() {
@@ -29,6 +30,7 @@ export const linkingService = {
     return data;
   },
   async createLinkRequest(parentId: string, childId: string, childName: string, schoolId: string) {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('child_link_requests')
       .insert({
@@ -44,6 +46,7 @@ export const linkingService = {
     return data;
   },
   async createChild(parentId: string, childData: Partial<Child>) {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('children')
       .insert({ ...childData, parent_id: parentId })
@@ -53,6 +56,9 @@ export const linkingService = {
     return data;
   },
   async createDriverRequest(parentId: string, childId: string, driverId: string, monthlyRate?: number) {
+    await assertCallerOwns(parentId);
+    // The child must belong to this parent.
+    await assertRecordOwner('children', childId, 'parent_id');
     const { data, error } = await supabase
       .from('driver_assignments')
       .insert({

@@ -1,9 +1,11 @@
 // Emergency Service
 import { supabase } from './supabase';
 import type { EmergencyContact } from './types';
+import { assertCallerOwns, assertRecordOwner } from './ownership';
 
 export const emergencyContactService = {
   async getContacts(userId: string) {
+    await assertCallerOwns(userId);
     const { data, error } = await supabase
       .from('emergency_contacts')
       .select('*')
@@ -13,6 +15,7 @@ export const emergencyContactService = {
     return data as EmergencyContact[];
   },
   async addContact(userId: string, contact: Partial<EmergencyContact>) {
+    await assertCallerOwns(userId);
     const { data, error } = await supabase
       .from('emergency_contacts')
       .insert({ ...contact, user_id: userId })
@@ -22,6 +25,7 @@ export const emergencyContactService = {
     return data as EmergencyContact;
   },
   async deleteContact(contactId: string) {
+    await assertRecordOwner('emergency_contacts', contactId, 'user_id');
     const { error } = await supabase
       .from('emergency_contacts')
       .delete()
@@ -29,6 +33,7 @@ export const emergencyContactService = {
     if (error) throw error;
   },
   async createPanicAlert(userId: string, location?: string) {
+    await assertCallerOwns(userId);
     const { data, error } = await supabase
       .from('panic_alerts')
       .insert({ user_id: userId, location, status: 'active' })

@@ -1,6 +1,7 @@
 // Children Service
 import { supabase } from './supabase';
 import { Child, DriverAssignment } from './types';
+import { assertCallerOwns, assertRecordOwner } from './ownership';
 
 type ChildWithRelations = Child & {
   driver_assignments?: DriverAssignment[];
@@ -46,6 +47,7 @@ export const childrenService = {
   },
 
   async addChild(parentId: string, childData: Partial<Child>) {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('children')
       .insert({ ...childData, parent_id: parentId })
@@ -57,6 +59,7 @@ export const childrenService = {
   },
 
   async updateChild(childId: string, updates: Partial<Child>) {
+    await assertRecordOwner('children', childId, 'parent_id');
     const { data, error } = await supabase
       .from('children')
       .update(updates)

@@ -1,13 +1,27 @@
 // PayStack Payment Service for ScholarTrack
-// Handles card payments for South African market
+// All Paystack calls are proxied through a Supabase Edge Function
+// (supabase/functions/paystack-proxy) so the secret key never reaches the client.
 
 import { supabase } from './services/supabase';
 
-const PAYSTACK_SECRET_KEY = process.env.EXPO_PUBLIC_PAYSTACK_SECRET_KEY;
-if (!PAYSTACK_SECRET_KEY) {
-  throw new Error('Missing Paystack configuration. Set EXPO_PUBLIC_PAYSTACK_SECRET_KEY');
+const EDGE_FUNCTION_NAME = 'paystack-proxy';
+
+interface ProxyOptions {
+  action: string;
+  method?: 'GET' | 'POST';
+  body?: Record<string, unknown>;
 }
-const PAYSTACK_BASE_URL = 'https://api.paystack.co';
+
+async function callPaystackProxy<T>({ action, method = 'POST', body }: ProxyOptions): Promise<T> {
+  const { data, error } = await supabase.functions.invoke<T>(EDGE_FUNCTION_NAME, {
+    body: { action, ...body },
+  });
+
+  if (error) {
+    throw new Error(error.message || 'Paystack proxy call failed');
+  }
+  return data as T;
+}
 
 export interface PayStackTransaction {
   id: number;
@@ -29,13 +43,8 @@ export interface InitializePaymentParams {
   amount: number; // Amount in kobo (R100 = 10000 kobo)
   reference?: string;
   callback_url?: string;
-  paymentType?: 'monthly' | 'one-time' | 'deposit';
-  metadata?: {
-    user_id: string;
-    child_id?: string;
-    payment_type: 'monthly' | 'one-time' | 'deposit';
-    description: string;
-  };
+  paymentType?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CardBinInfo {
@@ -43,6 +52,7 @@ export interface CardBinInfo {
   brand: string;
   sub_brand: string;
   country_code: string;
+  country_name: string;
   card_type: string;
   bank: string;
 }
@@ -51,28 +61,20 @@ export const payStackService = {
   // Initialize a payment transaction
   async initializePayment(params: InitializePaymentParams): Promise<{ authorization_url: string; reference: string }> {
     const reference = params.reference || `scholartrack_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/initialize`, {
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: { authorization_url: string; reference: string } }>({
+      action: 'initialize',
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         email: params.email,
         amount: params.amount,
         reference,
         callback_url: params.callback_url,
         metadata: params.metadata,
-      }),
+      },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to initialize payment');
     }
-
     return {
       authorization_url: data.data.authorization_url,
       reference: data.data.reference,
@@ -81,135 +83,92 @@ export const payStackService = {
 
   // Verify a payment transaction
   async verifyTransaction(reference: string): Promise<PayStackTransaction> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/verify/${reference}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-      },
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: PayStackTransaction }>({
+      action: 'verify',
+      method: 'POST',
+      body: { id: reference },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to verify transaction');
     }
-
     return data.data;
   },
 
   // Get card bin information
   async getCardBin(bin: string): Promise<CardBinInfo> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/decision/bin/${bin}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-      },
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: CardBinInfo }>({
+      action: 'bin',
+      method: 'POST',
+      body: { id: bin },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to get bin info');
     }
-
     return data.data;
   },
 
   // Charge a customer (for saved cards)
-  async chargeAuthorization(email: string, amount: number, authorizationCode: string, reference?: string): Promise<PayStackTransaction> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/charge_authorization`, {
+  async chargeAuthorization(
+    email: string,
+    amount: number,
+    authorizationCode: string,
+    reference?: string
+  ): Promise<PayStackTransaction> {
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: PayStackTransaction }>({
+      action: 'charge',
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      body: {
         email,
         amount,
         authorization_code: authorizationCode,
         reference: reference || `scholartrack_${Date.now()}`,
-      }),
+      },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to charge card');
     }
-
     return data.data;
   },
 
   // Create a customer
-  async createCustomer(email: string, firstName?: string, lastName?: string, phone?: string): Promise<{ id: number; customer_code: string }> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/customer`, {
+  async createCustomer(
+    email: string,
+    firstName?: string,
+    lastName?: string,
+    phone?: string
+  ): Promise<{ id: number; customer_code: string }> {
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: { id: number; customer_code: string } }>({
+      action: 'customer',
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        phone,
-      }),
+      body: { email, first_name: firstName, last_name: lastName, phone },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to create customer');
     }
-
-    return {
-      id: data.data.id,
-      customer_code: data.data.customer_code,
-    };
+    return { id: data.data.id, customer_code: data.data.customer_code };
   },
 
   // List customer's transactions
   async getCustomerTransactions(customerEmail: string): Promise<PayStackTransaction[]> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction?customer=${customerEmail}&per_page=50`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-      },
+    const data = await callPaystackProxy<{ status: boolean; message: string; data: PayStackTransaction[] }>({
+      action: 'transactions',
+      method: 'POST',
+      body: { customer: customerEmail, per_page: 50 },
     });
-
-    const data = await response.json();
-
     if (!data.status) {
       throw new Error(data.message || 'Failed to get transactions');
     }
-
     return data.data;
   },
 
   // Refund a transaction
   async refundTransaction(transactionId: number, amount?: number): Promise<{ status: boolean; message: string }> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/refund`, {
+    const data = await callPaystackProxy<{ status: boolean; message: string }>({
+      action: 'refund',
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        transaction: transactionId,
-        ...(amount && { amount }),
-      }),
+      body: { transaction: transactionId, ...(amount && { amount }) },
     });
-
-    const data = await response.json();
-
-    if (!data.status) {
-      throw new Error(data.message || 'Failed to process refund');
-    }
-
-    return {
-      status: data.status,
-      message: data.message,
-    };
+    return { status: data.status, message: data.message };
   },
 };
 
@@ -219,47 +178,53 @@ export const paymentHelper = {
   randToKobo(rand: number): number {
     return Math.round(rand * 100);
   },
-
   // Convert kobo to rand
   koboToRand(kobo: number): number {
     return kobo / 100;
   },
-
   // Format amount for display
   formatRand(amount: number): string {
     return `R${amount.toFixed(2)}`;
   },
-
-  // Generate payment reference
-  generateReference(type: string): string {
-    return `st_${type}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  // Validate email
+  isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   },
-
-  // Save payment record to database
+  // Generate payment reference
+  generateReference(prefix: string = 'scholartrack'): string {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  },
+  // Calculate platform fee
+  calculatePlatformFee(amount: number, feePercentage: number = 0.029): number {
+    return Math.round(amount * feePercentage);
+  },
+  // Check if amount is valid
+  isValidAmount(amount: number): boolean {
+    return amount > 0 && Number.isFinite(amount);
+  },
+  // Persist a payment record to Supabase.
+  // Statuses: 'paid' | 'failed' | 'pending'.
   async savePaymentRecord(
     userId: string,
     amount: number,
     reference: string,
-    status: 'pending' | 'paid' | 'failed',
+    status: 'paid' | 'failed' | 'pending',
     paymentType: string,
     childId?: string
-  ) {
-    const { data, error } = await supabase
-      .from('payments')
-      .insert({
-        parent_id: userId,
-        amount,
-        reference,
-        status,
-        child_id: childId || null,
-        payment_type: paymentType,
-        month: new Date().toISOString().slice(0, 7), // YYYY-MM format
-        paid_at: status === 'paid' ? new Date().toISOString() : null,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+  ): Promise<void> {
+    const { error } = await supabase.from('payments').insert({
+      user_id: userId,
+      amount,
+      reference,
+      status,
+      payment_type: paymentType,
+      child_id: childId ?? null,
+    });
+    if (error) {
+      // Don't throw to caller; payment verification already happened.
+      // Surface as console warning so the issue is visible.
+      // eslint-disable-next-line no-console
+      console.warn('savePaymentRecord failed:', error.message);
+    }
   },
 };

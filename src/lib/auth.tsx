@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, authService, Profile, UserRole } from './api';
+import { cacheService } from './cache';
 
 interface AuthUser {
   id: string;
@@ -71,7 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             phone: profile.phone
           });
           await AsyncStorage.setItem(USER_ID_KEY, profile.id);
+          cacheService.setActiveUser(profile.id);
         }
+      } else {
+        // No session — make sure cache is bound to nobody
+        cacheService.setActiveUser(null);
       }
     } catch (error) {
       console.error('Auth init error:', error);
@@ -145,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           phone
         });
         await AsyncStorage.setItem(USER_ID_KEY, data.user.id);
+        cacheService.setActiveUser(data.user.id);
       }
       
       return { success: true };
@@ -159,6 +165,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      // Purge ALL cached data on sign-out so the next user can't
+      // inherit the previous user's data via AsyncStorage.
+      await cacheService.clearAll();
+      cacheService.setActiveUser(null);
       await AsyncStorage.removeItem(USER_ID_KEY);
       setUser(null);
     } catch (error) {

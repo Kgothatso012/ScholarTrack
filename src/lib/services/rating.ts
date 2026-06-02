@@ -1,5 +1,6 @@
 // Driver Rating Service
 import { supabase } from './supabase';
+import { assertCallerOwns } from './ownership';
 
 export interface DriverReview {
   id: string;
@@ -28,6 +29,7 @@ export const ratingService = {
     comment: string,
     month: string
   ): Promise<DriverReview> {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('reviews')
       .insert({
@@ -57,6 +59,7 @@ export const ratingService = {
   },
 
   async getParentReviews(parentId: string): Promise<DriverReview[]> {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('reviews')
       .select('*')
@@ -104,6 +107,7 @@ export const ratingService = {
     driverId: string,
     month: string
   ): Promise<boolean> {
+    await assertCallerOwns(parentId);
     const { data, error } = await supabase
       .from('reviews')
       .select('id')

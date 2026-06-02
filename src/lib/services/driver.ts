@@ -1,6 +1,7 @@
 // Driver Service
 import { supabase } from './supabase';
 import { Driver } from './types';
+import { assertCallerOwns, assertRecordOwner } from './ownership';
 
 export const driverService = {
   async getDrivers(availableOnly = false) {
@@ -30,6 +31,7 @@ export const driverService = {
   },
 
   async getDriverByUserId(userId: string): Promise<Driver | null> {
+    await assertCallerOwns(userId);
     const { data, error } = await supabase
       .from('drivers')
       .select('*')
@@ -44,6 +46,16 @@ export const driverService = {
   },
 
   async updateAvailability(driverId: string, isAvailable: boolean) {
+    // Only the driver themselves can toggle their own availability.
+    // Resolve user_id from the driver row first.
+    const { data: driverRow, error: lookupErr } = await supabase
+      .from('drivers')
+      .select('user_id')
+      .eq('id', driverId)
+      .single();
+    if (lookupErr) throw lookupErr;
+    await assertCallerOwns(driverRow.user_id);
+
     const { data, error } = await supabase
       .from('drivers')
       .update({ is_available: isAvailable })
@@ -67,6 +79,15 @@ export const driverService = {
   },
 
   async updateLocation(driverId: string, latitude: number, longitude: number) {
+    // Only the driver themselves may push their own location.
+    const { data: driverRow, error: lookupErr } = await supabase
+      .from('drivers')
+      .select('user_id')
+      .eq('id', driverId)
+      .single();
+    if (lookupErr) throw lookupErr;
+    await assertCallerOwns(driverRow.user_id);
+
     const { data, error } = await supabase
       .from('drivers')
       .update({
