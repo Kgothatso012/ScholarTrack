@@ -33,7 +33,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { cacheService } from '../../lib/cache';
 import { ThemeColors } from '../../context/ThemeContext';
 
-import { Spacer, Badge, EmptyState } from '../../ui-plugin/components';
+import { Spacer, Badge, EmptyState, SpringTouchable } from '../../ui-plugin/components';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -42,8 +42,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const CACHE_TTL = 2 * 60 * 1000;
-
-const SPRING = { damping: 15, stiffness: 150 };
 
 // ─── Theme (dark mode) ────────────────────────────────────────────────────────
 const { colors: C, spacing: S, borderRadius: BR, typography: TY } = getTheme('dark');
@@ -64,33 +62,6 @@ interface PaymentRecord {
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; openDrawer?: () => void };
 }
-
-// ─── Spring-press wrapper ──────────────────────────────────────────────────────
-const SpringTouchable = ({
-  children,
-  onPress,
-  style,
-}: {
-  children: React.ReactNode;
-  onPress: () => void;
-  style?: object;
-}) => {
-  const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
-  }));
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      onPressIn={() => { pressed.value = 1; }}
-      onPressOut={() => { pressed.value = 0; }}
-      activeOpacity={1}
-      style={style}
-    >
-      <Animated.View style={animStyle}>{children}</Animated.View>
-    </TouchableOpacity>
-  );
-};
 
 // ─── Breathing dot (live indicator) ───────────────────────────────────────────
 const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
@@ -535,7 +506,7 @@ const ParentDashboard = ({ navigation }: Props) => {
     heroText: { flex: 1 },
     heroTag: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
     heroTagText: { ...TY.caption, color: C.textMuted },
-    heroTitle: { ...TY.h3, color: C.text, lineHeight: 22 },
+    heroTitle: { ...TY.displaySmall, color: C.text, lineHeight: 28 },
     heroSub: { ...TY.bodySmall, color: C.textMuted, marginTop: 2 },
     heroTrackBtn: {
       backgroundColor: C.success + '33',
@@ -606,7 +577,7 @@ const ParentDashboard = ({ navigation }: Props) => {
       width: '100%',
       alignItems: 'center',
     },
-    modalTitle: { ...TY.h2, color: C.text, marginBottom: 4 },
+    modalTitle: { ...TY.displaySmall, color: C.text, marginBottom: 4 },
     modalSub: { ...TY.bodySmall, color: C.textMuted, marginBottom: S.xl },
     modalStars: { flexDirection: 'row', gap: S.sm, marginBottom: S.xl },
     modalStarBtn: { padding: 4 },

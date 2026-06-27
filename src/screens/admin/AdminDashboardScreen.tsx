@@ -14,7 +14,7 @@ import Animated, {
 
 import { Spacer, Badge, Skeleton } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, typography } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -155,7 +155,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     headerGlow1: { position: 'absolute', top: -50, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,184,28,.08)' },
     headerGlow2: { position: 'absolute', bottom: -40, left: -20, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(0,119,73,.2)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
     headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', marginLeft: 8 },
     tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,.08)' },

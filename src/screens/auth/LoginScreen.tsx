@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SpringTouchable } from '../../ui-plugin/components';
 import { spacing, getTheme } from '../../ui-plugin/theme';
 
 interface Props {
@@ -56,8 +56,6 @@ const C = {
   dangerLight: t.colors.errorLight,
 };
 
-const SPRING = { damping: 15, stiffness: 150 };
-
 // Breathing dot
 const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
@@ -72,17 +70,6 @@ const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: 
       <Animated.View style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color }, ringStyle]} />
       <View style={{ width: size * 0.7, height: size * 0.7, borderRadius: size * 0.35, backgroundColor: color }} />
     </View>
-  );
-};
-
-// Spring press wrapper
-const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
-  const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }] }));
-  return (
-    <TouchableOpacity onPress={onPress} onPressIn={() => { pressed.value = 1; }} onPressOut={() => { pressed.value = 0; }} activeOpacity={1} style={style}>
-      <Animated.View style={animStyle}>{children}</Animated.View>
-    </TouchableOpacity>
   );
 };
 

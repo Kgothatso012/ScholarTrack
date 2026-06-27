@@ -14,3 +14,4 @@ export { SearchBar } from './SearchBar';
 export { Pagination } from './Pagination';
 export { Skeleton, SkeletonListItem, SkeletonStatCard, DashboardSkeleton, SkeletonCard, SkeletonMap, SkeletonTrackingCard } from './Skeleton';
 export { Calendar } from './Calendar';
+export { SpringTouchable } from './SpringTouchable';

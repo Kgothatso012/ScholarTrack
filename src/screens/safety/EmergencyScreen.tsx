@@ -11,7 +11,7 @@ import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { RSA_EMERGENCY } from '../../constants/app';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, typography } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -110,7 +110,7 @@ const EmergencyScreen = () => {
     headerGlass: { backgroundColor: C.surface, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, padding: 20, paddingTop: insets.top + 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,184,28,0.15)', position: 'relative', overflow: 'hidden' },
     headerGlow: { position: 'absolute', top: -60, right: -40, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(224,60,49,0.1)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
-    headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 4 },
     sosHero: { marginHorizontal: 16, marginTop: 20, position: 'relative' },
     sosGlass: { ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },

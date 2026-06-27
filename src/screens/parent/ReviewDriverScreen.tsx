@@ -30,7 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { ratingService } from '../../lib/services';
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SpringTouchable } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -38,36 +38,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const SPRING = { damping: 15, stiffness: 150 };
-
 // Theme token aliases for this screen
 const C = getTheme('dark').colors;
-
-const SpringTouchable = ({
-  children,
-  onPress,
-  style,
-}: {
-  children: React.ReactNode;
-  onPress: () => void;
-  style?: object;
-}) => {
-  const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
-  }));
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      onPressIn={() => { pressed.value = 1; }}
-      onPressOut={() => { pressed.value = 0; }}
-      activeOpacity={1}
-      style={style}
-    >
-      <Animated.View style={animStyle}>{children}</Animated.View>
-    </TouchableOpacity>
-  );
-};
 
 const glassCard = cards.glassAmber;
 
@@ -193,7 +165,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       borderBottomWidth: 4,
       borderBottomColor: C.primaryLight,
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displaySmall, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     driverCard: {
       ...glassCard,

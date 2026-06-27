@@ -35,7 +35,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { childrenService } from '../../lib/services/children';
 import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, typography } from '../../ui-plugin/theme';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -497,7 +497,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       position: 'relative',
       zIndex: 1,
     },
-    ltTitle: { fontFamily: 'Syne_800ExtraBold', fontSize: 26, color: C.text, letterSpacing: -0.5 },
+    ltTitle: { ...typography.displayMedium, color: C.text },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 1.5, textTransform: 'uppercase' as const },
     ltBack: {
       width: 32,

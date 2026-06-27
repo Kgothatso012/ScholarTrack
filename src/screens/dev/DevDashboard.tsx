@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
-import { Card, Button, Spacer } from '../../ui-plugin/components';
+import { Card, Button, Spacer, SpringTouchable } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -20,31 +20,9 @@ interface Props {
 
 const { colors: C } = getTheme('dark');
 
-const SPRING = { damping: 15, stiffness: 150 };
-
 const glassCard = cards.glassCyan;
 
 const glassCardAmber = cards.glassAmber;
-
-const SpringTouchable = ({
-  children, onPress, style,
-}: { children: React.ReactNode; onPress: () => void; style?: object }) => {
-  const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }],
-  }));
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      onPressIn={() => { pressed.value = 1; }}
-      onPressOut={() => { pressed.value = 0; }}
-      activeOpacity={1}
-      style={style}
-    >
-      <Animated.View style={animStyle}>{children}</Animated.View>
-    </TouchableOpacity>
-  );
-};
 
 const DevDashboard = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();

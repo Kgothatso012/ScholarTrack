@@ -12,8 +12,8 @@ import { paymentService } from '../../lib/services/payment';
 import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
 import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
-import { Spacer, Badge, Skeleton } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, Badge, Skeleton, SpringTouchable } from '../../ui-plugin/components';
+import { getTheme, cards, typography } from '../../ui-plugin/theme';
 
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -23,24 +23,11 @@ const { colors: C, spacing: S } = getTheme('dark');
 
 const glass = cards.glassAmber;
 
-const SPRING = { damping: 15, stiffness: 150 };
-
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
 }
 
 type TabKey = 'overview' | 'trips' | 'requests' | 'earnings';
-
-// Spring press wrapper
-const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
-  const pressed = useSharedValue(0);
-  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: withSpring(1 - pressed.value * 0.04, SPRING) }] }));
-  return (
-    <TouchableOpacity onPress={onPress} onPressIn={() => { pressed.value = 1; }} onPressOut={() => { pressed.value = 0; }} activeOpacity={1} style={style}>
-      <Animated.View style={animStyle}>{children}</Animated.View>
-    </TouchableOpacity>
-  );
-};
 
 const DriverAppScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
@@ -148,7 +135,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     ltHeaderBg: { position: 'absolute', top: -50, right: -30, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(0,230,118,.1)' },
     ltHeaderBg2: { position: 'absolute', bottom: -40, left: -20, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(0,0,0,.15)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
+    ltTitle: { ...typography.displayMedium, color: C.text },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
     headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
