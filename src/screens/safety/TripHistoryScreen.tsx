@@ -1,10 +1,10 @@
 // Trip History Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -134,9 +134,8 @@ export default function TripHistoryScreen() {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Trip History</Text><Text style={s.ltSub}>All trips</Text></View></View>
-        <View style={s.loadingContainer}>
-          <ActivityIndicator size="large" color={C.accent} />
-          <Text style={s.loadingText}>Loading trips...</Text>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
         </View>
       </View>
     );

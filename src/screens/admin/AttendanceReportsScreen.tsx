@@ -1,10 +1,10 @@
 // Attendance Reports Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, Child } from '../../lib/api';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
@@ -186,7 +186,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={C.text} /></TouchableOpacity>
           <Text style={s.ltTitle}>Attendance</Text><View style={{ width: 36 }} />
         </View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.info} /><Text style={{ color: C.textMuted, marginTop: 10 }}>Loading...</Text></View>
+        <View style={{ flex: 1 }}><DashboardSkeleton /></View>
       </View>
     );
   }

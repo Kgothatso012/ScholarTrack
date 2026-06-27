@@ -9,7 +9,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
   Alert,
   Platform,
   UIManager,
@@ -30,7 +29,7 @@ import { childrenService } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -244,9 +243,8 @@ export default function ChildrenScreen({ navigation }: Props) {
           <Text style={styles.headerTitle}>My Children</Text>
           <Text style={styles.headerSub}>Manage your children</Text>
         </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={C.primary} />
-          <Text style={[styles.emptyText, { marginTop: S.md }]}>Loading children...</Text>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
         </View>
       </View>
     );

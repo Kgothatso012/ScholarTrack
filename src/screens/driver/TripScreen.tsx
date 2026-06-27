@@ -1,12 +1,12 @@
 // Trip Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -147,7 +147,9 @@ const TripScreen = ({ navigation }: Props) => {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.cyan} /><Text style={s.loadingText}>Loading trips...</Text></View>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
+        </View>
       </View>
     );
   }

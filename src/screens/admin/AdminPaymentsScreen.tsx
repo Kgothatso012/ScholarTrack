@@ -1,10 +1,10 @@
 // Admin Payments Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
@@ -131,9 +131,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Payments</Text><Text style={s.ltSub}>Manage all transactions</Text></View></View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={C.success} />
-        </View>
+        <View style={{ flex: 1 }}><DashboardSkeleton /></View>
       </View>
     );
   }

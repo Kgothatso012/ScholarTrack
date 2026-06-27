@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SkeletonCard } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -488,7 +488,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Driver Compliance</Text></View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.accent} /><Text style={s.loadingText}>Loading compliance status...</Text></View>
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
       </View>
     );
   }

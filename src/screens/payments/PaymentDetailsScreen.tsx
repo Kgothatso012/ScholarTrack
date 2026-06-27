@@ -9,7 +9,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
   Alert,
   Platform,
   UIManager,
@@ -29,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import PaymentModal from '../../components/PaymentModal';
 
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -213,8 +212,9 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
           <Text style={styles.headerTitle}>Payment Details</Text>
           <Text style={styles.headerSubtext}>{userEmail}</Text>
         </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={C.accent} />
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
         </View>
       </View>
     );

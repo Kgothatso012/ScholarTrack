@@ -1,10 +1,10 @@
 // Enhanced Reports Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Share, Platform, RefreshControl, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Share, Platform, RefreshControl, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -246,7 +246,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
           <Text style={s.ltTitle}>Reports</Text>
           <TouchableOpacity style={s.exportBtn} onPress={() => setShowExportModal(true)}><Ionicons name="download" size={18} color={C.accent} /></TouchableOpacity>
         </View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.accent} /><Text style={{ color: C.textMuted, marginTop: 10 }}>Loading reports...</Text></View>
+        <View style={{ flex: 1 }}><DashboardSkeleton /></View>
       </View>
     );
   }

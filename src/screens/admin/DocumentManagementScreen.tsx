@@ -1,11 +1,11 @@
 // Document Management Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, ActivityIndicator, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, FlatList, Image, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { documentService, DriverDocument, ParentDocument } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const glass = cards.glassAmber;
@@ -279,7 +279,9 @@ export default function DocumentManagementScreen({ navigation }: Props) {
 
       {/* Document List */}
       {loading ? (
-        <View style={s.loading}><ActivityIndicator size="large" color={C.cyan} /></View>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
+        </View>
       ) : (
         <FlatList
           data={activeDocs as (DriverDocument | ParentDocument)[]}

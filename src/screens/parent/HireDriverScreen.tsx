@@ -31,7 +31,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { driverService, ratingService, Driver, Child, linkingService } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
-import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, Input, SkeletonListItem } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -282,9 +282,8 @@ const HireDriverScreen = ({ navigation }: Props) => {
           <Text style={styles.headerTitle}>Hire a Driver</Text>
           <Text style={styles.headerSubtext}>Find vetted drivers near you</Text>
         </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={C.primary} />
-          <Text style={[styles.emptyText, { marginTop: spacing.md }]}>Finding available drivers...</Text>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
         </View>
       </View>
     );

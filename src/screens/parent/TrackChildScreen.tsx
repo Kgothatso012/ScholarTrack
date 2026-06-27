@@ -10,7 +10,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
-  ActivityIndicator,
   Dimensions,
   Platform,
   UIManager,
@@ -36,7 +35,7 @@ import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
 
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonMap } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -406,9 +405,8 @@ export default function TrackChildScreen({ navigation }: Props) {
           <Text style={styles.headerTitle}>Track Child</Text>
           <Text style={styles.headerSubtext}>Real-time location tracking</Text>
         </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={C.primary} />
-          <Text style={{ ...typography.body, color: C.textMuted, marginTop: S.md }}>Loading...</Text>
+        <View style={{ flex: 1 }}>
+          <SkeletonMap />
         </View>
       </View>
     );

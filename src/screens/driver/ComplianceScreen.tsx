@@ -1,12 +1,12 @@
 // ScholarTrack Compliance Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, SkeletonCard } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -191,7 +191,10 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View></View>
-        <View style={s.loadingContainer}><ActivityIndicator size="large" color={C.cyan} /><Text style={s.loadingText}>Loading compliance...</Text></View>
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
       </View>
     );
   }

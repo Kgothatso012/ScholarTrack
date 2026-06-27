@@ -1,10 +1,11 @@
 // Route Management Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshControl, Modal, TextInput, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshControl, Modal, TextInput, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { routeService, driverService, linkingService, Route, Driver } from '../../lib/api';
 import { getTheme, cards } from '../../ui-plugin/theme';
+import { SkeletonListItem } from '../../ui-plugin/components';
 
 const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
 
@@ -146,7 +147,9 @@ export default function RouteManagementScreen({ navigation }: Props) {
           <Text style={s.ltTitle}>Routes</Text>
           <TouchableOpacity style={s.addBtn} onPress={() => setShowModal(true)}><Ionicons name="add" size={20} color={C.accent} /></TouchableOpacity>
         </View></View>
-        <View style={s.loading}><ActivityIndicator size="large" color={C.accent} /></View>
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
+        </View>
       </View>
     );
   }

@@ -12,7 +12,6 @@ import {
   ScrollView,
   RefreshControl,
   Modal,
-  ActivityIndicator,
   Platform,
   UIManager,
 } from 'react-native';
@@ -31,7 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { linkingService, Child, School } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
-import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Avatar, Badge, Input, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -360,8 +359,9 @@ export default function LinkChildScreen({ navigation }: Props) {
       </View>
 
       {loading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" color={C.primary} />
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
         </View>
       ) : children.length === 0 ? (
         <View style={styles.empty}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
@@ -7,6 +7,7 @@ import { supabase, Profile, Driver, Child } from '../lib/api';
 import { ThemeColors } from '../context/ThemeContext';
 
 import { getTheme } from '../ui-plugin/theme';
+import { SkeletonCard } from '../ui-plugin/components';
 
 const { colors: C } = getTheme('dark');
 
@@ -231,7 +232,10 @@ export default function ChatScreen({ navigation }: Props) {
   if (loading && !selectedChat) {
     return (
       <View style={[styles(colors).container, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
       </View>
     );
   }

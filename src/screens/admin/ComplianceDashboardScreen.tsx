@@ -1,10 +1,10 @@
 // Compliance Dashboard Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -226,7 +226,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
           <Text style={s.ltTitle}>Compliance</Text>
           <View style={{ width: 36 }} />
         </View></View>
-        <View style={s.loadingWrap}><ActivityIndicator size="large" color={C.warning} /><Text style={{ color: C.textMuted, fontSize: 14, marginTop: 10 }}>Loading compliance data...</Text></View>
+        <View style={{ flex: 1 }}><DashboardSkeleton /></View>
       </View>
     );
   }

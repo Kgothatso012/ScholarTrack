@@ -1,6 +1,6 @@
 // Driver Trip Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -8,6 +8,7 @@ import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../.
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
 import { notificationService } from '../../services/NotificationService';
 import { getTheme, cards } from '../../ui-plugin/theme';
+import { SkeletonListItem } from '../../ui-plugin/components';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -240,8 +241,8 @@ export default function DriverTripScreen({ navigation }: Props) {
       <View style={s.container}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>My Trips</Text><Text style={s.ltSub}>Loading...</Text></View></View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={C.cyan} />
+        <View style={{ flex: 1, padding: 16 }}>
+          {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
         </View>
       </View>
     );

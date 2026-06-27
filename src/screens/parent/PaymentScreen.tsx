@@ -9,7 +9,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
   Alert,
   Platform,
   UIManager,
@@ -30,7 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { paymentService, Payment } from '../../lib/api';
 
-import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -209,8 +208,9 @@ const PaymentScreen = ({ navigation }: Props) => {
           <Text style={styles.headerTitle}>Payments</Text>
           <Text style={styles.headerSubtext}>Manage your subscriptions</Text>
         </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={C.primary} />
+        <View style={{ flex: 1, padding: 16 }}>
+          <SkeletonCard />
+          <SkeletonCard />
         </View>
       </View>
     );
