@@ -30,7 +30,7 @@ import { supabase } from '../../lib/supabase';
 import PaymentModal from '../../components/PaymentModal';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -65,11 +65,7 @@ const SpringTouchable = ({
     </TouchableOpacity>
   );
 };
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 interface Payment {
   id: string;
   created_at?: string;
@@ -103,7 +99,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) setUserEmail(user.email || '');
     } catch (error) {
-      console.error('Error loading user:', error);
+      // error handled silently
     }
   };
   const loadPaymentHistory = async () => {
@@ -117,9 +113,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
         .order('created_at', { ascending: false })
         .limit(10);
       setPaymentHistory(payments || []);
-    } catch (error) {
-      console.error('Error loading payments:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -157,22 +151,22 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     section: { padding: spacing.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: spacing.md },
     balanceCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: spacing.xl,
       alignItems: 'center',
-      ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,255,255,.12)',
     },
     balanceLabel: { ...typography.label, color: C.textMuted },
     balanceAmount: { ...typography.displayLarge, color: C.accent, marginVertical: spacing.sm },
     methodCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: spacing.md,
       marginBottom: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',
-      ...glassCard,
     },
     methodIcon: {
       width: 40,
@@ -186,13 +180,13 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     methodName: { ...typography.label, color: C.text },
     methodDetail: { ...typography.bodySmall, color: C.textMuted },
     paymentCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: spacing.md,
       marginBottom: spacing.sm,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      ...glassCard,
     },
     paymentInfo: { flex: 1 },
     paymentDesc: { ...typography.label, color: C.text },

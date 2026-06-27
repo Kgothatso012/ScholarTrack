@@ -7,18 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
 // Glassmorphism helper
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface UploadedDocument {
   uri: string;
@@ -75,9 +69,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
         }));
         updateComplianceStatus(compliance.documents || []);
       }
-    } catch (error) {
-      console.error('Error checking compliance:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   }, []);

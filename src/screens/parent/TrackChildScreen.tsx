@@ -37,7 +37,7 @@ import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -47,11 +47,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const SPRING = { damping: 15, stiffness: 150 };
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -234,7 +230,7 @@ export default function TrackChildScreen({ navigation }: Props) {
               }
             }
           } catch (e) {
-            console.error('Error loading driver for child:', e);
+            // error handled silently
           }
           return { ...child, name: child.full_name, home_address: child.pickup_address || '' } as EnrichedChild;
         })
@@ -243,9 +239,7 @@ export default function TrackChildScreen({ navigation }: Props) {
       if (enrichedChildren?.length > 0 && !selectedChild) {
         setSelectedChild(enrichedChildren[0]);
       }
-    } catch (error) {
-      console.error('Error loading children:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -255,7 +249,7 @@ export default function TrackChildScreen({ navigation }: Props) {
       const location = await driverTrackingService.getDriverLocation(driverId);
       if (location) setDriverLocation(location);
     } catch (error) {
-      console.error('Error loading driver location:', error);
+      // error handled silently
     }
   };
 
@@ -306,10 +300,10 @@ export default function TrackChildScreen({ navigation }: Props) {
     placeholderTitle: { ...typography.h3, color: C.text, marginBottom: S.sm },
     placeholderText: { ...typography.body, color: C.textMuted, textAlign: 'center' },
     infoCard: {
+      ...glassCard,
       borderRadius: 20,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
@@ -340,11 +334,11 @@ export default function TrackChildScreen({ navigation }: Props) {
     },
     liveText: { ...typography.labelSmall, color: C.background, fontWeight: '700' },
     driverCard: {
+      ...glassCard,
       marginHorizontal: S.lg,
       borderRadius: 20,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
@@ -376,11 +370,11 @@ export default function TrackChildScreen({ navigation }: Props) {
     actionBtn: { alignItems: 'center' },
     actionText: { ...typography.labelSmall, color: C.primary, marginTop: S.xs },
     statusCard: {
+      ...glassCard,
       marginHorizontal: S.lg,
       borderRadius: 20,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
@@ -391,12 +385,12 @@ export default function TrackChildScreen({ navigation }: Props) {
     etaText: { ...typography.h4, color: C.accent },
     etaLabel: { ...typography.bodySmall, color: C.textMuted },
     quickActions: {
+      ...glassCard,
       marginHorizontal: S.lg,
       flexDirection: 'row',
       borderRadius: 20,
       padding: S.md,
       justifyContent: 'space-around',
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',

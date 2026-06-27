@@ -6,17 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface UserProfile {
   name: string;

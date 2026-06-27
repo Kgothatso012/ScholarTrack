@@ -31,7 +31,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { ratingService } from '../../lib/services';
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -69,11 +69,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -131,7 +127,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       );
       setCanReview(!thisMonthReview);
     } catch (error) {
-      console.error('Error loading data:', error);
+      // error handled silently
     }
   };
 
@@ -162,9 +158,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       setComment('');
       setCanReview(false);
       loadData();
-    } catch (error) {
-      console.error('Error submitting review:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -202,11 +196,11 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     headerTitle: { ...typography.h2, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     driverCard: {
+      ...glassCard,
       margin: spacing.lg,
       padding: spacing.xl,
       borderRadius: 20,
       alignItems: 'center',
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',
@@ -227,11 +221,11 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     driverSchool: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     driverRate: { ...typography.h4, color: C.primaryLight, marginTop: spacing.xs },
     ratingSection: {
+      ...glassCard,
       margin: spacing.lg,
       padding: spacing.xl,
       borderRadius: borderRadius.lg,
       alignItems: 'center',
-      ...glassCard,
     },
     ratingTitle: { ...typography.h4, color: C.text, marginBottom: spacing.lg },
     stars: { flexDirection: 'row', marginBottom: spacing.sm },
@@ -253,11 +247,11 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       color: C.error,
     },
     feedbackSection: {
+      ...glassCard,
       margin: spacing.lg,
       marginTop: 0,
       padding: spacing.lg,
       borderRadius: borderRadius.lg,
-      ...glassCard,
     },
     feedbackTitle: { ...typography.h4, color: C.text, marginBottom: spacing.md },
     feedbackInput: {
@@ -281,19 +275,19 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     submitBtnDisabled: { opacity: 0.6 },
     submitBtnText: { ...typography.button, color: C.background, fontWeight: '700' },
     completedSection: {
+      ...glassCard,
       margin: spacing.lg,
       padding: spacing.xl,
       borderRadius: borderRadius.lg,
       alignItems: 'center',
-      ...glassCard,
     },
     completedTitle: { ...typography.h3, color: C.text, marginTop: spacing.md },
     completedText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: spacing.sm },
     historySection: {
+      ...glassCard,
       margin: spacing.lg,
       padding: spacing.lg,
       borderRadius: borderRadius.lg,
-      ...glassCard,
     },
     historyTitle: { ...typography.h4, color: C.text, marginBottom: spacing.md },
     emptyHistory: { alignItems: 'center', paddingVertical: spacing.xl },
@@ -320,13 +314,13 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     },
     flaggedText: { ...typography.caption, color: C.error, marginLeft: 4 },
     infoSection: {
+      ...glassCard,
       margin: spacing.lg,
       marginTop: 0,
       padding: spacing.md,
       borderRadius: borderRadius.lg,
       flexDirection: 'row',
       alignItems: 'flex-start',
-      ...glassCard,
     },
     infoText: {
       flex: 1,

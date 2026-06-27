@@ -168,7 +168,6 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         setStep('otp');
       }
     } catch (error) {
-      console.error('OTP send error:', error);
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to send verification code.');
     } finally {
       setLoading(false);
@@ -218,7 +217,6 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
       ]);
     } catch (error) {
-      console.error('Registration error:', error);
       const errorMsg = error instanceof Error ? error.message : (error as { error_description?: string })?.error_description || '';
       if (errorMsg.toLowerCase().includes('already registered') ||
           errorMsg.toLowerCase().includes('already exists') ||

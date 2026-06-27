@@ -6,17 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface EarningsData {
   thisMonth: number;
@@ -66,9 +60,7 @@ const EarningsScreen = ({ navigation }: Props) => {
       const available = allPayments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
 
       setEarnings({ thisMonth, pending, available, totalTrips: allPayments.length, rating: 4.8 });
-    } catch (error) {
-      console.error('Error fetching earnings:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   }, []);

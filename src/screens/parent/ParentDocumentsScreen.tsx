@@ -29,7 +29,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -85,11 +85,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 const documentTypes = [
   { id: 'id_card', label: 'ID Document', icon: 'card', required: true },
@@ -131,9 +127,7 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
         .select('*')
         .eq('parent_id', user.id);
       setUploadedDocs(docData || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -177,10 +171,10 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
     headerTitle: { ...typography.h2, color: C.text },
     headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     progressCard: {
+      ...glassCard,
       margin: S.lg,
       padding: S.lg,
       borderRadius: borderRadius.lg,
-      ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',
@@ -197,12 +191,12 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
     section: { padding: S.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     docCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: S.lg,
       marginBottom: S.md,
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
-      ...glassCard,
     },
     docIcon: undefined as any,
     docInfo: { flex: 1, marginLeft: S.md },

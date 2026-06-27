@@ -6,15 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import FleetOSMMap from '../../components/FleetOSMMap';
 import { supabase } from '../../lib/supabase';
 import { Spacer, Badge } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -85,13 +79,13 @@ export default function FleetTrackingScreen({ navigation }: Props) {
             if (tracking && tracking.length > 0) {
               return { driver_id: driver.id, driver_name: driver.full_name || 'Unknown', vehicle: driver.vehicle_type || 'Vehicle', latitude: tracking[0].latitude || 0, longitude: tracking[0].longitude || 0, speed: tracking[0].speed || 0, status: tracking[0].status || driver.status || 'active', last_updated: tracking[0].last_updated };
             }
-          } catch (e) { console.error('Error loading tracking:', e); }
+          } catch (e) { /* silent */ }
           return { driver_id: driver.id, driver_name: driver.full_name || 'Unknown', vehicle: driver.vehicle_type || 'Vehicle', latitude: 0, longitude: 0, speed: 0, status: driver.status || 'active', last_updated: new Date().toISOString() };
         })
       );
 
       setDriverLocations(driversWithLocations.filter(d => d.latitude !== 0 && d.longitude !== 0));
-    } catch (error) { console.error('Error loading fleet:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); }
   };
 

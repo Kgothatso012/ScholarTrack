@@ -1,7 +1,7 @@
 // Driver App Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, LayoutAnimation, UIManager, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeIn } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,8 +12,8 @@ import { paymentService } from '../../lib/services/payment';
 import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
 import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
-import { Spacer, Badge } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { Spacer, Badge, Skeleton } from '../../ui-plugin/components';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -21,13 +21,7 @@ if (UIManager.setLayoutAnimationEnabledExperimental) {
 
 const { colors: C, spacing: S } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 const SPRING = { damping: 15, stiffness: 150 };
 
@@ -36,14 +30,6 @@ interface Props {
 }
 
 type TabKey = 'overview' | 'trips' | 'requests' | 'earnings';
-
-// Skeleton shimmer component
-const SkeletonRect = ({ w, h, radius = 20 }: { w: number | string; h: number; radius?: number }) => {
-  const opacity = useSharedValue(0.3);
-  useEffect(() => { opacity.value = withRepeat(withSequence(withTiming(0.6, { duration: 900, easing: Easing.inOut(Easing.ease) }), withTiming(0.3, { duration: 900, easing: Easing.inOut(Easing.ease) })), -1, true); }, []);
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  return <Animated.View style={[{ width: w as number, height: h, borderRadius: radius, backgroundColor: 'rgba(255,255,255,.08)' }, style]} />;
-};
 
 // Spring press wrapper
 const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
@@ -110,7 +96,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
       try { const requests = await linkingService.getDriverRequestsForDriver(user.id); setPendingRequests(requests || []); } catch { setPendingRequests([]); }
       finally { setLoadingRequests(false); }
 
-    } catch (err: unknown) { console.error('Error loading driver data:', err); setError(err instanceof Error ? err.message : 'Failed to load dashboard'); }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Failed to load dashboard'); }
     finally { setLoading(false); setRefreshing(false); }
   };
 
@@ -248,15 +234,15 @@ const DriverAppScreen = ({ navigation }: Props) => {
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
-            <View><SkeletonRect w={160} h={24} /><SkeletonRect w={120} h={14} /></View>
-            <View style={{ flexDirection: 'row', gap: 8 }}><SkeletonRect w={36} h={36} radius={12} /><SkeletonRect w={36} h={36} radius={12} /></View>
+            <View><Skeleton width={160} height={24} /><Skeleton width={120} height={14} /></View>
+            <View style={{ flexDirection: 'row', gap: 8 }}><Skeleton width={36} height={36} borderRadius={12} /><Skeleton width={36} height={36} borderRadius={12} /></View>
           </View>
         </View>
-        <View style={{ marginHorizontal: 16, marginTop: 12 }}><SkeletonRect w="100%" h={44} radius={16} /></View>
+        <View style={{ marginHorizontal: 16, marginTop: 12 }}><Skeleton width="100%" height={44} borderRadius={16} /></View>
         <View style={s.skeletonSection}>
-          <SkeletonRect w={80} h={10} />
+          <Skeleton width={80} height={10} />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 16, gap: 8 }}>
-            {[1,2,3,4].map(i => <SkeletonRect key={i} w={120} h={90} />)}
+            {[1,2,3,4].map(i => <Skeleton key={i} width={120} height={90} />)}
           </ScrollView>
         </View>
       </View>

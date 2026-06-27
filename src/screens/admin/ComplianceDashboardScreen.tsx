@@ -5,15 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1, borderColor: 'rgba(255,183,0,.10)',
-  borderRadius: 20, overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface ComplianceStats {
   totalDrivers: number;
@@ -144,7 +140,6 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       setStats({ totalDrivers: driverList.length, compliant, expiringSoon, expired, pendingReview });
 
     } catch (error) {
-      console.error('Error fetching compliance data:', error);
       Alert.alert('Error', 'Failed to load compliance data');
     } finally {
       setLoading(false);

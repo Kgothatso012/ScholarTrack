@@ -70,7 +70,7 @@ export default function ChatScreen({ navigation }: Props) {
         setCurrentUser(data);
       }
     } catch (error) {
-      console.error('Error loading user:', error);
+      // error handled silently
     }
   };
 
@@ -152,9 +152,7 @@ export default function ChatScreen({ navigation }: Props) {
       setConversations(Array.from(convMap.values()).sort((a, b) =>
         new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
       ));
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -177,7 +175,7 @@ export default function ChatScreen({ navigation }: Props) {
         .eq('receiver_id', currentUser.id)
         .eq('sender_id', selectedChat.participant_id);
     } catch (error) {
-      console.error('Error loading messages:', error);
+      // error handled silently
     }
   };
 
@@ -198,9 +196,7 @@ export default function ChatScreen({ navigation }: Props) {
       setNewMessage('');
       loadMessages();
       loadConversations();
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setSending(false);
     }
   };

@@ -11,17 +11,11 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 // ============ RSA VALIDATION UTILITIES ============
 
@@ -149,9 +143,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
       if (stored) {
         setExistingCompliance(JSON.parse(stored));
       }
-    } catch (error) {
-      console.error('Error checking compliance:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -253,7 +245,6 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         updateComplianceStatus();
       }
     } catch (error) {
-      console.error('Document pick error:', error);
       Alert.alert('Error', 'Failed to pick document. Please try again.');
     }
   };

@@ -173,7 +173,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
               full_name: userName,
               phone: data.user?.user_metadata?.phone || ''
             });
-          } catch (err) {}
+          } catch (err) { /* silent */ }
         } else if (!profileData?.role && data.user) {
           // Profile exists but role is NULL — sync from metadata
           await supabase.from('profiles').update({ role: userRole }).eq('id', data.user.id);

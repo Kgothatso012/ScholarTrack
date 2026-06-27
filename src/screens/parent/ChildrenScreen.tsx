@@ -31,7 +31,7 @@ import { supabase } from '../../lib/supabase';
 
 // UI Plugin components
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -87,11 +87,7 @@ const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: 
 const AVATAR_COLORS = [C.accent, C.primary, C.success, C.error, C.secondary];
 
 // ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
-const glassCardBase = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCardBase = cards.glassAmber;
 
 const childAvatarStyle = (index: number) => ({
   width: 50,
@@ -105,12 +101,12 @@ const childAvatarStyle = (index: number) => ({
 });
 
 const actionBtnStyle = (color: string) => ({
+  ...glassCardBase,
   width: '48%' as const,
   borderRadius: borderRadius.lg,
   padding: spacing.md,
   marginBottom: spacing.sm,
   alignItems: 'center' as const,
-  ...glassCardBase,
 });
 
 const getInitials = (name: string) => (name || 'C').substring(0, 1).toUpperCase();
@@ -157,7 +153,6 @@ export default function ChildrenScreen({ navigation }: Props) {
         setChildList([]);
       }
     } catch (error) {
-      console.error('Error fetching children:', error);
       setChildList([]);
     } finally {
       setLoading(false);
@@ -201,10 +196,10 @@ export default function ChildrenScreen({ navigation }: Props) {
     headerTitle: { ...typography.h2, color: C.text },
     headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     addBtn: {
+      ...glassCardBase,
       margin: S.lg,
       padding: S.md,
       borderRadius: borderRadius.lg,
-      ...glassCardBase,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,255,255,.12)',
       flexDirection: 'row',
@@ -215,10 +210,10 @@ export default function ChildrenScreen({ navigation }: Props) {
     section: { padding: S.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     childCard: {
+      ...glassCardBase,
       borderRadius: borderRadius.lg,
       padding: S.md,
       marginBottom: S.md,
-      ...glassCardBase,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',

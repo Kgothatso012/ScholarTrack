@@ -7,17 +7,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -42,7 +36,7 @@ const TripScreen = ({ navigation }: Props) => {
       const active = tripsData?.find(t => t.status === 'in_progress' || t.status === 'scheduled');
       if (active) { setCurrentTrip(active); setTripActive(active.status === 'in_progress'); }
       else { setCurrentTrip(null); setTripActive(false); }
-    } catch (error) { console.error('Error fetching trips:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { fetchTrips(); }, [fetchTrips]);

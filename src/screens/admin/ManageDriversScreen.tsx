@@ -5,15 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { driverService, Driver } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -33,7 +27,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
     try {
       const data = await driverService.getDrivers(false);
       setDrivers(data || []);
-    } catch (error) { console.error('Error fetching drivers:', error); setDrivers([]); }
+    } catch (error) { setDrivers([]); }
     finally { setLoading(false); }
   };
 

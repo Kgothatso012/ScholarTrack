@@ -32,7 +32,7 @@ import { driverService, ratingService, Driver, Child, linkingService } from '../
 import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Badge, Input } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -69,11 +69,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 const avatarColors = [C.primary, C.accent, C.success, C.error, C.secondary];
 
@@ -125,7 +121,6 @@ const HireDriverScreen = ({ navigation }: Props) => {
       );
       setDrivers(driversWithRatings || []);
     } catch (error) {
-      console.error('Error fetching drivers:', error);
       setDrivers([]);
     } finally {
       setLoading(false);
@@ -174,9 +169,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
       // Simplified alert for dark theme
       setShowChildModal(false);
       setSelectedDriver(null);
-    } catch (error) {
-      console.error('Error sending request:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setHiring(false);
     }
   };
@@ -213,21 +206,21 @@ const HireDriverScreen = ({ navigation }: Props) => {
     headerTitle: { ...typography.h2, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     searchContainer: {
+      ...glassCard,
       margin: S.lg,
       padding: S.md,
       borderRadius: borderRadius.lg,
       flexDirection: 'row',
       alignItems: 'center',
-      ...glassCard,
     },
     searchInput: { flex: 1, marginLeft: S.sm, ...typography.body, color: C.text },
     section: { padding: S.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     driverCard: {
+      ...glassCard,
       borderRadius: 20,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',

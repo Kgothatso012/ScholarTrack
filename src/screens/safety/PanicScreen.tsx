@@ -10,17 +10,11 @@ import { supabase } from '../../lib/supabase';
 import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 export const PanicButton = ({
   style,
@@ -64,7 +58,7 @@ export default function PanicScreen() {
       if (!user) return;
       const data = await emergencyContactService.getContacts(user.id);
       setContacts(data);
-    } catch (error) { console.error('Error loading contacts:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); }
   };
 
@@ -87,7 +81,6 @@ export default function PanicScreen() {
       }
       setSosActive(true);
     } catch (error: unknown) {
-      console.error('SOS Error:', error);
       Alert.alert('SOS Failed', error instanceof Error ? error.message || 'Failed to send emergency alert' : 'Failed to send emergency alert');
     } finally { setSending(false); }
   };

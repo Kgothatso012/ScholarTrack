@@ -30,7 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase, emergencyContactService, EmergencyContact } from '../../lib/api';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -67,11 +67,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 const avatarColors = [C.primary, C.accent, C.success, C.error, C.secondary];
 
@@ -109,9 +105,7 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       if (!user) return;
       const data = await emergencyContactService.getContacts(user.id);
       setContacts(data || []);
-    } catch (error) {
-      console.error('Error loading contacts:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
       setRefreshing(false);
     }
@@ -161,10 +155,10 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     headerTitle: { ...typography.h2, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     addBtn: {
+      ...glassCard,
       margin: S.lg,
       padding: S.md,
       borderRadius: borderRadius.lg,
-      ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,255,255,.12)',
       flexDirection: 'row',
@@ -175,10 +169,10 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
     section: { padding: S.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     contactCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',

@@ -32,7 +32,7 @@ import { linkingService, Child, School } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
 import { Card, Button, Spacer, Avatar, Badge, Input } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -69,11 +69,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 const avatarColors = [C.primary, C.accent, C.success, C.error, C.secondary];
 
@@ -142,9 +138,7 @@ export default function LinkChildScreen({ navigation }: Props) {
 
       const schoolData = await linkingService.getSchools();
       setSchools(schoolData);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -165,9 +159,7 @@ export default function LinkChildScreen({ navigation }: Props) {
       setShowAddModal(false);
       setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
       loadData();
-    } catch (error) {
-      console.error('Error adding child:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -200,9 +192,7 @@ export default function LinkChildScreen({ navigation }: Props) {
       setSelectedChild(null);
       setNewChild({ full_name: '', grade: '', pickup_address: '', school_id: '' });
       loadData();
-    } catch (error) {
-      console.error('Error updating child:', error);
-    } finally {
+    } catch (error) { /* silent */ } finally {
       setLoading(false);
     }
   };
@@ -278,20 +268,20 @@ export default function LinkChildScreen({ navigation }: Props) {
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
     emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: 10 },
     addFirstBtn: {
+      ...glassCard,
       flexDirection: 'row',
       alignItems: 'center',
       padding: 15,
       borderRadius: borderRadius.lg,
       marginTop: 20,
-      ...glassCard,
     },
     addFirstText: { ...typography.button, color: C.primary, marginLeft: 8 },
     list: { padding: S.lg },
     childCard: {
+      ...glassCard,
       borderRadius: 20,
       padding: S.lg,
       marginBottom: S.md,
-      ...glassCard,
       position: 'relative' as const,
       overflow: 'hidden' as const,
       borderColor: 'rgba(255,183,0,.12)',

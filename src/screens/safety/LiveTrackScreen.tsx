@@ -275,7 +275,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         setSelectedChild(active[0]);
       }
     } catch (err) {
-      console.error('Error fetching children:', err);
+      // error handled silently
     }
   }, [selectedChild]);
 
@@ -299,7 +299,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         }
       }
     } catch (err) {
-      console.error('Error fetching driver location:', err);
+      // error handled silently
     }
   }, []);
 
@@ -312,7 +312,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
         setDriverReviewsCount(data.length);
       }
     } catch (err) {
-      console.error('Error fetching driver rating:', err);
+      // error handled silently
     }
   }, []);
 
@@ -449,7 +449,6 @@ export default function LiveTrackScreen({ navigation }: Props) {
       setRating(0);
       await fetchDriverRating(selectedChild.driver.id);
     } catch (err) {
-      console.error('Error submitting rating:', err);
       Alert.alert('Error', 'Failed to submit rating.');
     }
   };

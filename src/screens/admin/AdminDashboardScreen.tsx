@@ -8,37 +8,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
-  interpolate,
   withSpring,
   FadeIn,
 } from 'react-native-reanimated';
 
-import { Spacer, Badge } from '../../ui-plugin/components';
+import { Spacer, Badge, Skeleton } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 const SPRING = { damping: 15, stiffness: 150 };
-
-// Shimmer skeleton rect
-const SkeletonRect = ({ width, height, br = 16 }: { width: number | string; height: number; br?: number }) => {
-  const shimmer = useSharedValue(0);
-  useEffect(() => { shimmer.value = withRepeat(withSequence(withTiming(1, { duration: 900 }), withTiming(0, { duration: 900 })), -1, false); }, []);
-  const animStyle = useAnimatedStyle(() => ({ opacity: 0.15 + interpolate(shimmer.value, [0, 1], [0, 0.55]) }));
-  return <Animated.View style={[{ backgroundColor: 'rgba(255,184,28,0.22)', borderRadius: br, width: width as any, height }, animStyle]} />;
-};
 
 // Spring press wrapper
 const SpringTouchable = ({ children, onPress, style }: { children: React.ReactNode; onPress: () => void; style?: object }) => {
@@ -139,7 +121,6 @@ export default function AdminDashboardScreen({ navigation }: Props) {
       if (driversData) setDrivers(driversData.map(d => ({ ...d, full_name: d.full_name || 'Unknown Driver' })));
       if (paymentsData) setPayments(paymentsData);
     } catch (error) {
-      console.error('Error loading dashboard:', error);
       setStats([{ label: 'Active Drivers', value: 0 }, { label: 'Total Students', value: 0 }, { label: 'Schools', value: 0 }, { label: 'Revenue', value: 'R0' }]);
     } finally {
       setLoading(false);
@@ -238,16 +219,16 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           <View style={s.headerGlow2} />
           <View style={s.headerRow}>
             <View>
-              <SkeletonRect width={160} height={24} br={8} />
-              <SkeletonRect width={120} height={14} br={8} />
+              <Skeleton width={160} height={24} borderRadius={8} />
+              <Skeleton width={120} height={14} borderRadius={8} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              {[0, 1, 2].map(i => <SkeletonRect key={i} width={36} height={36} br={12} />)}
+              {[0, 1, 2].map(i => <Skeleton key={i} width={36} height={36} borderRadius={12} />)}
             </View>
           </View>
         </View>
         <View style={s.tabsOuter}>
-          {[0, 1, 2].map(i => <SkeletonRect key={i} width={'33%'} height={36} br={12} />)}
+          {[0, 1, 2].map(i => <Skeleton key={i} width={'33%'} height={36} borderRadius={12} />)}
         </View>
         <View style={s.statsGrid}>
           {[0, 1, 2, 3].map(i => (
@@ -255,8 +236,8 @@ export default function AdminDashboardScreen({ navigation }: Props) {
               <View style={s.statCard}>
                 <View style={s.statCardTopRefraction} />
                 <View style={s.statCardLeftBar} />
-                <SkeletonRect width={80} height={10} br={8} />
-                <SkeletonRect width={100} height={26} br={8} />
+                <Skeleton width={80} height={10} borderRadius={8} />
+                <Skeleton width={100} height={26} borderRadius={8} />
               </View>
             </View>
           ))}
@@ -264,7 +245,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
         <View style={s.section}>
           <Text style={s.sectionLabel}>Quick Actions</Text>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-            {[0, 1, 2, 3].map(i => <SkeletonRect key={i} width={'25%'} height={72} br={20} />)}
+            {[0, 1, 2, 3].map(i => <Skeleton key={i} width={'25%'} height={72} borderRadius={20} />)}
           </View>
         </View>
         <Spacer size="xl" />

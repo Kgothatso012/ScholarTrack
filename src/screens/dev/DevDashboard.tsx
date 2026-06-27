@@ -11,7 +11,7 @@ import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { Card, Button, Spacer } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 interface Props {
@@ -22,21 +22,9 @@ const { colors: C } = getTheme('dark');
 
 const SPRING = { damping: 15, stiffness: 150 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(0,229,255,.10)',
-  borderRadius: 18,
-  overflow: 'hidden' as const,
-};
+const glassCard = cards.glassCyan;
 
-const glassCardAmber = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,183,0,.10)',
-  borderRadius: 18,
-  overflow: 'hidden' as const,
-};
+const glassCardAmber = cards.glassAmber;
 
 const SpringTouchable = ({
   children, onPress, style,

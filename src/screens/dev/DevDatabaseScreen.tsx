@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 interface Props {
@@ -18,13 +18,7 @@ const { colors: C } = getTheme('dark');
 
 const SPRING = { damping: 15, stiffness: 150 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(0,229,255,.10)',
-  borderRadius: 18,
-  overflow: 'hidden' as const,
-};
+const glassCard = cards.glassCyan;
 
 const SpringTouchable = ({
   children, onPress, style,

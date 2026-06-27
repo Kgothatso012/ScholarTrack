@@ -4,17 +4,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { routeService, driverService, linkingService, Route, Driver } from '../../lib/api';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -50,7 +44,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
       setDrivers(driverData);
       const childData = await linkingService.getAllChildren();
       setChildren(childData.filter(c => !c.parent_id));
-    } catch (error) { console.error('Error loading data:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); }
   };
 

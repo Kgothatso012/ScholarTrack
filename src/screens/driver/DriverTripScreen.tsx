@@ -7,17 +7,11 @@ import * as Location from 'expo-location';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
 import { notificationService } from '../../services/NotificationService';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-  borderRadius: 20,
-  overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -58,7 +52,7 @@ export default function DriverTripScreen({ navigation }: Props) {
           if (driver && isOnline) updateDriverLocation(location.coords.latitude, location.coords.longitude);
         }
       );
-    } catch (error) { console.error('Location error:', error); }
+    } catch (error) { /* silent */ }
   };
 
   const updateDriverLocation = async (lat: number, lng: number) => {
@@ -67,7 +61,7 @@ export default function DriverTripScreen({ navigation }: Props) {
       await supabase.from('driver_tracking').insert({ driver_id: driver.id, latitude: lat, longitude: lng, status: isOnline ? 'active' : 'idle', last_updated: new Date().toISOString() });
       await supabase.from('drivers').update({ current_latitude: lat, current_longitude: lng, last_location_update: new Date().toISOString() }).eq('id', driver.id);
       if (activeTrip && geofenceZones.length > 0) await checkGeofenceZones(lat, lng);
-    } catch (error) { console.error('Location update error:', error); }
+    } catch (error) { /* silent */ }
   };
 
   const checkGeofenceZones = async (lat: number, lng: number) => {
@@ -83,7 +77,7 @@ export default function DriverTripScreen({ navigation }: Props) {
 
   const loadGeofenceZones = async (tripId: string) => {
     try { const zones = await geofenceService.getZonesForTrip(tripId); setGeofenceZones(zones); }
-    catch (error) { console.error('Error loading geofence zones:', error); }
+    catch (error) { /* silent */ }
   };
 
   const loadData = async () => {
@@ -112,7 +106,7 @@ export default function DriverTripScreen({ navigation }: Props) {
           setCheckedInStudents((checkins || []).map((c: { child_id: string }) => c.child_id));
         }
       }
-    } catch (error) { console.error('Error loading data:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); }
   };
 

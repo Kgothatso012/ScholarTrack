@@ -304,7 +304,6 @@ const ParentDashboard = ({ navigation }: Props) => {
       }
       await fetchFreshData(user.id);
     } catch (error) {
-      console.error('Error loading data:', error);
       setStats([
         { label: 'Children', value: 0, positive: true },
         { label: 'Trips', value: 0, positive: true },
@@ -368,7 +367,7 @@ const ParentDashboard = ({ navigation }: Props) => {
         ]);
       }
     } catch (error) {
-      console.error('Error fetching fresh data:', error);
+      // error handled silently
     }
   };
 
@@ -750,7 +749,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                   label={action.label}
                   bgColor={action.bgColor}
                   borderColor={action.borderColor}
-                  onPress={() => { console.log('[QA] nav:', typeof navigation?.navigate, 'route:', action.route); navigation?.navigate?.(action.route); }}
+                  onPress={() => { navigation?.navigate?.(action.route); }}
                   delay={i * 50}
                 />
               ))}

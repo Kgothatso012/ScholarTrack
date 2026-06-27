@@ -5,15 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, Child } from '../../lib/api';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
 
-const glass = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1, borderColor: 'rgba(255,183,0,.10)',
-  borderRadius: 20, overflow: 'hidden' as const,
-};
+const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -48,7 +44,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       const { data, error } = await supabase.from('children').select('*').eq('status', 'active').order('full_name', { ascending: true });
       if (error) throw error;
       setChildren(data || []);
-    } catch (error) { console.error('Error loading children:', error); }
+    } catch (error) { /* silent */ }
     finally { setLoading(false); setRefreshing(false); }
   };
 
@@ -63,7 +59,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
         return { ...att, child_name: child?.full_name || 'Unknown' };
       });
       setAttendance(attendanceWithNames);
-    } catch (error) { console.error('Error loading attendance:', error); }
+    } catch (error) { /* silent */ }
   };
 
   const onRefresh = async () => { setRefreshing(true); await loadChildren(); };

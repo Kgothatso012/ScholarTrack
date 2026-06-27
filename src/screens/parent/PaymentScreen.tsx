@@ -31,7 +31,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { paymentService, Payment } from '../../lib/api';
 
 import { Card, Button, Spacer, Badge } from '../../ui-plugin/components';
-import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -67,11 +67,7 @@ const SpringTouchable = ({
   );
 };
 
-const glassCard = {
-  backgroundColor: 'rgba(255,255,255,.04)',
-  borderWidth: 1,
-  borderColor: 'rgba(255,255,255,.08)',
-};
+const glassCard = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -89,7 +85,6 @@ const PaymentScreen = ({ navigation }: Props) => {
       const data = await paymentService.getPaymentsForParent(userId);
       setPayments(data || []);
     } catch (error) {
-      console.error('Error fetching payments:', error);
       setPayments([]);
     } finally {
       setLoading(false);
@@ -139,11 +134,11 @@ const PaymentScreen = ({ navigation }: Props) => {
     headerTitle: { ...typography.h1, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     balanceCard: {
+      ...glassCard,
       margin: S.lg,
       padding: S.xl,
       borderRadius: borderRadius.lg,
       alignItems: 'center',
-      ...glassCard,
       borderTopWidth: 1,
       borderTopColor: 'rgba(255,183,0,.3)',
       borderColor: 'rgba(255,183,0,.12)',
@@ -160,11 +155,11 @@ const PaymentScreen = ({ navigation }: Props) => {
     },
     payBtnText: { ...typography.button, color: C.background, fontWeight: '700' },
     statsRow: {
+      ...glassCard,
       flexDirection: 'row' as const,
       marginHorizontal: S.lg,
       borderRadius: borderRadius.lg,
       padding: S.md,
-      ...glassCard,
     },
     infoRow: { flex: 1, flexDirection: 'row', alignItems: 'center' },
     infoContent: { marginLeft: S.sm },
@@ -173,21 +168,21 @@ const PaymentScreen = ({ navigation }: Props) => {
     section: { padding: S.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     emptyContainer: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: S.xl,
       alignItems: 'center',
-      ...glassCard,
     },
     emptyTitle: { ...typography.h4, color: C.text, marginTop: S.md },
     emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: S.sm },
     paymentCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: S.md,
       marginBottom: S.sm,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      ...glassCard,
     },
     paymentInfo: { flex: 1 },
     paymentMonth: { ...typography.label, color: C.text },
@@ -195,11 +190,11 @@ const PaymentScreen = ({ navigation }: Props) => {
     paymentRight: { alignItems: 'flex-end' },
     paymentAmount: { ...typography.h4, color: C.accent },
     methodCard: {
+      ...glassCard,
       borderRadius: borderRadius.lg,
       padding: S.md,
       flexDirection: 'row',
       alignItems: 'center',
-      ...glassCard,
     },
     methodInfo: { flex: 1, marginLeft: S.md },
     methodName: { ...typography.label, color: C.text },
