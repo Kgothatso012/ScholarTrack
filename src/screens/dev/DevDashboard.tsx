@@ -19,10 +19,6 @@ interface Props {
 }
 
 const { colors: C } = getTheme('dark');
-const CYAN = '#00e5ff';
-const AMBER = '#ffb700';
-const GREEN2 = '#00e676';
-const RED = '#ff3d5a';
 
 const SPRING = { damping: 15, stiffness: 150 };
 
@@ -78,25 +74,25 @@ const DevDashboard = ({ navigation }: Props) => {
   };
 
   const devTools = [
-    { name: 'API Console', icon: 'code-slash' as const, color: CYAN },
-    { name: 'Database', icon: 'server' as const, color: '#0066ff' },
-    { name: 'Logs', icon: 'list' as const, color: AMBER },
+    { name: 'API Console', icon: 'code-slash' as const, color: C.cyan },
+    { name: 'Database', icon: 'server' as const, color: C.info },
+    { name: 'Logs', icon: 'list' as const, color: C.primaryLight },
     { name: 'Settings', icon: 'settings' as const, color: C.textMuted },
-    { name: 'Users', icon: 'people' as const, color: GREEN2 },
-    { name: 'Routes', icon: 'map' as const, color: '#7c4dff' },
+    { name: 'Users', icon: 'people' as const, color: C.success },
+    { name: 'Routes', icon: 'map' as const, color: C.secondary },
   ];
 
   const statusItems = [
-    { label: 'API Status', value: 'Online', icon: 'checkmark-circle' as const, color: GREEN2 },
-    { label: 'Database', value: 'Connected', icon: 'checkmark-circle' as const, color: GREEN2 },
-    { label: 'Environment', value: 'Development', icon: 'code-slash' as const, color: AMBER },
-    { label: 'Realtime', value: 'Active', icon: 'flash' as const, color: CYAN },
+    { label: 'API Status', value: 'Online', icon: 'checkmark-circle' as const, color: C.success },
+    { label: 'Database', value: 'Connected', icon: 'checkmark-circle' as const, color: C.success },
+    { label: 'Environment', value: 'Development', icon: 'code-slash' as const, color: C.primaryLight },
+    { label: 'Realtime', value: 'Active', icon: 'flash' as const, color: C.cyan },
   ];
 
   const quickActions = [
-    { label: 'Sync Database', icon: 'refresh' as const, color: CYAN },
-    { label: 'Export Logs', icon: 'download' as const, color: AMBER },
-    { label: 'Clear Cache', icon: 'trash' as const, color: RED },
+    { label: 'Sync Database', icon: 'refresh' as const, color: C.cyan },
+    { label: 'Export Logs', icon: 'download' as const, color: C.primaryLight },
+    { label: 'Clear Cache', icon: 'trash' as const, color: C.error },
   ];
 
   const s = StyleSheet.create({
@@ -106,7 +102,7 @@ const DevDashboard = ({ navigation }: Props) => {
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: CYAN,
+      borderBottomColor: C.cyan,
     },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: C.text },
@@ -155,7 +151,7 @@ const DevDashboard = ({ navigation }: Props) => {
       backgroundColor: 'rgba(255,61,90,.10)',
       borderWidth: 1, borderColor: 'rgba(255,61,90,.15)',
     },
-    dangerBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: RED, textAlign: 'center' },
+    dangerBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: C.error, textAlign: 'center' },
   });
 
   return (
@@ -165,7 +161,7 @@ const DevDashboard = ({ navigation }: Props) => {
         <View style={s.headerRow}>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Ionicons name="construct" size={20} color={CYAN} />
+              <Ionicons name="construct" size={20} color={C.cyan} />
               <Text style={s.headerTitle}>Dev Dashboard</Text>
             </View>
             <Text style={s.headerSub}>ScholarTrack Development Tools</Text>
@@ -235,7 +231,7 @@ const DevDashboard = ({ navigation }: Props) => {
           onPress={() => Alert.alert('Coming Soon', 'Cache clearing not yet implemented.')}
           style={s.dangerBtn}
         >
-          <Ionicons name="trash-outline" size={16} color={RED} />
+          <Ionicons name="trash-outline" size={16} color={C.error} />
           <Text style={s.dangerBtnText}>Clear Cache</Text>
         </SpringTouchable>
       </View>

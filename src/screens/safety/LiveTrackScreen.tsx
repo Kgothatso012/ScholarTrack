@@ -862,7 +862,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
           </TouchableOpacity>
           <TouchableOpacity onPress={handleShare} style={s.qaItem}>
             <View style={[s.qaCircle, { backgroundColor: 'rgba(0,35,149,.15)', borderColor: 'rgba(0,35,149,.35)' }]}>
-              <Ionicons name="share-social-outline" size={20} color="#6699ff" />
+              <Ionicons name="share-social-outline" size={20} color={C.info} />
             </View>
             <Text style={s.qaLbl}>Share</Text>
           </TouchableOpacity>

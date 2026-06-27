@@ -4,7 +4,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useTheme, ThemeColors } from '../context/ThemeContext';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../lib/auth';
 import { getTheme } from '../ui-plugin/theme';
 import { payStackService, paymentHelper } from '../lib/paystack';
 

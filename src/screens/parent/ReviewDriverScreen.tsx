@@ -42,9 +42,6 @@ const SPRING = { damping: 15, stiffness: 150 };
 
 // Theme token aliases for this screen
 const C = getTheme('dark').colors;
-// Custom accent colors not in theme - keep original values to preserve design
-const CYAN = '#00e5ff';
-const AMBER = '#ffb700';
 
 const SpringTouchable = ({
   children,
@@ -185,7 +182,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
 
   const getRatingColor = (r: number) => {
     if (r >= 4) return C.success;
-    if (r >= 3) return AMBER;
+    if (r >= 3) return C.primaryLight;
     if (r > 0) return C.error;
     return C.textMuted;
   };
@@ -200,7 +197,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: AMBER,
+      borderBottomColor: C.primaryLight,
     },
     headerTitle: { ...typography.h2, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
@@ -219,16 +216,16 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       width: 70,
       height: 70,
       borderRadius: 35,
-      backgroundColor: CYAN + '20',
+      backgroundColor: C.cyan + '20',
       borderWidth: 1.5,
-      borderColor: CYAN,
+      borderColor: C.cyan,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: spacing.md,
     },
     driverName: { ...typography.h3, color: C.text },
     driverSchool: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
-    driverRate: { ...typography.h4, color: AMBER, marginTop: spacing.xs },
+    driverRate: { ...typography.h4, color: C.primaryLight, marginTop: spacing.xs },
     ratingSection: {
       margin: spacing.lg,
       padding: spacing.xl,
@@ -278,7 +275,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       margin: spacing.lg,
       padding: spacing.md,
       borderRadius: borderRadius.lg,
-      backgroundColor: CYAN,
+      backgroundColor: C.cyan,
       alignItems: 'center',
     },
     submitBtnDisabled: { opacity: 0.6 },
@@ -345,12 +342,12 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[CYAN]} tintColor={CYAN} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.cyan]} tintColor={C.cyan} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: AMBER, opacity: 0.06 }} />
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, backgroundColor: C.primaryLight, opacity: 0.06 }} />
           <Text style={styles.headerTitle}>Monthly Review</Text>
           <Text style={styles.headerSubtext}>
             Rate your driver for {currentMonth} {currentYear}
@@ -361,11 +358,11 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
         <Animated.View entering={ZoomIn.duration(300)}>
           <View style={[styles.driverCard, { overflow: 'hidden' }]}>
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
-            <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: AMBER, borderRadius: 2 }} />
+            <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.primaryLight, borderRadius: 2 }} />
             {driver ? (
               <>
                 <View style={styles.driverAvatar}>
-                  <Ionicons name="person" size={36} color={CYAN} />
+                  <Ionicons name="person" size={36} color={C.cyan} />
                 </View>
                 <Text style={styles.driverName}>{driver.full_name}</Text>
                 <Text style={styles.driverSchool}>Vehicle: {driver.vehicle_plate}</Text>
@@ -402,7 +399,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                       <Ionicons
                         name={star <= rating ? 'star' : 'star-outline'}
                         size={44}
-                        color={star <= rating ? AMBER : C.textMuted}
+                        color={star <= rating ? C.primaryLight : C.textMuted}
                       />
                     </TouchableOpacity>
                   ))}
@@ -480,7 +477,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                           key={star}
                           name={star <= review.rating ? 'star' : 'star-outline'}
                           size={14}
-                          color={star <= review.rating ? AMBER : C.textMuted}
+                          color={star <= review.rating ? C.primaryLight : C.textMuted}
                         />
                       ))}
                     </View>
@@ -502,7 +499,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
 
         {/* Payment Info */}
         <View style={styles.infoSection}>
-          <Ionicons name="information-circle" size={22} color={CYAN} />
+          <Ionicons name="information-circle" size={22} color={C.cyan} />
           <Text style={styles.infoText}>
             Payments are held in escrow until you submit your monthly review. Ratings of 4+ stars release the payment to your driver.
           </Text>

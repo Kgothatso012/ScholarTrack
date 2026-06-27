@@ -13,6 +13,7 @@ import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 import SplashScreen from './src/components/SplashScreen';
+import { AuthProvider } from './src/lib/auth';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './src/navigation/types';
@@ -42,15 +43,17 @@ function ThemedApp() {
   const { colors } = useTheme();
 
   return (
-    <DeepLinkProvider>
-      <ErrorBoundary>
-        <SafeAreaProvider>
-          <View style={{ flex: 1, backgroundColor: colors.background }}>
-            <AppContentWithTheme />
-          </View>
-        </SafeAreaProvider>
-      </ErrorBoundary>
-    </DeepLinkProvider>
+    <AuthProvider>
+      <DeepLinkProvider>
+        <ErrorBoundary>
+          <SafeAreaProvider>
+            <View style={{ flex: 1, backgroundColor: colors.background }}>
+              <AppContentWithTheme />
+            </View>
+          </SafeAreaProvider>
+        </ErrorBoundary>
+      </DeepLinkProvider>
+    </AuthProvider>
   );
 }
 

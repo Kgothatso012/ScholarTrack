@@ -75,7 +75,7 @@ const glassCard = {
   borderColor: 'rgba(255,255,255,.08)',
 };
 
-const avatarColors = [C.primary, C.accent, C.success, C.error, '#a855f7'];
+const avatarColors = [C.primary, C.accent, C.success, C.error, C.secondary];
 
 // ─── Parametric styles ────────────────────────────────────────────────────────
 const childAvatarStyle = (index: number) => ({

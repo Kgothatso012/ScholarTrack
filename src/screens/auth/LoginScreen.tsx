@@ -16,20 +16,6 @@ interface Props {
   onConfirmationErrorHandled?: () => void;
 }
 
-const DT = {
-  bg: '#050810',
-  bg2: '#080d1a',
-  panel: '#0b1120',
-  border: '#1a2a40',
-  cyan: '#00e5ff',
-  amber: '#ffb700',
-  green: '#007749',
-  green2: '#00e676',
-  blue: '#002395',
-  red: '#ff3d5a',
-  muted: '#4a6a8a',
-  white: '#e8f4ff',
-};
 const t = getTheme('dark');
 const C = {
   // Primary amber accent (unified taste-skill)
@@ -43,6 +29,7 @@ const C = {
   success: t.colors.success,
   successLight: t.colors.successLight,
   // Background / surface tokens
+  background: t.colors.background,
   surface: t.colors.surface,
   surfaceElevated: t.colors.surfaceElevated,
   // Text tokens
@@ -72,7 +59,7 @@ const C = {
 const SPRING = { damping: 15, stiffness: 150 };
 
 // Breathing dot
-const BreathingDot = ({ color = DT.green2, size = 8 }: { color?: string; size?: number }) => {
+const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
   useEffect(() => {
@@ -221,11 +208,11 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
   };
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: DT.bg },
+    container: { flex: 1, backgroundColor: C.background },
     scrollView: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
     // HEADER
     header: {
-      backgroundColor: DT.bg2,
+      backgroundColor: C.surface,
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomLeftRadius: 28,
@@ -247,7 +234,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     // LOGO
     logoSection: { alignItems: 'center', marginBottom: spacing.xl },
     logoCircle: {
-      width: 72, height: 72, borderRadius: 20, backgroundColor: DT.blue,
+      width: 72, height: 72, borderRadius: 20, backgroundColor: C.surface,
       justifyContent: 'center', alignItems: 'center',
       borderWidth: 1, borderColor: `${C.cyan}40`,
       shadowColor: C.cyan, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24, elevation: 8,
@@ -277,7 +264,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
       shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
     },
     loginBtnDisabled: { backgroundColor: C.textMuted },
-    loginBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: DT.bg },
+    loginBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background },
     // DIVIDER
     divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.lg },
     dividerLine: { flex: 1, height: 1, backgroundColor: C.glassBg },

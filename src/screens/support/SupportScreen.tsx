@@ -41,7 +41,7 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
     { icon: 'chatbubbles', title: 'Live Chat', subtitle: 'Chat with our team', route: 'Chat', color: C.accent },
     { icon: 'call', title: 'Call Us', subtitle: '0800 123 456', action: () => Linking.openURL('tel:0800123456'), color: C.success },
     { icon: 'mail', title: 'Email', subtitle: 'support@scholartrack.co.za', action: () => Linking.openURL('mailto:support@scholartrack.co.za'), color: C.accent },
-    { icon: 'logo-whatsapp', title: 'WhatsApp', subtitle: 'Chat on WhatsApp', action: () => Linking.openURL('https://wa.me/270800123456'), color: '#25D366' },
+    { icon: 'logo-whatsapp', title: 'WhatsApp', subtitle: 'Chat on WhatsApp', action: () => Linking.openURL('https://wa.me/270800123456'), color: C.success },
   ];
   const faqs = [
     { q: 'How do I hire a driver?', a: 'Go to Hire Driver in the menu and browse available drivers in your area.' },

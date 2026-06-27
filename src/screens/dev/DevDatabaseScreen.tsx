@@ -15,9 +15,6 @@ interface Props {
 }
 
 const { colors: C } = getTheme('dark');
-const CYAN = '#00e5ff';
-const AMBER = '#ffb700';
-const GREEN2 = '#00e676';
 
 const SPRING = { damping: 15, stiffness: 150 };
 
@@ -54,18 +51,18 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
   const [query, setQuery] = useState('');
 
   const tables = [
-    { name: 'users', rows: 245, size: '1.2 MB', icon: 'people' as const, color: CYAN },
-    { name: 'drivers', rows: 24, size: '156 KB', icon: 'car' as const, color: GREEN2 },
-    { name: 'parents', rows: 156, size: '420 KB', icon: 'person' as const, color: AMBER },
-    { name: 'trips', rows: 1245, size: '2.1 MB', icon: 'navigate' as const, color: CYAN },
-    { name: 'payments', rows: 890, size: '890 KB', icon: 'card' as const, color: AMBER },
-    { name: 'schools', rows: 12, size: '24 KB', icon: 'school' as const, color: GREEN2 },
+    { name: 'users', rows: 245, size: '1.2 MB', icon: 'people' as const, color: C.cyan },
+    { name: 'drivers', rows: 24, size: '156 KB', icon: 'car' as const, color: C.success },
+    { name: 'parents', rows: 156, size: '420 KB', icon: 'person' as const, color: C.primaryLight },
+    { name: 'trips', rows: 1245, size: '2.1 MB', icon: 'navigate' as const, color: C.cyan },
+    { name: 'payments', rows: 890, size: '890 KB', icon: 'card' as const, color: C.primaryLight },
+    { name: 'schools', rows: 12, size: '24 KB', icon: 'school' as const, color: C.success },
   ];
 
   const actions = [
-    { label: 'Sync DB', icon: 'sync' as const, color: GREEN2 },
-    { label: 'Backup', icon: 'cloud-download' as const, color: CYAN },
-    { label: 'Migrate', icon: 'git-branch' as const, color: AMBER },
+    { label: 'Sync DB', icon: 'sync' as const, color: C.success },
+    { label: 'Backup', icon: 'cloud-download' as const, color: C.cyan },
+    { label: 'Migrate', icon: 'git-branch' as const, color: C.primaryLight },
   ];
 
   const runQuery = () => {
@@ -80,7 +77,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       padding: spacing.lg,
       paddingTop: insets.top + spacing.lg,
       borderBottomWidth: 4,
-      borderBottomColor: CYAN,
+      borderBottomColor: C.cyan,
     },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 22, color: C.text },
@@ -99,22 +96,22 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
       borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,.05)',
     },
     statusDot: {
-      width: 8, height: 8, borderRadius: 4, backgroundColor: GREEN2, marginRight: spacing.sm,
+      width: 8, height: 8, borderRadius: 4, backgroundColor: C.success, marginRight: spacing.sm,
     },
-    statusText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: GREEN2 },
+    statusText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, color: C.success },
     statusField: { flexDirection: 'row', alignItems: 'center' },
     statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, width: 72 },
     statusValue: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textSecondary },
     queryCard: { ...glassCard },
     queryTop: { height: 1, backgroundColor: 'rgba(0,229,255,.15)' },
     queryInput: {
-      fontFamily: 'DMMono_400Regular', fontSize: 13, color: '#d4d4d4',
+      fontFamily: 'DMMono_400Regular', fontSize: 13, color: C.textSecondary,
       minHeight: 80, padding: spacing.lg, textAlignVertical: 'top',
       backgroundColor: 'rgba(0,0,0,.3)',
     },
     runBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-      paddingVertical: spacing.md, backgroundColor: GREEN2,
+      paddingVertical: spacing.md, backgroundColor: C.success,
     },
     runBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.background },
     tableCard: {
@@ -148,7 +145,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
           </TouchableOpacity>
           <View>
             <View style={s.headerRow}>
-              <Ionicons name="server" size={20} color={CYAN} />
+              <Ionicons name="server" size={20} color={C.cyan} />
               <Text style={s.headerTitle}>Database</Text>
             </View>
             <Text style={s.headerSub}>Query and manage Supabase</Text>

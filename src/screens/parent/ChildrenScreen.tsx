@@ -84,7 +84,7 @@ const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: 
 };
 
 // Child avatar colors for variety
-const AVATAR_COLORS = [C.accent, C.primary, C.success, C.error, '#a855f7'];
+const AVATAR_COLORS = [C.accent, C.primary, C.success, C.error, C.secondary];
 
 // ─── Parametric styles (must be outside StyleSheet.create) ─────────────────────
 const glassCardBase = {

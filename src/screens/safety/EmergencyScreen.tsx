@@ -92,7 +92,7 @@ const EmergencyScreen = () => {
 
   const quickDials = [
     { name: 'Police', phone: RSA_EMERGENCY.POLICE, icon: 'shield', color: C.success },
-    { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, icon: 'medkit', color: '#E03C31' },
+    { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, icon: 'medkit', color: C.error },
     { name: 'Fire', phone: RSA_EMERGENCY.FIRE, icon: 'flame', color: C.accent },
   ];
 
@@ -120,7 +120,7 @@ const EmergencyScreen = () => {
     headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 4 },
     sosHero: { marginHorizontal: 16, marginTop: 20, position: 'relative' },
-    sosGlass: { ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: '#E03C31', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },
+    sosGlass: { ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },
     sosRingOuter: { position: 'absolute', top: '50%', left: '50%', marginTop: -70, marginLeft: -70, width: 140, height: 140, borderRadius: 70, borderWidth: 2, borderColor: 'rgba(224,60,49,.3)' },
     sosRingMid: { position: 'absolute', top: '50%', left: '50%', marginTop: -55, marginLeft: -55, width: 110, height: 110, borderRadius: 55, borderWidth: 1, borderColor: 'rgba(224,60,49,.2)' },
     sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(224,60,49,.3)' },

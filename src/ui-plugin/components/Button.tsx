@@ -8,7 +8,9 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import { colors, borderRadius, typography, shadows, spacing } from '../theme';
+import { getTheme } from '../theme';
+
+const { colors, borderRadius, typography, shadows, spacing } = getTheme('dark');
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -190,7 +192,7 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colorsDark) => StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',

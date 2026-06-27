@@ -372,7 +372,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   convRole: { fontSize: 12, marginTop: 2 },
   convLast: { fontSize: 13, marginTop: 4 },
   unreadBadge: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  unreadText: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+  unreadText: { color: C.textInverse, fontSize: 12, fontWeight: 'bold' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 },
   emptyText: { fontSize: 18, fontWeight: '600', marginTop: 20 },
   emptySubtext: { fontSize: 14, marginTop: 5 }

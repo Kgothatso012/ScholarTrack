@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
-import { colors, borderRadius, shadows, spacing } from '../theme';
+import { getTheme } from '../theme';
+
+const { colors, borderRadius, shadows, spacing } = getTheme('dark');
 
 type CardVariant = 'elevated' | 'outlined' | 'filled' | 'soft';
 type CardPadding = 'none' | 'small' | 'medium' | 'large';
@@ -98,7 +100,7 @@ export const Card: React.FC<CardProps> = ({
   return cardContent;
 };
 
-const styles = (colors: typeof import('../theme').colors) => StyleSheet.create({
+const styles = (colors: typeof import('../theme').colorsDark) => StyleSheet.create({
   base: {
     borderRadius: borderRadius.xxl, // larger radius (24px) for premium feel
     overflow: 'hidden',

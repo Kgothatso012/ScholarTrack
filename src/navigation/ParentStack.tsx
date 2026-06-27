@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from './types';
-import { getTheme } from '../lib/theme';
+import { getTheme } from '../ui-plugin/theme';
 
 // Screen imports
 import ParentDashboard from '../screens/parent/ParentDashboard';
