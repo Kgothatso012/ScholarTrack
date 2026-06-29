@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
-import { getTheme } from '../theme';
+import { getTheme, cards as cardPresets } from '../theme';
 
 const { colors, borderRadius, shadows, spacing } = getTheme('dark');
 
-type CardVariant = 'elevated' | 'outlined' | 'filled' | 'soft';
+type CardVariant = 'elevated' | 'outlined' | 'filled' | 'soft' | 'glassAmber' | 'glassCyan';
 type CardPadding = 'none' | 'small' | 'medium' | 'large';
 
 interface CardProps {
@@ -57,6 +57,10 @@ export const Card: React.FC<CardProps> = ({
         return {
           backgroundColor: colors.selected,
         };
+      case 'glassAmber':
+        return cardPresets.glassAmber;
+      case 'glassCyan':
+        return cardPresets.glassCyan;
       default:
         // Elevated: card with shadow + subtle inner top border tint
         return {
