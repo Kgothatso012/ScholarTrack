@@ -4,12 +4,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Trip {
   id: string;
@@ -95,14 +93,14 @@ export default function TripHistoryScreen() {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    filters: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, ...glass, padding: 6 },
+    filters: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, padding: 6 },
     filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 12, marginHorizontal: 3 },
     filterActive: { backgroundColor: C.accent },
     filterText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
     filterTextActive: { color: C.background },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    tripCard: { ...glass, padding: 14, marginBottom: 10 },
+    tripCard: { padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
     tripDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
@@ -112,7 +110,7 @@ export default function TripHistoryScreen() {
     tripDetails: { flexDirection: 'row', justifyContent: 'space-between' },
     tripDetail: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     tripDetailText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
-    emptyState: { ...glass, padding: 40, alignItems: 'center' },
+    emptyState: { padding: 40, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -160,22 +158,22 @@ export default function TripHistoryScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Filters */}
-        <View style={s.filters}>
+        <Card variant='glassAmber' style={s.filters}>
           <FilterButton label="All" value="all" />
           <FilterButton label="Completed" value="completed" />
           <FilterButton label="Cancelled" value="cancelled" />
-        </View>
+        </Card>
 
         {/* Trips List */}
         <View style={s.section}>
           {filteredTrips.length === 0 ? (
-            <View style={s.emptyState}>
+            <Card variant='glassAmber' style={s.emptyState}>
               <View style={s.emptyIcon}><Ionicons name="bus-outline" size={44} color={C.textMuted} /></View>
               <Text style={s.emptyText}>No trips found</Text>
-            </View>
+            </Card>
           ) : (
             filteredTrips.map((trip) => (
-              <View key={trip.id} style={s.tripCard}>
+              <Card key={trip.id} variant='glassAmber' style={s.tripCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={s.tripHeader}>
                   <Text style={s.tripDate}>{formatDate(trip.scheduled_time)} at {formatTime(trip.scheduled_time)}</Text>
@@ -194,7 +192,7 @@ export default function TripHistoryScreen() {
                     <Text style={s.tripDetailText}>{trip.status}</Text>
                   </View>
                 </View>
-              </View>
+              </Card>
             ))
           )}
         </View>

@@ -6,11 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface EarningsData {
   thisMonth: number;
@@ -124,7 +123,7 @@ const EarningsScreen = ({ navigation }: Props) => {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    balanceCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(217,119,6,.2)', borderWidth: 1 },
+    balanceCard: { marginHorizontal: 16, marginTop: 16, padding: 28, alignItems: 'center', borderColor: 'rgba(217,119,6,.2)', borderWidth: 1 },
     balanceTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(217,119,6,.3)' },
     balanceLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     balanceAmount: { fontFamily: 'Syne_700Bold', fontSize: 42, fontWeight: '800', color: C.primary, marginVertical: 8, letterSpacing: -1 },
@@ -133,12 +132,12 @@ const EarningsScreen = ({ navigation }: Props) => {
     withdrawBtnDisabled: { opacity: 0.4 },
     withdrawBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background, letterSpacing: 0.5, textTransform: 'uppercase' },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { width: '47%', ...glass, padding: 16, alignItems: 'center', borderColor: 'rgba(217,119,6,.12)' },
+    statCard: { width: '47%', padding: 16, alignItems: 'center', borderColor: 'rgba(217,119,6,.12)' },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     statValue: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: C.text, marginTop: 6 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    paymentCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    paymentCard: { padding: 14, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     paymentTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     paymentInfo: { flex: 1 },
     paymentMonth: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
@@ -181,8 +180,8 @@ const EarningsScreen = ({ navigation }: Props) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}
       >
         {/* Balance Card */}
-        <View style={s.balanceCard}>
-          <View style={s.balanceTopRefraction} />
+        <Card variant='glassAmber' style={s.balanceCard}>
+         <View style={s.balanceTopRefraction} />
           <Text style={s.balanceLabel}>Available Balance</Text>
           <Text style={s.balanceAmount}>R{(earnings.available / 100).toFixed(2)}</Text>
           <Text style={s.balanceSubtext}>Ready to withdraw</Text>
@@ -193,31 +192,31 @@ const EarningsScreen = ({ navigation }: Props) => {
           >
             <Ionicons name="arrow-up" size={18} color={C.background} />
             <Text style={s.withdrawBtnText}>{processing ? 'Processing...' : 'Withdraw Funds'}</Text>
-          </TouchableOpacity>
-        </View>
+         </TouchableOpacity>
+        </Card>
 
         {/* Stats Grid */}
         <View style={s.statsGrid}>
-          <View style={s.statCard}>
+          <Card variant='glassAmber' style={s.statCard}>
             <Text style={s.statLabel}>This Month</Text>
             <Text style={s.statValue}>R{(earnings.thisMonth / 100).toFixed(0)}</Text>
-          </View>
-          <View style={s.statCard}>
-            <Text style={s.statLabel}>Pending</Text>
-            <Text style={s.statValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
-          </View>
-          <View style={s.statCard}>
-            <Text style={s.statLabel}>Total Trips</Text>
-            <Text style={s.statValue}>{earnings.totalTrips}</Text>
-          </View>
-          <View style={s.statCard}>
-            <Text style={s.statLabel}>Rating</Text>
+          </Card>
+          <Card variant='glassAmber' style={s.statCard}>
+           <Text style={s.statLabel}>Pending</Text>
+           <Text style={s.statValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
+          </Card>
+          <Card variant='glassAmber' style={s.statCard}>
+           <Text style={s.statLabel}>Total Trips</Text>
+           <Text style={s.statValue}>{earnings.totalTrips}</Text>
+          </Card>
+          <Card variant='glassAmber' style={s.statCard}>
+           <Text style={s.statLabel}>Rating</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 }}>
               <Ionicons name="star" size={16} color={C.primary} />
-              <Text style={[s.statValue, { fontSize: 20 }]}>{earnings.rating}</Text>
-            </View>
-          </View>
-        </View>
+             <Text style={[s.statValue, { fontSize: 20 }]}>{earnings.rating}</Text>
+           </View>
+          </Card>
+       </View>
 
         {/* Payment History */}
         <View style={s.section}>
@@ -226,8 +225,8 @@ const EarningsScreen = ({ navigation }: Props) => {
             <Text style={s.emptyText}>No payments yet</Text>
           ) : (
             payments.slice(0, 10).map((payment, index) => (
-              <View key={index} style={s.paymentCard}>
-                <View style={s.paymentTopRefraction} />
+              <Card key={index} variant='glassAmber' style={s.paymentCard}>
+               <View style={s.paymentTopRefraction} />
                 <View style={s.paymentInfo}>
                   <Text style={s.paymentMonth}>{payment.month}</Text>
                   <Text style={s.paymentDate}>
@@ -239,9 +238,9 @@ const EarningsScreen = ({ navigation }: Props) => {
                   <View style={[s.statusBadge, { backgroundColor: payment.status === 'paid' ? C.success : C.warning }]}>
                     <Text style={s.statusText}>{payment.status === 'paid' ? 'Paid' : 'Pending'}</Text>
                   </View>
-                </View>
-              </View>
-            ))
+               </View>
+              </Card>
+           ))
           )}
         </View>
 

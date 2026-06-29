@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -96,13 +97,13 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    infoCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 16 },
+    infoCard: { marginHorizontal: 16, marginTop: 16, padding: 16 },
     infoRow: { flexDirection: 'row', marginBottom: 10 },
     infoItem: { flex: 1, alignItems: 'center' },
     infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     infoValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginTop: 2 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 16, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 16, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
@@ -121,7 +122,7 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
     childLocation: { flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 4 },
     locationText: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted },
     parentContact: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 3, fontWeight: '600' },
-    emergencyBox: { marginHorizontal: 16, marginBottom: 16, ...glass, padding: 14, borderColor: 'rgba(248,113,113,.3)' },
+    emergencyBox: { marginHorizontal: 16, marginBottom: 16, padding: 14, borderColor: 'rgba(248,113,113,.3)' },
     emergencyHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 },
     emergencyTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.error },
     emergencyText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 18 },
@@ -154,7 +155,7 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
         }
       >
         {/* Trip Info */}
-        <View style={s.infoCard}>
+        <Card variant='glassAmber' style={s.infoCard}>
           <View style={s.infoRow}>
             <View style={s.infoItem}>
               <Ionicons name="calendar" size={18} color={C.cyan} />
@@ -181,13 +182,13 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
               </Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* Stats */}
         <View style={s.statsRow}>
-          <View style={s.statCard}><Text style={s.statNumber}>{onboardCount}</Text><Text style={s.statLabel}>Onboard</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{waitingCount}</Text><Text style={s.statLabel}>Waiting</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{manifest.children.length}</Text><Text style={s.statLabel}>Total</Text></View>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{onboardCount}</Text><Text style={s.statLabel}>Onboard</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{waitingCount}</Text><Text style={s.statLabel}>Waiting</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{manifest.children.length}</Text><Text style={s.statLabel}>Total</Text></Card>
         </View>
 
         {/* Children List */}
@@ -229,13 +230,13 @@ export default function TripManifestScreen({ navigation, setScreen }: Props) {
         </View>
 
         {/* Emergency Contacts */}
-        <View style={s.emergencyBox}>
+        <Card variant='glassAmber' style={s.emergencyBox}>
           <View style={s.emergencyHeader}>
             <Ionicons name="warning" size={18} color={C.error} />
             <Text style={s.emergencyTitle}>Emergency Contacts</Text>
           </View>
           <Text style={s.emergencyText}>Police: 10111  |  Ambulance: 10177  |  Scholar Transport Hotline: 0800 123 456</Text>
-        </View>
+        </Card>
 
         {/* Complete Button */}
         {manifest.status !== 'completed' && (

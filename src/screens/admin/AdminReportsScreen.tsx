@@ -4,12 +4,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -138,16 +136,16 @@ export default function AdminReportsScreen({ navigation }: Props) {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     statsGrid: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    revenueCard: { ...glass, marginHorizontal: 16, marginTop: 12, padding: 20, borderTopWidth: 1, borderTopColor: 'rgba(255,183,0,.3)' },
+    revenueCard: { marginHorizontal: 16, marginTop: 12, padding: 20, borderTopWidth: 1, borderTopColor: 'rgba(255,183,0,.3)' },
     revenueRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     revenueLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     revenueValue: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '800', color: C.primary },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    reportCard: { ...glass, padding: 16, marginBottom: 10 },
+    reportCard: { padding: 16, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     reportRow: { flexDirection: 'row', alignItems: 'center' },
@@ -192,38 +190,38 @@ export default function AdminReportsScreen({ navigation }: Props) {
 
       {/* Stats Grid */}
       <View style={s.statsGrid}>
-        <View style={s.statCard}>
+        <Card variant='glassAmber' style={s.statCard}>
           <Text style={s.statNumber}>{stats.totalStudents}</Text>
           <Text style={s.statLabel}>Students</Text>
-        </View>
-        <View style={s.statCard}>
+        </Card>
+        <Card variant='glassAmber' style={s.statCard}>
           <Text style={s.statNumber}>{stats.activeDrivers}</Text>
           <Text style={s.statLabel}>Drivers</Text>
-        </View>
-        <View style={s.statCard}>
+        </Card>
+        <Card variant='glassAmber' style={s.statCard}>
           <Text style={s.statNumber}>{stats.schools}</Text>
           <Text style={s.statLabel}>Schools</Text>
-        </View>
-        <View style={s.statCard}>
+        </Card>
+        <Card variant='glassAmber' style={s.statCard}>
           <Text style={s.statNumber}>{stats.tripsToday}</Text>
           <Text style={s.statLabel}>Trips Today</Text>
-        </View>
+        </Card>
       </View>
 
       {/* Revenue Card */}
-      <View style={s.revenueCard}>
+      <Card variant='glassAmber' style={s.revenueCard}>
         <View style={s.revenueRow}>
           <Text style={s.revenueLabel}>Total Revenue</Text>
           <Text style={s.revenueValue}>R{(stats.revenue / 100).toLocaleString()}</Text>
         </View>
-      </View>
+      </Card>
 
       {/* Report Types */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>Generate Reports</Text>
         {reportTypes.map((report, index) => (
           <TouchableOpacity key={index} onPress={report.action} activeOpacity={0.7}>
-            <View style={s.reportCard}>
+            <Card variant='glassAmber' style={s.reportCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.reportRow}>
                 <View style={[s.reportIcon, { backgroundColor: `${report.color}18`, borderWidth: 1, borderColor: `${report.color}35` }]}>
@@ -235,7 +233,7 @@ export default function AdminReportsScreen({ navigation }: Props) {
                 </View>
                 <Ionicons name="download" size={20} color={C.textMuted} />
               </View>
-            </View>
+            </Card>
           </TouchableOpacity>
         ))}
       </View>

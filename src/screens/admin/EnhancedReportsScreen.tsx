@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Share, Pla
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -190,11 +190,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     content: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12, marginTop: 8 },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    statCard: { width: '48%', ...glass, padding: 14, alignItems: 'center', borderColor: 'rgba(255,255,255,.08)' },
+    statCard: { width: '48%', padding: 14, alignItems: 'center', borderColor: 'rgba(255,255,255,.08)' },
     statIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
     statValue: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    chartCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    chartCard: { padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     chartContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 150, paddingBottom: 24 },
@@ -204,14 +204,14 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     barValue: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '600', color: C.textSecondary, position: 'absolute', top: -16 },
     chartLegend: { alignItems: 'center', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: C.border },
     legendText: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted },
-    paymentCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    paymentCard: { padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
     paymentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border },
     paymentMonth: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: C.text, width: 52 },
     paymentAmounts: { flexDirection: 'row', gap: 12 },
     paid: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.success },
     pending: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.warning },
     overdue: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.error },
-    driverCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    driverCard: { padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
     driverRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border },
     driverRank: { marginRight: 12 },
     rankNumber: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, fontFamily: 'DMMono_400Regular', fontSize: 11, fontWeight: '700', color: C.text, overflow: 'hidden' },
@@ -220,7 +220,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     driverStats: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textMuted, marginTop: 2 },
     driverRating: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     ratingValue: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text },
-    complianceCard: { ...glass, padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
+    complianceCard: { padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
     complianceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: C.border, gap: 14 },
     complianceInfo: { flex: 1 },
     complianceTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
@@ -287,19 +287,19 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
             { title: 'Completed Trips', value: reportData?.completedTrips || 0, icon: 'navigate', color: C.warning },
             { title: 'Revenue', value: `R${(reportData?.totalRevenue || 0).toLocaleString()}`, icon: 'cash', color: C.error },
           ].map((stat, i) => (
-            <View key={i} style={s.statCard}>
+            <Card variant='glassAmber' key={i} style={s.statCard}>
               <View style={[s.statIcon, { backgroundColor: `${stat.color}18` }]}>
                 <Ionicons name={stat.icon as keyof typeof Ionicons.glyphMap} size={22} color={stat.color} />
               </View>
               <Text style={s.statValue}>{stat.value}</Text>
               <Text style={s.statLabel}>{stat.title}</Text>
-            </View>
+            </Card>
           ))}
         </View>
 
         {/* Trip Analytics Chart */}
         <Text style={s.sectionTitle}>Trip Analytics (Last 7 Days)</Text>
-        <View style={s.chartCard}>
+        <Card variant='glassAmber' style={s.chartCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.cardLeftBar} />
           <View style={s.chartContainer}>
@@ -318,11 +318,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
               Total: {tripAnalytics.reduce((s, d) => s + d.trips, 0)} trips | R{tripAnalytics.reduce((s, d) => s + d.revenue, 0).toLocaleString()} revenue
             </Text>
           </View>
-        </View>
+        </Card>
 
         {/* Payment Summary */}
         <Text style={s.sectionTitle}>Payment Summary</Text>
-        <View style={s.paymentCard}>
+        <Card variant='glassAmber' style={s.paymentCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.cardLeftBar} />
           {paymentSummary.map((item, index) => (
@@ -335,11 +335,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
               </View>
             </View>
           ))}
-        </View>
+        </Card>
 
         {/* Driver Performance */}
         <Text style={s.sectionTitle}>Driver Performance</Text>
-        <View style={s.driverCard}>
+        <Card variant='glassAmber' style={s.driverCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.cardLeftBar} />
           {driverPerformance.slice(0, 5).map((driver, index) => (
@@ -357,11 +357,11 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
               </View>
             </View>
           ))}
-        </View>
+        </Card>
 
         {/* Government Compliance */}
         <Text style={s.sectionTitle}>Government Compliance</Text>
-        <View style={s.complianceCard}>
+        <Card variant='glassAmber' style={s.complianceCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.cardLeftBar} />
           {[
@@ -377,7 +377,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
               </View>
             </View>
           ))}
-        </View>
+        </Card>
 
         <Spacer size="xl" />
         <View style={s.bottomSpacer} />

@@ -4,10 +4,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { driverService, Driver } from '../../lib/api';
-import { Spacer } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
-
-const glass = cards.glassAmber;
+import { Spacer, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -68,15 +66,15 @@ const ManageDriversScreen = ({ navigation }: Props) => {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    searchWrap: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 16, ...glass, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, gap: 8 },
+    searchWrap: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 16, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, gap: 8 },
     searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    driverCard: { ...glass, padding: 14, marginBottom: 10 },
+    driverCard: { padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     driverRow: { flexDirection: 'row', alignItems: 'center' },
@@ -88,7 +86,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
     badgeRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
     badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 9, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
-    skeletonCard: { ...glass, height: 80, marginBottom: 10, borderRadius: 20 },
+    skeletonCard: { height: 80, marginBottom: 10, borderRadius: 20 },
     paginationRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingHorizontal: 4 },
     pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
     pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.cyan },
@@ -103,7 +101,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Manage Drivers</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ padding: 16 }}>
-          {[1,2,3,4,5].map(i => <View key={i} style={s.skeletonCard} />)}
+          {[1,2,3,4,5].map(i => <Card key={i} variant='glassAmber' style={s.skeletonCard}><View /></Card>)}
         </View>
       </View>
     );
@@ -129,13 +127,13 @@ const ManageDriversScreen = ({ navigation }: Props) => {
       >
         {/* Stats */}
         <View style={s.statsRow}>
-          <View style={s.statCard}><Text style={s.statNumber}>{activeDrivers}</Text><Text style={s.statLabel}>Active</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{pendingDrivers}</Text><Text style={s.statLabel}>Pending</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{drivers.length}</Text><Text style={s.statLabel}>Total</Text></View>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{activeDrivers}</Text><Text style={s.statLabel}>Active</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{pendingDrivers}</Text><Text style={s.statLabel}>Pending</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{drivers.length}</Text><Text style={s.statLabel}>Total</Text></Card>
         </View>
 
         {/* Search */}
-        <View style={s.searchWrap}>
+        <Card variant='glassAmber' style={s.searchWrap}>
           <Ionicons name="search" size={16} color={C.textMuted} />
           <View style={{ flex: 1 }}>
             {searchQuery ? (
@@ -149,7 +147,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
               <Ionicons name="close-circle" size={16} color={C.textMuted} />
             </TouchableOpacity>
           ) : null}
-        </View>
+        </Card>
 
         {/* Driver List */}
         <View style={s.section}>

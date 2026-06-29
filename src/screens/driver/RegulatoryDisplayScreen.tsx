@@ -5,11 +5,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -52,7 +51,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.primary, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
-    infoCard: { ...glass, padding: 16, marginBottom: 10 },
+    infoCard: { padding: 16, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     infoRowIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
@@ -60,7 +59,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
     infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     infoValue: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.text, marginTop: 2 },
     divider: { height: 1, backgroundColor: C.border, marginVertical: 2 },
-    emergencyCard: { ...glass, padding: 16 },
+    emergencyCard: { padding: 16 },
     emergencyRow: { flexDirection: 'row' },
     emergencyItem: { flex: 1, alignItems: 'center', padding: 10 },
     emergencyLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 5, textTransform: 'uppercase' },
@@ -97,7 +96,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
         {/* Operator Details */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Operator Details</Text>
-          <View style={s.infoCard}>
+          <Card variant='glassAmber' style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
               <View style={[s.infoRowIcon, { backgroundColor: 'rgba(34,211,238,.1)' }]}>
@@ -128,13 +127,13 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
                 <Text style={s.infoValue}>{regulatoryInfo.licenseExpiry}</Text>
               </View>
             </View>
-          </View>
+          </Card>
         </View>
 
         {/* Vehicle Details */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Vehicle Details</Text>
-          <View style={s.infoCard}>
+          <Card variant='glassAmber' style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
               <View style={[s.infoRowIcon, { backgroundColor: 'rgba(148,163,184,.15)' }]}>
@@ -175,13 +174,13 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
                 <Text style={[s.infoValue, { color: C.error }]}>{regulatoryInfo.speedLimit} km/h</Text>
               </View>
             </View>
-          </View>
+          </Card>
         </View>
 
         {/* Route Details */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Route Details</Text>
-          <View style={s.infoCard}>
+          <Card variant='glassAmber' style={s.infoCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.infoRow}>
               <View style={[s.infoRowIcon, { backgroundColor: 'rgba(217,119,6,.1)' }]}>
@@ -192,13 +191,13 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
                 <Text style={s.infoValue}>{regulatoryInfo.routePermit}</Text>
               </View>
             </View>
-          </View>
+          </Card>
         </View>
 
         {/* Emergency Contacts */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Emergency & Complaint Contacts</Text>
-          <View style={s.emergencyCard}>
+          <Card variant='glassAmber' style={s.emergencyCard}>
             <View style={s.cardTopRefraction} />
             <View style={s.emergencyRow}>
               <View style={s.emergencyItem}>
@@ -235,7 +234,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
                 <Text style={s.contactNumber}>{regulatoryInfo.departmentContact}</Text>
               </View>
             </View>
-          </View>
+          </Card>
         </View>
 
         {/* Legal Notice */}

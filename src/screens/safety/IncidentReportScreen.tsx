@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Incident {
   id: number;
@@ -85,12 +84,12 @@ export default function IncidentReportScreen() {
     reportButtonText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     reportSubtext: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 10, textAlign: 'center' },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 16, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 16, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '700', color: C.accent },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    incidentCard: { ...glass, padding: 14, marginBottom: 10 },
+    incidentCard: { padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     incidentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
     incidentType: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
@@ -101,7 +100,7 @@ export default function IncidentReportScreen() {
     incidentMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     metaText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
-    infoCard: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+    infoCard: { padding: 16, flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
     infoContent: { flex: 1 },
     infoTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.success, marginBottom: 6 },
     infoText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, lineHeight: 18 },
@@ -152,18 +151,18 @@ export default function IncidentReportScreen() {
 
         {/* Quick Stats */}
         <View style={s.statsRow}>
-          <View style={s.statCard}>
+          <Card variant='glassAmber' style={s.statCard}>
             <Text style={s.statNumber}>{incidents.length}</Text>
             <Text style={s.statLabel}>Total</Text>
-          </View>
-          <View style={s.statCard}>
+          </Card>
+          <Card variant='glassAmber' style={s.statCard}>
             <Text style={[s.statNumber, { color: C.accent }]}>{incidents.filter(i => i.status === 'investigating').length}</Text>
             <Text style={s.statLabel}>Investigating</Text>
-          </View>
-          <View style={s.statCard}>
+          </Card>
+          <Card variant='glassAmber' style={s.statCard}>
             <Text style={[s.statNumber, { color: C.success }]}>{incidents.filter(i => i.status === 'resolved').length}</Text>
             <Text style={s.statLabel}>Resolved</Text>
-          </View>
+          </Card>
         </View>
 
         {/* Recent Reports */}
@@ -172,7 +171,7 @@ export default function IncidentReportScreen() {
           {incidents.map((incident) => {
             const statusColor = getStatusColor(incident.status);
             return (
-              <View key={incident.id} style={s.incidentCard}>
+              <Card key={incident.id} variant='glassAmber' style={s.incidentCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={s.incidentHeader}>
                   <View style={[s.incidentType, { backgroundColor: statusColor + '30' }]}>
@@ -198,19 +197,19 @@ export default function IncidentReportScreen() {
                     <Text style={s.metaText}>{incident.reportedBy}</Text>
                   </View>
                 </View>
-              </View>
+              </Card>
             );
           })}
         </View>
         {/* Anonymous Reporting Info */}
         <View style={s.section}>
-          <View style={s.infoCard}>
+          <Card variant='glassAmber' style={s.infoCard}>
             <Ionicons name="shield-checkmark" size={28} color={C.success} />
             <View style={s.infoContent}>
               <Text style={s.infoTitle}>Your Safety is Our Priority</Text>
               <Text style={s.infoText}>All reports are confidential. You can choose to report anonymously. We take all reports seriously and will investigate promptly.</Text>
             </View>
-          </View>
+          </Card>
         </View>
 
         <View style={s.bottomPadding} />

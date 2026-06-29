@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -116,7 +116,7 @@ export default function SettingsScreen({ navigation }: Props) {
     profileEmail: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 2 },
     badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'capitalize' },
-    settingCard: { ...glass, padding: 0, overflow: 'visible' },
+    settingCard: { padding: 0, overflow: 'visible' },
     settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
     settingInfo: { flex: 1 },
     settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },

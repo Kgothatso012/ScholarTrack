@@ -6,13 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Spacer, SkeletonCard } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, SkeletonCard, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
-
-// Glassmorphism helper
-const glass = cards.glassAmber;
 
 interface UploadedDocument {
   uri: string;
@@ -151,18 +148,18 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
-    progressCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 16 },
+    progressCard: { marginHorizontal: 16, marginTop: 12, padding: 16 },
     progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
     progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
     progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: C.textMuted },
-    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, overflow: 'hidden' },
+    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, overflow: 'hidden' },
     statCard: { flex: 1, alignItems: 'center', paddingVertical: 16 },
     statNum: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.primary },
     statNum2: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700', color: C.cyan },
     statLbl: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    docCard: { ...glass, padding: 16, marginBottom: 12 },
+    docCard: { padding: 16, marginBottom: 12 },
     docTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.12)' },
     docHdr: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     docInfo: { flex: 1 },
@@ -176,11 +173,11 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
     changeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.cyan },
     submitBtn: { marginHorizontal: 16, marginBottom: 24, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: C.success },
     submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 1, textTransform: 'uppercase' },
-    successCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 32, alignItems: 'center' },
+    successCard: { marginHorizontal: 16, marginTop: 16, padding: 32, alignItems: 'center' },
     successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8, textAlign: 'center' },
     successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
     submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 12 },
-    helpCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 12, ...glass, padding: 16 },
+    helpCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 12, padding: 16 },
     helpText: { flex: 1, marginLeft: 12, fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, lineHeight: 18 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
@@ -213,16 +210,16 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
           </View>
         </View>
         <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}>
-          <View style={s.successCard}>
+          <Card variant='glassAmber' style={s.successCard}>
             <Ionicons name="checkmark-circle" size={80} color={C.success} />
             <Text style={s.successTitle}>Submitted Successfully!</Text>
             <Text style={s.successText}>Your documents are being reviewed.{'\n'}This typically takes 1-2 business days.</Text>
             <Text style={s.submittedDate}>Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}</Text>
-          </View>
+          </Card>
           <View style={s.section}>
             <Text style={s.sectionTitle}>Uploaded Documents</Text>
             {documents.map(doc => (
-              <View key={doc.id} style={s.docCard}>
+              <Card key={doc.id} variant='glassAmber' style={s.docCard}>
                 <View style={s.docTopRefraction} />
                 <View style={s.docHdr}>
                   <View style={s.docInfo}><Text style={s.docLabel}>{doc.label}</Text></View>
@@ -231,7 +228,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
                     <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 10, color: C.success, fontWeight: '600' }}>Uploaded</Text>
                   </View>
                 </View>
-              </View>
+              </Card>
             ))}
           </View>
           <Spacer size="xxl" />
@@ -255,22 +252,22 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
 
       <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}>
         {/* Progress */}
-        <View style={s.progressCard}>
+        <Card variant='glassAmber' style={s.progressCard}>
           <View style={s.progressBar}><View style={[s.progressFill, { width: `${(verified / documents.length) * 100}%` }]} /></View>
           <Text style={s.progressText}>{verified} of {documents.length} documents uploaded</Text>
-        </View>
+        </Card>
 
         {/* Stats */}
-        <View style={s.statsRow}>
+        <Card variant='glassAmber' style={s.statsRow}>
           <View style={s.statCard}><Text style={s.statNum}>{verified}</Text><Text style={s.statLbl}>Uploaded</Text></View>
           <View style={s.statCard}><Text style={s.statNum2}>{pending}</Text><Text style={s.statLbl}>Pending</Text></View>
-        </View>
+        </Card>
 
         {/* Documents */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Required Documents</Text>
           {documents.map(doc => (
-            <View key={doc.id} style={s.docCard}>
+            <Card key={doc.id} variant='glassAmber' style={s.docCard}>
               <View style={s.docTopRefraction} />
               <View style={s.docHdr}>
                 <View style={s.docInfo}>
@@ -294,7 +291,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
                   <Ionicons name="cloud-upload" size={20} color={C.cyan} /><Text style={s.uploadBtnText}>Upload Document</Text>
                 </TouchableOpacity>
               )}
-            </View>
+            </Card>
           ))}
         </View>
 
@@ -304,10 +301,10 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
         </TouchableOpacity>
 
         {/* Help */}
-        <View style={s.helpCard}>
+        <Card variant='glassAmber' style={s.helpCard}>
           <Ionicons name="help-circle" size={22} color={C.cyan} />
           <Text style={s.helpText}>Contact support for help with document verification</Text>
-        </View>
+        </Card>
 
         <Spacer size="xxl" />
       </ScrollView>

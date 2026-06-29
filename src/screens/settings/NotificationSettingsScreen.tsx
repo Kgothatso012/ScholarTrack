@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationService } from '../../services/NotificationService';
-import { Spacer } from '../../ui-plugin/components';
+import { Spacer, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -87,7 +87,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    statusCard: { ...glass, padding: 20, marginBottom: 8 },
+    statusCard: { padding: 20, marginBottom: 8 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.3)' },
     statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
     statusLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
@@ -96,7 +96,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
     statusDesc: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 4, lineHeight: 18 },
     enableBtn: { ...glass, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16, borderColor: `${C.accent}40` },
     enableBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.accent },
-    settingCard: { ...glass, padding: 0, overflow: 'visible' },
+    settingCard: { padding: 0, overflow: 'visible' },
     settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
     settingInfo: { flex: 1 },
     settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
@@ -139,7 +139,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
 
       {/* Status Card */}
       <View style={s.section}>
-        <View style={s.statusCard}>
+        <Card variant='glassAmber' style={s.statusCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.statusRow}>
             <Text style={s.statusLabel}>Push Notifications</Text>
@@ -157,13 +157,13 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
               <Text style={s.enableBtnText}>Enable Notifications</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </Card>
       </View>
 
       {/* Notification Types */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>Notification Types</Text>
-        <View style={s.settingCard}>
+        <Card variant='glassAmber' style={s.settingCard}>
           {notificationTypes.map((item, index) => (
             <View key={item.key} style={[s.settingRow, index === notificationTypes.length - 1 && { borderBottomWidth: 0 }]}>
               <View style={s.settingInfo}>
@@ -178,7 +178,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
               />
             </View>
           ))}
-        </View>
+        </Card>
       </View>
 
       {/* Test & Save */}

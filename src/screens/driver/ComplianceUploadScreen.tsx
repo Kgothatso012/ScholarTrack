@@ -10,12 +10,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
-import { Spacer, SkeletonCard } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, SkeletonCard, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 // ============ RSA VALIDATION UTILITIES ============
 
@@ -416,7 +414,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
-    progressCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20, marginBottom: 8 },
+    progressCard: { marginHorizontal: 16, marginTop: 16, padding: 20, marginBottom: 8 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     progressBar: { height: 8, backgroundColor: C.border, borderRadius: 4, overflow: 'hidden' },
     progressFill: { height: '100%', backgroundColor: complianceStatus === 'complete' ? C.success : complianceStatus === 'partial' ? C.accent : C.textMuted, borderRadius: 4 },
@@ -432,7 +430,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
     inputError: { borderColor: C.error, backgroundColor: 'rgba(255,61,90,.08)' },
     errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.error, marginTop: 4 },
     helperText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
-    docCard: { ...glass, padding: 16, marginBottom: 12 },
+    docCard: { padding: 16, marginBottom: 12 },
     docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     docInfo: { flex: 1 },
     docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
@@ -474,7 +472,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
     modalCancelText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
     modalConfirm: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.accent, marginLeft: 8, alignItems: 'center' },
     modalConfirmText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background },
-    successCard: { ...glass, margin: 16, padding: 32, alignItems: 'center', marginTop: 40 },
+    successCard: { margin: 16, padding: 32, alignItems: 'center', marginTop: 40 },
     successTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8 },
     successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
     submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 8 },
@@ -509,13 +507,13 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           <View style={{ width: 36 }} />
         </View><Text style={s.ltSub}>Submitted for review</Text></View>
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          <View style={s.successCard}>
+          <Card variant='glassAmber' style={s.successCard}>
             <View style={s.cardTopRefraction} />
             <Ionicons name="checkmark-circle" size={80} color={C.success} />
             <Text style={s.successTitle}>Submitted Successfully!</Text>
             <Text style={s.successText}>Your compliance documents have been submitted for review. This typically takes 1-2 business days.</Text>
             <Text style={s.submittedDate}>Submitted: {new Date(existingCompliance.submittedAt).toLocaleDateString()}</Text>
-          </View>
+          </Card>
           <TouchableOpacity style={s.viewDocsBtn} onPress={() => Alert.alert('View Documents', 'This would open the submitted documents.')}>
             <Ionicons name="document-text" size={20} color={C.background} />
             <Text style={s.viewDocsBtnText}>View Submitted Documents</Text>
@@ -553,7 +551,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(false)} tintColor={C.accent} colors={[C.accent]} />}
       >
         {/* Progress Indicator */}
-        <View style={s.progressCard}>
+        <Card variant='glassAmber' style={s.progressCard}>
           <View style={s.cardTopRefraction} />
           <View style={s.progressBar}>
             <View style={[s.progressFill, { width: `${progressPct}%` }]} />
@@ -561,7 +559,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           <Text style={s.progressText}>
             {complianceStatus === 'complete' ? <><Ionicons name="checkmark-circle" size={14} color={C.success} /> All documents uploaded</> : complianceStatus === 'partial' ? <><Ionicons name="document-text" size={14} color={C.accent} /> Partially complete</> : <><Ionicons name="arrow-up" size={14} color={C.textMuted} /> Start uploading documents</>}
           </Text>
-        </View>
+        </Card>
 
         {/* Personal Information */}
         <View style={s.section}>
@@ -688,7 +686,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
           {documents.map((doc) => {
             const expiryColor = getExpiryStatusColor(doc.expiryDate);
             return (
-              <View key={doc.id} style={s.docCard}>
+              <Card key={doc.id} variant='glassAmber' style={s.docCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={s.docHeader}>
                   <View style={s.docInfo}>
@@ -796,7 +794,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
                     </View>
                   </View>
                 </Modal>
-              </View>
+              </Card>
             );
           })}
         </View>

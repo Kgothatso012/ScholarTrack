@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { documentService, DriverDocument, ParentDocument } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
+import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const glass = cards.glassAmber;
@@ -101,13 +101,13 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     refreshBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
-    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, borderRadius: 16 },
+    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, borderRadius: 16 },
     tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 6 },
     tabText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600' },
     tabBadge: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
     tabBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
-    statItem: { flex: 1, ...glass, paddingVertical: 14, alignItems: 'center' },
+    statItem: { flex: 1, paddingVertical: 14, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     list: { padding: 16 },
@@ -134,7 +134,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: C.border },
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text },
     modalBody: { padding: 20 },
-    previewCard: { height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 16, ...glass },
+    previewCard: { height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
     previewImage: { width: '100%', height: '100%', borderRadius: 16 },
     filePreview: { alignItems: 'center' },
     fileName: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, marginTop: 10 },
@@ -230,7 +230,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
       </View>
 
       {/* Tabs */}
-      <View style={s.tabs}>
+      <Card variant='glassAmber' style={s.tabs}>
         <TouchableOpacity
           style={[s.tab, activeTab === 'drivers' && { borderBottomWidth: 2, borderBottomColor: C.cyan }]}
           onPress={() => setActiveTab('drivers')}
@@ -255,26 +255,26 @@ export default function DocumentManagementScreen({ navigation }: Props) {
             </View>
           )}
         </TouchableOpacity>
-      </View>
+      </Card>
 
       {/* Stats */}
       <View style={s.statsRow}>
-        <View style={s.statItem}>
+        <Card variant='glassAmber' style={s.statItem}>
           <Text style={[s.statNumber, { color: C.cyan }]}>{activeDocs.length}</Text>
           <Text style={s.statLabel}>Total</Text>
-        </View>
-        <View style={s.statItem}>
+        </Card>
+        <Card variant='glassAmber' style={s.statItem}>
           <Text style={[s.statNumber, { color: C.success }]}>{activeDocs.filter(d => d.status === 'approved').length}</Text>
           <Text style={s.statLabel}>Approved</Text>
-        </View>
-        <View style={s.statItem}>
+        </Card>
+        <Card variant='glassAmber' style={s.statItem}>
           <Text style={[s.statNumber, { color: C.primary }]}>{activeDocs.filter(d => d.status === 'pending').length}</Text>
           <Text style={s.statLabel}>Pending</Text>
-        </View>
-        <View style={s.statItem}>
+        </Card>
+        <Card variant='glassAmber' style={s.statItem}>
           <Text style={[s.statNumber, { color: C.error }]}>{activeDocs.filter(d => d.status === 'rejected').length}</Text>
           <Text style={s.statLabel}>Rejected</Text>
-        </View>
+        </Card>
       </View>
 
       {/* Document List */}
@@ -311,7 +311,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
 
             {selectedDoc && (
               <ScrollView style={s.modalBody} showsVerticalScrollIndicator={false}>
-                <View style={s.previewCard}>
+                <Card variant='glassAmber' style={s.previewCard}>
                   {selectedDoc.file_url?.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                     <Image source={{ uri: selectedDoc.file_url }} style={s.previewImage} resizeMode="contain" />
                   ) : (
@@ -320,7 +320,7 @@ export default function DocumentManagementScreen({ navigation }: Props) {
                       <Text style={s.fileName}>{selectedDoc.file_name}</Text>
                     </View>
                   )}
-                </View>
+                </Card>
 
                 <Text style={s.docDetail}>Type: {documentTypes[selectedDoc.document_type]}</Text>
                 <Text style={s.docDetail}>Submitted: {new Date(selectedDoc.uploaded_at).toLocaleString()}</Text>

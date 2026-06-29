@@ -5,11 +5,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface DocStatus {
   id: string;
@@ -139,7 +138,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    scoreCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 20, flexDirection: 'row', alignItems: 'center' },
+    scoreCard: { marginHorizontal: 16, marginTop: 16, padding: 20, flexDirection: 'row', alignItems: 'center' },
     scoreCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: C.primary, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(217,119,6,.08)' },
     scoreText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: C.primary },
     scoreLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.text },
@@ -151,7 +150,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
     legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    docCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    docCard: { padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     docTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
     docIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
     docInfo: { flex: 1, marginLeft: 12 },
@@ -190,7 +189,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
         }
       >
         {/* Compliance Score */}
-        <View style={s.scoreCard}>
+        <Card variant='glassAmber' style={s.scoreCard}>
           <View style={s.scoreCircle}>
             <Text style={s.scoreText}>{compliancePercent}%</Text>
             <Text style={s.scoreLabel}>Compliant</Text>
@@ -202,7 +201,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
               <Text style={s.warningText}>Some documents need verification</Text>
             )}
           </View>
-        </View>
+        </Card>
 
         {/* Legal Reference */}
         <View style={s.legalBox}>
@@ -218,11 +217,11 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
           {docs.map((doc) => {
             const statusColor = getStatusColor(doc.verified, doc.required);
             return (
-              <TouchableOpacity
+              <Card
                 key={doc.id}
+                variant='glassAmber'
                 style={s.docCard}
                 onPress={() => handleVerifyDoc(doc.id)}
-                activeOpacity={0.7}
               >
                 <View style={s.docTopRefraction} />
                 <View style={[s.docIcon, { backgroundColor: statusColor + '18' }]}>
@@ -241,7 +240,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
                   )}
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={C.textMuted} />
-              </TouchableOpacity>
+              </Card>
             );
           })}
         </View>

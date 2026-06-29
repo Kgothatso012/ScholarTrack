@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -194,7 +194,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     statIcon: { marginBottom: 6 },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 30, fontWeight: '800', color: C.text },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, color: 'rgba(255,255,255,.8)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    summaryCard: { ...glass, marginHorizontal: 16, marginTop: 12, padding: 20, position: 'relative', overflow: 'hidden' },
+    summaryCard: { marginHorizontal: 16, marginTop: 12, padding: 20, position: 'relative', overflow: 'hidden' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     summaryTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 14, letterSpacing: 0.5 },
@@ -282,7 +282,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       </View>
 
       {/* Summary Card */}
-      <View style={s.summaryCard}>
+      <Card variant='glassAmber' style={s.summaryCard}>
         <View style={s.cardTopRefraction} />
         <View style={s.cardLeftBar} />
         <Text style={s.summaryTitle}>Fleet Overview</Text>
@@ -296,7 +296,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
             {stats.totalDrivers > 0 ? Math.round((stats.compliant / stats.totalDrivers) * 100) : 0}%
           </Text>
         </View>
-      </View>
+      </Card>
 
       {/* Driver List */}
       <View style={s.section}>

@@ -12,7 +12,7 @@ import Animated, {
   FadeIn,
 } from 'react-native-reanimated';
 
-import { Spacer, Badge, Skeleton } from '../../ui-plugin/components';
+import { Spacer, Badge, Skeleton, Card } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
 import { getTheme, cards, typography } from '../../ui-plugin/theme';
 
@@ -167,7 +167,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     sectionLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     statCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
-    statCard: { ...glass, paddingVertical: 18, paddingHorizontal: 16, position: 'relative', overflow: 'hidden' },
+    statCard: { paddingVertical: 18, paddingHorizontal: 16, position: 'relative', overflow: 'hidden' },
     statTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     statLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: 1.2 },
@@ -196,7 +196,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     listName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
     listMeta: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: C.textMuted, marginTop: 2 },
     amount: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.accent },
-    emptyGlass: { ...glass, padding: 30, alignItems: 'center' },
+    emptyGlass: { padding: 30, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
     emptyTitle: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text, textAlign: 'center', marginBottom: 6 },
     emptyText: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textMuted, textAlign: 'center' },
@@ -233,12 +233,12 @@ export default function AdminDashboardScreen({ navigation }: Props) {
         <View style={s.statsGrid}>
           {[0, 1, 2, 3].map(i => (
             <View key={i} style={s.statCardOuter}>
-              <View style={s.statCard}>
+              <Card variant='glassAmber' style={s.statCard}>
                 <View style={s.statCardTopRefraction} />
                 <View style={s.statCardLeftBar} />
                 <Skeleton width={80} height={10} borderRadius={8} />
                 <Skeleton width={100} height={26} borderRadius={8} />
-              </View>
+              </Card>
             </View>
           ))}
         </View>
@@ -296,12 +296,12 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           <View style={s.statsGrid}>
             {stats.map((stat, index) => (
               <View key={index} style={s.statCardOuter}>
-                <View style={s.statCard}>
+                <Card variant='glassAmber' style={s.statCard}>
                   <View style={s.statCardTopRefraction} />
                   <View style={[s.statCardLeftBar, { backgroundColor: stat.positive !== false ? 'rgba(255,183,0,.6)' : 'rgba(255,61,90,.6)' }]} />
                   <Text style={s.statLabel}>{stat.label}</Text>
                   <Text style={s.statValue}>{stat.value}</Text>
-                </View>
+                </Card>
               </View>
             ))}
           </View>
@@ -353,11 +353,11 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           </View>
 
           {filteredDrivers.length === 0 ? (
-            <View style={s.emptyGlass}>
+            <Card variant='glassAmber' style={s.emptyGlass}>
               <Ionicons name="car-outline" size={52} color={C.textMuted} style={s.emptyIcon} />
               <Text style={s.emptyTitle}>{driverSearch ? 'No drivers match your search' : 'No drivers yet'}</Text>
               <Text style={s.emptyText}>{driverSearch ? 'Try a different search term' : 'Add your first driver to get started'}</Text>
-            </View>
+            </Card>
           ) : (
             <>
               {paginatedDrivers.map((driver, index) => (
@@ -396,11 +396,11 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           </View>
 
           {filteredPayments.length === 0 ? (
-            <View style={s.emptyGlass}>
+            <Card variant='glassAmber' style={s.emptyGlass}>
               <Ionicons name="card-outline" size={48} color={C.textMuted} style={s.emptyIcon} />
               <Text style={s.emptyTitle}>No {paymentFilter === 'all' ? '' : paymentFilter} payments</Text>
               <Text style={s.emptyText}>Payments will appear here once recorded</Text>
-            </View>
+            </Card>
           ) : (
             <>
               {paginatedPayments.map((payment, index) => (

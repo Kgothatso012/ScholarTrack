@@ -4,12 +4,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { routeService, driverService, linkingService, Route, Driver } from '../../lib/api';
-import { getTheme, cards } from '../../ui-plugin/theme';
-import { SkeletonListItem } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
+import { SkeletonListItem, Card } from '../../ui-plugin/components';
 
 const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -99,7 +97,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
     addFirstBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 24, borderRadius: 14, backgroundColor: C.primary, gap: 8, marginTop: 20 },
     addFirstText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.textInverse },
     list: { padding: 16 },
-    routeCard: { ...glass, padding: 16, marginBottom: 12 },
+    routeCard: { padding: 16, marginBottom: 12 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(245,158,11,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(245,158,11,.6)' },
     routeHeader: { flexDirection: 'row', alignItems: 'center' },
@@ -191,7 +189,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
           ListFooterComponent={<View style={s.bottomPadding} />}
           renderItem={({ item: route }) => (
-            <View style={s.routeCard}>
+            <Card variant='glassAmber' style={s.routeCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.routeHeader}>
                 <View style={[s.routeIcon, { backgroundColor: 'rgba(34,211,238,.12)', borderWidth: 1, borderColor: 'rgba(34,211,238,.2)' }]}>
@@ -223,7 +221,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
               <TouchableOpacity style={s.viewBtn}>
                 <Text style={s.viewBtnText}>Manage Route</Text>
               </TouchableOpacity>
-            </View>
+            </Card>
           )}
         />
       )}

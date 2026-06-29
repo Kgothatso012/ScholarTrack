@@ -7,12 +7,10 @@ import * as Location from 'expo-location';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
 import { notificationService } from '../../services/NotificationService';
-import { getTheme, cards } from '../../ui-plugin/theme';
-import { SkeletonListItem } from '../../ui-plugin/components';
+import { SkeletonListItem, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -190,7 +188,7 @@ export default function DriverTripScreen({ navigation }: Props) {
     onlineBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: '#fff' },
     geofenceBanner: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8, marginHorizontal: 16, marginTop: 12, borderRadius: 14, overflow: 'hidden' },
     geofenceBannerText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: '#fff', flex: 1 },
-    activeTripCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 18, borderColor: C.primary, borderWidth: 1 },
+    activeTripCard: { marginHorizontal: 16, marginTop: 12, padding: 18, borderColor: C.primary, borderWidth: 1 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.2)' },
     activeTripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
     statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, gap: 4 },
@@ -210,14 +208,14 @@ export default function DriverTripScreen({ navigation }: Props) {
     checkinBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: '#fff' },
     completeTripBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, gap: 8 },
     completeTripBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: '#fff' },
-    noTripCard: { marginHorizontal: 16, marginTop: 12, ...glass, padding: 40, alignItems: 'center' },
+    noTripCard: { marginHorizontal: 16, marginTop: 12, padding: 40, alignItems: 'center' },
     noTripText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 12, textAlign: 'center' },
     locationText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 6 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    emptyCard: { ...glass, padding: 30, alignItems: 'center', marginBottom: 10 },
+    emptyCard: { padding: 30, alignItems: 'center', marginBottom: 10 },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, textAlign: 'center' },
-    tripCard: { ...glass, padding: 14, marginBottom: 10, borderColor: C.border },
+    tripCard: { padding: 14, marginBottom: 10, borderColor: C.border },
     tripHeader: { flexDirection: 'row', alignItems: 'center' },
     tripTimeBox: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, backgroundColor: 'rgba(0,35,149,.15)' },
     tripTimeText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.cyan },
@@ -229,7 +227,7 @@ export default function DriverTripScreen({ navigation }: Props) {
     addressText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
     startBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, marginTop: 10, gap: 6 },
     startBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: '#fff' },
-    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, ...glass, overflow: 'hidden' },
+    statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, overflow: 'hidden' },
     statItem: { flex: 1, alignItems: 'center', paddingVertical: 16 },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.cyan },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
@@ -282,8 +280,8 @@ export default function DriverTripScreen({ navigation }: Props) {
 
         {/* Active Trip Card */}
         {activeTrip ? (
-          <View style={s.activeTripCard}>
-            <View style={s.cardTopRefraction} />
+          <Card variant='glassAmber' style={s.activeTripCard}>
+           <View style={s.cardTopRefraction} />
             <View style={s.activeTripHeader}>
               <View style={[s.statusBadge, { backgroundColor: C.primary }]}>
                 <Ionicons name="bus" size={14} color="#fff" /><Text style={s.statusBadgeText}>IN PROGRESS</Text>
@@ -315,27 +313,27 @@ export default function DriverTripScreen({ navigation }: Props) {
             </View>
             <TouchableOpacity style={[s.completeTripBtn, { backgroundColor: C.success }]} onPress={() => completeTrip(activeTrip.id)}>
               <Ionicons name="flag" size={20} color="#fff" /><Text style={s.completeTripBtnText}>Complete Trip</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={s.noTripCard}>
-            <Ionicons name="bus-outline" size={44} color={C.textMuted} />
+           </TouchableOpacity>
+          </Card>
+       ) : (
+          <Card variant='glassAmber' style={s.noTripCard}>
+           <Ionicons name="bus-outline" size={44} color={C.textMuted} />
             <Text style={s.noTripText}>{isOnline ? 'No active trips' : 'Go online to receive trips'}</Text>
             {currentLocation && (
               <Text style={s.locationText}><Ionicons name="location" size={12} color={C.textMuted} /> Location active</Text>
-            )}
-          </View>
-        )}
+           )}
+          </Card>
+       )}
 
         {/* Today's Schedule */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Today's Schedule</Text>
           {trips.length === 0 ? (
-            <View style={s.emptyCard}><Text style={s.emptyText}>No trips scheduled for today</Text></View>
+            <Card variant='glassAmber' style={s.emptyCard}><Text style={s.emptyText}>No trips scheduled for today</Text></Card>
           ) : (
             trips.map((trip: Trip) => (
-              <View key={trip.id} style={s.tripCard}>
-                <View style={s.cardTopRefraction} />
+              <Card key={trip.id} variant='glassAmber' style={s.tripCard}>
+               <View style={s.cardTopRefraction} />
                 <View style={s.tripHeader}>
                   <View style={s.tripTimeBox}>
                     <Text style={s.tripTimeText}>
@@ -356,19 +354,18 @@ export default function DriverTripScreen({ navigation }: Props) {
                   <TouchableOpacity style={[s.startBtn, { backgroundColor: C.success }]} onPress={() => startTrip(trip.id)}>
                     <Ionicons name="play" size={16} color="#fff" /><Text style={s.startBtnText}>Start Trip</Text>
                   </TouchableOpacity>
-                )}
-              </View>
-            ))
-          )}
+               )}
+              </Card>
+           ))
+         )}
         </View>
 
         {/* Quick Stats */}
-        <View style={s.statsRow}>
-          <View style={s.statItem}><Text style={s.statNumber}>{trips.length}</Text><Text style={s.statLabel}>Total</Text></View>
+        <Card variant='glassAmber' style={s.statsRow}>
+         <View style={s.statItem}><Text style={s.statNumber}>{trips.length}</Text><Text style={s.statLabel}>Total</Text></View>
           <View style={s.statItem}><Text style={s.statNumber}>{trips.filter((t) => t.status === 'completed').length}</Text><Text style={s.statLabel}>Done</Text></View>
-          <View style={s.statItem}><Text style={s.statNumber}>{trips.filter((t) => t.status === 'in_progress').length}</Text><Text style={s.statLabel}>Active</Text></View>
-        </View>
-
+         <View style={s.statItem}><Text style={s.statNumber}>{trips.filter((t) => t.status === 'in_progress').length}</Text><Text style={s.statLabel}>Active</Text></View>
+        </Card>
         <View style={s.bottomSpacer} />
       </ScrollView>
     </View>

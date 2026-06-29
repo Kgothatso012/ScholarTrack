@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, Child } from '../../lib/api';
-import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
@@ -134,16 +134,16 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
     backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, borderRadius: 16 },
+    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, borderRadius: 16 },
     tab: { flex: 1, paddingVertical: 12, alignItems: 'center' },
     tabText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600' },
-    filterRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, padding: 12, borderRadius: 16, gap: 10, alignItems: 'center' },
+    filterRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, padding: 12, borderRadius: 16, gap: 10, alignItems: 'center' },
     dateBox: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
     dateInput: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, flex: 1 },
     filterBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: C.info },
     filterBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, paddingHorizontal: 16, marginTop: 16, marginBottom: 12, letterSpacing: 0.5 },
-    childCard: { ...glass, marginHorizontal: 16, marginBottom: 10, padding: 14, flexDirection: 'row', alignItems: 'center' },
+    childCard: { marginHorizontal: 16, marginBottom: 10, padding: 14, flexDirection: 'row', alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     childInfo: { flex: 1, flexDirection: 'row', alignItems: 'center' },
@@ -154,16 +154,16 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text, textTransform: 'capitalize' },
     actionBtns: { flexDirection: 'row', gap: 8 },
     actionBtn: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
-    summaryCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20 },
+    summaryCard: { marginHorizontal: 16, marginTop: 16, padding: 20 },
     summaryTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 14, letterSpacing: 0.5 },
     summaryRow: { flexDirection: 'row', justifyContent: 'space-around' },
     summaryItem: { alignItems: 'center' },
     summaryNumber: { fontFamily: 'Syne_700Bold', fontSize: 28, fontWeight: '700' },
     summaryLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
-    reportTypeRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, ...glass, padding: 4, borderRadius: 14 },
+    reportTypeRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, padding: 4, borderRadius: 14 },
     reportTypeBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
     reportTypeText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600' },
-    statsCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20 },
+    statsCard: { marginHorizontal: 16, marginTop: 16, padding: 20 },
     statsTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 14, letterSpacing: 0.5 },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap' },
     statBox: { width: '33%', alignItems: 'center', marginBottom: 12 },
@@ -212,14 +212,14 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       </View>
 
       {/* Tabs */}
-      <View style={s.tabs}>
+      <Card variant='glassAmber' style={s.tabs}>
         <TouchableOpacity style={[s.tab, activeTab === 'attendance' && { borderBottomWidth: 2, borderBottomColor: C.cyan }]} onPress={() => setActiveTab('attendance')}>
           <Text style={[s.tabText, { color: activeTab === 'attendance' ? C.cyan : C.textMuted }]}>Daily Attendance</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[s.tab, activeTab === 'reports' && { borderBottomWidth: 2, borderBottomColor: C.cyan }]} onPress={() => setActiveTab('reports')}>
           <Text style={[s.tabText, { color: activeTab === 'reports' ? C.cyan : C.textMuted }]}>Reports</Text>
         </TouchableOpacity>
-      </View>
+      </Card>
 
       {activeTab === 'attendance' ? (
         <ScrollView
@@ -227,7 +227,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />}
         >
           {/* Filter Row */}
-          <View style={s.filterRow}>
+          <Card variant='glassAmber' style={s.filterRow}>
             <View style={s.dateBox}>
               <Ionicons name="calendar" size={18} color={C.cyan} />
               <TextInput
@@ -244,14 +244,14 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
             >
               <Text style={s.filterBtnText}>{selectedChild ? 'Filtered' : 'All'}</Text>
             </TouchableOpacity>
-          </View>
+          </Card>
 
           {/* Mark Attendance */}
           <Text style={s.sectionTitle}>Mark Attendance for {dateFilter}</Text>
           {children.map((child) => {
             const record = attendance.find(a => a.child_id === child.id);
             return (
-              <View key={child.id} style={s.childCard}>
+              <Card variant='glassAmber' key={child.id} style={s.childCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={s.childInfo}>
                   <View style={[s.childAvatar, { backgroundColor: `${C.info}15`, borderColor: `${C.info}35` }]}>
@@ -280,12 +280,12 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
                     </TouchableOpacity>
                   </View>
                 )}
-              </View>
+              </Card>
             );
           })}
 
           {/* Today's Summary */}
-          <View style={s.summaryCard}>
+          <Card variant='glassAmber' style={s.summaryCard}>
             <View style={s.cardTopRefraction} />
             <Text style={s.summaryTitle}>Today's Summary</Text>
             <View style={s.summaryRow}>
@@ -302,7 +302,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
                 <Text style={s.summaryLabel}>Excused</Text>
               </View>
             </View>
-          </View>
+          </Card>
 
           <Spacer size="xl" />
           <View style={s.bottomPadding} />
@@ -310,7 +310,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Report Type */}
-          <View style={s.reportTypeRow}>
+          <Card variant='glassAmber' style={s.reportTypeRow}>
             {(['daily', 'weekly', 'monthly'] as const).map((type) => (
               <TouchableOpacity
                 key={type}
@@ -322,10 +322,10 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </Card>
 
           {/* Quick Stats */}
-          <View style={s.statsCard}>
+          <Card variant='glassAmber' style={s.statsCard}>
             <Text style={s.statsTitle}>Quick Stats</Text>
             <View style={s.statsGrid}>
               <View style={s.statBox}>
@@ -343,7 +343,7 @@ export default function AttendanceReportsScreen({ navigation }: Props) {
                 <Text style={s.statLabel}>Attendance Rate</Text>
               </View>
             </View>
-          </View>
+          </Card>
 
           {/* Report Actions */}
           <Text style={s.sectionTitle}>Generate Reports</Text>

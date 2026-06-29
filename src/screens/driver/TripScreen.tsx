@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
-import { Spacer, SkeletonListItem } from '../../ui-plugin/components';
+import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -77,7 +77,7 @@ const TripScreen = ({ navigation }: Props) => {
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted, marginTop: 10 },
-    tripStatus: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 20, alignItems: 'center' },
+    tripStatus: { marginHorizontal: 16, marginTop: 16, padding: 20, alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     statusBadge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.text, textTransform: 'uppercase', letterSpacing: 1 },
@@ -90,12 +90,12 @@ const TripScreen = ({ navigation }: Props) => {
     startBtn: { backgroundColor: C.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
     endBtn: { backgroundColor: C.error, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
     btnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background },
-    noTripCard: { ...glass, marginHorizontal: 16, marginTop: 16, padding: 24, alignItems: 'center' },
+    noTripCard: { marginHorizontal: 16, marginTop: 16, padding: 24, alignItems: 'center' },
     noTripText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 10 },
     noTripSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 6, textAlign: 'center' },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    tripCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    tripCard: { padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     tripIcon: { marginRight: 14 },
     tripInfo: { flex: 1 },
     tripName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
@@ -105,7 +105,7 @@ const TripScreen = ({ navigation }: Props) => {
     quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
     quickAction: { ...glass, padding: 16, alignItems: 'center', flex: 1, marginHorizontal: 4 },
     quickActionText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text, marginTop: 6, textAlign: 'center' },
-    emptyContainer: { ...glass, padding: 30, alignItems: 'center' },
+    emptyContainer: { padding: 30, alignItems: 'center' },
     emptyIcon: { marginBottom: 12 },
     emptyTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 12 },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, textAlign: 'center', marginTop: 8 },
@@ -118,12 +118,12 @@ const TripScreen = ({ navigation }: Props) => {
       <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />} showsVerticalScrollIndicator={false}>
         <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
-        <View style={s.noTripCard}>
+        <Card variant='glassAmber' style={s.noTripCard}>
           <View style={s.cardTopRefraction} />
           <Ionicons name="bus-outline" size={60} color={C.textMuted} />
           <Text style={s.noTripText}>No Active Trips</Text>
           <Text style={s.noTripSubtext}>You don't have any trips assigned yet. Trips will appear here when parents book your service.</Text>
-        </View>
+        </Card>
         <View style={s.section}>
           <Text style={s.sectionTitle}>Quick Actions</Text>
           <View style={s.quickActions}>
@@ -173,7 +173,7 @@ const TripScreen = ({ navigation }: Props) => {
       {/* Trip Status Card */}
       {currentTrip ? (
         <>
-          <View style={s.tripStatus}>
+          <Card variant='glassAmber' style={s.tripStatus}>
             <View style={s.cardTopRefraction} />
             <View style={[s.statusBadge, { backgroundColor: tripActive ? C.success : C.primary }]}>
               <Text style={s.statusText}>{tripActive ? 'In Progress' : 'Scheduled'}</Text>
@@ -184,7 +184,7 @@ const TripScreen = ({ navigation }: Props) => {
               <View style={s.stat}><Text style={s.statNumber}>{upcomingTrips}</Text><Text style={s.statLabel}>Upcoming</Text></View>
               <View style={s.stat}><Text style={s.statNumber}>{trips.length}</Text><Text style={s.statLabel}>Total</Text></View>
             </View>
-          </View>
+          </Card>
 
           <View style={s.tripActions}>
             {!tripActive ? (
@@ -201,26 +201,26 @@ const TripScreen = ({ navigation }: Props) => {
           </View>
         </>
       ) : (
-        <View style={s.noTripCard}>
+        <Card variant='glassAmber' style={s.noTripCard}>
           <View style={s.cardTopRefraction} />
           <Ionicons name="calendar-outline" size={40} color={C.textMuted} />
           <Text style={s.noTripText}>No trip scheduled</Text>
           <Text style={s.noTripSubtext}>You have no upcoming trips. Check back later or contact support.</Text>
-        </View>
+        </Card>
       )}
 
       {/* All Trips */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>All Trips</Text>
         {trips.length === 0 ? (
-          <View style={s.emptyContainer}>
+          <Card variant='glassAmber' style={s.emptyContainer}>
             <Ionicons name="bus-outline" size={48} color={C.textMuted} style={s.emptyIcon} />
             <Text style={s.emptyTitle}>No Trips Yet</Text>
             <Text style={s.emptyText}>Your trip history will appear here.</Text>
-          </View>
+          </Card>
         ) : (
           trips.slice(0, 10).map((trip) => (
-            <View key={trip.id} style={s.tripCard}>
+            <Card key={trip.id} variant='glassAmber' style={s.tripCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.tripIcon}>
                 {trip.status === 'completed' ? <Ionicons name="checkmark-circle" size={22} color={C.success} />
@@ -234,7 +234,7 @@ const TripScreen = ({ navigation }: Props) => {
               <View style={[s.tripStatusBadge, { backgroundColor: trip.status === 'completed' ? C.success : trip.status === 'in_progress' ? C.primary : C.info }]}>
                 <Text style={s.tripStatusText}>{trip.status === 'completed' ? 'Done' : trip.status === 'in_progress' ? 'Active' : 'Scheduled'}</Text>
               </View>
-            </View>
+            </Card>
           ))
         )}
       </View>

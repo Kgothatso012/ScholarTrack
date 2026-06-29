@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import FleetOSMMap from '../../components/FleetOSMMap';
 import { supabase } from '../../lib/supabase';
-import { Spacer, Badge } from '../../ui-plugin/components';
+import { Spacer, Badge, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const glass = cards.glassAmber;
@@ -116,12 +116,12 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.background },
     liveText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.background },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.cyan },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    selectedCard: { ...glass, padding: 16, marginBottom: 10 },
+    selectedCard: { padding: 16, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     driverRow: { flexDirection: 'row', alignItems: 'center' },
@@ -138,7 +138,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     detailLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 2, textTransform: 'uppercase' },
     driverCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 30 },
-    emptyCard: { ...glass, padding: 30, alignItems: 'center' },
+    emptyCard: { padding: 30, alignItems: 'center' },
     bottomPadding: { height: 50 },
   });
 
@@ -192,16 +192,16 @@ export default function FleetTrackingScreen({ navigation }: Props) {
 
         {/* Stats */}
         <View style={s.statsRow}>
-          <View style={s.statCard}><Text style={s.statNumber}>{activeDrivers}</Text><Text style={s.statLabel}>Active</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{idleDrivers}</Text><Text style={s.statLabel}>Idle</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{driversWithLocation.length}</Text><Text style={s.statLabel}>On Map</Text></View>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{activeDrivers}</Text><Text style={s.statLabel}>Active</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{idleDrivers}</Text><Text style={s.statLabel}>Idle</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{driversWithLocation.length}</Text><Text style={s.statLabel}>On Map</Text></Card>
         </View>
 
         {/* Selected Driver Detail */}
         {selectedDriver && (
           <View style={s.section}>
             <Text style={s.sectionTitle}>Selected Driver</Text>
-            <View style={s.selectedCard}>
+            <Card variant='glassAmber' style={s.selectedCard}>
               <View style={s.cardTopRefraction} />
               <View style={s.driverRow}>
                 <View style={[s.driverAvatar, { backgroundColor: 'rgba(0,229,255,.12)' }]}>
@@ -229,7 +229,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
                   <Text style={s.detailLabel}>Longitude</Text>
                 </View>
               </View>
-            </View>
+            </Card>
           </View>
         )}
 
@@ -237,7 +237,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
         <View style={s.section}>
           <Text style={s.sectionTitle}>All Drivers ({driverLocations.length})</Text>
           {driverLocations.length === 0 ? (
-            <View style={s.emptyCard}><Text style={s.emptyText}>No drivers found</Text></View>
+            <Card variant='glassAmber' style={s.emptyCard}><Text style={s.emptyText}>No drivers found</Text></Card>
           ) : (
             driverLocations.map((driver) => (
               <TouchableOpacity key={driver.driver_id} style={s.driverCard} onPress={() => setSelectedDriver(driver)} activeOpacity={0.7}>

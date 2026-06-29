@@ -5,11 +5,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface CheckItem {
   id: string;
@@ -112,7 +111,7 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
-    progressCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 16 },
+    progressCard: { marginHorizontal: 16, marginTop: 16, padding: 16 },
     progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
     progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
     progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: C.textMuted },
@@ -162,12 +161,12 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
         }
       >
         {/* Progress */}
-        <View style={s.progressCard}>
+        <Card variant='glassAmber' style={s.progressCard}>
           <View style={s.progressBar}>
             <View style={[s.progressFill, { width: `${progress}%` }]} />
           </View>
           <Text style={s.progressText}>{checkedCount}/{requiredCount} Required Checks ({progress}%)</Text>
-        </View>
+        </Card>
 
         {/* Categories */}
         {categories.map(category => (

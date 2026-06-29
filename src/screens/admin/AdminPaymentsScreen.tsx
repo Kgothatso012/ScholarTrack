@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { Spacer, DashboardSkeleton } from '../../ui-plugin/components';
+import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
@@ -100,12 +100,12 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { flex: 1, ...glass, paddingVertical: 18, alignItems: 'center' },
+    statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    searchWrap: { flexDirection: 'row', alignItems: 'center', ...glass, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginBottom: 12, gap: 8 },
+    searchWrap: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginBottom: 12, gap: 8 },
     searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted },
     paymentCard: { ...glass, padding: 14, marginBottom: 10 },
@@ -156,9 +156,9 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
       >
         {/* Stats */}
         <View style={s.statsRow}>
-          <View style={s.statCard}><Text style={s.statNumber}>{payments.length}</Text><Text style={s.statLabel}>Total</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>{pendingCount}</Text><Text style={s.statLabel}>Pending</Text></View>
-          <View style={s.statCard}><Text style={s.statNumber}>R{(totalAmount / 100).toFixed(0)}</Text><Text style={s.statLabel}>Value</Text></View>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{payments.length}</Text><Text style={s.statLabel}>Total</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>{pendingCount}</Text><Text style={s.statLabel}>Pending</Text></Card>
+          <Card variant='glassAmber' style={s.statCard}><Text style={s.statNumber}>R{(totalAmount / 100).toFixed(0)}</Text><Text style={s.statLabel}>Value</Text></Card>
         </View>
 
         {/* Payments List */}
@@ -166,7 +166,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
           <Text style={s.sectionTitle}>Recent Payments</Text>
 
           {/* Search */}
-          <View style={s.searchWrap}>
+          <Card variant='glassAmber' style={s.searchWrap}>
             <Ionicons name="search" size={16} color={C.textMuted} />
             <View style={{ flex: 1 }}>
               {searchQuery ? (
@@ -180,7 +180,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
                 <Ionicons name="close-circle" size={16} color={C.textMuted} />
               </TouchableOpacity>
             ) : null}
-          </View>
+          </Card>
 
           {filteredPayments.length === 0 ? (
             <Text style={s.emptyText}>No payments found</Text>
