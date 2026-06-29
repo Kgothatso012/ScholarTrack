@@ -102,7 +102,7 @@ const BentoCell = ({
   danger?: boolean;
   delay?: number;
 }) => (
-  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: wide ? '55%' : '45%', padding: 4 }}>
+  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: wide ? '60%' : '36%', padding: 4 }}>
     <View
       style={{
         backgroundColor: C.surface,
@@ -133,6 +133,7 @@ const QuickCard = ({
   bgColor,
   borderColor,
   onPress,
+  wide = false,
   delay = 0,
 }: {
   iconName: string;
@@ -141,9 +142,10 @@ const QuickCard = ({
   bgColor: string;
   borderColor: string;
   onPress: () => void;
+  wide?: boolean;
   delay?: number;
 }) => (
-  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: '50%', padding: 4 }}>
+  <Animated.View entering={FadeIn.delay(delay).springify()} style={{ width: wide ? '55%' : '40%', padding: 4 }}>
     <SpringTouchable onPress={onPress}>
       <View
         style={{
@@ -721,6 +723,7 @@ const ParentDashboard = ({ navigation }: Props) => {
                   bgColor={action.bgColor}
                   borderColor={action.borderColor}
                   onPress={() => { navigation?.navigate?.(action.route); }}
+                  wide={i % 2 === 0}
                   delay={i * 50}
                 />
               ))}
@@ -730,7 +733,7 @@ const ParentDashboard = ({ navigation }: Props) => {
             <Text style={[s.secLabel, { marginTop: S.md }]}>Recent Trips</Text>
             <View style={s.tripList}>
               {trips.length === 0 ? (
-                <View style={{ alignItems: 'center', padding: S.xxxl }}>
+                <View style={{ alignItems: 'flex-start', padding: S.xxxl }}>
                   <Ionicons name="bus" size={28} color={C.textMuted} />
                   <Text style={s.emptyText}>No upcoming trips</Text>
                 </View>
@@ -761,7 +764,7 @@ const ParentDashboard = ({ navigation }: Props) => {
           <Animated.View entering={FadeIn.springify()} style={{ paddingHorizontal: S.lg, paddingTop: S.md }}>
             <Text style={s.secLabel}>My Children ({children.length})</Text>
             {children.length === 0 ? (
-              <View style={{ alignItems: 'center', padding: S.xxxl }}>
+              <View style={{ alignItems: 'flex-start', padding: S.xxxl }}>
                 <Ionicons name="people" size={28} color={C.textMuted} />
                 <Text style={s.emptyText}>No children added yet</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Children')} style={s.heroTrackBtn}>
