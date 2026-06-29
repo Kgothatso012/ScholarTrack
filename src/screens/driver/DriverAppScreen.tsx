@@ -12,16 +12,14 @@ import { paymentService } from '../../lib/services/payment';
 import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
 import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
-import { Spacer, Badge, Skeleton, SpringTouchable } from '../../ui-plugin/components';
-import { getTheme, cards, typography } from '../../ui-plugin/theme';
+import { Spacer, Badge, Skeleton, SpringTouchable, Card } from '../../ui-plugin/components';
+import { getTheme, typography } from '../../ui-plugin/theme';
 
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const { colors: C, spacing: S } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -160,7 +158,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     // Rating
     ratingSection: { paddingHorizontal: 16, paddingTop: 16 },
     ratingSectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 },
-    ratingGlass: { ...glass, padding: 20, position: 'relative', overflow: 'hidden' },
+    ratingGlass: { padding: 20, position: 'relative', overflow: 'hidden' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     ratingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     ratingLeft: { flexDirection: 'row', alignItems: 'center' },
@@ -179,18 +177,18 @@ const DriverAppScreen = ({ navigation }: Props) => {
     // Section
     section: { paddingHorizontal: 16, paddingTop: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    listItem: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    listItem: { padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     listAvatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
     listInfo: { flex: 1, marginLeft: 14 },
     listName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     listMeta: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 3 },
     amount: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.primary },
-    emptyWrap: { ...glass, padding: 30, alignItems: 'center' },
+    emptyWrap: { padding: 30, alignItems: 'center' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', marginTop: 8 },
-    errorWrap: { ...glass, padding: 16, marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', borderColor: 'rgba(255,61,90,.25)' },
+    errorWrap: { padding: 16, marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', borderColor: 'rgba(255,61,90,.25)' },
     errorText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.error, flex: 1 },
     skeletonSection: { paddingHorizontal: 16, paddingTop: 16 },
-    reqCard: { ...glass, marginBottom: 12, position: 'relative', overflow: 'hidden' },
+    reqCard: { marginBottom: 12, position: 'relative', overflow: 'hidden' },
     reqChildName: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '600', color: C.text },
     reqChildMeta: { fontFamily: 'Syne_700Bold', fontSize: 13, color: 'rgba(255,255,255,.5)', marginTop: 3 },
     reqChildAddress: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.4)', marginTop: 4 },
@@ -246,10 +244,10 @@ const DriverAppScreen = ({ navigation }: Props) => {
           <View style={s.ltTop}><Text style={s.ltTitle}>Driver Dashboard</Text></View>
         </View>
         <View style={{ flex: 1, justifyContent: 'center', padding: 16 }}>
-          <View style={s.errorWrap}>
+          <Card variant='glassAmber' style={s.errorWrap}>
             <Ionicons name="alert-circle" size={24} color={C.error} />
             <Text style={s.errorText}>{error}</Text>
-          </View>
+          </Card>
           <Spacer size="lg" />
           <TouchableOpacity onPress={loadDriverData} style={{ alignItems: 'center' }}>
             <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.primary }}>Try Again</Text>
@@ -318,13 +316,13 @@ const DriverAppScreen = ({ navigation }: Props) => {
         <View style={s.section}>
           <Text style={s.sectionTitle}>Hiring Requests</Text>
           {!loadingRequests && pendingRequests.length === 0 ? (
-            <View style={s.emptyWrap}>
+            <Card variant='glassAmber' style={s.emptyWrap}>
               <Ionicons name="person-add-outline" size={40} color={C.textMuted} />
               <Text style={s.emptyText}>No pending requests.{'\n'}Parents will appear here when they request you.</Text>
-            </View>
+            </Card>
           ) : (
             pendingRequests.map((req: any) => (
-              <View key={req.id} style={s.reqCard}>
+              <Card key={req.id} variant='glassAmber' style={s.reqCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={{ padding: 20 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -344,7 +342,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </View>
+              </Card>
             ))
           )}
         </View>
@@ -378,7 +376,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
           {ratingSummary ? (
             <View style={s.ratingSection}>
               <Text style={s.ratingSectionTitle}>My Rating</Text>
-              <View style={s.ratingGlass}>
+              <Card variant='glassAmber' style={s.ratingGlass}>
                 <View style={s.cardTopRefraction} />
                 <View style={s.ratingRow}>
                   <View style={s.ratingLeft}>
@@ -399,15 +397,15 @@ const DriverAppScreen = ({ navigation }: Props) => {
                     </View>
                   </View>
                 </View>
-              </View>
+              </Card>
             </View>
           ) : (
             <View style={s.ratingSection}>
               <Text style={s.ratingSectionTitle}>My Rating</Text>
-              <View style={s.emptyWrap}>
+              <Card variant='glassAmber' style={s.emptyWrap}>
                 <Ionicons name="star-outline" size={32} color={C.textMuted} />
                 <Text style={s.emptyText}>No ratings yet</Text>
-              </View>
+              </Card>
             </View>
           )}
 
@@ -435,14 +433,14 @@ const DriverAppScreen = ({ navigation }: Props) => {
         <View style={s.section}>
           <Text style={s.sectionTitle}>Today's Trips ({trips.length})</Text>
           {trips.length === 0 ? (
-            <View style={s.emptyWrap}>
+            <Card variant='glassAmber' style={s.emptyWrap}>
               <Ionicons name="bus-outline" size={40} color={C.textMuted} />
               <Text style={s.emptyText}>No trips scheduled for today.{'\n'}Pull down to refresh.</Text>
-            </View>
+            </Card>
           ) : (
             trips.map((trip, index) => (
               <Animated.View key={trip.id} entering={FadeIn.delay(index * 70).springify()}>
-                <TouchableOpacity style={s.listItem} onPress={() => navigation.navigate('DriverTrips')} activeOpacity={0.7}>
+                <Card variant='glassAmber' onPress={() => navigation.navigate('DriverTrips')} style={s.listItem}>
                   <View style={s.cardTopRefraction} />
                   <View style={[s.listAvatar, { backgroundColor: `${C.info}15` }]}>
                     <Ionicons name="bus" size={20} color={C.info} />
@@ -455,7 +453,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
                     </Text>
                   </View>
                   <Badge label={formatTripStatus(trip.status)} variant={getTripStatusVariant(trip.status)} size="small" />
-                </TouchableOpacity>
+                </Card>
               </Animated.View>
             ))
           )}
@@ -467,22 +465,24 @@ const DriverAppScreen = ({ navigation }: Props) => {
         <View style={s.section}>
           <Text style={s.sectionTitle}>Recent Payments ({payments.length})</Text>
           {payments.length === 0 ? (
-            <View style={s.emptyWrap}>
+            <Card variant='glassAmber' style={s.emptyWrap}>
               <Ionicons name="card-outline" size={40} color={C.textMuted} />
               <Text style={s.emptyText}>No payments yet.{'\n'}Pull down to refresh.</Text>
-            </View>
+            </Card>
           ) : (
             payments.map((payment, index) => (
-              <Animated.View key={payment.id} entering={FadeIn.delay(index * 70).springify()} style={s.listItem}>
-                <View style={s.cardTopRefraction} />
-                <View style={[s.listAvatar, { backgroundColor: `${C.success}15`, borderColor: `${C.success}35` }]}>
-                  <Ionicons name="card" size={20} color={C.success} />
-                </View>
-                <View style={s.listInfo}>
-                  <Text style={s.listName}>Payment · {payment.month || new Date(payment.created_at!).toLocaleDateString()}</Text>
-                  <View style={{ marginTop: 4 }}><Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" /></View>
-                </View>
-                <Text style={s.amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+              <Animated.View key={payment.id} entering={FadeIn.delay(index * 70).springify()}>
+                <Card variant='glassAmber' style={s.listItem}>
+                  <View style={s.cardTopRefraction} />
+                  <View style={[s.listAvatar, { backgroundColor: `${C.success}15`, borderColor: `${C.success}35` }]}>
+                    <Ionicons name="card" size={20} color={C.success} />
+                  </View>
+                  <View style={s.listInfo}>
+                    <Text style={s.listName}>Payment · {payment.month || new Date(payment.created_at!).toLocaleDateString()}</Text>
+                    <View style={{ marginTop: 4 }}><Badge label={payment.status} variant={getPaymentVariant(payment.status)} size="small" /></View>
+                  </View>
+                  <Text style={s.amount}>R{((payment.amount || 0) / 100).toFixed(2)}</Text>
+                </Card>
               </Animated.View>
             ))
           )}

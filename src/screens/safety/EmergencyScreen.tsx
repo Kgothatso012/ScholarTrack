@@ -9,13 +9,11 @@ import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
-import { Spacer, Badge } from '../../ui-plugin/components';
+import { Spacer, Badge, Card } from '../../ui-plugin/components';
 import { RSA_EMERGENCY } from '../../constants/app';
-import { getTheme, cards, typography } from '../../ui-plugin/theme';
+import { getTheme, typography } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 const EmergencyScreen = () => {
   const insets = useSafeAreaInsets();
@@ -113,7 +111,7 @@ const EmergencyScreen = () => {
     headerTitle: { ...typography.displayMedium, color: C.text },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 4 },
     sosHero: { marginHorizontal: 16, marginTop: 20, position: 'relative' },
-    sosGlass: { ...glass, padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },
+    sosGlass: { padding: 28, alignItems: 'center', borderColor: 'rgba(224,60,49,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 0 },
     sosRingOuter: { position: 'absolute', top: '50%', left: '50%', marginTop: -70, marginLeft: -70, width: 140, height: 140, borderRadius: 70, borderWidth: 2, borderColor: 'rgba(224,60,49,.3)' },
     sosRingMid: { position: 'absolute', top: '50%', left: '50%', marginTop: -55, marginLeft: -55, width: 110, height: 110, borderRadius: 55, borderWidth: 1, borderColor: 'rgba(224,60,49,.2)' },
     sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(224,60,49,.3)' },
@@ -122,22 +120,22 @@ const EmergencyScreen = () => {
     sosSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 4, zIndex: 1 },
     section: { paddingHorizontal: 16, paddingTop: 20 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    quickDialItem: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
+    quickDialItem: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
     dialIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     dialInfo: { flex: 1 },
     dialName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     dialNumber: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.success },
     callBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
-    contactCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
+    contactCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
     contactAvatar: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
     contactInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.primary },
     contactInfo: { flex: 1 },
     contactName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 20 },
-    emptyCard: { ...glass, padding: 20, marginBottom: 10 },
-    skeletonCard: { ...glass, height: 76, marginBottom: 10, borderRadius: 20 },
-    tipCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, ...glass, gap: 14 },
+    emptyCard: { padding: 20, marginBottom: 10 },
+    skeletonCard: { height: 76, marginBottom: 10, borderRadius: 20 },
+    tipCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
     tipText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textSecondary, lineHeight: 18 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     bottomPadding: { height: 50 },
@@ -155,7 +153,7 @@ const EmergencyScreen = () => {
 
       {/* SOS BUTTON */}
       <View style={s.sosHero}>
-        <View style={s.sosGlass}>
+        <Card variant='glassAmber' style={s.sosGlass}>
           <Animated.View style={[s.sosRingOuter, sosRingAnimatedStyle]} />
           <Animated.View style={[s.sosRingMid, sosRingAnimatedStyle]} />
           <View style={s.sosTopRefraction} />
@@ -172,7 +170,7 @@ const EmergencyScreen = () => {
               <Text style={s.sosSub}>Alerts all contacts with location</Text>
             </Animated.View>
           </TouchableOpacity>
-        </View>
+        </Card>
       </View>
 
       {/* QUICK DIAL */}
@@ -180,7 +178,7 @@ const EmergencyScreen = () => {
         <Text style={s.sectionTitle}>Quick Dial</Text>
         {quickDials.map((item, index) => (
           <Animated.View key={index} entering={FadeIn.delay(index * 80).springify()}>
-            <TouchableOpacity onPress={() => callNumber(item.phone)} style={s.quickDialItem}>
+            <Card variant='glassAmber' onPress={() => callNumber(item.phone)} style={s.quickDialItem}>
               <View style={[s.dialIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}35` }]}>
                 <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
               </View>
@@ -191,7 +189,7 @@ const EmergencyScreen = () => {
               <View style={[s.callBtn, { backgroundColor: `${C.success}20` }]}>
                 <Ionicons name="call" size={18} color={C.success} />
               </View>
-            </TouchableOpacity>
+            </Card>
           </Animated.View>
         ))}
       </View>
@@ -201,26 +199,28 @@ const EmergencyScreen = () => {
         <Text style={s.sectionTitle}>Emergency Contacts ({contacts.length})</Text>
         {loading ? (
           <>
-            <View style={s.skeletonCard} />
-            <View style={s.skeletonCard} />
-            <View style={s.skeletonCard} />
+            <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
+            <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
+            <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
           </>
         ) : contacts.length === 0 ? (
-          <View style={s.emptyCard}><Text style={s.emptyText}>No emergency contacts added. Add contacts in Settings.</Text></View>
+          <Card variant='glassAmber' style={s.emptyCard}><Text style={s.emptyText}>No emergency contacts added. Add contacts in Settings.</Text></Card>
         ) : (
           contacts.map((contact, index) => (
-            <Animated.View key={contact.id} entering={FadeIn.delay(index * 70).springify()} style={s.contactCard}>
-              <View style={[s.contactAvatar, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
-                <Text style={s.contactInitial}>{getInitials(contact.name)}</Text>
-              </View>
-              <View style={s.contactInfo}>
-                <Text style={s.contactName}>{contact.name}</Text>
-                <Text style={s.contactPhone}>{contact.phone}</Text>
-                <Badge label={contact.relationship} variant={contact.is_primary ? 'warning' : 'neutral'} size="small" />
-              </View>
-              <TouchableOpacity onPress={() => callNumber(contact.phone)} style={[s.callBtn, { backgroundColor: `${C.success}20` }]}>
-                <Ionicons name="call" size={18} color={C.success} />
-              </TouchableOpacity>
+            <Animated.View key={contact.id} entering={FadeIn.delay(index * 70).springify()}>
+              <Card variant='glassAmber' style={s.contactCard}>
+                <View style={[s.contactAvatar, { backgroundColor: 'rgba(0,35,149,.15)' }]}>
+                  <Text style={s.contactInitial}>{getInitials(contact.name)}</Text>
+                </View>
+                <View style={s.contactInfo}>
+                  <Text style={s.contactName}>{contact.name}</Text>
+                  <Text style={s.contactPhone}>{contact.phone}</Text>
+                  <Badge label={contact.relationship} variant={contact.is_primary ? 'warning' : 'neutral'} size="small" />
+                </View>
+                <TouchableOpacity onPress={() => callNumber(contact.phone)} style={[s.callBtn, { backgroundColor: `${C.success}20` }]}>
+                  <Ionicons name="call" size={18} color={C.success} />
+                </TouchableOpacity>
+              </Card>
             </Animated.View>
           ))
         )}
@@ -230,9 +230,11 @@ const EmergencyScreen = () => {
       <View style={s.section}>
         <Text style={s.sectionTitle}>Safety Tips</Text>
         {tips.map((tip, index) => (
-          <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()} style={s.tipCard}>
-            <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color={C.accent} />
-            <Text style={s.tipText}>{tip.text}</Text>
+          <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()}>
+            <Card variant='glassAmber' style={s.tipCard}>
+              <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color={C.accent} />
+              <Text style={s.tipText}>{tip.text}</Text>
+            </Card>
           </Animated.View>
         ))}
       </View>

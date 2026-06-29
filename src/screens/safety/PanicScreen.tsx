@@ -9,12 +9,10 @@ import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
 import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
-import { Spacer, Badge } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { Spacer, Badge, Card } from '../../ui-plugin/components';
+import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
-
-const glass = cards.glassAmber;
 
 export const PanicButton = ({
   style,
@@ -113,20 +111,20 @@ export default function PanicScreen() {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    sosCard: { marginHorizontal: 16, marginTop: 20, ...glass, padding: 32, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24 },
+    sosCard: { marginHorizontal: 16, marginTop: 20, padding: 32, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)', borderWidth: 1, shadowColor: C.error, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 24 },
     sosTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
     sosButton: { width: 100, height: 100, borderRadius: 50, backgroundColor: C.error, justifyContent: 'center', alignItems: 'center', marginBottom: 16, shadowColor: C.error, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 12 },
     sosText: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: C.text, marginBottom: 6 },
     sosSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
     sosLoading: { marginTop: 12 },
-    activeCard: { marginHorizontal: 16, marginTop: 16, ...glass, padding: 20, borderColor: 'rgba(255,61,90,.3)', borderWidth: 1 },
+    activeCard: { marginHorizontal: 16, marginTop: 16, padding: 20, borderColor: 'rgba(255,61,90,.3)', borderWidth: 1 },
     activeTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,61,90,.3)' },
     activeTitle: { fontFamily: 'Syne_700Bold', fontSize: 15, color: C.text, textAlign: 'center', marginBottom: 14 },
     cancelBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
     cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    contactCard: { ...glass, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
+    contactCard: { padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     contactIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,229,255,.3)' },
     contactInfo: { flex: 1, marginLeft: 12 },
@@ -134,7 +132,7 @@ export default function PanicScreen() {
     contactPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     callBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 30 },
-    skeletonCard: { ...glass, height: 76, marginBottom: 10, borderRadius: 20 },
+    skeletonCard: { height: 76, marginBottom: 10, borderRadius: 20 },
     bottomPadding: { height: 50 },
   });
 
@@ -154,7 +152,7 @@ export default function PanicScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* SOS Button */}
-        <View style={s.sosCard}>
+        <Card variant='glassAmber' style={s.sosCard}>
           <View style={s.sosTopRefraction} />
           <TouchableOpacity style={s.sosButton} onPress={triggerSOS} disabled={sending} activeOpacity={0.8}>
             <Ionicons name="warning" size={44} color={C.text} />
@@ -162,11 +160,11 @@ export default function PanicScreen() {
           <Text style={s.sosText}>{sending ? 'SENDING...' : 'TAP TO SEND SOS'}</Text>
           <Text style={s.sosSub}>{contacts.length} contacts will be notified</Text>
           {sending && <View style={s.sosLoading}><ActivityIndicator color={C.error} /></View>}
-        </View>
+        </Card>
 
         {/* Active SOS State */}
         {sosActive && (
-          <View style={s.activeCard}>
+          <Card variant='glassAmber' style={s.activeCard}>
             <View style={s.activeTopRefraction} />
             <Badge label="SOS ACTIVE" variant="error" size="medium" />
             <Spacer size="md" />
@@ -174,7 +172,7 @@ export default function PanicScreen() {
             <TouchableOpacity style={s.cancelBtn} onPress={cancelSOS}>
               <Text style={s.cancelBtnText}>Cancel Alert</Text>
             </TouchableOpacity>
-          </View>
+          </Card>
         )}
 
         {/* Emergency Contacts */}
@@ -182,15 +180,15 @@ export default function PanicScreen() {
           <Text style={s.sectionTitle}>Emergency Contacts ({contacts.length})</Text>
           {loading ? (
             <>
-              <View style={s.skeletonCard} />
-              <View style={s.skeletonCard} />
-              <View style={s.skeletonCard} />
+              <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
+              <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
+              <Card variant='glassAmber' style={s.skeletonCard}>{null}</Card>
             </>
           ) : contacts.length === 0 ? (
             <Text style={s.emptyText}>No emergency contacts added</Text>
           ) : (
             contacts.map((contact) => (
-              <View key={contact.id} style={s.contactCard}>
+              <Card key={contact.id} variant='glassAmber' style={s.contactCard}>
                 <View style={s.cardTopRefraction} />
                 <View style={[s.contactIcon, { backgroundColor: 'rgba(0,229,255,.08)' }]}>
                   <Ionicons name="person" size={18} color={C.accent} />
@@ -203,7 +201,7 @@ export default function PanicScreen() {
                 <TouchableOpacity style={[s.callBtn, { backgroundColor: 'rgba(0,119,73,.15)' }]} onPress={() => callContact(contact.phone)}>
                   <Ionicons name="call" size={18} color={C.success} />
                 </TouchableOpacity>
-              </View>
+              </Card>
             ))
           )}
         </View>
