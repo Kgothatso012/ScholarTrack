@@ -20,6 +20,10 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#1E3A5F"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.scholartrack.sa"
@@ -37,7 +41,11 @@
       }
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-notifications"
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }
