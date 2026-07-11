@@ -30,7 +30,7 @@
       "package": "com.scholartrack.sa",
       "config": {
         "googleMaps": {
-          "apiKey": "REDACTED_GMAPS"
+          "apiKey": "AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI"
         }
       }
     },
