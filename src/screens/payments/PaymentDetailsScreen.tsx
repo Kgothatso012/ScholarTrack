@@ -295,7 +295,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
         amount={currentAmount * 100}
-        description="ScholarTrack Transport Payment"
+        description="MalumeScholarTrack Transport Payment"
         paymentType="monthly"
         onSuccess={(ref) => {
           Alert.alert('Payment Successful', `Reference: ${ref}`);

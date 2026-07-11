@@ -19,9 +19,9 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
-  const regulatoryInfo = {
+const regulatoryInfo = {
     operatorLicense: 'OP/2026/001234',
-    operatorName: 'ScholarTrack Transport Services',
+    operatorName: 'MalumeScholarTrack Transport Services',
     licenseExpiry: '2026-12-31',
     vehicleRegistration: 'GP 123-456',
     vehiclePermit: 'SCH/2026/789',

@@ -64,7 +64,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
   const testNotification = async () => {
     await notificationService.scheduleNotification(
       'Test Notification',
-      'This is a test notification from ScholarTrack',
+      'This is a test notification from MalumeScholarTrack',
       {},
       'default'
     );

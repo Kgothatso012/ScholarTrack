@@ -187,8 +187,8 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
 
         {/* Footer */}
         <View style={s.footer}>
-          <Text style={s.footerText}>ScholarTrack v1.0.0</Text>
-          <Text style={s.footerText}>© 2026 ScholarTrack South Africa</Text>
+          <Text style={s.footerText}>MalumeScholarTrack v1.0.0</Text>
+          <Text style={s.footerText}>© 2026 MalumeScholarTrack South Africa</Text>
         </View>
         <Spacer size="xxl" />
       </ScrollView>

@@ -53,7 +53,7 @@ function DrawerNavigator() {
         drawerStyle: { width: 280 },
       }}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'ScholarTrack' }} />
+      <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'MalumeScholarTrack' }} />
       <Drawer.Screen name="Children" component={ChildrenScreen} />
       <Drawer.Screen name="LinkChild" component={LinkChildScreen} />
       <Drawer.Screen name="TrackChild" component={TrackChildScreen} />

@@ -34,7 +34,7 @@ const ExampleScreen = () => {
     <SafeAreaProvider>
       <SafeAreaView style={styles(colors).container} edges={['top']}>
         <Header
-          title="ScholarTrack"
+          title="MalumeScholarTrack"
           subtitle="UI Plugin Demo"
           leftIcon="menu-outline"
           rightIcon="notifications-outline"

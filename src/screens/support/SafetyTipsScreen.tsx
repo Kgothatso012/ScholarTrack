@@ -94,7 +94,7 @@ export default function SafetyTipsScreen() {
             <View style={s.headerTop}>
               <View>
                 <Text style={s.headerTitle}>Safety Tips</Text>
-                <Text style={s.headerSub}>Stay safe with ScholarTrack</Text>
+                <Text style={s.headerSub}>Stay safe with MalumeScholarTrack</Text>
               </View>
               <View style={s.headerBadge}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.success }} />
