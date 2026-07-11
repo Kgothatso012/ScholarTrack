@@ -25,7 +25,7 @@ export type NotificationType =
   | 'ROUTE_UPDATE'
   | 'DRIVER_ASSIGNED';
 
-export type NotificationChannel = 'default' | 'safety' | 'trips' | 'payments';
+export type NotificationChannel = 'default' | 'safety' | 'trips' | 'payments' | 'bus_arrival';
 
 export interface TripNotificationData {
   tripId: string;
@@ -177,7 +177,8 @@ const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: (pa
 
 function getChannelForType(type: NotificationType): NotificationChannel {
   if (type === 'PANIC_TRIGGERED' || type === 'EMERGENCY') return 'safety';
-  if (type.startsWith('TRIP') || type === 'CHILD_PICKED_UP' || type === 'CHILD_DROPPED_OFF') return 'trips';
+  if (type === 'CHILD_PICKED_UP' || type === 'CHILD_DROPPED_OFF') return 'bus_arrival';
+  if (type.startsWith('TRIP')) return 'trips';
   if (type.startsWith('PAYMENT')) return 'payments';
   return 'default';
 }
@@ -226,6 +227,15 @@ export const notificationService = {
         importance: Notifications.AndroidImportance.DEFAULT,
         lightColor: '#FFB81C',
       });
+
+      await Notifications.setNotificationChannelAsync('bus_arrival', {
+        name: 'Bus Arrival',
+        description: 'Plays a school bus horn when the bus enters a pickup or dropoff zone',
+        importance: Notifications.AndroidImportance.MAX,
+        sound: 'school_bus_horn',
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#1E3A5F',
+      });
     }
 
     return true;
@@ -248,7 +258,8 @@ export const notificationService = {
     title: string,
     body: string,
     data: Record<string, unknown> = {},
-    channel: NotificationChannel = 'default'
+    channel: NotificationChannel = 'default',
+    sound?: string,
   ): Promise<string> {
     // Skip non-safety notifications during quiet hours
     if (channel !== 'safety' && isQuietHours()) {
@@ -256,7 +267,13 @@ export const notificationService = {
     }
 
     return await Notifications.scheduleNotificationAsync({
-      content: { title, body, data },
+      content: {
+        title,
+        body,
+        data,
+        ...(sound && Platform.OS === 'ios' && { sound: `${sound}.wav` }),
+        ...(Platform.OS === 'android' && { channelId: channel }),
+      },
       trigger: null,
     });
   },
@@ -433,7 +450,8 @@ export async function sendAppNotification(
     message.title,
     message.body(payload),
     { type, payload, channel },
-    channel
+    channel,
+    channel === 'bus_arrival' ? 'school_bus_horn' : undefined,
   );
 }
 

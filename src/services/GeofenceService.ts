@@ -4,6 +4,51 @@ import { locationService } from './location';
 import { panicAlertService } from '../lib/api';
 import { sendAppNotification } from './NotificationService';
 import { supabase } from '../lib/supabase';
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+
+// ============================================================================
+// BACKGROUND GEOFENCE TASK — fires even when app is closed
+// ============================================================================
+
+export const GEOFENCE_TASK_NAME = 'scholartrack-geofence-task';
+
+// Identifier format: `${tripId}-${type}::${parentId}::${childId}::${childName}`
+// The task parses this and fires the parent notification (which plays the horn).
+try {
+  TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }: any) => {
+    if (error) {
+      console.error('[GeofenceTask] error:', error);
+      return;
+    }
+    const payload = data as {
+      eventType: Location.GeofencingEventType;
+      region: Location.LocationRegion;
+    };
+    if (payload.eventType !== Location.GeofencingEventType.Enter) return;
+
+    const identifier = String(payload.region.identifier);
+    const parts = identifier.split('::');
+    if (parts.length < 3) return;
+
+    const [zonePart, parentId, childId, ...nameParts] = parts;
+    const [tripId, type] = zonePart.split('-');
+    const childName = nameParts.join('::') || 'Student';
+
+    if (!parentId || !tripId) return;
+
+    const notificationType =
+      type === 'pickup' ? 'CHILD_PICKED_UP' : 'CHILD_DROPPED_OFF';
+
+    await sendAppNotification(notificationType, parentId, {
+      childId: childId || `unknown-${tripId}`,
+      childName,
+      tripId,
+    });
+  });
+} catch (e) {
+  // Task already registered (HMR / duplicate import) — safe to ignore
+}
 
 export interface GeofenceZone {
   id: string;
@@ -240,6 +285,75 @@ export const geofenceService = {
    * @param zone - The geofence zone
    * @returns number - Distance in meters
    */
+  // ============================================================================
+// NATIVE BACKGROUND GEOFENCING — starts/stops OS-level monitoring
+// ============================================================================
+
+  /**
+   * Starts OS-level geofence monitoring for the given zones.
+   * The background task (defined at module load) fires `sendAppNotification`
+   * on enter, which plays the school bus horn via the `bus_arrival` channel.
+   *
+   * Requires foreground + background location permissions.
+   */
+  async startBackgroundGeofencing(zones: GeofenceZone[]): Promise<boolean> {
+    try {
+      const { status: fg } = await Location.requestForegroundPermissionsAsync();
+      if (fg !== 'granted') return false;
+
+      const { status: bg } = await Location.requestBackgroundPermissionsAsync();
+      if (bg !== 'granted') return false;
+
+      const regions: Location.LocationRegion[] = [];
+      for (const zone of zones) {
+        if (!zone.latitude || !zone.longitude) continue;
+
+        // Resolve parent_id so the background task can notify the right parent.
+        // Skip zones we can't resolve (no child link).
+        if (!zone.childId) continue;
+        const { data: child } = await supabase
+          .from('children')
+          .select('parent_id')
+          .eq('id', zone.childId)
+          .single();
+        const parentId = child?.parent_id;
+        if (!parentId) continue;
+
+        regions.push({
+          identifier: `${zone.tripId}-${zone.type}::${parentId}::${zone.childId}::${zone.childName || 'Student'}`,
+          latitude: zone.latitude,
+          longitude: zone.longitude,
+          radius: zone.radius,
+        });
+      }
+
+      if (regions.length === 0) return false;
+
+      // Replace any existing geofences for this task
+      try {
+        const isReg = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK_NAME);
+        if (isReg) await Location.stopGeofencingAsync(GEOFENCE_TASK_NAME);
+      } catch {
+        // ignore
+      }
+
+      await Location.startGeofencingAsync(GEOFENCE_TASK_NAME, regions);
+      return true;
+    } catch (err) {
+      console.error('startBackgroundGeofencing error:', err);
+      return false;
+    }
+  },
+
+  async stopBackgroundGeofencing(): Promise<void> {
+    try {
+      const isReg = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK_NAME);
+      if (isReg) await Location.stopGeofencingAsync(GEOFENCE_TASK_NAME);
+    } catch {
+      // ignore
+    }
+  },
+
   // Calculate distance to zone in meters
   getDistanceToZone(latitude: number, longitude: number, zone: GeofenceZone): number {
     const distanceKm = locationService.calculateDistance(

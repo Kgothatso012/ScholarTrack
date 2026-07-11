@@ -170,13 +170,18 @@ export function useDriverTracking({
 
     const tripIdToUse = newTripId || tripIdRef.current;
     if (tripIdToUse) {
-      await loadGeofenceZones(tripIdToUse);
+      const zones = await geofenceService.getZonesForTrip(tripIdToUse);
+      setGeofenceZones(zones);
+      // Native background geofencing — fires horn notification even when app is closed
+      await geofenceService.startBackgroundGeofencing(zones);
     }
 
     setTripActive(true);
   };
 
   const endTrip = async () => {
+    // Stop native background geofencing
+    await geofenceService.stopBackgroundGeofencing();
     setTripActive(false);
     setGeofenceZones([]);
   };
