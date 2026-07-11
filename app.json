@@ -4,12 +4,13 @@
     "slug": "scholartrack-expo54",
     "version": "1.0.0",
     "scheme": "scholartrack",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#1E3A5F"
     },
     "extra": {
       "eas": {
@@ -25,7 +26,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E3A5F"
       },
       "package": "com.scholartrack.sa",
       "config": {
