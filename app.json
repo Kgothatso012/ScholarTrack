@@ -45,7 +45,9 @@
     },
     "plugins": [
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-location",
+      "expo-task-manager"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
