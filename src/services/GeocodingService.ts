@@ -73,7 +73,7 @@ export const geocodingService = {
       const data = await response.json();
 
       if (!data || data.length === 0) {
-        console.warn('No geocoding results for:', address);
+        if (__DEV__) console.warn('No geocoding results for:', address);
         return null;
       }
 

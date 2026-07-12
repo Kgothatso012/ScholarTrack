@@ -146,7 +146,7 @@ export const notificationService = {
       const { data } = await Notifications.getExpoPushTokenAsync();
       return data;
     } catch (error) {
-      console.error('Error getting push token:', error);
+      if (__DEV__) console.error('Error getting push token:', error);
       return null;
     }
   },
@@ -159,7 +159,7 @@ export const notificationService = {
         .update({ push_token: token })
         .eq('id', userId);
     } catch (error) {
-      console.error('Error saving push token:', error);
+      if (__DEV__) console.error('Error saving push token:', error);
     }
   },
 

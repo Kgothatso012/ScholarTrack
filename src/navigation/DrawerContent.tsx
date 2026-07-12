@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { getMenuForRole, MenuItem } from '../config/menu';
-import { supabase } from '../lib/supabase';
 import { useTheme, ThemeColors } from '../context/ThemeContext';
+import { useAuth } from '../lib/auth';
 
 interface DrawerItemProps {
   item: MenuItem;
@@ -49,6 +49,7 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   const { navigation, state } = props;
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { signOut: authSignOut } = useAuth();
   const [userName, setUserName] = React.useState('');
   const [userRole, setUserRole] = React.useState<string | null>(null);
 
@@ -123,8 +124,9 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            await supabase.auth.signOut();
-            await AsyncStorage.clear();
+            // Use auth context signOut: it handles supabase + cacheService + AsyncStorage removal
+            // without nuking unrelated prefs (themeMode, notificationSettings, languageSettings).
+            await authSignOut();
             navigation.closeDrawer();
             // Navigate to auth - use reset to clear nav stack
             navigation.navigate('Auth');

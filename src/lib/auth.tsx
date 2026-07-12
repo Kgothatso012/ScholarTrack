@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, authService, Profile, UserRole } from './api';
 import { cacheService } from './cache';
+import { geofenceService } from '../services/GeofenceService';
 
 interface AuthUser {
   id: string;
@@ -170,6 +171,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await cacheService.clearAll();
       cacheService.setActiveUser(null);
       await AsyncStorage.removeItem(USER_ID_KEY);
+      // Stop background geofencing task — leftover tasks would otherwise keep
+      // firing notifications for a logged-out user (or for a different user
+      // who logs in on the same device).
+      try {
+        await geofenceService.stopBackgroundGeofencing();
+      } catch (e) {
+        if (__DEV__) console.warn('Geofence cleanup on signOut failed:', e);
+      }
       setUser(null);
     } catch (error) {
       console.error('Sign out error:', error);

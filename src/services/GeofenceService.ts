@@ -254,7 +254,7 @@ export const geofenceService = {
         .single();
 
       if (!child?.parent_id) {
-        console.warn('No parent found for child:', zone.childId);
+        if (__DEV__) console.warn('No parent found for child:', zone.childId);
         return;
       }
 

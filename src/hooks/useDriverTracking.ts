@@ -105,7 +105,7 @@ export function useDriverTracking({
 
       return true;
     } catch (err) {
-      console.error('Error starting location tracking:', err);
+      if (__DEV__) console.error('Error starting location tracking:', err);
       setError('Failed to start tracking');
       setIsTracking(false);
       return false;
@@ -159,7 +159,7 @@ export function useDriverTracking({
         }
       }
     } catch (err) {
-      console.error('Error sending location:', err);
+      if (__DEV__) console.error('Error sending location:', err);
     }
   };
 
