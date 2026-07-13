@@ -42,12 +42,8 @@ export default function LanguageSettingsScreen() {
     settings: 'Settings',
   };
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-  const s = StyleSheet.create({
+    const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
@@ -70,8 +66,7 @@ export default function LanguageSettingsScreen() {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-      {/* Status Bar */}
-      <View style={s.statusBar}>
+            <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
         <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>

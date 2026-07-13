@@ -311,23 +311,11 @@ export default function LiveTrackScreen({ navigation }: Props) {
   };
 
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-  const child = selectedChild;
+    const child = selectedChild;
 
   // ─── Styles ────────────────────────────────────────────────────────────────
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    statusBar: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: insets.top + 8,
-      paddingBottom: 4,
-      backgroundColor: C.background,
-    },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.text, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
     ltHeader: {
       backgroundColor: C.surface,

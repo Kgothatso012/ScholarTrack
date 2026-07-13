@@ -174,13 +174,9 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
   };
 
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
+  
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
-    sbTime: { fontFamily: 'DMMono_400Regular', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 6 },
     sbIcon: { fontSize: 14 },
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
@@ -237,8 +233,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.warning} colors={[C.warning]} />}
     >
-      {/* Status Bar */}
-      <View style={s.statusBar}>
+            <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
         <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>

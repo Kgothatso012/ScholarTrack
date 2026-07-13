@@ -121,13 +121,9 @@ const DriverAppScreen = ({ navigation }: Props) => {
   };
 
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
+  
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 4 },
     sbIcon: { fontSize: 12 },
     ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.success, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -50, right: -30, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(0,230,118,.1)' },
@@ -259,8 +255,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
 
   return (
     <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.success} colors={[C.success]} />} showsVerticalScrollIndicator={false}>
-      {/* Status Bar */}
-      <View style={s.statusBar}>
+            <View style={s.statusBar}>
         <Text style={s.sbTime}>{timeStr}</Text>
         <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
       </View>
