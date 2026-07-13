@@ -44,7 +44,7 @@ const onboardingData: OnboardingData[] = [
   {
     id: '3',
     title: 'Emergency Response',
-    description: 'One-tap panic button alerts emergency services and parents instantly when needed.',
+    description: 'Sends an SOS to your saved emergency contacts with your location. For life-threatening emergencies, always call 10111 (Police) or 10177 (Ambulance) directly first.',
     icon: 'warning',
     color: C.error,
     bgColor: 'rgba(255,61,90,.12)',

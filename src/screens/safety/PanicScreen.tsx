@@ -11,12 +11,25 @@ import { emergencyContactService } from '../../lib/services/emergency';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge, Card } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
+import { RSA_EMERGENCY } from '../../constants/app';
 
-const { colors: C } = getTheme('dark');
+const { colors: C, spacing: S } = getTheme('dark');
+
+const callEmergencyNumber = (phone: string) =>
+  Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() =>
+    Alert.alert('Unable to Call', `Could not open the dialer. Please call ${phone} manually.`)
+  );
+
+// SA emergency service numbers — always available, even with zero saved contacts
+const quickDials = [
+  { name: 'Police', phone: RSA_EMERGENCY.POLICE, icon: 'shield', color: C.success },
+  { name: 'Ambulance', phone: RSA_EMERGENCY.AMBULANCE, icon: 'medkit', color: C.error },
+  { name: 'Fire', phone: RSA_EMERGENCY.FIRE, icon: 'flame', color: C.accent },
+];
 
 export const PanicButton = ({
   style,
-  size = 60,
+  size = 88,
   onActivate,
 }: {
   style?: any;
@@ -27,15 +40,27 @@ export const PanicButton = ({
   return (
     <TouchableOpacity
       style={[
-        { width: size, height: size, borderRadius: size / 2, backgroundColor: C.error, justifyContent: 'center', alignItems: 'center' },
-        pressed && { transform: [{ scale: 0.95 }] },
+        {
+          width: '100%',
+          height: 88,
+          borderRadius: 16,
+          backgroundColor: C.error,
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+          gap: 12,
+        },
+        pressed && { transform: [{ scale: 0.97 }], opacity: 0.9 },
         style,
       ]}
       onPress={onActivate}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <Ionicons name="warning" size={size * 0.5} color={C.text} />
+      <Ionicons name="warning" size={32} color={C.textInverse} />
+      <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 22, color: C.textInverse, letterSpacing: 0.5 }}>
+        EMERGENCY — TAP FOR HELP
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -61,7 +86,18 @@ export default function PanicScreen() {
   };
 
   const sendSOS = async () => {
-    if (contacts.length === 0) { Alert.alert('No Contacts', 'Please add emergency contacts first'); return; }
+    if (contacts.length === 0) {
+      Alert.alert(
+        'No Emergency Contacts',
+        'You have no saved emergency contacts. For a life-threatening emergency, call 10111 (Police) or 10177 (Ambulance) now.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Call 10111', onPress: () => callEmergencyNumber(RSA_EMERGENCY.POLICE) },
+          { text: 'Call 10177', onPress: () => callEmergencyNumber(RSA_EMERGENCY.AMBULANCE) },
+        ]
+      );
+      return;
+    }
     try {
       setSending(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -84,7 +120,18 @@ export default function PanicScreen() {
   };
 
   const triggerSOS = () => {
-    if (contacts.length === 0) { Alert.alert('No Contacts', 'Please add emergency contacts first'); return; }
+    if (contacts.length === 0) {
+      Alert.alert(
+        'No Emergency Contacts',
+        'You have no saved emergency contacts. For a life-threatening emergency, call 10111 (Police) or 10177 (Ambulance) now.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Call 10111', onPress: () => callEmergencyNumber(RSA_EMERGENCY.POLICE) },
+          { text: 'Call 10177', onPress: () => callEmergencyNumber(RSA_EMERGENCY.AMBULANCE) },
+        ]
+      );
+      return;
+    }
     Alert.alert('Trigger SOS', `Send emergency alert to ${contacts.length} contact(s)?`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'SEND', style: 'destructive', onPress: sendSOS },
@@ -133,6 +180,11 @@ export default function PanicScreen() {
     callBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 30 },
     skeletonCard: { height: 76, marginBottom: 10, borderRadius: 20 },
+    quickDialItem: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
+    dialIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+    dialInfo: { flex: 1 },
+    dialName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
+    dialNumber: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', marginTop: 2 },
     bottomPadding: { height: 50 },
   });
 
@@ -174,6 +226,30 @@ export default function PanicScreen() {
             </TouchableOpacity>
           </Card>
         )}
+
+        {/* Quick Dial — direct access to SA emergency services */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Call Emergency Services</Text>
+          {quickDials.map((item, index) => (
+            <Card
+              key={index}
+              variant='glassAmber'
+              onPress={() => callEmergencyNumber(item.phone)}
+              style={s.quickDialItem}
+            >
+              <View style={[s.dialIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}35` }]}>
+                <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color={item.color} />
+              </View>
+              <View style={s.dialInfo}>
+                <Text style={s.dialName}>{item.name}</Text>
+                <Text style={[s.dialNumber, { color: item.color }]}>{item.phone}</Text>
+              </View>
+              <View style={[s.callBtn, { backgroundColor: 'rgba(5,150,105,.18)' }]}>
+                <Ionicons name="call" size={20} color={C.success} />
+              </View>
+            </Card>
+          ))}
+        </View>
 
         {/* Emergency Contacts */}
         <View style={s.section}>

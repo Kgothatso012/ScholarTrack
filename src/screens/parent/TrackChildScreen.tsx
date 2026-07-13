@@ -553,7 +553,7 @@ export default function TrackChildScreen({ navigation }: Props) {
               <View style={[styles.quickActions, { overflow: 'hidden' }]}>
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
                 <View style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, backgroundColor: C.accent, borderRadius: 2 }} />
-                <SpringTouchable style={styles.quickBtn} onPress={() => {}}>
+                <SpringTouchable style={styles.quickBtn} onPress={() => navigation?.navigate?.('Emergency')}>
                   <Ionicons name="warning" size={24} color={C.error} />
                   <Text style={styles.quickBtnText}>Emergency</Text>
                 </SpringTouchable>
