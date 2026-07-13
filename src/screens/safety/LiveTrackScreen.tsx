@@ -18,15 +18,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withRepeat,
-  withSequence,
-  withTiming,
-  FadeIn,
   ZoomIn,
-  Easing,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import OSMMap from '../../components/OSMMap';
@@ -77,86 +69,7 @@ interface Props {
 // ─── Theme colors ─────────────────────────────────────────────────────────────
 const { colors: C } = getTheme('dark');
 
-// ─── Animated Bus Marker ──────────────────────────────────────────────────────
-const BusMarkerAnimated = () => {
-  const scale = useSharedValue(1);
-  const opacityRing1 = useSharedValue(1);
-  const opacityRing2 = useSharedValue(1);
-
-  useEffect(() => {
-    scale.value = withRepeat(withSequence(withTiming(1.08, { duration: 1200, easing: Easing.ease }), withTiming(1, { duration: 1200 })), -1, false);
-    opacityRing1.value = withRepeat(withSequence(withTiming(0.25, { duration: 1200 }), withTiming(1, { duration: 1200 })), -1, false);
-    opacityRing2.value = withRepeat(withSequence(withTiming(0.1, { duration: 1500 }), withTiming(1, { duration: 1200 })), -1, false);
-  }, []);
-
-  const dotStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const ring1Style = useAnimatedStyle(() => ({ opacity: opacityRing1.value }));
-  const ring2Style = useAnimatedStyle(() => ({ opacity: opacityRing2.value }));
-
-  return (
-    <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
-      <Animated.View style={[busStyles.ring2, ring2Style]} />
-      <Animated.View style={[busStyles.ring1, ring1Style]} />
-      <Animated.View style={[busStyles.busDot, dotStyle]}>
-        <Ionicons name="bus" size={18} color={C.background} />
-      </Animated.View>
-    </View>
-  );
-};
-
-// Styles for BusMarkerAnimated (outside main StyleSheet to avoid naming conflicts)
-const busStyles = StyleSheet.create({
-  busDot: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: C.cyan,
-    borderWidth: 3,
-    borderColor: C.text,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    zIndex: 2,
-  },
-  ring1: {
-    position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    borderColor: 'rgba(0,229,255,.25)',
-  },
-  ring2: {
-    position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 1,
-    borderColor: 'rgba(0,229,255,.1)',
-  },
-});
-
-// ─── Breathing Dot ───────────────────────────────────────────────────────────
-const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: number }) => {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  useEffect(() => {
-    scale.value = withRepeat(withSequence(withTiming(1.4, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
-    opacity.value = withRepeat(withSequence(withTiming(0.4, { duration: 1600 }), withTiming(1, { duration: 1600 })), -1, false);
-  }, []);
-
-  const ringStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }], opacity: opacity.value }));
-
-  return (
-    <View style={{ width: size + 8, height: size + 8, justifyContent: 'center', alignItems: 'center' }}>
-      <Animated.View style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color }, ringStyle]} />
-      <View style={{ width: size * 0.75, height: size * 0.75, borderRadius: size * 0.375, backgroundColor: color }} />
-    </View>
-  );
-};
-
-// ─── Map Placeholder (animated) ──────────────────────────────────────────────
+// ─── Map Placeholder ──────────────────────────────────────────────────────────
 const MapPlaceholder = ({
   driverLocation,
   pickupLat,
@@ -166,39 +79,14 @@ const MapPlaceholder = ({
   pickupLat?: number;
   pickupLng?: number;
 }) => {
-  const busX = useSharedValue(52);
-  const busY = useSharedValue(50);
-
-  useEffect(() => {
-    busX.value = withRepeat(withSequence(withTiming(68, { duration: 8000, easing: Easing.linear }), withTiming(36, { duration: 8000, easing: Easing.linear })), -1, true);
-    busY.value = withRepeat(withSequence(withTiming(45, { duration: 8000, easing: Easing.linear }), withTiming(55, { duration: 8000, easing: Easing.linear })), -1, true);
-  }, []);
-
-  const busPosStyle = useAnimatedStyle(() => ({
-    position: 'absolute' as const,
-    left: `${busX.value}%`,
-    top: `${busY.value}%`,
-    transform: [{ translateX: -20 }, { translateY: -20 }],
-  }));
-
   return (
     <View style={mapStyles.mapContainer}>
-      {/* grid overlay */}
-      <View style={mapStyles.gridOverlay} />
-      {/* route line */}
-      <View style={mapStyles.routeLine} />
-      {/* home marker */}
-      <View style={mapStyles.homeMarker}>
-        <Ionicons name="home" size={18} color={C.primary} />
+      <View style={mapStyles.mapOverlay}>
+        <Ionicons name="map-outline" size={48} color={C.textMuted} />
+        <Text style={{ fontFamily: 'Syne_600SemiBold', fontSize: 16, color: C.textMuted, marginTop: 12 }}>
+          {driverLocation ? 'Driver location active' : 'Waiting for driver location…'}
+        </Text>
       </View>
-      {/* pickup zone */}
-      <View style={mapStyles.pickupZone}>
-        <Ionicons name="school" size={18} color={C.primary} />
-      </View>
-      {/* pulsing bus */}
-      <Animated.View style={[mapStyles.busMarkerWrap, busPosStyle]}>
-        <BusMarkerAnimated />
-      </Animated.View>
     </View>
   );
 };
@@ -209,41 +97,10 @@ const mapStyles = StyleSheet.create({
     backgroundColor: C.surface,
     position: 'relative',
   },
-  gridOverlay: {
-    position: 'absolute',
-    inset: 0,
-    backgroundColor: C.surface,
-  },
-  routeLine: {
-    position: 'absolute',
-    top: '50%',
-    left: '15%',
-    right: '20%',
-    height: 2,
-    backgroundColor: C.success,
-    opacity: 0.7,
-  },
-  homeMarker: {
-    position: 'absolute',
-    top: '18%',
-    left: '13%',
-  },
-  pickupZone: {
-    position: 'absolute',
-    top: '30%',
-    right: '22%',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(0,119,73,.12)',
-    borderWidth: 2,
-    borderColor: 'rgba(0,119,73,.4)',
+  mapOverlay: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  busMarkerWrap: {
-    width: 40,
-    height: 40,
   },
 });
 

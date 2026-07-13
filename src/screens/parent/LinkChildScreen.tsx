@@ -214,7 +214,7 @@ export default function LinkChildScreen({ navigation }: Props) {
             <Text style={styles.childName}>{item.full_name}</Text>
             <Text style={styles.childSchool}>{item.school?.name || 'No school'}</Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: C.success + '25', borderWidth: 1, borderColor: C.success + '50' }]}>
+          <View style={[styles.statusBadge, { backgroundColor: C.success + '25', borderWidth: 1, borderColor: C.success + '50', flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
             <Text style={[styles.statusText, { color: C.success }]}>Active</Text>
           </View>
         </View>

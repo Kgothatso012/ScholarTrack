@@ -86,6 +86,36 @@ export default function PanicScreen() {
   };
 
   const sendSOS = async () => {
+    // Check GPS first — warn if location will be missing
+    let locationStr: string | undefined = undefined;
+    let gpsAvailable = true;
+    try {
+      const result = await locationService.getCurrentLocation();
+      if (result.location) {
+        locationStr = `${result.location.coords.latitude},${result.location.coords.longitude}`;
+      } else {
+        gpsAvailable = false;
+      }
+    } catch {
+      gpsAvailable = false;
+    }
+
+    // If GPS is off, warn the user before proceeding
+    if (!gpsAvailable) {
+      const proceed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          'Location Unavailable',
+          'Your GPS is off or location permission is denied. SOS will be sent WITHOUT your location. For a life-threatening emergency, call 10111 (Police) or 10177 (Ambulance) directly.',
+          [
+            { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+            { text: 'Send SOS Anyway', onPress: () => resolve(true) },
+            { text: 'Call 10111', onPress: () => { callEmergencyNumber(RSA_EMERGENCY.POLICE); resolve(false); } },
+          ]
+        );
+      });
+      if (!proceed) return;
+    }
+
     if (contacts.length === 0) {
       Alert.alert(
         'No Emergency Contacts',
@@ -102,12 +132,10 @@ export default function PanicScreen() {
       setSending(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { Alert.alert('Error', 'Please login first'); return; }
-      const result = await locationService.getCurrentLocation();
-      const locationStr = result.location ? `${result.location.coords.latitude},${result.location.coords.longitude}` : undefined;
       const panicAlert = await panicAlertService.createPanicAlert(user.id, locationStr);
       for (const contact of contacts) {
         await sendAppNotification('EMERGENCY', user.id, {
-          message: `Emergency SOS from ${user.email}`,
+          message: `Emergency SOS from ${user.email}${gpsAvailable ? '' : ' (no location)'}`,
           location: locationStr,
           timestamp: new Date().toISOString(),
           panicAlertId: panicAlert?.id,
@@ -115,7 +143,15 @@ export default function PanicScreen() {
       }
       setSosActive(true);
     } catch (error: unknown) {
-      Alert.alert('SOS Failed', error instanceof Error ? error.message || 'Failed to send emergency alert' : 'Failed to send emergency alert');
+      Alert.alert(
+        'SOS Failed',
+        `Failed to send emergency alert.\n\nFor a life-threatening emergency, call 10111 (Police) or 10177 (Ambulance).`,
+        [
+          { text: 'OK', style: 'cancel' },
+          { text: 'Call 10111', onPress: () => callEmergencyNumber(RSA_EMERGENCY.POLICE) },
+          { text: 'Call 10177', onPress: () => callEmergencyNumber(RSA_EMERGENCY.AMBULANCE) },
+        ]
+      );
     } finally { setSending(false); }
   };
 
