@@ -508,10 +508,10 @@ export default function LiveTrackScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}>
-          <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-        </View>
+
+
+
+
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
@@ -532,10 +532,10 @@ export default function LiveTrackScreen({ navigation }: Props) {
   if (children.length === 0 || !child?.driver) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}>
-          <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-        </View>
+
+
+
+
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
@@ -577,10 +577,10 @@ export default function LiveTrackScreen({ navigation }: Props) {
         }
       >
         {/* STATUS BAR */}
-        <View style={s.statusBar}>
-          <Text style={s.sbTime}>{timeStr}</Text>
-          <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-        </View>
+
+
+
+
 
         {/* HEADER */}
         <View style={s.ltHeader}>

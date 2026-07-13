@@ -105,7 +105,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Vehicles</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={s.emptyText}>Loading vehicles...</Text>
@@ -116,10 +116,10 @@ export default function VehicleManagementScreen({ navigation }: Props) {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
-      </View>
+
+
+
+
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />

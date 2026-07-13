@@ -240,7 +240,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={C.text} /></TouchableOpacity>
           <Text style={s.ltTitle}>Reports</Text>
@@ -254,10 +254,10 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
   return (
     <View style={s.container}>
       {/* Status Bar */}
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

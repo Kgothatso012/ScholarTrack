@@ -211,7 +211,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: C.background }}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
@@ -234,7 +234,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
   if (error) {
     return (
       <View style={{ flex: 1, backgroundColor: C.background }}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}>
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}><Text style={s.ltTitle}>Driver Dashboard</Text></View>
@@ -255,10 +255,10 @@ const DriverAppScreen = ({ navigation }: Props) => {
 
   return (
     <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.success} colors={[C.success]} />} showsVerticalScrollIndicator={false}>
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

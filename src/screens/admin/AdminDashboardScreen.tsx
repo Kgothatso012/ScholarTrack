@@ -209,7 +209,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.header}>
           <View style={s.headerGlow1} />
           <View style={s.headerGlow2} />
@@ -251,10 +251,10 @@ export default function AdminDashboardScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />} showsVerticalScrollIndicator={false}>
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.header}>

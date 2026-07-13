@@ -157,7 +157,7 @@ export default function AdminReportsScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Reports</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={s.loadingWrap}><Text style={s.emptyText}>Loading reports...</Text></View>
       </View>
@@ -170,10 +170,10 @@ export default function AdminReportsScreen({ navigation }: Props) {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.success} colors={[C.success]} />}
     >
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

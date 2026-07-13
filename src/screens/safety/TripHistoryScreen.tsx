@@ -130,7 +130,7 @@ export default function TripHistoryScreen() {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Trip History</Text><Text style={s.ltSub}>All trips</Text></View></View>
         <View style={{ flex: 1, padding: 16 }}>
           {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
@@ -141,10 +141,10 @@ export default function TripHistoryScreen() {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />

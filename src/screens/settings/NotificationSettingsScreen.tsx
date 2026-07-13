@@ -115,10 +115,10 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

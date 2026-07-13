@@ -112,7 +112,7 @@ const TripScreen = ({ navigation }: Props) => {
   if (!loading && trips.length === 0) {
     return (
       <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />} showsVerticalScrollIndicator={false}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
         <Card variant='glassAmber' style={s.noTripCard}>
           <View style={s.cardTopRefraction} />
@@ -141,7 +141,7 @@ const TripScreen = ({ navigation }: Props) => {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Active Trip</Text></View></View>
         <View style={{ flex: 1, padding: 16 }}>
           {[0, 1, 2, 3, 4].map(i => <SkeletonListItem key={i} />)}
@@ -152,10 +152,10 @@ const TripScreen = ({ navigation }: Props) => {
 
   return (
     <ScrollView style={s.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.cyan} colors={[C.cyan]} />} showsVerticalScrollIndicator={false}>
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

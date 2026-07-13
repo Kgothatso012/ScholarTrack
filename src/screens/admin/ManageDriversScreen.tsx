@@ -98,7 +98,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Manage Drivers</Text><Text style={s.ltSub}>Loading...</Text></View></View>
         <View style={{ padding: 16 }}>
           {[1,2,3,4,5].map(i => <Card key={i} variant='glassAmber' style={s.skeletonCard}><View /></Card>)}
@@ -109,10 +109,10 @@ const ManageDriversScreen = ({ navigation }: Props) => {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
-      </View>
+
+
+
+
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />

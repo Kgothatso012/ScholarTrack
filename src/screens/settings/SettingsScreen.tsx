@@ -166,10 +166,10 @@ export default function SettingsScreen({ navigation }: Props) {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={false} onRefresh={loadUserProfile} tintColor={C.accent} colors={[C.accent]} />}
     >
-            <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

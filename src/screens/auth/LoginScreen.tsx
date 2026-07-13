@@ -399,7 +399,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
 
         {/* Time */}
         <Animated.View entering={FadeIn.delay(300).springify()} style={{ alignItems: 'center', marginTop: spacing.sm }}>
-          <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.15)', letterSpacing: 1 }}>{timeStr}</Text>
+
         </Animated.View>
       </ScrollView>
 

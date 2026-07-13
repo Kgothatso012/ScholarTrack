@@ -210,10 +210,10 @@ export default function DocumentManagementScreen({ navigation }: Props) {
   return (
     <View style={s.container}>
       {/* Status Bar */}
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

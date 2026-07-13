@@ -484,7 +484,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}><Text style={s.ltTitle}>Driver Compliance</Text></View></View>
         <View style={{ flex: 1, padding: 16 }}>
           <SkeletonCard />
@@ -498,7 +498,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   if (existingCompliance && existingCompliance.status === 'pending_review') {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={18} color={C.text} />
@@ -528,10 +528,10 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
   return (
     <View style={s.container}>
       {/* Status Bar */}
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       {/* Header */}
       <View style={s.ltHeader}>

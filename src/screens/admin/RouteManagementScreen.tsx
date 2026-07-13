@@ -139,7 +139,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
   if (loading && routes.length === 0) {
     return (
       <View style={s.container}>
-        <View style={s.statusBar}><Text style={s.sbTime}>{timeStr}</Text><View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View></View>
+
         <View style={s.ltHeader}><View style={s.ltHeaderBg} /><View style={s.ltTop}>
           <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={18} color={C.text} /></TouchableOpacity>
           <Text style={s.ltTitle}>Routes</Text>
@@ -154,10 +154,10 @@ export default function RouteManagementScreen({ navigation }: Props) {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.success} /><Ionicons name="battery-full" size={14} color={C.text} /></View>
-      </View>
+
+
+
+
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />

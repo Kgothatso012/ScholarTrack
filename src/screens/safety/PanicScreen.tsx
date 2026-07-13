@@ -226,10 +226,10 @@ export default function PanicScreen() {
 
   return (
     <View style={s.container}>
-      <View style={s.statusBar}>
-        <Text style={s.sbTime}>{timeStr}</Text>
-        <View style={s.sbIcons}><Ionicons name="wifi" size={14} color={C.textMuted} /><Ionicons name="battery-full" size={14} color={C.textMuted} /></View>
-      </View>
+
+
+
+
 
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
