@@ -276,7 +276,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
   });
 
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
 
   return (
     <KeyboardAvoidingView style={[s.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

@@ -177,7 +177,7 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
   
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    sbIcon: { fontSize: 14 },
+
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },

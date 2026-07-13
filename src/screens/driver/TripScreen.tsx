@@ -65,7 +65,7 @@ const TripScreen = ({ navigation }: Props) => {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    sbIcon: { fontSize: 12 },
+
     ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.cyan, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },

@@ -146,7 +146,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   const now = new Date();
     const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    sbIcon: { fontSize: 14 },
+
     header: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
     headerGlow1: { position: 'absolute', top: -50, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,184,28,.08)' },
     headerGlow2: { position: 'absolute', bottom: -40, left: -20, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(0,119,73,.2)' },

@@ -316,7 +316,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
   // ─── Styles ────────────────────────────────────────────────────────────────
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    sbIcon: { fontSize: 12 },
+
     ltHeader: {
       backgroundColor: C.surface,
       padding: spacing.lg,

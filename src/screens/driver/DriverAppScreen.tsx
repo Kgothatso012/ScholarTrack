@@ -124,7 +124,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
   
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    sbIcon: { fontSize: 12 },
+
     ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.success, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -50, right: -30, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(0,230,118,.1)' },
     ltHeaderBg2: { position: 'absolute', bottom: -40, left: -20, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(0,0,0,.15)' },

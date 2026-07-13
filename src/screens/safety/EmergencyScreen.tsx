@@ -97,14 +97,14 @@ const EmergencyScreen = () => {
   const sosRingAnimatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: sosRingScale.value }], opacity: sosRingOpacity.value }));
 
   const now = new Date();
-  const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
-    statusBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8, paddingBottom: 4, backgroundColor: C.background },
-    sbTime: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text, letterSpacing: 0.5 },
-    sbIcons: { flexDirection: 'row', gap: 4 },
-    sbIcon: { fontSize: 12 },
+
+
+
+
     headerGlass: { backgroundColor: C.surface, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, padding: 20, paddingTop: insets.top + 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,184,28,0.15)', position: 'relative', overflow: 'hidden' },
     headerGlow: { position: 'absolute', top: -60, right: -40, width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(224,60,49,0.1)' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
