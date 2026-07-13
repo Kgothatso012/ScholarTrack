@@ -265,6 +265,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <SettingRowBtn label="Privacy Policy" onPress={() => handleLink('https://scholartrack.co.za/privacy')} />
           <SettingRowBtn label="Terms of Service" onPress={() => handleLink('https://scholartrack.co.za/terms')} />
           <SettingRowBtn label="Contact Support" onPress={() => navigation.navigate('Support')} />
+          <SettingRowBtn label="DevTools — Test GPS, Notifications, SOS" onPress={() => navigation.navigate('DevTools')} />
         </View>
       </View>
 

@@ -22,6 +22,7 @@ export type DrawerParamList = {
   Payments: undefined;
   Support: undefined;
   Settings: undefined;
+  DevTools: undefined;
   ReviewDriver: { driverId?: string };
 };
 

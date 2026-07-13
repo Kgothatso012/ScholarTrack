@@ -204,7 +204,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
   });
 
   const quickActions = [
-    { name: 'Add Driver', icon: 'person-add', color: C.success, route: 'ManageDrivers' },
+    { name: 'Add Driver', icon: 'person-add', color: C.success, route: 'Drivers' },
     { name: 'Documents', icon: 'document-text', color: C.primary, route: 'Documents' },
     { name: 'Reports', icon: 'analytics', color: C.accent, route: 'EnhancedReports' },
     { name: 'Settings', icon: 'settings', color: C.textMuted, route: 'Settings' },

@@ -1,7 +1,7 @@
 // Location Tracking Service for ScholarTrack
 // Patched: Huawei/GMS fallback support
 import * as Location from 'expo-location';
-import { supabase } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 export interface DriverLocation {
   driver_id: string;
