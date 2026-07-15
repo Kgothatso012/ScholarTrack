@@ -138,9 +138,24 @@ function AppContentWithTheme() {
     }
   }, []);
 
-  const handleLogout = () => {
-    supabase.auth.signOut();
-    AsyncStorage.multiRemove(['userRole', 'userId']);
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    AsyncStorage.setItem('onboardingComplete', 'true');
+  };
+
+  const handleLogin = async (role: string) => {
+    setUserRole(role);
+    setIsAuthenticated(true);
+    await AsyncStorage.setItem('userRole', role);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('SignOut error:', error);
+    }
+    await AsyncStorage.removeItem('userRole');
     setUserRole(null);
     setIsAuthenticated(false);
   };
