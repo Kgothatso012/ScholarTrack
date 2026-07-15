@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text, Linking, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,6 +14,10 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 import SplashScreen from './src/components/SplashScreen';
 import { AuthProvider } from './src/lib/auth';
+import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';
+
+// Install BEFORE React mounts — catches module-load + async errors.
+installGlobalErrorHandler();
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './src/navigation/types';
@@ -94,7 +98,7 @@ function AppContentWithTheme() {
 
   useEffect(() => {
     init();
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         try {
@@ -102,7 +106,7 @@ function AppContentWithTheme() {
           setUserRole(profile.role);
           setIsAuthenticated(true);
           await AsyncStorage.setItem('userRole', profile.role);
-          
+
           // Register push token
           const pushToken = await notificationService.getPushToken();
           if (pushToken) {
@@ -116,67 +120,27 @@ function AppContentWithTheme() {
         setIsAuthenticated(false);
       }
     });
-    
+
     return () => subscription.unsubscribe();
+
+    async function init() {
+      try {
+        const role = await AsyncStorage.getItem('userRole');
+        if (role) {
+          setUserRole(role);
+          setIsAuthenticated(true);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Init error:', error);
+        setLoading(false);
+      }
+    }
   }, []);
 
-  const init = async () => {
-    try {
-      // Check if onboarding is complete
-      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
-      if (onboardingComplete !== 'true') {
-        setShowOnboarding(true);
-        setLoading(false);
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        const profile = await profileService.getProfile(session.user.id);
-        setUserRole(profile.role);
-        setIsAuthenticated(true);
-
-        const pushToken = await notificationService.getPushToken();
-        if (pushToken) {
-          await notificationService.registerPushToken(session.user.id, pushToken);
-        }
-      } else {
-        setUserRole(null);
-        setIsAuthenticated(false);
-      }
-    } catch (error) {
-      console.error('Init error:', error);
-      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
-      if (onboardingComplete !== 'true') {
-        setShowOnboarding(true);
-      } else {
-        setIsAuthenticated(false);
-      }
-    }
-    setLoading(false);
-  };
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    AsyncStorage.setItem('onboardingComplete', 'true');
-  };
-
-  const handleLogin = async (role: string) => {
-
-    setUserRole(role);
-    setIsAuthenticated(true);
-    await AsyncStorage.setItem('userRole', role);
-
-  };
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-
-    }
-    await AsyncStorage.removeItem('userRole');
+  const handleLogout = () => {
+    supabase.auth.signOut();
+    AsyncStorage.multiRemove(['userRole', 'userId']);
     setUserRole(null);
     setIsAuthenticated(false);
   };
@@ -205,6 +169,13 @@ function AppContentWithTheme() {
 }
 
 export default function App() {
+  // Mobicel-safe: if global handler caught a crash, show it instead of crashing silently.
+  const [captured] = useState(() => getCapturedError());
+
+  if (captured.error) {
+    return <CrashScreen error={captured.error} info={captured.info ?? undefined} />;
+  }
+
   const [fontsLoaded, fontError] = useFonts({
     Syne_400Regular,
     Syne_600SemiBold,
@@ -223,4 +194,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
