@@ -25,7 +25,9 @@
     "notification": {
       "icon": "./assets/notification-icon.png",
       "color": "#1E3A5F",
-      "sounds": ["./assets/sounds/school-bus-horn.wav"]
+      "sounds": [
+        "./assets/sounds/school-bus-horn.wav"
+      ]
     },
     "ios": {
       "supportsTablet": true,
