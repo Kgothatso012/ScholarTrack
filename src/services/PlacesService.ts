@@ -41,12 +41,7 @@ export const placesService = {
    * Get API key from environment
    */
   getApiKey(): string {
-    // Try multiple env var names for flexibility
-    return (
-      process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ||
-      process.env.GOOGLE_MAPS_API_KEY ||
-      ''
-    );
+    return 'AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI';
   },
 
   /**

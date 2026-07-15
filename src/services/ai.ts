@@ -1,7 +1,7 @@
 // AI Service - Connect to OpenClaw gateway for AI features
 // Uses MiniMax M2.5 via local gateway
 
-const GATEWAY_URL = process.env.EXPO_PUBLIC_AI_GATEWAY_URL || 'http://127.0.0.1:18789/v1';
+const GATEWAY_URL = 'http://127.0.0.1:18789/v1';
 
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
