@@ -197,26 +197,26 @@ describe('Expiry Date Calculations', () => {
 
   describe('getExpiryStatusColor', () => {
     test('returns gray for null date', () => {
-      expect(getExpiryStatusColor(undefined)).toBe('#999');
+      expect(getExpiryStatusColor(undefined)).toBe('#999999');
     });
 
     test('returns red for expired date', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 5);
       const result = getExpiryStatusColor(pastDate);
-      expect(result).toBe('#E03C31');
+      expect(result).toBe('#DC2626'); // error red
     });
 
     test('returns yellow for date within 30 days', () => {
       const soonDate = new Date();
       soonDate.setDate(soonDate.getDate() + 15);
-      expect(getExpiryStatusColor(soonDate)).toBe('#FFB81C');
+      expect(getExpiryStatusColor(soonDate)).toBe('#D97706'); // primary amber
     });
 
     test('returns green for date beyond 30 days', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 60);
-      expect(getExpiryStatusColor(futureDate)).toBe('#007749');
+      expect(getExpiryStatusColor(futureDate)).toBe('#059669'); // success green
     });
   });
 
