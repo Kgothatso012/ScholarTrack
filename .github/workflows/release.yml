@@ -1,0 +1,127 @@
+name: Release
+
+# Gated production release. Two jobs:
+#   1. supabase-migrate — applies supabase/migrations/* (incl. 014 RLS lockdown)
+#      to the production project before any build ships.
+#   2. build-android   — runs `expo prebuild` (applies the withAndroidSecurity
+#      config plugin), then a LOCAL Gradle release build on the runner signed
+#      with the dedicated upload keystore, and FAILS if the resulting AAB is
+#      signed with the Android debug key.
+#
+# The release keystore is injected as a file from a base64 GitHub secret, so the
+# plugin's SCHOLARTRACK_UPLOAD_* env vars resolve to a real file on the runner.
+# (For EAS *cloud* builds, use EAS Credentials instead — see docs/RELEASE.md.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      supabase_migrate:
+        description: "Run `supabase db push` before building"
+        type: boolean
+        default: true
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  supabase-migrate:
+    name: Apply Supabase migrations (RLS lockdown)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.supabase_migrate != 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        run: npm i -g supabase@latest
+
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Preview migration diff (dry run)
+        run: supabase db push --dry-run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Apply migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+  build-android:
+    name: Build & verify signed production AAB
+    runs-on: ubuntu-latest
+    needs: supabase-migrate
+    if: always() && (needs.supabase-migrate.result == 'success' || needs.supabase-migrate.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK (build-tools for apksigner)
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'build-tools;34.0.0'
+
+      - name: Decode release keystore from secret
+        run: |
+          printf '%s' "${{ secrets.SCHOLARTRACK_UPLOAD_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          test -s "$RUNNER_TEMP/upload.keystore" || { echo "keystore secret empty"; exit 1; }
+          echo "RUNNER_KEYSTORE=$RUNNER_TEMP/upload.keystore" >> "$GITHUB_ENV"
+
+      - name: expo prebuild (applies security config plugin)
+        run: npx expo prebuild --platform android --clean
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Gradle release build (signed with upload keystore)
+        working-directory: android
+        run: ./gradlew bundleRelease -x lint
+        env:
+          SCHOLARTRACK_UPLOAD_KEYSTORE_PATH: ${{ env.RUNNER_KEYSTORE }}
+          SCHOLARTRACK_UPLOAD_STORE_PASSWORD: ${{ secrets.SCHOLARTRACK_UPLOAD_STORE_PASSWORD }}
+          SCHOLARTRACK_UPLOAD_KEY_ALIAS: ${{ secrets.SCHOLARTRACK_UPLOAD_KEY_ALIAS }}
+          SCHOLARTRACK_UPLOAD_KEY_PASSWORD: ${{ secrets.SCHOLARTRACK_UPLOAD_KEY_PASSWORD }}
+
+      - name: Locate AAB
+        id: aab
+        run: |
+          AAB=$(ls android/app/build/outputs/bundle/release/*.aab | head -1)
+          test -s "$AAB" || { echo "no AAB produced"; exit 1; }
+          echo "path=$AAB" >> "$GITHUB_OUTPUT"
+
+      - name: Verify signing cert is NOT the Android debug key
+        run: |
+          set -e
+          APKSIGNER="$ANDROID_HOME/build-tools/34.0.0/apksigner"
+          "$APKSIGNER" verify --print-certs "${{ steps.aab.outputs.path }}" > certs.txt 2>&1 || { cat certs.txt; exit 1; }
+          echo "::group::Signing certificates"; cat certs.txt; echo "::endgroup::"
+          if grep -q "CN=Android Debug" certs.txt; then
+            echo "FATAL: build is signed with the Android DEBUG keystore — do not ship."; exit 1
+          fi
+          echo "OK: production build is not signed with the debug key."
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-production-aab
+          path: ${{ steps.aab.outputs.path }}
+          if-no-files-found: error
