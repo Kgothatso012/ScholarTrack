@@ -51,7 +51,8 @@
       "expo-font",
       "expo-notifications",
       "expo-location",
-      "expo-task-manager"
+      "expo-task-manager",
+      "./plugins/withAndroidSecurity"
     ],
     "web": {
       "favicon": "./assets/favicon.png"
