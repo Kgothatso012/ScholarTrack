@@ -96,12 +96,23 @@ echo "    to your static host, after filling the [placeholders] in legal/*.md."
 echo "    (authored and ready to deploy — see legal/README.md)"
 
 echo "==> 6/6  Build the signed AAB via CI"
+echo "    Required GitHub secrets (Actions → Settings → Secrets):"
+echo "      SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF"
+echo "      SCHOLARTRACK_UPLOAD_KEYSTORE_B64 (base64 of your .keystore)"
+echo "      SCHOLARTRACK_UPLOAD_STORE_PASSWORD, SCHOLARTRACK_UPLOAD_KEY_ALIAS"
+echo "      SCHOLARTRACK_UPLOAD_KEY_PASSWORD"
+echo "    Optional (hardcoded fallbacks exist in app.json):"
+echo "      EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY"
+echo "      EXPO_PUBLIC_GOOGLE_MAPS_API_KEY, EXPO_PUBLIC_SENTRY_DSN"
+echo ""
 if gh auth status >/dev/null 2>&1; then
+  git push origin master
   git tag -a v1.1.1 -m "Internal testing release" || true
   git push origin v1.1.1
   echo "    Tag pushed — release.yml will build the AAB. Download the artifact."
 else
-  echo "    gh is not authed — run 'gh auth login', then push a v1.1.1 tag to trigger release.yml."
+  echo "    gh is not authed — run 'gh auth login', then:"
+  echo "      git push origin master && git tag -a v1.1.1 -m 'Internal testing' && git push origin v1.1.1"
 fi
 
 echo "==> Done. Next: rotate the Google Maps key in the Cloud Console (can't be scripted)."

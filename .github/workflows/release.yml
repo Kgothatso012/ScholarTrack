@@ -92,6 +92,8 @@ jobs:
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
 
       - name: Gradle release build (signed with upload keystore)
         working-directory: android
@@ -101,6 +103,12 @@ jobs:
           SCHOLARTRACK_UPLOAD_STORE_PASSWORD: ${{ secrets.SCHOLARTRACK_UPLOAD_STORE_PASSWORD }}
           SCHOLARTRACK_UPLOAD_KEY_ALIAS: ${{ secrets.SCHOLARTRACK_UPLOAD_KEY_ALIAS }}
           SCHOLARTRACK_UPLOAD_KEY_PASSWORD: ${{ secrets.SCHOLARTRACK_UPLOAD_KEY_PASSWORD }}
+          # EXPO_PUBLIC_* vars are inlined by Metro during JS bundling inside
+          # this Gradle task — they must be on THIS step, not just on prebuild.
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
 
       - name: Locate AAB
         id: aab
@@ -112,8 +120,9 @@ jobs:
       - name: Verify signing cert is NOT the Android debug key
         run: |
           set -e
-          APKSIGNER="$ANDROID_HOME/build-tools/34.0.0/apksigner"
-          "$APKSIGNER" verify --print-certs "${{ steps.aab.outputs.path }}" > certs.txt 2>&1 || { cat certs.txt; exit 1; }
+          # keytool -printcert -jarfile works on AABs (JAR-signed ZIPs);
+          # apksigner is APK-only and cannot read AAB signature blocks.
+          keytool -printcert -jarfile "${{ steps.aab.outputs.path }}" > certs.txt 2>&1 || { cat certs.txt; exit 1; }
           echo "::group::Signing certificates"; cat certs.txt; echo "::endgroup::"
           if grep -q "CN=Android Debug" certs.txt; then
             echo "FATAL: build is signed with the Android DEBUG keystore — do not ship."; exit 1
