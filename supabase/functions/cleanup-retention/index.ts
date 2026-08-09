@@ -21,7 +21,15 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
-const CORS_HEADERS = { 'Content-Type': 'application/json' };
+// CORS — match delete-user so this function can also be invoked manually from
+// the Supabase dashboard / a browser-based admin tool without preflight errors.
+// Cron (pg_net → Supabase function URL) is server-to-server and unaffected.
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: CORS_HEADERS });
@@ -32,6 +40,7 @@ const TRIP_RETENTION_MONTHS = 12;
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS_HEADERS });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
     console.error('cleanup-retention: missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
