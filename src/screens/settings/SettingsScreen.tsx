@@ -134,7 +134,9 @@ export default function SettingsScreen({ navigation }: Props) {
           style: 'destructive',
           onPress: async () => {
             try {
-              const { error } = await supabase.rpc('delete_user_cascade');
+              // The service-role edge function purges all data (audit row) AND
+              // removes the auth.users row, which the client RPC cannot do.
+              const { error } = await supabase.functions.invoke('delete-user');
               if (error) throw error;
               await supabase.auth.signOut();
               await AsyncStorage.clear();
