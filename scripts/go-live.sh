@@ -37,10 +37,57 @@ npx supabase secrets set \
 
 echo "==> 4/6  Add Sentry crash reporting (needs network)"
 npx expo install sentry-expo
-if [ -n "${SENTRY_DSN:-}" ]; then
-  echo "    SENTRY_DSN set — add the sentry-expo plugin to app.json and init in App.tsx with this DSN."
+if [ -z "${SENTRY_DSN:-}" ]; then
+  echo "    SENTRY_DSN not set — create a Sentry project and re-run with SENTRY_DSN exported; init will be skipped."
 else
-  echo "    SENTRY_DSN not set — create a Sentry project and re-run with SENTRY_DSN exported."
+  # Wire Sentry into App.tsx + app.json idempotently so it activates as soon
+  # as the package is installed. The init is guarded by EXPO_PUBLIC_SENTRY_DSN
+  # so the build stays green until a DSN is set in .env / EAS secrets.
+  python3 - "$SENTRY_DSN" << 'PYEOF2'
+import json, sys, re
+dsn = sys.argv[1]
+
+# App.tsx: prepend the import and a guarded init after installGlobalErrorHandler().
+ap = "App.tsx"
+src = open(ap, encoding="utf-8").read()
+changed = False
+if "sentry-expo" not in src:
+    src = src.replace(
+        "import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';",
+        "import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';\n"
+        "import * as Sentry from 'sentry-expo';",
+        1,
+    )
+    changed = True
+if "Sentry.init" not in src:
+    src = src.replace(
+        "installGlobalErrorHandler();",
+        "installGlobalErrorHandler();\n"
+        "// Sentry crash reporting — active only when EXPO_PUBLIC_SENTRY_DSN is set.\n"
+        "if (process.env.EXPO_PUBLIC_SENTRY_DSN) {\n"
+        "  Sentry.init({ dsn: process.env.EXPO_PUBLIC_SENTRY_DSN, tracesSampleRate: 0.2 });\n"
+        "}",
+        1,
+    )
+    changed = True
+if changed:
+    open(ap, "w", encoding="utf-8").write(src)
+    print("    App.tsx: Sentry init wired (guarded by EXPO_PUBLIC_SENTRY_DSN).")
+
+# app.json: add the sentry-expo plugin + the DSN to extra (idempotent).
+jp = "app.json"
+data = json.load(open(jp, encoding="utf-8"))
+plugins = data["expo"].setdefault("plugins", [])
+if "sentry-expo" not in plugins:
+    plugins.append("sentry-expo")
+extra = data["expo"].setdefault("extra", {})
+extra["EXPO_PUBLIC_SENTRY_DSN"] = dsn
+json.dump(data, open(jp, "w", encoding="utf-8"), indent=2)
+open(jp, "a", encoding="utf-8").write("\n")
+print("    app.json: sentry-expo plugin + EXPO_PUBLIC_SENTRY_DSN added.")
+PYEOF2
+  # Mirror the DSN into .env so the local build picks it up.
+  grep -q "EXPO_PUBLIC_SENTRY_DSN" .env 2>/dev/null || echo "EXPO_PUBLIC_SENTRY_DSN=$SENTRY_DSN" >> .env
 fi
 
 echo "==> 5/6  Host the policy + terms (scholartrack.co.za/privacy & /terms)"
