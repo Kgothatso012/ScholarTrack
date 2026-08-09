@@ -3,9 +3,12 @@
 // Requires EXPO_ACCESS_TOKEN environment variable in Supabase
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const EXPO_ACCESS_TOKEN = Deno.env.get('EXPO_ACCESS_TOKEN');
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || '';
 
 interface PushNotificationPayload {
   to: string;
@@ -19,6 +22,25 @@ interface PushNotificationPayload {
 
 serve(async (req: Request) => {
   try {
+    // --- JWT verification: reject unauthenticated callers ---
+    const authHeader = req.headers.get('Authorization') || '';
+    if (!authHeader || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized or server not configured' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    const callerClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: callerData, error: callerErr } = await callerClient.auth.getUser();
+    if (callerErr || !callerData?.user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { token, title, body, data, priority } = await req.json();
 
     if (!token || !title || !body) {
