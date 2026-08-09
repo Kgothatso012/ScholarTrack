@@ -104,6 +104,8 @@ echo "      SCHOLARTRACK_UPLOAD_KEY_PASSWORD"
 echo "    Optional (hardcoded fallbacks exist in app.json):"
 echo "      EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY"
 echo "      EXPO_PUBLIC_GOOGLE_MAPS_API_KEY, EXPO_PUBLIC_SENTRY_DSN"
+echo "    Optional (cert fingerprint check is skipped if not set):"
+echo "      SCHOLARTRACK_UPLOAD_CERT_SHA256 (SHA-256 of your upload keystore cert)"
 echo ""
 if gh auth status >/dev/null 2>&1; then
   git push origin master
