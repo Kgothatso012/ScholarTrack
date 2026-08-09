@@ -40,11 +40,7 @@ function withSigning(config) {
             keyPassword System.getenv('SCHOLARTRACK_UPLOAD_KEY_PASSWORD') ?: findProperty('SCHOLARTRACK_UPLOAD_KEY_PASSWORD') ?: ''
             println 'ScholarTrack: using RELEASE signing keystore at ' + ksPath
         } else {
-            println 'ScholarTrack WARNING: SCHOLARTRACK_UPLOAD_KEYSTORE_PATH not set or missing — falling back to DEBUG keystore. Do NOT ship this APK.'
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            throw new GradleException('ScholarTrack: SCHOLARTRACK_UPLOAD_KEYSTORE_PATH not set or keystore missing. Release builds must be signed with the upload keystore; refusing to fall back to the debug keystore. Set the SCHOLARTRACK_UPLOAD_* env vars (or ~/.gradle/gradle.properties) before building a release.')
         }
     }`;
 
@@ -79,10 +75,38 @@ function withMinify(config) {
   });
 }
 
-// 3. Manifest: no backup, no cleartext traffic.
+// 3. Manifest: no backup, no cleartext traffic; strip unused permissions
+    //    (Play Store requires justification — RECORD_AUDIO / SYSTEM_ALERT_WINDOW
+    //    have no usage in this app and must not ship).
 function withManifest(config) {
   return withAndroidManifest(config, (cfg) => {
-    const app = cfg.modResults.manifest.application?.[0];
+    const manifest = cfg.modResults.manifest;
+    const STRIP = new Set([
+      'android.permission.RECORD_AUDIO',
+      'android.permission.SYSTEM_ALERT_WINDOW',
+    ]);
+    if (!Array.isArray(manifest['uses-permission'])) {
+      manifest['uses-permission'] = [];
+    }
+    manifest['uses-permission'] = manifest['uses-permission'].filter(
+      (p) => !STRIP.has(p?.$?.['android:name'])
+    );
+    // Add the permissions the background driver-tracking task needs (these
+    // ARE used by Location.startLocationUpdatesAsync — declared here so they
+    // survive prebuild, and so the manifest source is the plugin, not the
+    // gitignored android/ tree).
+    const ADD_PERMS = [
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.FOREGROUND_SERVICE_LOCATION',
+      'android.permission.ACCESS_BACKGROUND_LOCATION',
+    ];
+    const present = new Set(manifest['uses-permission'].map((p) => p?.$?.['android:name']));
+    for (const name of ADD_PERMS) {
+      if (!present.has(name)) {
+        manifest['uses-permission'].push({ $: { 'android:name': name } });
+      }
+    }
+    const app = manifest.application?.[0];
     if (app) {
       app.$['android:allowBackup'] = 'false';
       app.$['android:usesCleartextTraffic'] = 'false';

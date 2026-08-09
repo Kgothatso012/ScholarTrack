@@ -23,15 +23,15 @@ import {
 describe('validateRSAId', () => {
   describe('valid RSA IDs', () => {
     test('accepts valid 13-digit RSA ID', () => {
-      // Valid ID with valid Luhn checksum (8601205239082)
-      const result = validateRSAId('8601205239082');
+      // Synthetic ID: valid date (900101) + valid Luhn checksum (9001015000085)
+      const result = validateRSAId('9001015000085');
       expect(result.valid).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
     test('accepts valid ID with spaces', () => {
       // Same ID with spaces
-      const result = validateRSAId('860120 5239082');
+      const result = validateRSAId('900101 5000085');
       expect(result.valid).toBe(true);
     });
   });
@@ -68,6 +68,13 @@ describe('validateRSAId', () => {
     test('rejects invalid date in ID (day 32)', () => {
       const result = validateRSAId('8501321234567');
       expect(result.valid).toBe(false);
+    });
+
+    test('rejects 13-digit ID that fails the Luhn checksum', () => {
+      // Valid date + 13 digits, but the checksum does not match (8601205239082).
+      const result = validateRSAId('8601205239082');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('checksum');
     });
   });
 });

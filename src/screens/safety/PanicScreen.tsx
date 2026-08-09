@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { panicAlertService } from '../../lib/services/emergency';
 import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
@@ -132,7 +131,7 @@ export default function PanicScreen() {
       setSending(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { Alert.alert('Error', 'Please login first'); return; }
-      const panicAlert = await panicAlertService.createPanicAlert(user.id, locationStr);
+      const panicAlert = await emergencyContactService.createPanicAlert(user.id, locationStr);
       for (const contact of contacts) {
         await sendAppNotification('EMERGENCY', user.id, {
           message: `Emergency SOS from ${user.email}${gpsAvailable ? '' : ' (no location)'}`,

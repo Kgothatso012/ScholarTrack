@@ -1,6 +1,8 @@
 // Google Places Autocomplete Service for ScholarTrack
 // Uses Google Places API via HTTP - no native library required
 
+import Constants from 'expo-constants';
+
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
 
 export interface PlacePrediction {
@@ -41,7 +43,18 @@ export const placesService = {
    * Get API key from environment
    */
   getApiKey(): string {
-    return 'AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI';
+    // Single source of truth: the value committed in app.json
+    // (android.config.googleMaps.apiKey) is the same one Expo writes to the
+    // AndroidManifest meta-data at prebuild, so the JS bundle no longer ships
+    // its own hardcoded copy. EXPO_PUBLIC_GOOGLE_MAPS_API_KEY overrides it for
+    // rotation without a code change.
+    const env = process.env as Record<string, string | undefined>;
+    return (
+      Constants.expoConfig?.android?.config?.googleMaps?.apiKey ||
+      (Constants.expoConfig?.extra as Record<string, string | undefined>)?.googleMapsApiKey ||
+      env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ||
+      ''
+    );
   },
 
   /**
@@ -89,7 +102,13 @@ export const placesService = {
 
       const data = await response.json();
 
-      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      if (data.status === 'ZERO_RESULTS') return [];
+      if (data.status === 'OVER_QUERY_LIMIT' || data.status === 'REQUEST_DENIED' || data.status === 'INVALID_REQUEST') {
+        // Configuration/quota failure — do NOT silently return []. Autocomplete
+        // has effectively stopped; the caller must surface this to the user.
+        throw new Error(`Google Places autocomplete unavailable (${data.status})`);
+      }
+      if (data.status !== 'OK') {
         console.warn('Places autocomplete status:', data.status);
         return [];
       }

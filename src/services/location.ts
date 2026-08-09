@@ -2,6 +2,9 @@
 // Patched: Huawei/GMS fallback support
 import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
+import { offlineService } from './OfflineService';
+import * as TaskManager from 'expo-task-manager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface DriverLocation {
   driver_id: string;
@@ -18,27 +21,65 @@ export interface LocationResult {
   isHuaweiFallback: boolean;
 }
 
-// Detect if we're on a device without Google Play Services
-// Huawei devices and some custom ROMs don't have GMS
+
+// GMS availability is inferred from each caller's catch block on the real
+// location call — we no longer burn an upfront GPS fix (which also demanded
+// permission before the user expected it) purely to sniff Play Services.
 async function isGooglePlayServicesAvailable(): Promise<boolean> {
-  try {
-    // Try a simple location call — if it fails with SERVICE_INVALID, GMS is missing
-    await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
-    return true;
-  } catch (error: any) {
-    const message = error?.message || '';
-    if (
-      message.includes('SERVICE_INVALID') ||
-      message.includes('ConnectionResult') ||
-      message.includes('LocationServices.API') ||
-      message.includes('not available on this device') ||
-      error?.code === 'SERVICE_INVALID'
-    ) {
-      return false;
+  return true;
+}
+
+const BACKGROUND_TRACKING_TASK = 'scholartrack-driver-tracking';
+const BG_DRIVER_ID_KEY = 'bg_tracking_driver_id';
+
+// Background tracking task — registered at module load so it is ready before
+// Location.startLocationUpdatesAsync starts it. Fires even when the app is
+// backgrounded (Android foreground service), so the parent's map no longer
+// freezes when the driver's screen sleeps. Fixes are batched into a single
+// insert to avoid per-fix write amplification.
+try {
+  TaskManager.defineTask(BACKGROUND_TRACKING_TASK, async ({ data, error }) => {
+    if (error) {
+      console.error('[Location] background tracking task error:', error);
+      return;
     }
-    // Other errors (permission denied, etc.) don't mean GMS is missing
-    return true;
-  }
+    const payload = data as { locations: Location.LocationObject[] } | undefined;
+    if (!payload?.locations?.length) return;
+
+    let driverId: string | null = null;
+    try {
+      driverId = await AsyncStorage.getItem(BG_DRIVER_ID_KEY);
+    } catch { /* ignore */ }
+    if (!driverId) return;
+
+    const now = new Date().toISOString();
+    const rows = payload.locations.map((loc) => {
+      const { latitude, longitude, accuracy, speed } = loc.coords;
+      return {
+        driver_id: driverId,
+        latitude,
+        longitude,
+        last_updated: now,
+        accuracy,
+        speed: speed ?? null,
+      };
+    });
+    await offlineService.queueDriverTrackingBatch(rows);
+
+    // Update the drivers cache with the latest fix in this batch.
+    const latest = payload.locations[payload.locations.length - 1];
+    const { error: upErr } = await supabase
+      .from('drivers')
+      .update({
+        current_latitude: latest.coords.latitude,
+        current_longitude: latest.coords.longitude,
+        last_location_update: now,
+      })
+      .eq('id', driverId);
+    if (upErr) console.error('[Location] drivers update error:', upErr.message);
+  });
+} catch (e) {
+  // Task already defined (HMR / duplicate import) — safe to ignore.
 }
 
 export const locationService = {
@@ -91,33 +132,39 @@ export const locationService = {
     }
   },
 
-  // Start background location tracking (for drivers)
+  // Start background location tracking (for drivers). Uses a foreground-service
+  // background task (Location.startLocationUpdatesAsync) so tracking survives the
+  // screen sleeping — watchPositionAsync dies when the app is backgrounded.
   async startBackgroundTracking(driverId: string): Promise<{ success: boolean; error: string | null }> {
-    const gmsAvailable = await isGooglePlayServicesAvailable();
-
-    if (!gmsAvailable) {
-      return {
-        success: false,
-        error: 'Background tracking requires Google Play Services. Your device does not support this.',
-      };
-    }
-
     try {
-      const { status } = await Location.requestBackgroundPermissionsAsync();
-      if (status !== 'granted') {
-        return { success: false, error: 'Background location permission denied.' };
+      const { status: fg } = await Location.requestForegroundPermissionsAsync();
+      if (fg !== 'granted') {
+        return { success: false, error: 'Location access denied. Enable it in Settings.' };
+      }
+      const { status: bg } = await Location.requestBackgroundPermissionsAsync();
+      if (bg !== 'granted') {
+        return { success: false, error: 'Background location denied. Choose "Allow all the time" in Settings to keep tracking on trips.' };
       }
 
-      await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 30000,
-          distanceInterval: 10,
-        },
-        async (location) => {
-          await this.updateDriverLocation(driverId, location);
+      try {
+        if (await TaskManager.isTaskRegisteredAsync(BACKGROUND_TRACKING_TASK)) {
+          await Location.stopLocationUpdatesAsync(BACKGROUND_TRACKING_TASK);
         }
-      );
+      } catch { /* not running */ }
+
+      await AsyncStorage.setItem(BG_DRIVER_ID_KEY, driverId);
+      await Location.startLocationUpdatesAsync(BACKGROUND_TRACKING_TASK, {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 30000,
+        distanceInterval: 10,
+        deferredUpdatesInterval: 60000,
+        showsBackgroundLocationIndicator: true,
+        foregroundService: {
+          notificationTitle: 'ScholarTrack is tracking your trip',
+          notificationBody: 'Sharing live location with parents.',
+          notificationColor: '#1E3A5F',
+        },
+      });
 
       return { success: true, error: null };
     } catch (error: any) {
@@ -126,35 +173,45 @@ export const locationService = {
     }
   },
 
+  // Stop background tracking and clear the stored driver id.
+  async stopBackgroundTracking(): Promise<void> {
+    try {
+      const isReg = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TRACKING_TASK);
+      if (isReg) await Location.stopLocationUpdatesAsync(BACKGROUND_TRACKING_TASK);
+    } catch { /* ignore */ }
+    try { await AsyncStorage.removeItem(BG_DRIVER_ID_KEY); } catch { /* ignore */ }
+  },
+
   // Update driver location in Supabase
   async updateDriverLocation(
     driverId: string,
     location: Location.LocationObject
   ): Promise<void> {
-    try {
-      const { latitude, longitude, accuracy, speed } = location.coords;
-      const last_updated = new Date().toISOString();
+    const { latitude, longitude, accuracy, speed } = location.coords;
+    const last_updated = new Date().toISOString();
 
-      await supabase.from('driver_tracking').insert({
-        driver_id: driverId,
-        latitude,
-        longitude,
-        last_updated,
-        accuracy,
-        speed: speed || null,
-      });
+    // Insert via the offline-aware queue: inserts immediately when online,
+    // otherwise buffers to AsyncStorage and flushes on reconnect so a long
+    // offline window no longer silently loses child-position history.
+    await offlineService.queueDriverTracking({
+      driver_id: driverId,
+      latitude,
+      longitude,
+      last_updated,
+      accuracy,
+      speed: speed ?? null,
+    });
 
-      await supabase
-        .from('drivers')
-        .update({
-          current_latitude: latitude,
-          current_longitude: longitude,
-          last_location_update: new Date().toISOString(),
-        })
-        .eq('id', driverId);
-    } catch (error) {
-      console.error('[Location] updateDriverLocation error:', error);
-    }
+    // Best-effort update of the drivers table cache (derived from tracking).
+    const { error } = await supabase
+      .from('drivers')
+      .update({
+        current_latitude: latitude,
+        current_longitude: longitude,
+        last_location_update: new Date().toISOString(),
+      })
+      .eq('id', driverId);
+    if (error) console.error('[Location] drivers update error:', error.message);
   },
 
   // Get driver's current location from Supabase

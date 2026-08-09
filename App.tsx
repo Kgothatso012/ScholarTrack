@@ -12,6 +12,7 @@ import { supabase, profileService, Profile } from './src/lib/api';
 import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
+import ConsentGate from './src/components/ConsentGate';
 import SplashScreen from './src/components/SplashScreen';
 import { AuthProvider } from './src/lib/auth';
 import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';
@@ -179,6 +180,7 @@ function AppContentWithTheme() {
         onLogin={handleLogin}
         onOnboardingComplete={handleOnboardingComplete}
       />
+      {isAuthenticated && <ConsentGate />}
     </NavigationContainer>
   );
 }

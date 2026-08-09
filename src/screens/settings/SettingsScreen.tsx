@@ -1,6 +1,6 @@
 // Settings Screen — Design System: Dark SA Transport
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Linking, RefreshControl, TextInput } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Linking, RefreshControl, TextInput, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,7 +52,29 @@ export default function SettingsScreen({ navigation }: Props) {
   const isDriver = userProfile.role === 'driver';
   const isParent = userProfile.role === 'parent';
 
-  useEffect(() => { loadUserProfile(); }, []);
+  const prefsLoaded = useRef(false);
+  useEffect(() => { loadUserProfile(); loadPrefs(); }, []);
+  const loadPrefs = async () => {
+    try {
+      const [n, p, a] = await Promise.all([
+        AsyncStorage.getItem('prefs_notifications'),
+        AsyncStorage.getItem('prefs_privacy'),
+        AsyncStorage.getItem('prefs_appSettings'),
+      ]);
+      if (n) setNotifications(JSON.parse(n));
+      if (p) setPrivacy(JSON.parse(p));
+      if (a) setAppSettings(JSON.parse(a));
+    } catch { /* silent */ } finally {
+      prefsLoaded.current = true;
+    }
+  };
+  // Persist preferences whenever they change (after the initial load).
+  useEffect(() => {
+    if (!prefsLoaded.current) return;
+    AsyncStorage.setItem('prefs_notifications', JSON.stringify(notifications)).catch(() => {});
+    AsyncStorage.setItem('prefs_privacy', JSON.stringify(privacy)).catch(() => {});
+    AsyncStorage.setItem('prefs_appSettings', JSON.stringify(appSettings)).catch(() => {});
+  }, [notifications, privacy, appSettings]);
   const loadUserProfile = async () => {
     try {
       const name = await AsyncStorage.getItem('userName');
@@ -90,6 +112,42 @@ export default function SettingsScreen({ navigation }: Props) {
 
   const handleLink = (url: string) => {
     Linking.openURL(url).catch(() => Alert.alert('Error', 'Cannot open link'));
+  };
+  const handleExportData = async () => {
+    try {
+      const { data, error } = await supabase.rpc('export_user_data');
+      if (error) throw error;
+      const json = JSON.stringify(data, null, 2);
+      await Share.share({ message: json, title: 'My ScholarTrack data' });
+    } catch (error) {
+      Alert.alert('Export failed', error instanceof Error ? error.message : 'Could not export your data.');
+    }
+  };
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete account',
+      'This permanently erases your profile, children, trips, payments, emergency contacts and tracking history. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete everything',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await supabase.rpc('delete_user_cascade');
+              if (error) throw error;
+              await supabase.auth.signOut();
+              await AsyncStorage.clear();
+              Alert.alert('Account deleted', 'Your data has been erased.', [
+                { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Auth' }] }) },
+              ]);
+            } catch (error) {
+              Alert.alert('Delete failed', error instanceof Error ? error.message : 'Could not delete your account.');
+            }
+          },
+        },
+      ],
+    );
   };
   const now = new Date();
     const s = StyleSheet.create({
@@ -253,6 +311,15 @@ export default function SettingsScreen({ navigation }: Props) {
         </View>
       )}
 
+      {/* Data & Privacy */}
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Data & Privacy</Text>
+        <View style={s.settingCard}>
+          <SettingRowBtn label="Export my data" onPress={handleExportData} />
+          <SettingRowBtn label="Delete my account" onPress={handleDeleteAccount} />
+        </View>
+      </View>
+
       {/* About */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>About</Text>
@@ -260,7 +327,9 @@ export default function SettingsScreen({ navigation }: Props) {
           <SettingRowBtn label="Privacy Policy" onPress={() => handleLink('https://scholartrack.co.za/privacy')} />
           <SettingRowBtn label="Terms of Service" onPress={() => handleLink('https://scholartrack.co.za/terms')} />
           <SettingRowBtn label="Contact Support" onPress={() => navigation.navigate('Support')} />
-          <SettingRowBtn label="DevTools — Test GPS, Notifications, SOS" onPress={() => navigation.navigate('DevTools')} />
+          {__DEV__ && (
+            <SettingRowBtn label="DevTools — Test GPS, Notifications, SOS" onPress={() => navigation.navigate('DevTools')} />
+          )}
         </View>
       </View>
 

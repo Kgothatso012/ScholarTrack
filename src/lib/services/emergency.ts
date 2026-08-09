@@ -59,30 +59,3 @@ export const emergencyContactService = {
   }
 };
 
-// Panic Alert Service (alias)
-export const panicAlertService = {
-  async createPanicAlert(userId: string, location?: string) {
-    const { data, error } = await supabase
-      .from('panic_alerts')
-      .insert({ user_id: userId, location, status: 'active' })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
-  async triggerGeofenceAlert(childId: string, tripId: string, type: string, location?: { latitude: number; longitude: number }) {
-    const { data, error } = await supabase
-      .from('geofence_alerts')
-      .insert({
-        child_id: childId,
-        trip_id: tripId,
-        alert_type: type,
-        location: location ? `${location.latitude},${location.longitude}` : null,
-        status: 'active'
-      })
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  }
-};

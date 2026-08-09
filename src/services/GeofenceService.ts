@@ -1,7 +1,7 @@
 // Geofencing Service for ScholarTrack
 // Monitors driver location against pickup/dropoff zones
 import { locationService } from './location';
-import { panicAlertService } from '../lib/api';
+import { emergencyContactService } from '../lib/api';
 import { sendAppNotification } from './NotificationService';
 import { supabase } from '../lib/supabase';
 import * as Location from 'expo-location';
@@ -234,7 +234,7 @@ export const geofenceService = {
       if (!zone.childId) return;
 
       // Create alert in database
-      await panicAlertService.triggerGeofenceAlert(
+      await emergencyContactService.triggerGeofenceAlert(
         zone.childId,
         zone.tripId,
         zone.type,

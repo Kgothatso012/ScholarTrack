@@ -1,11 +1,12 @@
 // Driver Trip Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, AppState } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { supabase, driverService, tripServiceEnhanced, Driver, Trip } from '../../lib/api';
 import { geofenceService, GeofenceZone } from '../../services/GeofenceService';
+import { locationService } from '../../services/location';
 import { notificationService } from '../../services/NotificationService';
 import { SkeletonListItem, Card } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
@@ -35,8 +36,26 @@ export default function DriverTripScreen({ navigation }: Props) {
     requestLocation();
     return () => {
       if (locationSubscription.current) locationSubscription.current.remove();
+      locationService.stopBackgroundTracking();
     };
   }, []);
+
+  // Keep tracking alive when the screen sleeps: while a trip is active, start
+  // the background tracking task when the app is backgrounded and stop it on
+  // return to the foreground (the foreground watcher handles on-screen updates).
+  useEffect(() => {
+    if (!driver?.id || !activeTrip?.id) return;
+    const sub = AppState.addEventListener('change', async (state) => {
+      try {
+        if (state === 'background' || state === 'inactive') {
+          await locationService.startBackgroundTracking(driver.id);
+        } else if (state === 'active') {
+          await locationService.stopBackgroundTracking();
+        }
+      } catch { /* ignore */ }
+    });
+    return () => { sub.remove(); locationService.stopBackgroundTracking(); };
+  }, [driver?.id, activeTrip?.id]);
 
   const requestLocation = async () => {
     try {

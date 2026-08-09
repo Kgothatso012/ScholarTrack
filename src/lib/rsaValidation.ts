@@ -30,6 +30,24 @@ export function validateRSAId(idNumber: string): { valid: boolean; error?: strin
     return { valid: false, error: 'Invalid date in ID number' };
   }
 
+  // Luhn checksum — matches the server-side validate_rsa_id() trigger on
+  // drivers.id_number, so client feedback stays in sync with DB enforcement.
+  let sum = 0;
+  for (let i = 0; i < 13; i++) {
+    let digit = parseInt(cleanId.charAt(i), 10);
+    const dist = 12 - i; // distance from the right (check digit is i=12)
+    if (dist % 2 === 1) {
+      let dbl = digit * 2;
+      if (dbl > 9) dbl -= 9;
+      sum += dbl;
+    } else {
+      sum += digit;
+    }
+  }
+  if (sum % 10 !== 0) {
+    return { valid: false, error: 'Invalid RSA ID number (checksum failed)' };
+  }
+
   return { valid: true };
 }
 

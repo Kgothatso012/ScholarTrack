@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking, A
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withRepeat, withSequence, FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { emergencyContactService, panicAlertService } from '../../lib/services/emergency';
+import { emergencyContactService } from '../../lib/services/emergency';
 import { locationService } from '../../services/location';
 import { sendAppNotification } from '../../services/NotificationService';
 import { supabase } from '../../lib/supabase';
@@ -55,7 +55,7 @@ const EmergencyScreen = () => {
       if (!user) { Alert.alert('Error', 'Please login first'); return; }
       const result = await locationService.getCurrentLocation();
       const locationStr = result.location ? `${result.location.coords.latitude},${result.location.coords.longitude}` : undefined;
-      const panicAlert = await panicAlertService.createPanicAlert(user.id, locationStr);
+      const panicAlert = await emergencyContactService.createPanicAlert(user.id, locationStr);
       for (const contact of contacts) {
         await sendAppNotification('EMERGENCY', user.id, {
           message: `Emergency SOS from ${user.email}`,

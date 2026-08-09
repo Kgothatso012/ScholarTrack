@@ -20,7 +20,7 @@ export { driverService } from './driver';
 export { tripService } from './trip';
 export { paymentService } from './payment';
 export { documentService } from './document';
-export { emergencyContactService, panicAlertService } from './emergency';
+export { emergencyContactService } from './emergency';
 export { linkingService } from './linking';
 export { routeService } from './route';
 export { tripServiceEnhanced, driverTrackingService, profileService } from './tripEnhanced';

@@ -1,5 +1,4 @@
 // Content Safety Filter - Basic guardrails for AI responses
-// Can be expanded with Qwen3Guard backend later
 
 const BLOCKED_KEYWORDS = [
   'violence', 'weapon', 'harm', 'abuse', 'threat',
@@ -57,7 +56,6 @@ export const contentSafety = {
 
   // Filter AI response before displaying
   checkOutput(text: string): { filtered: string; wasFiltered: boolean } {
-    // Basic filtering - can expand with Qwen3Guard
     let filtered = text;
     let wasFiltered = false;
     
@@ -70,18 +68,6 @@ export const contentSafety = {
     return { filtered: filtered.trim(), wasFiltered };
   },
 
-  // Multi-language detection (basic)
-  detectLanguage(text: string): string {
-    // Simple heuristic - can be improved
-    const patterns = {
-      af: /^[a-z\s]+$/i, // Afrikaans rough check
-      zu: /u|um|ba|si/i, // Zulu rough check
-      st: /o|a|e|ho/i,   // Sesotho rough check
-    };
-    
-    // Default to English if uncertain
-    return 'en';
-  },
 };
 
 export default contentSafety;

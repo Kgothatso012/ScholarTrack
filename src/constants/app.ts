@@ -36,3 +36,7 @@ export const RSA_EMERGENCY = {
   AMBULANCE: '10177',
   FIRE: '10177',
 } as const;
+// POPIA consent — bump this when the policy changes to re-prompt users.
+export const CONSENT_VERSION = '1.0';
+export const PRIVACY_POLICY_URL = 'https://scholartrack.co.za/privacy';
+export const TERMS_OF_SERVICE_URL = 'https://scholartrack.co.za/terms';

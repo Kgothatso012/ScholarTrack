@@ -1,10 +1,11 @@
 // ScholarTrack RegisterScreen — Design System: Dark SA Transport
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, Easing } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import { CONSENT_VERSION, PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
 import { spacing, getTheme } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
@@ -96,6 +97,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
   const otpInputRefs = useRef<(TextInput | null)[]>([]);
   const [pendingPhone, setPendingPhone] = useState('');
   const [usePhoneAuth, setUsePhoneAuth] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
 
   const roles = [
     { id: 'parent', name: 'Parent', icon: 'people', description: 'Hire drivers for your children' },
@@ -103,6 +105,10 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
   ];
 
   const handleSendOTP = async () => {
+    if (!consentAccepted) {
+      Alert.alert('Consent required', 'Please accept the Privacy Policy and Terms of Service to continue.');
+      return;
+    }
     if (!name || !phone || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -134,7 +140,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         phone: formattedPhone,
         password,
         options: {
-          data: { full_name: name, role: selectedRole },
+          data: { full_name: name, role: selectedRole, consent_version: CONSENT_VERSION },
           emailRedirectTo: 'scholartrack://confirm'
         }
       });
@@ -160,6 +166,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         await AsyncStorage.setItem('userName', name);
         await AsyncStorage.setItem('userEmail', formattedPhone);
         if (data.user) { await AsyncStorage.setItem('userId', data.user.id); }
+        (async () => { try { await supabase.rpc('record_consent', { p_version: CONSENT_VERSION, p_policy_url: PRIVACY_POLICY_URL }); } catch { /* consent recorded via metadata; persisted on next gate */ } })();
         Alert.alert('Success', 'You have successfully registered!', [
           { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
         ]);
@@ -175,6 +182,10 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
   };
 
   const handleEmailRegister = async () => {
+    if (!consentAccepted) {
+      Alert.alert('Consent required', 'Please accept the Privacy Policy and Terms of Service to continue.');
+      return;
+    }
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -556,7 +567,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
           <Animated.View entering={FadeIn.delay(250).springify()}>
             <SpringTouchable onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()} style={{}}>
               <TouchableOpacity
-                disabled={loading}
+                disabled={loading || !consentAccepted}
                 style={[s.registerBtn, loading && s.registerBtnDisabled]}
               >
                 <Text style={s.registerBtnText}>{loading ? 'Creating Account…' : 'Create Account'}</Text>
@@ -564,14 +575,28 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
             </SpringTouchable>
           </Animated.View>
 
-          {/* Terms */}
+          {/* Consent */}
           <Animated.View entering={FadeIn.delay(280).springify()}>
             <View style={s.termsContainer}>
-              <Text style={s.termsText}>
-                By signing up, you agree to our{' '}
-                <Text style={s.termsLink}>Terms of Service</Text> and{' '}
-                <Text style={s.termsLink}>Privacy Policy</Text>
-              </Text>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                onPress={() => setConsentAccepted(v => !v)}
+                activeOpacity={0.7}
+              >
+                <View style={{
+                  width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+                  borderColor: consentAccepted ? C.success : C.textMuted,
+                  backgroundColor: consentAccepted ? C.success : 'transparent',
+                  marginRight: 10, marginTop: 2, alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {consentAccepted ? <Ionicons name="checkmark" size={16} color="#fff" /> : null}
+                </View>
+                <Text style={[s.termsText, { flex: 1 }]}>
+                  I have read and agree to the{' '}
+                  <Text style={s.termsLink} onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}>Terms of Service</Text> and{' '}
+                  <Text style={s.termsLink} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>Privacy Policy</Text>
+                </Text>
+              </TouchableOpacity>
             </View>
           </Animated.View>
 
