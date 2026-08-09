@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
 import { Spacer, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
 
@@ -326,8 +327,8 @@ export default function SettingsScreen({ navigation }: Props) {
       <View style={s.section}>
         <Text style={s.sectionTitle}>About</Text>
         <View style={s.settingCard}>
-          <SettingRowBtn label="Privacy Policy" onPress={() => handleLink('https://scholartrack.co.za/privacy')} />
-          <SettingRowBtn label="Terms of Service" onPress={() => handleLink('https://scholartrack.co.za/terms')} />
+          <SettingRowBtn label="Privacy Policy" onPress={() => handleLink(PRIVACY_POLICY_URL)} />
+          <SettingRowBtn label="Terms of Service" onPress={() => handleLink(TERMS_OF_SERVICE_URL)} />
           <SettingRowBtn label="Contact Support" onPress={() => navigation.navigate('Support')} />
           {__DEV__ && (
             <SettingRowBtn label="DevTools — Test GPS, Notifications, SOS" onPress={() => navigation.navigate('DevTools')} />

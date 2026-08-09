@@ -71,8 +71,8 @@ erase your data (see the Privacy Policy).
 ## 8. Acceptable use
 
 You may not use the App to: provide false information; use another person's
-identity; misuse the leaked public key or any API to access data you are not
-entitled to; scrape or reverse-engineer the service; or use it for anything
+identity; misuse any API key, authentication credential, or API to access data you
+are not entitled to; scrape or reverse-engineer the service; or use it for anything
 unlawful. We may suspend or terminate access for breaches of these Terms.
 
 ## 9. Liability

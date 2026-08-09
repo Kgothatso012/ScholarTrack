@@ -37,7 +37,7 @@ Stiemens Street, Brooklyn, Pretoria.
 **Account information:** full name, email address, mobile number, and your
 role (parent / driver / admin).
 
-**If you are a parent:** your children's first name, school, grade, and the
+**If you are a parent:** your children's full name, school, grade, and the
 parent–child link; emergency contacts (name, phone, relationship); and trip
 records (assigned driver, child, pickup/dropoff addresses and coordinates,
 scheduled and actual times, status).
@@ -99,8 +99,13 @@ We do not sell personal information. We share it only as needed to operate:
 - **Expo** — push notification delivery.
 
 Each processor processes data under instructions from us and is bound to
-protect it. Some may process data outside South Africa; we rely on standard
-contractual clauses or equivalent safeguards for any cross-border transfer.
+protect it. The processors listed above may process data outside South Africa
+(Supabase and Google in the United States; Paystack in Nigeria and other
+supported regions; Expo in the United States). We permit these transfers
+under section 72 of POPIA because they are necessary for the performance of
+our contract with you (providing the App's services) and for the proper
+performance of our obligations to you. We require each processor to maintain
+technical and organisational measures appropriate to the level of risk.
 
 We may disclose information where required by law (for example a lawful request
 from the South African Police Service or a court order).
@@ -114,7 +119,7 @@ from the South African Police Service or a court order).
   **90 days** afterwards, then deleted.
 - **Trip records:** **12 months** after completion.
 - **Payment records:** **5 years** (financial-record-keeping obligations).
-- **Marketing leads:** **6 months**, then deleted.
+- **Marketing leads:** **90 days**, then deleted.
 - **Consent records:** for the life of the account.
 - **Deleted-account audit:** we keep a permanent record that an account was
   deleted (user id, role, email, date) to meet our accountability

@@ -8,11 +8,18 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RETENTION_DAYS = 90;
 
 Deno.serve(async () => {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error("cleanup-leads: missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    return new Response(
+      JSON.stringify({ error: "Server not configured" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
