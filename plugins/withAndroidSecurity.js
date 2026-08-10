@@ -66,8 +66,11 @@ function withSigning(config) {
 function withMinify(config) {
   return withGradleProperties(config, (cfg) => {
     const set = (key, value) => {
-      cfg.modResults = cfg.modResults.filter((l) => !l.startsWith(`${key}=`));
-      cfg.modResults.push(`${key}=${value}`);
+      // gradle.properties items are { type: 'property', key, value } objects, not strings.
+      cfg.modResults = cfg.modResults.filter(
+        (l) => !(l.type === 'property' && l.key === key)
+      );
+      cfg.modResults.push({ type: 'property', key, value });
     };
     set('android.enableMinifyInReleaseBuilds', 'true');
     set('android.enableShrinkResourcesInReleaseBuilds', 'true');
