@@ -14,6 +14,24 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Point Gradle at the Android SDK. Search common locations; create local.properties
+# so Expo prebuild (which regenerates android/) doesn't blow it away mid-build.
+ANDROID_SDK_DIR="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+if [ -z "$ANDROID_SDK_DIR" ] || [ ! -d "$ANDROID_SDK_DIR" ]; then
+  for candidate in "$HOME/android-sdk" "$HOME/Android/Sdk" "/opt/android-sdk" "/usr/lib/android-sdk"; do
+    if [ -d "$candidate/platform-tools" ]; then
+      ANDROID_SDK_DIR="$candidate"
+      break
+    fi
+  done
+fi
+if [ -z "$ANDROID_SDK_DIR" ]; then
+  echo "FATAL: Android SDK not found. Set ANDROID_HOME or ANDROID_SDK_ROOT." >&2
+  exit 1
+fi
+export ANDROID_HOME="$ANDROID_SDK_DIR"
+export ANDROID_SDK_ROOT="$ANDROID_SDK_DIR"
+
 # Ensure a debug keystore exists.
 DEBUG_KS="$HOME/.android/debug.keystore"
 if [ ! -f "$DEBUG_KS" ]; then
@@ -40,7 +58,14 @@ npx expo prebuild --platform android --clean
 
 echo "==> Gradle assembleDebug"
 cd android
-./gradlew assembleDebug
+# Re-write local.properties AFTER prebuild — `expo prebuild --clean` wipes the
+# entire android/ directory including any local.properties we wrote earlier.
+# Gradle needs sdk.dir to resolve the SDK; ANDROID_HOME alone is not enough
+# when a stale/empty local.properties exists. ponytail: write beats env-var.
+echo "sdk.dir=$ANDROID_SDK_DIR" > local.properties
+# ponytail: dl.google.com has both A + AAAA records; Java prefers IPv6 and WSL2 here
+# has no public v6 route, so Maven downloads hang on connect timeout. Force IPv4.
+GRADLE_OPTS="-Djava.net.preferIPv4Stack=true" ./gradlew assembleDebug
 
 APK="app/build/outputs/apk/debug/app-debug.apk"
 if [ -f "$APK" ]; then

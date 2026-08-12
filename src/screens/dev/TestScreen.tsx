@@ -85,7 +85,7 @@ export default function TestScreen() {
         // Send a test notification
         await notificationService.scheduleNotification(
           'Test Notification',
-          'ScholarTrack notification system is working ✅',
+          'MalumeScholarTrack notification system is working ✅',
           undefined, 'default'
         );
         addLog('Notifications: test notification sent');
@@ -193,7 +193,7 @@ export default function TestScreen() {
 
   return (
     <ScrollView style={[s.container, { paddingTop: insets.top + 20 }]} contentContainerStyle={s.content}>
-      <Text style={s.title}>ScholarTrack Test Suite</Text>
+      <Text style={s.title}>MalumeScholarTrack Test Suite</Text>
       <Text style={s.subtitle}>Run before Play Store upload</Text>
 
       <Section title="📍 GPS & Location" />

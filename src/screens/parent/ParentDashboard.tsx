@@ -1,4 +1,4 @@
-// ScholarTrack Parent Dashboard — Taste-Skill Theme Redesign
+// MalumeScholarTrack Parent Dashboard — Taste-Skill Theme Redesign
 // Industrial dark aesthetic using theme tokens exclusively. No hardcoded colors.
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -36,6 +36,7 @@ import { ThemeColors } from '../../context/ThemeContext';
 import { Spacer, Badge, EmptyState, SpringTouchable } from '../../ui-plugin/components';
 import { SkeletonDashboard } from '../../components/SkeletonLoader';
 import { getTheme } from '../../ui-plugin/theme';
+import { useAuth } from '../../lib/auth';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -240,6 +241,7 @@ const TripItem = ({
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const ParentDashboard = ({ navigation }: Props) => {
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -359,7 +361,7 @@ const ParentDashboard = ({ navigation }: Props) => {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
-          await supabase.auth.signOut();
+          await signOut();
           await AsyncStorage.removeItem('userRole');
           await AsyncStorage.removeItem('userEmail');
           await AsyncStorage.removeItem('userName');
@@ -619,7 +621,7 @@ const ParentDashboard = ({ navigation }: Props) => {
           <View style={s.dashHeaderBg2} />
           <View style={s.dhTop}>
             <View>
-              <Text style={s.dhBrand}>ScholarTrack</Text>
+              <Text style={s.dhBrand}>MalumeScholarTrack</Text>
               <Text style={s.dhSub}>{userName || userEmail || 'Welcome back'}</Text>
             </View>
             <View style={s.dhActions}>

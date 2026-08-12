@@ -1,4 +1,4 @@
-# ScholarTrack — Secret Rotation Runbook
+# MalumeScholarTrack — Secret Rotation Runbook
 
 Four secrets were either exposed in git history or are about to be reused
 in production. Rotate all four in the order below, then push the new
@@ -83,7 +83,7 @@ out. Paystack and Google Maps rotations are non-breaking (server-side).
    API key list.
 5. Click the key, then **"RESTRICT KEY"** to:
    - Set application restriction: **Android apps**.
-   - Add the package name `com.scholartrack.app` and your SHA-1
+   - Add the package name `com.malumescholartrack.app` and your SHA-1
      fingerprint (get it with `keytool -list -v -keystore ~/.gradle/...`).
    - Restrict APIs to: Maps SDK for Android, Places API (if used).
    - Save.

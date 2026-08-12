@@ -160,7 +160,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
       if (Platform.OS === 'android') {
         Alert.alert('Report Generated', `${reportType.toUpperCase()} report ready!`, [{ text: 'OK' }]);
       } else {
-        await Share.share({ message: csvContent, title: `ScholarTrack ${reportType} Report` });
+        await Share.share({ message: csvContent, title: `MalumeScholarTrack ${reportType} Report` });
       }
 
       setShowExportModal(false);

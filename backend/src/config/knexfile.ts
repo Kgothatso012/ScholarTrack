@@ -6,7 +6,7 @@ export default {
       port: Number(process.env.DB_PORT) || 5432,
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_NAME || 'scholartrack_dev',
+      database: process.env.DB_NAME || 'malumescholartrack_dev',
     },
     pool: {
       min: 2,

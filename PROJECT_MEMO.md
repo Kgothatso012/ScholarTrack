@@ -1,4 +1,4 @@
-# ScholarTrack SA - Project Memory
+# MalumeScholarTrack SA - Project Memory
 
 ## What We Built
 
@@ -87,14 +87,14 @@ A complete **student transport safety app** for South Africa, connecting parents
 ---
 
 ## GitHub
-- Repository: `https://github.com/kgothatso012/ScholarTrack-Expo54`
+- Repository: `https://github.com/kgothatso012/MalumeScholarTrack-Expo54`
 
 ---
 
 ## Build & Run
 
 ```bash
-cd ~/ScholarTrack-Expo54
+cd ~/MalumeScholarTrack-Expo54
 npm install --legacy-peer-deps
 npx expo start
 npx tsc --noEmit   # type check

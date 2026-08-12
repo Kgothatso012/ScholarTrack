@@ -14,6 +14,7 @@ import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
 import { Spacer, Badge, Skeleton, SpringTouchable, Card } from '../../ui-plugin/components';
 import { getTheme, typography } from '../../ui-plugin/theme';
+import { useAuth } from '../../lib/auth';
 
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -28,6 +29,7 @@ interface Props {
 type TabKey = 'overview' | 'trips' | 'requests' | 'earnings';
 
 const DriverAppScreen = ({ navigation }: Props) => {
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [refreshing, setRefreshing] = useState(false);
@@ -94,7 +96,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: async () => { await supabase.auth.signOut(); await AsyncStorage.multiRemove(['driverCompliance', 'userRole', 'userName', 'userEmail']); } },
+      { text: 'Logout', style: 'destructive', onPress: async () => { await signOut(); } },
     ]);
   };
 

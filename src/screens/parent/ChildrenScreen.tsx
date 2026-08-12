@@ -1,4 +1,4 @@
-// ScholarTrack ChildrenScreen — Design System: Dark SA Transport
+// MalumeScholarTrack ChildrenScreen — Design System: Dark SA Transport
 // Dark glassmorphism cards, cyan/amber accents, spring animations
 
 import React, { useState, useEffect, useCallback } from 'react';

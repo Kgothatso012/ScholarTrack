@@ -1,4 +1,4 @@
-// Google Places Autocomplete Service for ScholarTrack
+// Google Places Autocomplete Service for MalumeScholarTrack
 // Uses Google Places API via HTTP - no native library required
 
 import Constants from 'expo-constants';

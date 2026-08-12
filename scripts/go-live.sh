@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScholarTrack go-live runbook — runs the remaining external steps in order.
+# MalumeScholarTrack go-live runbook — runs the remaining external steps in order.
 #
 # Everything the agent could NOT do from the sandbox (no network / expired gh
 # token / no cloud console) is here as one command. Run this on a machine with
@@ -18,7 +18,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-echo "==> ScholarTrack go-live"
+echo "==> MalumeScholarTrack go-live"
 
 echo "==> 1/6  Apply migrations (015 geofence RLS, 016 POPIA) to the project"
 npx supabase db push
@@ -90,8 +90,8 @@ PYEOF2
   grep -q "EXPO_PUBLIC_SENTRY_DSN" .env 2>/dev/null || echo "EXPO_PUBLIC_SENTRY_DSN=$SENTRY_DSN" >> .env
 fi
 
-echo "==> 5/6  Host the policy + terms (scholartrack.co.za/privacy & /terms)"
-echo "    Push the privacy.html / terms.html in Projects/scholartrack-website"
+echo "==> 5/6  Host the policy + terms (malumescholartrack.co.za/privacy & /terms)"
+echo "    Push the privacy.html / terms.html in Projects/malumescholartrack-website"
 echo "    to your static host, after filling the [placeholders] in legal/*.md."
 echo "    (authored and ready to deploy — see legal/README.md)"
 

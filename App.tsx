@@ -14,7 +14,7 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 import ConsentGate from './src/components/ConsentGate';
 import SplashScreen from './src/components/SplashScreen';
-import { AuthProvider } from './src/lib/auth';
+import { AuthProvider, useAuth } from './src/lib/auth';
 import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';
 
 // Install BEFORE React mounts — catches module-load + async errors.
@@ -24,10 +24,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './src/navigation/types';
 
 const linking = {
-  prefixes: ['scholartrack://', 'https://scholartrack.co.za'],
+  prefixes: ['malumescholartrack://', 'https://malumescholartrack.co.za'],
   getStateFromPath(path: string) {
     if (path.startsWith('confirm')) {
-      const url = new URL('scholartrack://' + path);
+      const url = new URL('malumescholartrack://' + path);
       const errorDescription = url.searchParams.get('error_description');
       const errorCode = url.searchParams.get('error_code');
       const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
@@ -70,6 +70,9 @@ function AppContentWithTheme() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // ─── DEV BYPASS — skip auth, go straight to elder UI ──────────────────────
+  const __DEV_SKIP_AUTH__ = true;
+
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
       const { url } = event;
@@ -96,6 +99,17 @@ function AppContentWithTheme() {
 
     return () => subscription.remove();
   }, []);
+
+  const { user: authUser } = useAuth();
+
+  // Sync App.tsx auth state with AuthContext — covers dev bypass where
+  // Supabase onAuthStateChange never fires (no real session).
+  useEffect(() => {
+    if (!authUser) {
+      setUserRole(null);
+      setIsAuthenticated(false);
+    }
+  }, [authUser]);
 
   useEffect(() => {
     init();
@@ -125,6 +139,12 @@ function AppContentWithTheme() {
     return () => subscription.unsubscribe();
 
     async function init() {
+      if (__DEV_SKIP_AUTH__) {
+        setUserRole('parent');
+        setIsAuthenticated(true);
+        setLoading(false);
+        return;
+      }
       try {
         const role = await AsyncStorage.getItem('userRole');
         if (role) {

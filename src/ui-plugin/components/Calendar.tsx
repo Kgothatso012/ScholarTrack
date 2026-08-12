@@ -1,4 +1,4 @@
-// Calendar Component - Trip schedule view for ScholarTrack
+// Calendar Component - Trip schedule view for MalumeScholarTrack
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';

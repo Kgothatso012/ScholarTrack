@@ -28,4 +28,4 @@ RUN npx expo prebuild --platform android --clean
 RUN cd android && ./gradlew assembleRelease
 
 # Output APK
-CMD ["cp", "android/app/build/outputs/apk/release/app-release.apk", "/app/scholartrack.apk"]
+CMD ["cp", "android/app/build/outputs/apk/release/app-release.apk", "/app/malumescholartrack.apk"]

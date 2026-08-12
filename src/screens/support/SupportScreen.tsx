@@ -1,4 +1,4 @@
-// ScholarTrack SupportScreen — Design System: Dark SA Transport
+// MalumeScholarTrack SupportScreen — Design System: Dark SA Transport
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, FadeIn, Easing } from 'react-native-reanimated';
@@ -40,7 +40,7 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
   const contactOptions = [
     { icon: 'chatbubbles', title: 'Live Chat', subtitle: 'Chat with our team', route: 'Chat', color: C.accent },
     { icon: 'call', title: 'Call Us', subtitle: '0800 123 456', action: () => Linking.openURL('tel:0800123456'), color: C.success },
-    { icon: 'mail', title: 'Email', subtitle: 'support@scholartrack.co.za', action: () => Linking.openURL('mailto:support@scholartrack.co.za'), color: C.accent },
+    { icon: 'mail', title: 'Email', subtitle: 'support@malumescholartrack.co.za', action: () => Linking.openURL('mailto:support@malumescholartrack.co.za'), color: C.accent },
     { icon: 'logo-whatsapp', title: 'WhatsApp', subtitle: 'Chat on WhatsApp', action: () => Linking.openURL('https://wa.me/270800123456'), color: C.success },
   ];
   const faqs = [
@@ -187,8 +187,8 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
 
         {/* Footer */}
         <View style={s.footer}>
-          <Text style={s.footerText}>MalumeScholarTrack v1.0.0</Text>
-          <Text style={s.footerText}>© 2026 MalumeScholarTrack South Africa</Text>
+          <Text style={s.footerText}>MalumeMalumeScholarTrack v1.0.0</Text>
+          <Text style={s.footerText}>© 2026 MalumeMalumeScholarTrack South Africa</Text>
         </View>
         <Spacer size="xxl" />
       </ScrollView>

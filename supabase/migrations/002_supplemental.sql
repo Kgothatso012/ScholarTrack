@@ -1,4 +1,4 @@
--- ScholarTrack Supplemental Migration - New Tables Only
+-- MalumeScholarTrack Supplemental Migration - New Tables Only
 
 -- Driver Tracking Table
 CREATE TABLE IF NOT EXISTS driver_tracking (

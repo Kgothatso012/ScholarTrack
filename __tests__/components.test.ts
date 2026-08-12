@@ -1,9 +1,9 @@
-// Component tests for ScholarTrack
+// Component tests for MalumeScholarTrack
 // Tests to verify component structure without requiring React Native runtime
 
 import React from 'react';
 
-describe('ScholarTrack Components', () => {
+describe('MalumeScholarTrack Components', () => {
   const fs = require('fs');
   const path = require('path');
 

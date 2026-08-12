@@ -1,4 +1,4 @@
--- ScholarTrack Database Schema for Supabase
+-- MalumeScholarTrack Database Schema for Supabase
 -- Run this in Supabase SQL Editor
 
 -- Enable UUID extension

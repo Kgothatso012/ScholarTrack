@@ -1,7 +1,7 @@
 #!/bin/bash
-# ScholarTrack Test Script
+# MalumeScholarTrack Test Script
 
-echo "🚌 ScholarTrack Testing Script"
+echo "🚌 MalumeScholarTrack Testing Script"
 echo "=============================="
 echo ""
 echo "App running at: http://localhost:8098"

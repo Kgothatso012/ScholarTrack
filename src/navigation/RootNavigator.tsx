@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { AuthStack } from './AuthStack';
 import { ParentDrawerStack } from './ParentDrawerStack';
+import { ElderParentTabs } from './ElderParentTabs';
 import { DriverStack } from './DriverStack';
 import { AdminStack } from './AdminStack';
 
@@ -23,7 +24,6 @@ export function RootNavigator({
   onLogin,
   onOnboardingComplete
 }: RootNavigatorProps) {
-  // Show role-based main app when authenticated
   if (isAuthenticated && userRole) {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -34,8 +34,10 @@ export function RootNavigator({
                 return <DriverStack />;
               case 'admin':
                 return <AdminStack />;
+              case 'parent-elder':
+                return <ElderParentTabs />;
               default:
-                return <ParentDrawerStack />;
+                return <ElderParentTabs />;
             }
           }}
         </Stack.Screen>
@@ -43,11 +45,10 @@ export function RootNavigator({
     );
   }
 
-  // Not authenticated - show auth stack
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Auth">
-        {() => <AuthStack onLogin={onLogin} />}
+        {() => <AuthStack onLogin={onLogin} showOnboarding={showOnboarding} onOnboardingComplete={onOnboardingComplete} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

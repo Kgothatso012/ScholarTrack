@@ -13,6 +13,7 @@ import { supabase } from '../../lib/supabase';
 import { Card, Button, Spacer, SpringTouchable } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
+import { useAuth } from '../../lib/auth';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -25,6 +26,7 @@ const glassCard = cards.glassCyan;
 const glassCardAmber = cards.glassAmber;
 
 const DevDashboard = ({ navigation }: Props) => {
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
 
   const handleLogout = async () => {
@@ -32,7 +34,7 @@ const DevDashboard = ({ navigation }: Props) => {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Logout', style: 'destructive', onPress: async () => {
-          await supabase.auth.signOut();
+          await signOut();
           await AsyncStorage.multiRemove(['userRole', 'userName', 'userEmail', 'userId']);
         },
       },
@@ -130,7 +132,7 @@ const DevDashboard = ({ navigation }: Props) => {
               <Ionicons name="construct" size={20} color={C.cyan} />
               <Text style={s.headerTitle}>Dev Dashboard</Text>
             </View>
-            <Text style={s.headerSub}>ScholarTrack Development Tools</Text>
+            <Text style={s.headerSub}>MalumeScholarTrack Development Tools</Text>
           </View>
           <TouchableOpacity onPress={handleLogout} style={s.logoutBtn}>
             <Ionicons name="log-out-outline" size={22} color={C.text} />

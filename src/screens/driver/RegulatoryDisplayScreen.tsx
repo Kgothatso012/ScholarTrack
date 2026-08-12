@@ -21,7 +21,7 @@ export default function RegulatoryDisplayScreen({ navigation, setScreen }: Props
 
 const regulatoryInfo = {
     operatorLicense: 'OP/2026/001234',
-    operatorName: 'MalumeScholarTrack Transport Services',
+    operatorName: 'MalumeMalumeScholarTrack Transport Services',
     licenseExpiry: '2026-12-31',
     vehicleRegistration: 'GP 123-456',
     vehiclePermit: 'SCH/2026/789',

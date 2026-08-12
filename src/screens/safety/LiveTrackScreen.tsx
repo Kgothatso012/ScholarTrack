@@ -1,4 +1,4 @@
-// ScholarTrack Live Track Screen — Design System: Dark SA Transport
+// MalumeScholarTrack Live Track Screen — Design System: Dark SA Transport
 // Aesthetic: Industrial Dark + Cyan/Amber/SA Flag accents
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';

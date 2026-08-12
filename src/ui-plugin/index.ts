@@ -1,4 +1,4 @@
-// ScholarTrack UI Plugin - Main Export
+// MalumeScholarTrack UI Plugin - Main Export
 // Soft & Friendly Design System for React Native
 
 // Theme

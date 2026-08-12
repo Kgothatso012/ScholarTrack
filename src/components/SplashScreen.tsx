@@ -9,7 +9,7 @@ import { getTheme } from '../ui-plugin/theme';
 const { colors: C } = getTheme('dark');
 const { width } = Dimensions.get('window');
 
-const APP_NAME = 'ScholarTrack';
+const APP_NAME = 'MalumeScholarTrack';
 
 export const SplashScreen: React.FC<{ onFinish?: () => void }> = ({ onFinish }) => {
   const opacity = useRef(new Animated.Value(0)).current;

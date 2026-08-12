@@ -90,7 +90,7 @@ const EmergencyScreen = () => {
   const tips = [
     { icon: 'location', text: 'Your location is automatically shared with emergency contacts' },
     { icon: 'time', text: 'SOS alerts include timestamp for emergency services' },
-    { icon: 'shield-checkmark', text: 'All contacts verified through ScholarTrack' },
+    { icon: 'shield-checkmark', text: 'All contacts verified through MalumeScholarTrack' },
   ];
 
   const sosAnimatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: sosScale.value }] }));

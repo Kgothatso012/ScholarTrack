@@ -11,7 +11,7 @@ then re-prompt users.
 Search for `[` in both files and replace with real values:
 
 - `[Legal entity name]`, `[street, suburb, city, RSA]` physical address
-- `[IO name]`, `io@scholartrack.co.za`, `[+27 …]` / `[phone]` for the
+- `[IO name]`, `io@malumescholartrack.co.za`, `[+27 …]` / `[phone]` for the
   Information Officer
 - Confirm the Information Officer is **registered with the Information
   Regulator** (inforegulator.org.za) and that the body is registered as a
@@ -21,8 +21,8 @@ Search for `[` in both files and replace with real values:
 
 The App links to (and the consent flow opens):
 
-- `https://scholartrack.co.za/privacy` ← render `PRIVACY_POLICY.md`
-- `https://scholartrack.co.za/terms`   ← render `TERMS_OF_SERVICE.md`
+- `https://malumescholartrack.co.za/privacy` ← render `PRIVACY_POLICY.md`
+- `https://malumescholartrack.co.za/terms`   ← render `TERMS_OF_SERVICE.md`
 
 Keep those exact URLs — `SettingsScreen.tsx` and `RegisterScreen.tsx` and
 `ConsentGate.tsx` all point at them.

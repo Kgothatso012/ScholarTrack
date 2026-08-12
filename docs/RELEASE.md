@@ -1,4 +1,4 @@
-# ScholarTrack release signing & deployment
+# MalumeScholarTrack release signing & deployment
 
 Covers the **eas.json `production` profile** and the GitHub Actions
 `release.yml` workflow that wires the release keystore and runs Supabase
@@ -35,18 +35,18 @@ the release build on the GitHub runner (option A).
 | EXPO_PUBLIC_SUPABASE_ANON_KEY | anon key (rotate after RLS fix) |
 | SUPABASE_ACCESS_TOKEN | supabase access-token create |
 | SUPABASE_PROJECT_REF | zjcribmwgavpzycgpwva |
-| SCHOLARTRACK_UPLOAD_KEYSTORE_B64 | base64 -w0 scholartrack-upload.keystore |
+| SCHOLARTRACK_UPLOAD_KEYSTORE_B64 | base64 -w0 malumescholartrack-upload.keystore |
 | SCHOLARTRACK_UPLOAD_STORE_PASSWORD | keystore password |
 | SCHOLARTRACK_UPLOAD_KEY_ALIAS | e.g. upload |
 | SCHOLARTRACK_UPLOAD_KEY_PASSWORD | key password |
 
 ### Generate the upload keystore once
 ```bash
-keytool -genkeypair -v -storetype PKCS12 -keystore scholartrack-upload.keystore \
+keytool -genkeypair -v -storetype PKCS12 -keystore malumescholartrack-upload.keystore \
   -alias upload -keyalg RSA -keysize 2048 -validity 10000
-base64 -w0 scholartrack-upload.keystore   # paste into SCHOLARTRACK_UPLOAD_KEYSTORE_B64
+base64 -w0 malumescholartrack-upload.keystore   # paste into SCHOLARTRACK_UPLOAD_KEYSTORE_B64
 ```
-Never commit scholartrack-upload.keystore (it is gitignored).
+Never commit malumescholartrack-upload.keystore (it is gitignored).
 
 ## Running the release
 ```bash

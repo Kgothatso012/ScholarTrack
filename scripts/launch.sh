@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# launch.sh — end-to-end launch sequence for ScholarTrack.
+# launch.sh — end-to-end launch sequence for MalumeScholarTrack.
 #
 # Run this after you have rotated all 4 secrets (see SECRET_ROTATION.md)
 # and have OAuth sessions for `supabase` and `eas`.
@@ -47,7 +47,7 @@ step_migrations() {
 
 step_doctor() {
   c "Step 4/10: Re-run doctor (expect 14/14)"
-  python3 scholartrack_doctor.py
+  python3 malumescholartrack_doctor.py
 }
 
 step_deploy_functions() {

@@ -1,4 +1,4 @@
-// Navigation Types for ScholarTrack
+// Navigation Types for MalumeScholarTrack
 
 export type ScreenName =
   | 'Login'

@@ -38,15 +38,19 @@ function withSigning(config) {
             storePassword System.getenv('SCHOLARTRACK_UPLOAD_STORE_PASSWORD') ?: findProperty('SCHOLARTRACK_UPLOAD_STORE_PASSWORD') ?: ''
             keyAlias System.getenv('SCHOLARTRACK_UPLOAD_KEY_ALIAS') ?: findProperty('SCHOLARTRACK_UPLOAD_KEY_ALIAS') ?: ''
             keyPassword System.getenv('SCHOLARTRACK_UPLOAD_KEY_PASSWORD') ?: findProperty('SCHOLARTRACK_UPLOAD_KEY_PASSWORD') ?: ''
-            println 'ScholarTrack: using RELEASE signing keystore at ' + ksPath
+            println 'MalumeScholarTrack: using RELEASE signing keystore at ' + ksPath
         } else {
-            throw new GradleException('ScholarTrack: SCHOLARTRACK_UPLOAD_KEYSTORE_PATH not set or keystore missing. Release builds must be signed with the upload keystore; refusing to fall back to the debug keystore. Set the SCHOLARTRACK_UPLOAD_* env vars (or ~/.gradle/gradle.properties) before building a release.')
+            throw new GradleException('MalumeScholarTrack: SCHOLARTRACK_UPLOAD_KEYSTORE_PATH not set or keystore missing. Release builds must be signed with the upload keystore; refusing to fall back to the debug keystore. Set the SCHOLARTRACK_UPLOAD_* env vars (or ~/.gradle/gradle.properties) before building a release.')
         }
     }`;
 
-    if (!/signingConfigs\s*{[\s\S]*?release\s*{/.test(src)) {
+    // ponytail: bug-fix 2026-08-10 — the previous test regex `[\s\S]*?release\s*{`
+    // false-matched on `release {` inside `buildTypes { ... }` later in the file,
+    // so the release signing block was never injected. Restrict both tests to
+    // content within a single brace pair (no nested `{}`).
+    if (!/signingConfigs\s*\{[^{}]*release\s*\{/.test(src)) {
       src = src.replace(
-        /(signingConfigs\s*{[\s\S]*?debug\s*{[\s\S]*?\n\s*}\s*\n)/,
+        /(signingConfigs\s*\{[^{}]*?debug\s*\{[^{}]*?\n\s*}\s*\n)/,
         `$1${releaseSign}\n`
       );
     }

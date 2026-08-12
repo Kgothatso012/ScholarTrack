@@ -1,4 +1,4 @@
-# ScholarTrack — Secrets Operations Runbook
+# MalumeScholarTrack — Secrets Operations Runbook
 
 This file is a **runbook**, not a credential store. Real credentials live in:
 

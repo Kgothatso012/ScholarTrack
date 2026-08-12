@@ -1,4 +1,4 @@
-// Drawer Menu Content for ScholarTrack
+// Drawer Menu Content for MalumeScholarTrack
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -124,12 +124,14 @@ export const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            // Use auth context signOut: it handles supabase + cacheService + AsyncStorage removal
-            // without nuking unrelated prefs (themeMode, notificationSettings, languageSettings).
             await authSignOut();
             navigation.closeDrawer();
-            // Navigate to auth - use reset to clear nav stack
-            navigation.navigate('Auth');
+            // Force a full reload so the app re-initializes without a session.
+            // This is the only reliable way to reset all auth state across
+            // web and native without chasing race conditions.
+            if (typeof window !== 'undefined' && window.location?.reload) {
+              window.location.reload();
+            }
           },
         },
       ]

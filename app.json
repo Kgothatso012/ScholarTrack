@@ -1,9 +1,9 @@
 {
   "expo": {
     "name": "MalumeScholarTrack",
-    "slug": "scholartrack-expo54",
+    "slug": "malumescholartrack-expo54",
     "version": "1.1.0",
-    "scheme": "scholartrack",
+    "scheme": "malumescholartrack",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -31,7 +31,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.scholartrack.sa",
+      "bundleIdentifier": "com.malumescholartrack.sa",
       "buildNumber": "2"
     },
     "android": {
@@ -39,8 +39,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1E3A5F"
       },
-      "package": "com.scholartrack.sa",
-      "versionCode": 2,
+      "package": "com.malumescholartrack.sa",
+      "versionCode": 3,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI"

@@ -1,4 +1,4 @@
-// ScholarTrack API - Re-exports from services
+// MalumeScholarTrack API - Re-exports from services
 // Maintains backward compatibility while services are split into src/lib/services/
 
 // Re-export supabase client

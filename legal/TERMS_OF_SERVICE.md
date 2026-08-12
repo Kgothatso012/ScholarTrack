@@ -1,11 +1,11 @@
-# ScholarTrack Terms of Service
+# MalumeScholarTrack Terms of Service
 
 **Version 1.0** · Effective date: 9 August 2026
 
-These Terms govern your use of the MalumeScholarTrack mobile application
-("the App") operated by ScholarTrack ("we", "us"). By creating an account you
+These Terms govern your use of the MalumeMalumeScholarTrack mobile application
+("the App") operated by MalumeScholarTrack ("we", "us"). By creating an account you
 confirm that you have read and accept these Terms and the **Privacy Policy**
-(`scholartrack.co.za/privacy`). If we change these Terms we will ask you to
+(`malumescholartrack.co.za/privacy`). If we change these Terms we will ask you to
 accept the new version before you continue (the App's `CONSENT_VERSION` is
 bumped and you are re-prompted).
 
@@ -43,7 +43,7 @@ bumped and you are re-prompted).
 
 ## 4. The service
 
-ScholarTrack is a coordination platform. We are **not** a common carrier, the
+MalumeScholarTrack is a coordination platform. We are **not** a common carrier, the
 employer of any driver, or a transport operator. We do not guarantee that a
 driver or trip will be available, that any trip will be completed, or that
 tracking will be uninterrupted. The service is provided on a reasonable-effort
@@ -93,7 +93,7 @@ or terminate accounts that breach these Terms.
 
 We may update these Terms. Material changes will require you to accept the new
 version in the App before continuing. The current version is always at
-`scholartrack.co.za/terms`.
+`malumescholartrack.co.za/terms`.
 
 ## 12. Governing law
 
@@ -103,5 +103,5 @@ unless you are a consumer entitled to approach another forum.
 
 ## 13. Contact
 
-ScholarTrack · `support@scholartrack.co.za` · `[physical address, RSA]`.
-Privacy enquiries: Information Officer, `io@scholartrack.co.za`.
+MalumeScholarTrack · `support@malumescholartrack.co.za` · `[physical address, RSA]`.
+Privacy enquiries: Information Officer, `io@malumescholartrack.co.za`.

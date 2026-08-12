@@ -1,4 +1,4 @@
-// Unified typed notification service for ScholarTrack
+// Unified typed notification service for MalumeScholarTrack
 // Combines: clawhip typed events pattern + quiet hours + notification settings
 
 import * as Notifications from 'expo-notifications';

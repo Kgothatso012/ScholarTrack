@@ -1,4 +1,4 @@
-// Push Notifications Service for ScholarTrack
+// Push Notifications Service for MalumeScholarTrack
 // Unified typed notification system with event emitter
 
 import * as Notifications from 'expo-notifications';

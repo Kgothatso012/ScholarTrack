@@ -1,6 +1,6 @@
 /**
  * generate-logo.js
- * Generates ScholarTrack app icons using pngjs
+ * Generates MalumeScholarTrack app icons using pngjs
  * Outputs: icon.png (1024), splash-icon.png, adaptive-icon.png, favicon.png (128)
  */
 const PNG = require('pngjs').PNG;
@@ -365,7 +365,7 @@ async function writePNG(img, outPath) {
 }
 
 async function main() {
-  console.log('Generating ScholarTrack logos...\n');
+  console.log('Generating MalumeScholarTrack logos...\n');
 
   const sizes = [
     { name: 'icon.png',           size: 1024 },

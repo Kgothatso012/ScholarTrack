@@ -1,11 +1,11 @@
-// Geocoding Service for ScholarTrack
+// Geocoding Service for MalumeScholarTrack
 // Converts addresses to lat/lng coordinates using OpenStreetMap Nominatim (free)
 // Also provides reverse geocoding (lat/lng to address)
 
 import { supabase } from '../lib/supabase';
 
 const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
-const USER_AGENT = 'ScholarTrack/1.0 (South Africa School Transport App)';
+const USER_AGENT = 'MalumeScholarTrack/1.0 (South Africa School Transport App)';
 
 export interface GeocodingResult {
   latitude: number;

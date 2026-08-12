@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: scholartrack-dev
+    container_name: malumescholartrack-dev
     ports:
       - "8081:8081"
       - "8098:8098"

@@ -1,4 +1,4 @@
-// PayStack Payment Service for ScholarTrack
+// PayStack Payment Service for MalumeScholarTrack
 // All Paystack calls are proxied through a Supabase Edge Function
 // (supabase/functions/paystack-proxy) so the secret key never reaches the client.
 
@@ -60,7 +60,7 @@ export interface CardBinInfo {
 export const payStackService = {
   // Initialize a payment transaction
   async initializePayment(params: InitializePaymentParams): Promise<{ authorization_url: string; reference: string }> {
-    const reference = params.reference || `scholartrack_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const reference = params.reference || `malumescholartrack_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const data = await callPaystackProxy<{ status: boolean; message: string; data: { authorization_url: string; reference: string } }>({
       action: 'initialize',
       method: 'POST',
@@ -121,7 +121,7 @@ export const payStackService = {
         email,
         amount,
         authorization_code: authorizationCode,
-        reference: reference || `scholartrack_${Date.now()}`,
+        reference: reference || `malumescholartrack_${Date.now()}`,
       },
     });
     if (!data.status) {
@@ -172,7 +172,7 @@ export const payStackService = {
   },
 };
 
-// Helper functions for ScholarTrack
+// Helper functions for MalumeScholarTrack
 export const paymentHelper = {
   // Convert rand to kobo
   randToKobo(rand: number): number {
@@ -191,7 +191,7 @@ export const paymentHelper = {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   },
   // Generate payment reference
-  generateReference(prefix: string = 'scholartrack'): string {
+  generateReference(prefix: string = 'malumescholartrack'): string {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   },
   // Calculate platform fee

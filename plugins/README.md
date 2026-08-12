@@ -1,4 +1,4 @@
-# ScholarTrack security config plugin
+# MalumeScholarTrack security config plugin
 
 `withAndroidSecurity` applies the Android hardening from the adversarial APK
 audit (2026-07-24). It is registered in `app.json` and runs during
@@ -18,12 +18,12 @@ audit (2026-07-24). It is registered in `app.json` and runs during
 ## Wiring the release keystore
 Generate once:
 ```bash
-keytool -genkeypair -v -storetype PKCS12 -keystore scholartrack-upload.keystore \
+keytool -genkeypair -v -storetype PKCS12 -keystore malumescholartrack-upload.keystore \
   -alias upload -keyalg RSA -keysize 2048 -validity 10000
 ```
 Then set as **EAS secrets** (preferred) or `~/.gradle/gradle.properties`:
 ```
-SCHOLARTRACK_UPLOAD_KEYSTORE_PATH=/path/to/scholartrack-upload.keystore
+SCHOLARTRACK_UPLOAD_KEYSTORE_PATH=/path/to/malumescholartrack-upload.keystore
 SCHOLARTRACK_UPLOAD_STORE_PASSWORD=*****
 SCHOLARTRACK_UPLOAD_KEY_ALIAS=upload
 SCHOLARTRACK_UPLOAD_KEY_PASSWORD=*****

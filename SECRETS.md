@@ -1,4 +1,4 @@
-# ScholarTrack - Secrets Management
+# MalumeScholarTrack - Secrets Management
 
 ## EAS Secrets Setup
 

@@ -1,4 +1,4 @@
-// ScholarTrack UI Plugin - Taste-Skill Redesign
+// MalumeScholarTrack UI Plugin - Taste-Skill Redesign
 // Neutral Zinc/Slate base + sharp amber accent. NO AI purple/blue.
 // Supports light/dark mode via getTheme().
 

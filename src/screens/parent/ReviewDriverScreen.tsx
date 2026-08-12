@@ -1,4 +1,4 @@
-// ScholarTrack ReviewDriverScreen — Dark SA Transport Design
+// MalumeScholarTrack ReviewDriverScreen — Dark SA Transport Design
 // Glassmorphism, dark theme, cyan/amber accents, animated star rating
 
 import React, { useState, useEffect } from 'react';
@@ -341,7 +341,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
                 <Ionicons name="car-sport-outline" size={50} color={C.textMuted} />
                 <Text style={[styles.driverName, { marginTop: spacing.md }]}>No Driver Assigned</Text>
                 <Text style={styles.driverSchool}>
-                  Hire a driver to start using ScholarTrack
+                  Hire a driver to start using MalumeScholarTrack
                 </Text>
               </>
             )}

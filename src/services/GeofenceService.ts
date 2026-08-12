@@ -1,4 +1,4 @@
-// Geofencing Service for ScholarTrack
+// Geofencing Service for MalumeScholarTrack
 // Monitors driver location against pickup/dropoff zones
 import { locationService } from './location';
 import { emergencyContactService } from '../lib/api';
@@ -11,7 +11,7 @@ import * as TaskManager from 'expo-task-manager';
 // BACKGROUND GEOFENCE TASK — fires even when app is closed
 // ============================================================================
 
-export const GEOFENCE_TASK_NAME = 'scholartrack-geofence-task';
+export const GEOFENCE_TASK_NAME = 'malumescholartrack-geofence-task';
 
 // Identifier format: `${tripId}-${type}::${parentId}::${childId}::${childName}`
 // The task parses this and fires the parent notification (which plays the horn).

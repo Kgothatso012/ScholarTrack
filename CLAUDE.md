@@ -1,8 +1,8 @@
-# ScholarTrack - New Developer Guide
+# MalumeScholarTrack - New Developer Guide
 
-## What is ScholarTrack?
+## What is MalumeScholarTrack?
 
-ScholarTrack is a **student transport safety app** for South African schools. It connects parents, drivers, and schools to track children safely.
+MalumeScholarTrack is a **student transport safety app** for South African schools. It connects parents, drivers, and schools to track children safely.
 
 ---
 
@@ -20,7 +20,7 @@ ScholarTrack is a **student transport safety app** for South African schools. It
 ## Project Structure
 
 ```
-ScholarTrack-Expo54/
+MalumeScholarTrack-Expo54/
 ├── src/
 │ ├── screens/
 │ │ ├── auth/          # Login, SignUp, ForgotPassword
@@ -65,7 +65,7 @@ ScholarTrack-Expo54/
 ## Running the App
 
 ```bash
-cd ~/ScholarTrack-Expo54
+cd ~/MalumeScholarTrack-Expo54
 
 # Install dependencies
 npm install --legacy-peer-deps
@@ -144,9 +144,9 @@ npx tsc --noEmit            # TypeScript check
 
 ---
 
-## GSD Workflow for ScholarTrack
+## GSD Workflow for MalumeScholarTrack
 
-When working on ScholarTrack:
+When working on MalumeScholarTrack:
 
 1. **GRAB** — Understand the task
 2. **DO** — Implement → Test → Commit
@@ -164,7 +164,7 @@ See `CLAUDE.md` for production-grade overrides including:
 
 ## Memory & Obsidian Notes
 
-When working on ScholarTrack, CC must update these after each session or major milestone:
+When working on MalumeScholarTrack, CC must update these after each session or major milestone:
 
 ### Daily Memory
 Append to `~/.openclaw/workspace/memory/YYYY-MM-DD.md` (or create if missing):
@@ -175,7 +175,7 @@ Append to `~/.openclaw/workspace/memory/YYYY-MM-DD.md` (or create if missing):
 
 ### Obsidian Session Notes
 After a significant work session, create or update:
-- `~/obsidian/Projects/ScholarTrack/YYYY-MM-DD-session.md` — session summary
+- `~/obsidian/Projects/MalumeScholarTrack/YYYY-MM-DD-session.md` — session summary
   - Decisions made
   - Files changed
   - Issues resolved
@@ -191,10 +191,10 @@ After a significant work session, create or update:
 ### Example Session Note Header
 \`\`\`markdown
 ---
-tags: [scholartrack, session, YYYY-MM-DD]
+tags: [malumescholartrack, session, YYYY-MM-DD]
 ---
 
-# ScholarTrack Session — YYYY-MM-DD
+# MalumeScholarTrack Session — YYYY-MM-DD
 
 ## What was done
 - ...

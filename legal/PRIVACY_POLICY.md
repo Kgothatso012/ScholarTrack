@@ -1,8 +1,8 @@
-# ScholarTrack Privacy Policy
+# MalumeScholarTrack Privacy Policy
 
 **Version 1.0** · Effective date: 9 August 2026
 
-ScholarTrack ("we", "us", "the Operator") operates the MalumeScholarTrack
+MalumeScholarTrack ("we", "us", "the Operator") operates the MalumeMalumeScholarTrack
 mobile application ("the App"), a school-transport coordination service that
 connects parents with drivers and shares live trip location for child safety.
 This policy explains what personal information we process, why, and the rights
@@ -18,12 +18,12 @@ version before you continue using the App.
 
 ## 1. Responsible party and Information Officer
 
-**Operator:** `[Legal entity name]` ("ScholarTrack")
+**Operator:** `[Legal entity name]` ("MalumeScholarTrack")
 **Physical address:** `[street, suburb, city, RSA]`
-**Email:** `privacy@scholartrack.co.za`
+**Email:** `privacy@malumescholartrack.co.za`
 
 **Information Officer:** `[IO name]`
-**IO email:** `io@scholartrack.co.za` · **IO phone:** `[+27 …]`
+**IO email:** `io@malumescholartrack.co.za` · **IO phone:** `[+27 …]`
 
 The Information Officer is registered with, and complaints may be lodged with,
 the Information Regulator (South Africa): **inforegulator.org.za**,
@@ -156,7 +156,7 @@ You may, free of charge and at reasonable intervals:
 - **Lodge a complaint** with the Information Regulator if you are not
   satisfied with our response.
 
-To exercise any right, email `privacy@scholartrack.co.za`.
+To exercise any right, email `privacy@malumescholartrack.co.za`.
 
 ---
 
@@ -164,11 +164,11 @@ To exercise any right, email `privacy@scholartrack.co.za`.
 
 We may update this policy. When we do, the App will ask you to accept the new
 version (the `CONSENT_VERSION` is bumped) before you continue. The current
-version is always available at `scholartrack.co.za/privacy`.
+version is always available at `malumescholartrack.co.za/privacy`.
 
 ---
 
 ## 10. Contact
 
-Questions about this policy or your data: **Information Officer**, `io@scholartrack.co.za`,
+Questions about this policy or your data: **Information Officer**, `io@malumescholartrack.co.za`,
 `[phone]`. Complaints: Information Regulator, `inforegulator.org.za`.

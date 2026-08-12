@@ -1,4 +1,4 @@
-// ScholarTrack EmergencyContactsScreen — Dark SA Transport Design
+// MalumeScholarTrack EmergencyContactsScreen — Dark SA Transport Design
 // Glassmorphism, dark theme, cyan/amber accents
 
 import React, { useState, useEffect } from 'react';

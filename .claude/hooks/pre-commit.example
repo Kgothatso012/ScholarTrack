@@ -3,7 +3,7 @@
 # Run TypeScript check before committing
 
 echo "Running TypeScript check..."
-cd /home/kgothatso012/ScholarTrack-Expo54
+cd /home/kgothatso012/MalumeScholarTrack-Expo54
 npx tsc --noEmit
 
 if [ $? -eq 0 ]; then

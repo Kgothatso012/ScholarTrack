@@ -1,5 +1,5 @@
 -- Migration 010: Marketing leads table
--- Stores submissions from the scholartrack-website landing page form.
+-- Stores submissions from the malumescholartrack-website landing page form.
 -- Used by the submit-lead Edge Function.
 
 CREATE TABLE IF NOT EXISTS leads (
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS leads (
   area text,
   car text,
   children int,
-  source text NOT NULL DEFAULT 'scholartrack-website',
+  source text NOT NULL DEFAULT 'malumescholartrack-website',
   user_agent text,
   ip text,
   -- Pipeline state

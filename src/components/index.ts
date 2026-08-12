@@ -1,4 +1,4 @@
-// ScholarTrack Components Index
+// MalumeScholarTrack Components Index
 // Export all reusable components
 
 export { default as DriverAvailability } from './DriverAvailability';

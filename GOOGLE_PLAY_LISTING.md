@@ -1,14 +1,14 @@
-# Google Play Store Listing — ScholarTrack
+# Google Play Store Listing — MalumeScholarTrack
 
 ## App Name
-ScholarTrack
+MalumeScholarTrack
 
 ## Short Description (80 chars)
 Every Child, Accounted For. Real-time school transport safety for South African families.
 
 ## Full Description (4000 chars)
 
-ScholarTrack connects parents, verified drivers, and schools to keep children safe during school transport. Built for South African parents who want peace of mind — every trip tracked, every child accounted for.
+MalumeScholarTrack connects parents, verified drivers, and schools to keep children safe during school transport. Built for South African parents who want peace of mind — every trip tracked, every child accounted for.
 
 **For Parents:**
 • Real-time bus tracking — see your child's location during pickup and drop-off
@@ -29,13 +29,13 @@ ScholarTrack connects parents, verified drivers, and schools to keep children sa
 • Dashboard view — monitor all active trips in your area
 • Attendance tracking — confirm which children arrived safely
 
-**Why South African parents trust ScholarTrack:**
+**Why South African parents trust MalumeScholarTrack:**
 • All drivers are verified against South African regulations (PDP, NHBRC standards)
 • Built-in emergency response — SOS alerts go directly to parents with live GPS
 • Offline support — the app works even with poor connectivity
 • Privacy-first design — your child's data is protected under POPIA
 
-ScholarTrack is developed by Makena Building Group (Pty) Ltd, registered in Pretoria.
+MalumeScholarTrack is developed by Makena Building Group (Pty) Ltd, registered in Pretoria.
 
 ## Category
 Education
@@ -47,13 +47,13 @@ school transport, child safety, South Africa, school bus, parent tracking
 Everyone (IARC) — no violent, sexual, or mature content.
 
 ## Email (required)
-hello@scholartrack.co.za
+hello@malumescholartrack.co.za
 
 ## Website (required)
-https://kgothatso012.github.io/scholartrack-website/
+https://kgothatso012.github.io/malumescholartrack-website/
 
 ## Privacy Policy URL
-https://kgothatso012.github.io/scholartrack-website/#privacy-policy
+https://kgothatso012.github.io/malumescholartrack-website/#privacy-policy
 
 ## Data Safety (Google Play required since May 2022)
 
@@ -72,7 +72,7 @@ Yes — payment data is shared with Paystack for transaction processing. Locatio
 Yes — all communication uses TLS 1.2+ encryption.
 
 **Can users request data deletion?**
-Yes — email hello@scholartrack.co.za or use the in-app account deletion feature.
+Yes — email hello@malumescholartrack.co.za or use the in-app account deletion feature.
 
 ## Screenshots Needed
 - [ ] Parent dashboard (4.7" phone: 1080×1920)

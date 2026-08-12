@@ -14,15 +14,18 @@ const ResetPasswordConfirmScreen = React.lazy(() => import('../screens/auth/Rese
 
 interface AuthStackProps {
   onLogin: (role: string) => void;
+  showOnboarding?: boolean;
+  onOnboardingComplete?: () => void;
 }
 
 const LoadingFallback = () => <React.Fragment />;
 
 // Use a simple state-based approach for navigation
-export function AuthStack({ onLogin }: AuthStackProps) {
+export function AuthStack({ onLogin, showOnboarding = false, onOnboardingComplete }: AuthStackProps) {
   const [showRegister, setShowRegister] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
+  const [showOnboardingLocal, setShowOnboardingLocal] = React.useState(showOnboarding);
 
   // Custom navigation handlers
   const navigateToRegister = () => setShowRegister(true);
@@ -58,23 +61,25 @@ export function AuthStack({ onLogin }: AuthStackProps) {
             </React.Suspense>
           )}
         </Stack.Screen>
+      ) : showOnboardingLocal ? (
+        <Stack.Screen name="Onboarding">
+          {() => (
+            <React.Suspense fallback={<LoadingFallback />}>
+              <OnboardingScreenWrapper onComplete={() => {
+                setShowOnboardingLocal(false);
+                onOnboardingComplete?.();
+              }} />
+            </React.Suspense>
+          )}
+        </Stack.Screen>
       ) : (
-        <>
-          <Stack.Screen name="Login">
-            {() => (
-              <React.Suspense fallback={<LoadingFallback />}>
-                <LoginScreenWrapper onLogin={onLogin} onNavigateToRegister={navigateToRegister} onNavigateToForgotPassword={navigateToForgotPassword} />
-              </React.Suspense>
-            )}
-          </Stack.Screen>
-          <Stack.Screen name="Onboarding">
-            {() => (
-              <React.Suspense fallback={<LoadingFallback />}>
-                <OnboardingScreenWrapper onLogin={onLogin} />
-              </React.Suspense>
-            )}
-          </Stack.Screen>
-        </>
+        <Stack.Screen name="Login">
+          {() => (
+            <React.Suspense fallback={<LoadingFallback />}>
+              <LoginScreenWrapper onLogin={onLogin} onNavigateToRegister={navigateToRegister} onNavigateToForgotPassword={navigateToForgotPassword} />
+            </React.Suspense>
+          )}
+        </Stack.Screen>
       )}
     </Stack.Navigator>
   );
@@ -115,8 +120,8 @@ function RegisterScreenWrapper({ onLogin, onNavigateToLogin }: { onLogin: (role:
   );
 }
 
-function OnboardingScreenWrapper({ onLogin }: { onLogin: (role: string) => void }) {
-  return <OnboardingScreen onComplete={() => onLogin('')} />;
+function OnboardingScreenWrapper({ onComplete }: { onComplete: () => void }) {
+  return <OnboardingScreen onComplete={onComplete} />;
 }
 
 function ForgotPasswordScreenWrapper({ onGoBack, onNavigateToResetConfirm }: { onGoBack: () => void; onNavigateToResetConfirm: () => void }) {

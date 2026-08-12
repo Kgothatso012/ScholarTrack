@@ -1,4 +1,4 @@
-// ScholarTrack SafetyTipsScreen — Design System: Dark SA Transport
+// MalumeScholarTrack SafetyTipsScreen — Design System: Dark SA Transport
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -94,7 +94,7 @@ export default function SafetyTipsScreen() {
             <View style={s.headerTop}>
               <View>
                 <Text style={s.headerTitle}>Safety Tips</Text>
-                <Text style={s.headerSub}>Stay safe with MalumeScholarTrack</Text>
+                <Text style={s.headerSub}>Stay safe with MalumeMalumeScholarTrack</Text>
               </View>
               <View style={s.headerBadge}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.success }} />

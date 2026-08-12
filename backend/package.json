@@ -1,7 +1,7 @@
 {
-  "name": "scholartrack-backend",
+  "name": "malumescholartrack-backend",
   "version": "1.0.0",
-  "description": "ScholarTrack SA - Student Transport Backend",
+  "description": "MalumeScholarTrack SA - Student Transport Backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

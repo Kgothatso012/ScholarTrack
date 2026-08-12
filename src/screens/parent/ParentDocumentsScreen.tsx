@@ -1,4 +1,4 @@
-// ScholarTrack ParentDocumentsScreen — Dark SA Transport Design
+// MalumeScholarTrack ParentDocumentsScreen — Dark SA Transport Design
 // Glassmorphism, dark theme, cyan/amber accents
 
 import React, { useState, useEffect } from 'react';

@@ -1,7 +1,7 @@
-# 🚌 ScholarTrack - Complete Testing Guide
+# 🚌 MalumeScholarTrack - Complete Testing Guide
 
 ## App Overview
-ScholarTrack is a student transport management app connecting parents, drivers, and administrators.
+MalumeScholarTrack is a student transport management app connecting parents, drivers, and administrators.
 
 ## Demo Accounts (Test Now)
 | Role | Email | Password |

@@ -8,7 +8,7 @@
 heightened protection; notification obligations apply.
 
 ## 1. Summary
-The ScholarTrack Android app ships the Supabase **anon key** in the client
+The MalumeScholarTrack Android app ships the Supabase **anon key** in the client
 bundle, and the production Supabase backend had Row Level Security disabled or
 misconfigured on the core tables. The combination allowed anyone who downloaded
 the public APK to read, update, and delete rows in `drivers`, `children`,
@@ -34,9 +34,9 @@ not merely a data-loss event.
 actively abused (Supabase request logs must be reviewed for the open window).
 
 ## 3. Evidence
-- `pentest-agent/targets/scholartrack-app/REPORT.md` (2026-07-16) — anon-key
+- `pentest-agent/targets/malumescholartrack-app/REPORT.md` (2026-07-16) — anon-key
   `GET/PATCH/DELETE` on `/rest/v1/drivers|children|trips` returned real PII.
-- `pentest-agent/targets/scholartrack-app/REPORT.md` (2026-07-24 addendum) —
+- `pentest-agent/targets/malumescholartrack-app/REPORT.md` (2026-07-24 addendum) —
   APKv2 signing cert `CN=Android Debug` and the anon key extracted from
   `assets/index.android.bundle` via `strings`.
 
@@ -55,7 +55,7 @@ actively abused (Supabase request logs must be reviewed for the open window).
   Android debug key) — see `docs/RELEASE.md`.
 - Retire all debug-signed APKs currently in circulation.
 - Restrict + rotate the Google Maps API key (GCP Console → application + API
-  restrictions for `com.scholartrack.sa`).
+  restrictions for `com.malumescholartrack.sa`).
 - Move role assignment server-side; stop trusting client `user_metadata.role`
   (the RLS migration's `profiles` CHECK enforces `role IN ('parent','driver')`).
 

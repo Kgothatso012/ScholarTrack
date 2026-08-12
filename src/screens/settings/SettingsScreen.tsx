@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
 import { Spacer, Card } from '../../ui-plugin/components';
 import { getTheme, cards } from '../../ui-plugin/theme';
+import { useAuth } from '../../lib/auth';
 
 const { colors: C } = getTheme('dark');
 
@@ -24,7 +25,9 @@ interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; reset: (state: object) => void };
 }
 
-export default function SettingsScreen({ navigation }: Props) {
+export default function SettingsScreen
+({ navigation }: Props) {
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', email: '', phone: '', role: 'parent' });
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -103,7 +106,7 @@ export default function SettingsScreen({ navigation }: Props) {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
-          await supabase.auth.signOut();
+          await signOut();
           await AsyncStorage.clear();
           navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
         },
@@ -119,7 +122,7 @@ export default function SettingsScreen({ navigation }: Props) {
       const { data, error } = await supabase.rpc('export_user_data');
       if (error) throw error;
       const json = JSON.stringify(data, null, 2);
-      await Share.share({ message: json, title: 'My ScholarTrack data' });
+      await Share.share({ message: json, title: 'My MalumeScholarTrack data' });
     } catch (error) {
       Alert.alert('Export failed', error instanceof Error ? error.message : 'Could not export your data.');
     }
@@ -139,7 +142,7 @@ export default function SettingsScreen({ navigation }: Props) {
               // removes the auth.users row, which the client RPC cannot do.
               const { error } = await supabase.functions.invoke('delete-user');
               if (error) throw error;
-              await supabase.auth.signOut();
+              await signOut();
               await AsyncStorage.clear();
               Alert.alert('Account deleted', 'Your data has been erased.', [
                 { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Auth' }] }) },

@@ -1,4 +1,4 @@
-// ScholarTrack Compliance Screen — Design System: Dark SA Transport
+// MalumeScholarTrack Compliance Screen — Design System: Dark SA Transport
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

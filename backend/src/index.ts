@@ -46,7 +46,7 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    service: 'ScholarTrack SA API'
+    service: 'MalumeScholarTrack SA API'
   });
 });
 
@@ -83,7 +83,7 @@ app.listen(PORT, () => {
   console.log(`
   ╔═══════════════════════════════════════════════════════╗
   ║                                                       ║
-  ║   🚀 ScholarTrack SA API Server                      ║
+  ║   🚀 MalumeScholarTrack SA API Server                      ║
   ║   Running on http://localhost:${PORT}                   ║
   ║                                                       ║
   ╚═══════════════════════════════════════════════════════╝

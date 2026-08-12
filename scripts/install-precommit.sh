@@ -6,19 +6,19 @@ set -e
 cd "$(git rev-parse --show-toplevel)"
 
 HOOK=.git/hooks/pre-commit
-if [ -f "$HOOK" ] && ! grep -q "scholartrack-secret-scanner" "$HOOK" 2>/dev/null; then
+if [ -f "$HOOK" ] && ! grep -q "malumescholartrack-secret-scanner" "$HOOK" 2>/dev/null; then
   echo "ERROR: $HOOK already exists. Backing up to $HOOK.bak"
   mv "$HOOK" "$HOOK.bak"
 fi
 
 cat > "$HOOK" <<'EOF'
 #!/usr/bin/env bash
-# scholartrack-secret-scanner — fail if any tracked file in the diff has
+# malumescholartrack-secret-scanner — fail if any tracked file in the diff has
 # a credential pattern. Excludes .env.example, SECRETS_OPS.md, and the
 # doctor itself (which lists the patterns).
 set -e
 PATTERNS='sk_live_[A-Za-z0-9]{20,}|sk_test_[A-Za-z0-9]{20,}|AIzaSy[A-Za-z0-9_-]{30,}|eyJhbGciOi[A-Za-z0-9_-]{40,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'
-EXCLUDES='--exclude=.env.example --exclude=SECRETS_OPS.md --exclude=scholartrack_doctor.py --exclude=install-precommit.sh'
+EXCLUDES='--exclude=.env.example --exclude=SECRETS_OPS.md --exclude=malumescholartrack_doctor.py --exclude=install-precommit.sh'
 
 # Scan only staged changes
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR $EXCLUDES 2>/dev/null)

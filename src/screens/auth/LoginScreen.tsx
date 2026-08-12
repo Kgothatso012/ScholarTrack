@@ -1,4 +1,4 @@
-// ScholarTrack LoginScreen — Design System: Dark SA Transport
+// MalumeScholarTrack LoginScreen — Design System: Dark SA Transport
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, ZoomIn, Easing } from 'react-native-reanimated';
@@ -106,7 +106,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     setResetSentLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: 'scholartrack://reset-password',
+        redirectTo: 'malumescholartrack://reset-password',
       });
       if (error) throw error;
       setShowResetSuccess(true);
@@ -288,7 +288,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
             <View style={s.headerGlow2} />
             <View style={s.headerTop}>
               <View>
-                <Text style={s.headerBrand}>ScholarTrack</Text>
+                <Text style={s.headerBrand}>MalumeScholarTrack</Text>
                 <Text style={s.headerSub}>Safe Student Transport</Text>
               </View>
               <View style={s.headerBadge}>
@@ -316,7 +316,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
               {/* Info toggle */}
               <TouchableOpacity onPress={() => setShowInfo(!showInfo)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md }}>
                 <Ionicons name="information-circle" size={16} color={C.cyan} />
-                <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: C.cyan }}>{showInfo ? 'Hide info' : 'What is ScholarTrack?'}</Text>
+                <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, color: C.cyan }}>{showInfo ? 'Hide info' : 'What is MalumeScholarTrack?'}</Text>
               </TouchableOpacity>
 
               {showInfo && (

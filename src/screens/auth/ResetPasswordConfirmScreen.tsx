@@ -1,4 +1,4 @@
-// ScholarTrack ResetPasswordConfirmScreen — Design System: Dark SA Transport
+// MalumeScholarTrack ResetPasswordConfirmScreen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, FadeIn, Easing } from 'react-native-reanimated';

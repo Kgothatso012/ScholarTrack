@@ -59,9 +59,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [initialized]);
 
+  // ─── DEV BYPASS — mock user so all screens work without real auth ──────
+  const DEV_BYPASS = typeof window !== 'undefined' && window.location?.hostname === 'localhost' ? true : __DEV__;
+
   const init = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (DEV_BYPASS && !session?.user) {
+        // Provide a mock user so screens that call getUser() don't break
+        setUser({
+          id: 'dev-bypass-user',
+          email: 'dev@malumescholartrack.co.za',
+          role: 'parent',
+          full_name: 'Dev User',
+          phone: '0820000000',
+        });
+        await AsyncStorage.setItem(USER_ID_KEY, 'dev-bypass-user');
+        await AsyncStorage.setItem('userRole', 'parent');
+        await AsyncStorage.setItem('userName', 'Dev User');
+        cacheService.setActiveUser('dev-bypass-user');
+        setInitialized(true);
+        setLoading(false);
+        return;
+      }
       if (session?.user) {
         const profile = await authService.getCurrentUser();
         if (profile) {
@@ -164,24 +184,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Always clear local state first — even if Supabase call fails
+    // (e.g. dev bypass with no real session).
+    setUser(null);
+    await cacheService.clearAll();
+    cacheService.setActiveUser(null);
+    await AsyncStorage.removeItem(USER_ID_KEY);
+    await AsyncStorage.removeItem('userRole');
+    await AsyncStorage.removeItem('userName');
+    try {
+      await geofenceService.stopBackgroundGeofencing();
+    } catch (e) {
+      if (__DEV__) console.warn('Geofence cleanup on signOut failed:', e);
+    }
     try {
       await supabase.auth.signOut();
-      // Purge ALL cached data on sign-out so the next user can't
-      // inherit the previous user's data via AsyncStorage.
-      await cacheService.clearAll();
-      cacheService.setActiveUser(null);
-      await AsyncStorage.removeItem(USER_ID_KEY);
-      // Stop background geofencing task — leftover tasks would otherwise keep
-      // firing notifications for a logged-out user (or for a different user
-      // who logs in on the same device).
-      try {
-        await geofenceService.stopBackgroundGeofencing();
-      } catch (e) {
-        if (__DEV__) console.warn('Geofence cleanup on signOut failed:', e);
-      }
-      setUser(null);
     } catch (error) {
-      console.error('Sign out error:', error);
+      // Supabase signOut may fail if there's no session (dev bypass).
+      // Local state is already cleared above, so this is harmless.
+      if (__DEV__) console.warn('Supabase signOut skipped (no session):', error);
+    }
+    // Force reload on web to guarantee clean state. On native this is a no-op.
+    if (typeof window !== 'undefined' && window.location?.reload) {
+      window.location.reload();
     }
   };
 

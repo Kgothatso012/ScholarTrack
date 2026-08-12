@@ -69,7 +69,7 @@ fi
 # Rewrite .env: keep EXPO_PUBLIC_SUPABASE_URL, replace the 3 secrets
 TMP=$(mktemp)
 {
-  echo "# ScholarTrack .env — written by scripts/set-secrets.sh on $(date -Iseconds)"
+  echo "# MalumeScholarTrack .env — written by scripts/set-secrets.sh on $(date -Iseconds)"
   echo "# DO NOT COMMIT. Mode 600. Gitignored."
   echo
   echo "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL"

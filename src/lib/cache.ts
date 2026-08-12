@@ -1,4 +1,4 @@
-// Offline Cache Service for ScholarTrack
+// Offline Cache Service for MalumeScholarTrack
 // Provides AsyncStorage-based caching for offline data persistence.
 //
 // SECURITY:
@@ -14,8 +14,8 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CACHE_PREFIX = 'scholartrack_cache_';
-const SECURE_CACHE_PREFIX = 'scholartrack_secure_';
+const CACHE_PREFIX = 'malumescholartrack_cache_';
+const SECURE_CACHE_PREFIX = 'malumescholartrack_secure_';
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default cache lifetime
 
 interface CacheItem<T> {
@@ -40,7 +40,7 @@ export const cacheService = {
 
   /**
    * Returns the namespaced key for a logical cache key.
-   * Format: scholartrack_cache_<userId>:<key>
+   * Format: malumescholartrack_cache_<userId>:<key>
    * If no user is bound, returns the un-namespaced key (used by tests).
    */
   _namespacedKey(key: string): string {

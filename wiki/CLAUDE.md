@@ -1,7 +1,7 @@
-# ScholarTrack Wiki - Schema
+# MalumeScholarTrack Wiki - Schema
 
 ## Wiki Location
-`~/wiki/projects/scholartrack/` → `~/ScholarTrack-Expo54/wiki/`
+`~/wiki/projects/malumescholartrack/` → `~/MalumeScholarTrack-Expo54/wiki/`
 
 ## Purpose
 Track compliance patterns, driver history, safety incidents, transport regulations.
@@ -58,4 +58,4 @@ Any safety incidents on record.
 | drivers/active.md | Driver | Active driver records |
 
 ## log.md Format
-## [2026-04-06] init | Created ScholarTrack wiki structure
+## [2026-04-06] init | Created MalumeScholarTrack wiki structure

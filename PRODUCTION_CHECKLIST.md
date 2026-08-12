@@ -1,6 +1,6 @@
-# ScholarTrack — Production Launch Checklist
+# MalumeScholarTrack — Production Launch Checklist
 
-This is the step-by-step to get ScholarTrack from "code on a laptop" to
+This is the step-by-step to get MalumeScholarTrack from "code on a laptop" to
 "live on Google Play." Read top to bottom. Don't skip steps.
 
 ## Timeline target
@@ -10,7 +10,7 @@ This is the step-by-step to get ScholarTrack from "code on a laptop" to
 | Secrets rotation | 1-2 hours | You + access to Paystack/Supabase/Google consoles |
 | Git history scrub | 30 min | Decides whether to rewrite history (destructive) |
 | Apply migrations | 30 min | Supabase dashboard SQL editor |
-| Pre-flight doctor | 5 min | Run `python3 scholartrack_doctor.py` — must be 14/14 OK |
+| Pre-flight doctor | 5 min | Run `python3 malumescholartrack_doctor.py` — must be 14/14 OK |
 | EAS build | 30-60 min (cloud) | eas-cli + EAS secrets set |
 | Play Console setup | 1-2 hours | $25 Google Play developer fee, store listing |
 | Submit for review | 1-7 days | Google's review process |
@@ -38,7 +38,7 @@ the index but still in history. **You must rotate them.**
 - APIs & Services → Credentials
 - Find the leaked key (starts with `AIzaSyA1AB...`)
 - **Edit it first**: add Android restriction with your SHA-1 fingerprint
-  and package name `com.scholartrack.sa`. This is critical — without
+  and package name `com.malumescholartrack.sa`. This is critical — without
   restrictions, anyone can use the key against your billing account.
 - Then rotate the key
 - New key in EAS:
@@ -118,7 +118,7 @@ supabase functions schedule create cleanup-leads '0 2 * * *' \
 
 ```bash
 # 1. The doctor (must be 14/14 OK)
-python3 scholartrack_doctor.py
+python3 malumescholartrack_doctor.py
 
 # 2. TypeScript check
 npx tsc --noEmit
@@ -163,13 +163,13 @@ Smoke-test the AAB on a real device before submitting to Play.
 - Complete identity verification (can take 48 hours)
 
 ### 7.2 Create the app
-- "Create app" → name "ScholarTrack", default language English (South Africa)
+- "Create app" → name "MalumeScholarTrack", default language English (South Africa)
 - Free or paid: choose Free
 - Accept the content declarations
 
 ### 7.3 Store listing
 You'll need:
-- **App name**: ScholarTrack
+- **App name**: MalumeScholarTrack
 - **Short description** (80 chars): "Real-time school transport tracking for South African parents and drivers."
 - **Full description** (4000 chars): marketing copy
 - **Screenshots**: minimum 2 (phone), ideally 8. Real device captures.
@@ -178,7 +178,7 @@ You'll need:
 - **Content rating**: complete the questionnaire
 - **Target audience**: NOT "Children" (this would trigger stricter review)
 - **Category**: Education or Maps & Navigation
-- **Privacy policy URL**: required, host on scholartrack.co.za
+- **Privacy policy URL**: required, host on malumescholartrack.co.za
 
 ### 7.4 Service account for EAS submit
 - Google Cloud Console → IAM & Admin → Service Accounts
@@ -221,7 +221,7 @@ for a first submission.
   install `@sentry/react-native` and ship crash reports from day 1.
 - **Analytics**: not configured. Add `expo-analytics` or PostHog
   before opening the app to the public.
-- **Support email**: monitor `support@scholartrack.co.za`
+- **Support email**: monitor `support@malumescholartrack.co.za`
 - **POPIA**: ensure your privacy policy reflects what migration 013
   does (90-day leads retention, no UA storage, hashed IPs).
 
@@ -234,7 +234,7 @@ I cannot do these from this sandbox:
 4. Apply the migrations in the Supabase SQL Editor (or via `supabase db push`)
 5. Upload the AAB to Play Console
 6. Take real-device screenshots for the store listing
-7. Host a privacy policy at scholartrack.co.za/privacy
+7. Host a privacy policy at malumescholartrack.co.za/privacy
 
 Everything in this checklist except those 7 items is now in the repo
 and ready to use.

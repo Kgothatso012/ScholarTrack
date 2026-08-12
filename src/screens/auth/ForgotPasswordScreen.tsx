@@ -1,4 +1,4 @@
-// ScholarTrack ForgotPasswordScreen — Design System: Dark SA Transport
+// MalumeScholarTrack ForgotPasswordScreen — Design System: Dark SA Transport
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, FadeIn, ZoomIn, Easing } from 'react-native-reanimated';
@@ -51,7 +51,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: 'scholartrack://reset-password',
+        redirectTo: 'malumescholartrack://reset-password',
       });
       if (error) {
         Alert.alert('Error', error.message || 'Failed to send reset email');
@@ -268,7 +268,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
             </View>
             <View style={s.helpRow}>
               <Ionicons name="help-circle" size={16} style={s.helpIcon} />
-              <Text style={s.helpText}>Contact support@scholartrack.co.za</Text>
+              <Text style={s.helpText}>Contact support@malumescholartrack.co.za</Text>
             </View>
           </View>
         </Animated.View>

@@ -1,4 +1,4 @@
-// ScholarTrack Parent Stack Navigator
+// MalumeScholarTrack Parent Stack Navigator
 // All parent screens with consistent dark glassmorphism header + burger menu
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

@@ -48,8 +48,8 @@ let capturedInfo: string | null = null;
 export function installGlobalErrorHandler() {
   const g: any = global as any;
   const ErrorUtils = g.ErrorUtils;
-  if (!ErrorUtils || ErrorUtils.__scholartrackInstalled) return;
-  ErrorUtils.__scholartrackInstalled = true;
+  if (!ErrorUtils || ErrorUtils.__malumescholartrackInstalled) return;
+  ErrorUtils.__malumescholartrackInstalled = true;
   const previous = ErrorUtils.getGlobalHandler();
   ErrorUtils.setGlobalHandler((err: Error, isFatal?: boolean) => {
     capturedError = err;

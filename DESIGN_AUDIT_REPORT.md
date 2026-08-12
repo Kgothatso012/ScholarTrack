@@ -1,4 +1,4 @@
-# ScholarTrack Design Audit Report
+# MalumeScholarTrack Design Audit Report
 
 **Generated:** 2026-04-01
 

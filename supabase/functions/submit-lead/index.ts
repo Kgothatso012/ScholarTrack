@@ -2,7 +2,7 @@
 // Persists marketing-site form submissions to a `leads` table.
 // Deploy with: supabase functions deploy submit-lead
 //
-// Expected payload from scholartrack-website form:
+// Expected payload from malumescholartrack-website form:
 //   {
 //     role: 'parent' | 'driver',
 //     name: string,
@@ -12,7 +12,7 @@
 //     car?: string,
 //     children?: number,
 //     timestamp: ISO string,
-//     source: 'scholartrack-website'
+//     source: 'malumescholartrack-website'
 //   }
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
@@ -113,7 +113,7 @@ serve(async (req: Request) => {
       body.children === undefined || body.children === null
         ? null
         : Math.max(1, Math.min(10, Number(body.children) || 0)),
-    source: body.source || 'scholartrack-website',
+    source: body.source || 'malumescholartrack-website',
     user_agent: req.headers.get('user-agent')?.slice(0, 300) || null,
     ip:
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||

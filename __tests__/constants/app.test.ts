@@ -3,7 +3,7 @@
 
 describe('App Constants', () => {
   // Define expected constants for testing
-  const APP_NAME = 'ScholarTrack';
+  const APP_NAME = 'MalumeScholarTrack';
   const APP_VERSION = '1.0.0';
   
   const COLORS = {
@@ -95,8 +95,8 @@ describe('App Constants', () => {
       expect(APP_NAME.length).toBeGreaterThan(0);
     });
 
-    it('should be "ScholarTrack"', () => {
-      expect(APP_NAME).toBe('ScholarTrack');
+    it('should be "MalumeScholarTrack"', () => {
+      expect(APP_NAME).toBe('MalumeScholarTrack');
     });
   });
 

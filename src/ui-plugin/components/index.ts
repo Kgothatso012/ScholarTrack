@@ -1,4 +1,4 @@
-// ScholarTrack UI Plugin - Components Index
+// MalumeScholarTrack UI Plugin - Components Index
 export { Button } from './Button';
 export { Card } from './Card';
 export { Input } from './Input';

@@ -165,7 +165,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
           <View style={[s.statusRow, { borderBottomWidth: 0 }]}>
             <View style={s.statusField}>
               <Text style={s.statusLabel}>DB:</Text>
-              <Text style={s.statusValue}>scholartrack_prod</Text>
+              <Text style={s.statusValue}>malumescholartrack_prod</Text>
             </View>
           </View>
         </View>

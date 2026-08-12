@@ -1,4 +1,4 @@
-// ScholarTrack TrackChildScreen — Dark SA Transport Design
+// MalumeScholarTrack TrackChildScreen — Dark SA Transport Design
 // Dark glassmorphism, cyan/amber accents, spring animations, real-time map tracking
 // Uses OSM WebView map for universal Android compatibility (no GMS required)
 

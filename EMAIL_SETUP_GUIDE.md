@@ -1,4 +1,4 @@
-# ScholarTrack Email Branding Setup Guide
+# MalumeScholarTrack Email Branding Setup Guide
 
 ## Current Status
 - **Email Confirmation**: DISABLED (users auto-confirmed)
@@ -26,8 +26,8 @@ In Supabase Dashboard:
    - Port: 587 (or 465 for SSL)
    - Username: your-smtp-username
    - Password: your-smtp-password
-   - Sender email: noreply@scholartrack.co.za
-   - Sender name: ScholarTrack
+   - Sender email: noreply@malumescholartrack.co.za
+   - Sender name: MalumeScholarTrack
 
 **Providers to consider**:
 - SendGrid (recommended for SA)
@@ -41,7 +41,7 @@ In Supabase Dashboard:
 In Supabase Dashboard:
 1. Go to: Authentication → Email Templates
 2. Click "Edit" on each template
-3. Apply ScholarTrack branding:
+3. Apply MalumeScholarTrack branding:
 
 ### Template Variables Available
 ```
@@ -62,10 +62,10 @@ In Supabase Dashboard:
 
 **Confirmation Email**:
 ```
-Subject: Verify your ScholarTrack account
+Subject: Verify your MalumeScholarTrack account
 
 Body:
-Welcome to ScholarTrack!
+Welcome to MalumeScholarTrack!
 
 To confirm your email and activate your account, click the button below:
 
@@ -74,10 +74,10 @@ To confirm your email and activate your account, click the button below:
 If you didn't create this account, please ignore this email.
 
 Safe travels,
-The ScholarTrack Team
+The MalumeScholarTrack Team
 
 ---
-ScholarTrack - South Africa's Student Transport Safety App
+MalumeScholarTrack - South Africa's Student Transport Safety App
 ```
 
 ---
@@ -88,7 +88,7 @@ After configuring, test with:
 
 1. **Sign up** a new user → should receive confirmation email
 2. **Request password reset** → should come from your SMTP (not Supabase)
-3. **Check email source** → should show noreply@scholartrack.co.za
+3. **Check email source** → should show noreply@malumescholartrack.co.za
 
 ---
 
@@ -102,13 +102,13 @@ const { data, error } = await supabase.auth.signUp({
   password,
   options: {
     data: { role, full_name: fullName, phone },
-    emailRedirectTo: 'scholartrack://confirm'
+    emailRedirectTo: 'malumescholartrack://confirm'
   }
 });
 
 // ForgotPasswordScreen.tsx - line 40
 const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-  redirectTo: 'scholartrack://reset-password',
+  redirectTo: 'malumescholartrack://reset-password',
 });
 ```
 
@@ -122,12 +122,12 @@ For the redirect URLs to work, add this to your app:
 ```json
 {
   "expo": {
-    "scheme": "scholartrack"
+    "scheme": "malumescholartrack"
   }
 }
 ```
 
 2. **In Supabase** - Add to "Redirect URLs":
-   - scholartrack://confirm
-   - scholartrack://reset-password
-   - scholartrack://login
+   - malumescholartrack://confirm
+   - malumescholartrack://reset-password
+   - malumescholartrack://login

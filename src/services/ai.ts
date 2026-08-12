@@ -126,7 +126,7 @@ export const aiService = {
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: 'You are ScholarTrack AI Support. Help parents and drivers with: booking trips, driver hiring, payment issues, tracking children, emergency assistance. Be helpful, concise, and friendly. If you cannot help, suggest contacting human support.',
+        content: 'You are MalumeScholarTrack AI Support. Help parents and drivers with: booking trips, driver hiring, payment issues, tracking children, emergency assistance. Be helpful, concise, and friendly. If you cannot help, suggest contacting human support.',
       },
       {
         role: 'user',

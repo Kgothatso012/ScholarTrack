@@ -1,4 +1,4 @@
-// ScholarTrack PaymentDetailsScreen — Dark SA Transport Design
+// MalumeScholarTrack PaymentDetailsScreen — Dark SA Transport Design
 // Glassmorphism, dark theme, cyan/amber accents
 
 import React, { useState, useEffect } from 'react';
@@ -295,7 +295,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
         visible={showAddModal}
         onClose={() => setShowAddModal(false)}
         amount={currentAmount * 100}
-        description="MalumeScholarTrack Transport Payment"
+        description="MalumeMalumeScholarTrack Transport Payment"
         paymentType="monthly"
         onSuccess={(ref) => {
           Alert.alert('Payment Successful', `Reference: ${ref}`);

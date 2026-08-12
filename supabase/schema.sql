@@ -1,4 +1,4 @@
--- ScholarTrack Database Schema
+-- MalumeScholarTrack Database Schema
 -- Run this in Supabase SQL Editor to set up the database
 
 -- 1. Driver Tracking Table for GPS Location

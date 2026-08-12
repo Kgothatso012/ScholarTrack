@@ -1,4 +1,4 @@
-// Toast Service - Centralized notifications for ScholarTrack
+// Toast Service - Centralized notifications for MalumeScholarTrack
 // Replaces scattered Alert.alert calls with consistent toast notifications
 
 import { ToastAndroid, Platform, Alert } from 'react-native';

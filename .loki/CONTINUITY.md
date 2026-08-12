@@ -1,10 +1,10 @@
-# Loki Mode - ScholarTrack Continuity
+# Loki Mode - MalumeScholarTrack Continuity
 
 ## Project
-**ScholarTrack** - RSA Student Transport Safety App
+**MalumeScholarTrack** - RSA Student Transport Safety App
 
 ## Mission
-Build ScholarTrack into a production-ready student transport safety platform serving South African schools.
+Build MalumeScholarTrack into a production-ready student transport safety platform serving South African schools.
 
 ## Tech Stack
 - Frontend: Expo/React Native (SDK 54)
@@ -18,8 +18,8 @@ Build ScholarTrack into a production-ready student transport safety platform ser
 
 ## Key Context
 - Supabase URL: https://zjcribmwgavpzycgpwva.supabase.co
-- APK built: ScholarTrack-debug.apk (219MB)
-- ScholarTrack Expo54 located at: ~/ScholarTrack-Expo54/
+- APK built: MalumeScholarTrack-debug.apk (219MB)
+- MalumeScholarTrack Expo54 located at: ~/MalumeScholarTrack-Expo54/
 
 ## Current Focus
 - Task #6 pending: notification polish (typed events from clawhip)

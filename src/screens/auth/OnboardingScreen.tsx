@@ -1,4 +1,4 @@
-// ScholarTrack OnboardingScreen — Design System: Dark SA Transport
+// MalumeScholarTrack OnboardingScreen — Design System: Dark SA Transport
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, FlatList, Animated } from 'react-native';
 import AnimatedReanimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, FadeIn, Easing } from 'react-native-reanimated';
@@ -26,7 +26,7 @@ const onboardingData: OnboardingData[] = [
   {
     id: '1',
     title: 'Safe Student Transport',
-    description: 'ScholarTrack ensures your children travel safely to and from school with verified, trusted drivers.',
+    description: 'MalumeScholarTrack ensures your children travel safely to and from school with verified, trusted drivers.',
     icon: 'shield-checkmark',
     color: C.success,
     bgColor: 'rgba(0,230,118,.12)',

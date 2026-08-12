@@ -14,7 +14,7 @@
 -- 1. Add ip_hash column, populate it from existing ip, then drop ip
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 UPDATE leads
-SET ip_hash = encode(digest(COALESCE(ip, '') || 'scholartrack-salt-rotate-me', 'sha256'), 'hex')
+SET ip_hash = encode(digest(COALESCE(ip, '') || 'malumescholartrack-salt-rotate-me', 'sha256'), 'hex')
 WHERE ip_hash IS NULL AND ip IS NOT NULL;
 ALTER TABLE leads DROP COLUMN IF EXISTS ip;
 

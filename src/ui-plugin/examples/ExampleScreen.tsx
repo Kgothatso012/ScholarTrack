@@ -1,4 +1,4 @@
-// ScholarTrack UI Plugin - Example Usage
+// MalumeScholarTrack UI Plugin - Example Usage
 // Demonstrates how to use the Soft & Friendly UI components
 
 import React, { useState } from 'react';
@@ -34,7 +34,7 @@ const ExampleScreen = () => {
     <SafeAreaProvider>
       <SafeAreaView style={styles(colors).container} edges={['top']}>
         <Header
-          title="MalumeScholarTrack"
+          title="MalumeMalumeScholarTrack"
           subtitle="UI Plugin Demo"
           leftIcon="menu-outline"
           rightIcon="notifications-outline"

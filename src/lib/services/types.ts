@@ -1,4 +1,4 @@
-// Core Types for ScholarTrack
+// Core Types for MalumeScholarTrack
 import { User } from '@supabase/supabase-js';
 
 // User Roles

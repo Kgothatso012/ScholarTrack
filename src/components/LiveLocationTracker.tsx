@@ -1,4 +1,4 @@
-// Live Location Tracker Component for ScholarTrack
+// Live Location Tracker Component for MalumeScholarTrack
 // Patched: Huawei/GMS fallback — shows graceful error instead of crashing
 
 import React, { useState, useEffect, useRef } from 'react';

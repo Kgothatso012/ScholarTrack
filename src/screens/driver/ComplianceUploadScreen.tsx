@@ -12,6 +12,7 @@ import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 import { Spacer, SkeletonCard, Card } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
+import { useAuth } from '../../lib/auth';
 
 const { colors: C } = getTheme('dark');
 
@@ -125,7 +126,9 @@ interface Props {
 
 // ============ MAIN COMPONENT ============
 
-export default function ComplianceUploadScreen({ navigation }: Props) {
+export default function ComplianceUploadScreen
+({ navigation }: Props) {
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -387,7 +390,7 @@ export default function ComplianceUploadScreen({ navigation }: Props) {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', onPress: async () => {
-        await supabase.auth.signOut();
+        await signOut();
         await AsyncStorage.multiRemove(['driverCompliance', 'userRole', 'userName', 'userEmail']);
       }},
     ]);

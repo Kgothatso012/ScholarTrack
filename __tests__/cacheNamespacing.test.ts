@@ -82,7 +82,7 @@ describe('cacheService user-namespacing', () => {
 
     await cacheService.clearAll();
     // The namespaced cache key is gone
-    const namespacedKeys = Object.keys(mockStorage).filter((k) => k.startsWith('scholartrack_cache_'));
+    const namespacedKeys = Object.keys(mockStorage).filter((k) => k.startsWith('malumescholartrack_cache_'));
     expect(namespacedKeys.length).toBe(0);
     // User prefs outside the cache namespace remain intact
     expect(mockStorage['user_pref_theme']).toBe('dark');

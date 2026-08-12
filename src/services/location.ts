@@ -1,4 +1,4 @@
-// Location Tracking Service for ScholarTrack
+// Location Tracking Service for MalumeScholarTrack
 // Patched: Huawei/GMS fallback support
 import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
@@ -29,7 +29,7 @@ async function isGooglePlayServicesAvailable(): Promise<boolean> {
   return true;
 }
 
-const BACKGROUND_TRACKING_TASK = 'scholartrack-driver-tracking';
+const BACKGROUND_TRACKING_TASK = 'malumescholartrack-driver-tracking';
 const BG_DRIVER_ID_KEY = 'bg_tracking_driver_id';
 
 // Background tracking task — registered at module load so it is ready before
@@ -160,7 +160,7 @@ export const locationService = {
         deferredUpdatesInterval: 60000,
         showsBackgroundLocationIndicator: true,
         foregroundService: {
-          notificationTitle: 'ScholarTrack is tracking your trip',
+          notificationTitle: 'MalumeScholarTrack is tracking your trip',
           notificationBody: 'Sharing live location with parents.',
           notificationColor: '#1E3A5F',
         },

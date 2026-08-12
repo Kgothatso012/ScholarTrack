@@ -21,7 +21,7 @@ r() { printf "\033[1;31m%s\033[0m\n" "$*"; }
 
 cat <<'BANNER'
 ============================================================
-ScholarTrack migration runner
+MalumeScholarTrack migration runner
 Migrations to apply: 011, 012, 013
 ============================================================
 BANNER
@@ -64,7 +64,7 @@ cat <<'FOOTER'
 All three migrations applied.
 
 Next steps:
-  1. Verify: the doctor (python3 scholartrack_doctor.py) should still
+  1. Verify: the doctor (python3 malumescholartrack_doctor.py) should still
      pass 14/14.
   2. Deploy Edge Functions:
        supabase functions deploy cleanup-leads

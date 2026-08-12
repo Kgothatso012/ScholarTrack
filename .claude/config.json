@@ -2,7 +2,7 @@
   "skills": [
     {
       "name": "code-review",
-      "description": "Code review checklist for ScholarTrack",
+      "description": "Code review checklist for MalumeScholarTrack",
       "path": ".claude/skills/code-review.md"
     },
     {

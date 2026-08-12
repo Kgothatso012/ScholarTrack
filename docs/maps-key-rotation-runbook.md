@@ -22,13 +22,13 @@ forward — purging history without rotation leaves the old key active.
 ### 1. Create the new key in Google Cloud Console
 
 1. Open https://console.cloud.google.com/google/maps-apis/credentials
-2. Project: `ScholarTrack` (or whatever GCP project hosts the existing key)
+2. Project: `MalumeScholarTrack` (or whatever GCP project hosts the existing key)
 3. Click **+ CREATE CREDENTIALS → API key**
 4. Name: `Malume Android v1.1.1+` (include the release you're shipping for)
 5. **Application restrictions**:
    - Type: **Android apps**
    - Click **Add an item**:
-     - Package name: `com.scholartrack.sa`
+     - Package name: `com.malumescholartrack.sa`
      - SHA-1 fingerprint: **paste the release keystore SHA-1** (see step 2)
 6. **API restrictions**:
    - Type: **Restrict key**
@@ -46,8 +46,8 @@ to a secret manager — in which case use the SHA-1 from the keystore stored
 in your password manager / 1Password / GitHub Secrets.
 
 ```bash
-keytool -list -v -keystore ~/ScholarTrack-Expo54/android/app/release.keystore \
-  -alias scholartrack -storepass <KEYSTORE_PASSWORD> 2>/dev/null \
+keytool -list -v -keystore ~/MalumeScholarTrack-Expo54/android/app/release.keystore \
+  -alias malumescholartrack -storepass <KEYSTORE_PASSWORD> 2>/dev/null \
   | grep -E "SHA1:|SHA-1:"
 # Output line: SHA1: AB:CD:EF:... (40 hex chars with colons)
 # Remove the colons for the GCP form: ABCDEF...
@@ -74,7 +74,7 @@ time to revert.
 After the new key is created and restricted, replace the old value in:
 
 ```bash
-cd ~/ScholarTrack-Expo54
+cd ~/MalumeScholarTrack-Expo54
 
 # A. app.json — expo.android.config.googleMaps.apiKey (manifest source)
 # B. app.json — expo.extra.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY (JS bundle source)
@@ -118,7 +118,7 @@ Even with rotation, the old key is in every git commit ever pushed.
 Anyone who clones the repo gets it. Purge with:
 
 ```bash
-cd ~/ScholarTrack-Expo54
+cd ~/MalumeScholarTrack-Expo54
 echo "AIzaSy...old_key..." > /tmp/old-maps-keys.txt
 bfg --replace-text /tmp/old-maps-keys.txt --no-blob-protection
 git reflog expire --expire=now --all
@@ -182,7 +182,7 @@ The AAB from this build is the one you ship to Internal Testing.
 
 ## Verification checklist (after rotation)
 
-- [ ] New key created in GCP, restricted to `com.scholartrack.sa` + release SHA-1
+- [ ] New key created in GCP, restricted to `com.malumescholartrack.sa` + release SHA-1
 - [ ] Only Maps SDK + Places API enabled on the new key
 - [ ] Old key disabled in GCP
 - [ ] `app.json` updated (2 places)

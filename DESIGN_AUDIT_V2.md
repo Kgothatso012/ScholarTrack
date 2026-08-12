@@ -1,4 +1,4 @@
-# ScholarTrack Design Audit V2
+# MalumeScholarTrack Design Audit V2
 
 **Date:** 2026-04-15
 **Auditor:** Subagent (redesign-skill + taste-skill applied)
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-ScholarTrack has a solid theme foundation (Zinc/Slate base + amber accent, taste-skill applied to 6 files) but suffers from **widespread interaction debt and layout inconsistency** across the remaining screens. The most critical issues are: flat card designs with no visual hierarchy, symmetric center-biased layouts everywhere, and missing loading/empty states. The 7 priority screens have significant room for improvement without touching business logic.
+MalumeScholarTrack has a solid theme foundation (Zinc/Slate base + amber accent, taste-skill applied to 6 files) but suffers from **widespread interaction debt and layout inconsistency** across the remaining screens. The most critical issues are: flat card designs with no visual hierarchy, symmetric center-biased layouts everywhere, and missing loading/empty states. The 7 priority screens have significant room for improvement without touching business logic.
 
 ---
 

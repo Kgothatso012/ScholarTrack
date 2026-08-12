@@ -1,4 +1,4 @@
-// ScholarTrack RegisterScreen — Design System: Dark SA Transport
+// MalumeScholarTrack RegisterScreen — Design System: Dark SA Transport
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, withSpring, FadeIn, Easing } from 'react-native-reanimated';
@@ -141,7 +141,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         password,
         options: {
           data: { full_name: name, role: selectedRole, consent_version: CONSENT_VERSION },
-          emailRedirectTo: 'scholartrack://confirm'
+          emailRedirectTo: 'malumescholartrack://confirm'
         }
       });
 
@@ -206,7 +206,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
         password,
         options: {
           data: { full_name: name, phone: phone || '', role: selectedRole },
-          emailRedirectTo: 'scholartrack://confirm'
+          emailRedirectTo: 'malumescholartrack://confirm'
         }
       });
 
@@ -261,7 +261,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
       await AsyncStorage.setItem('userName', name);
       await AsyncStorage.setItem('userEmail', pendingPhone);
       if (data.user) { await AsyncStorage.setItem('userId', data.user.id); }
-      Alert.alert('Success', 'Phone verified! Welcome to ScholarTrack.', [
+      Alert.alert('Success', 'Phone verified! Welcome to MalumeScholarTrack.', [
         { text: 'OK', onPress: () => { if (onLogin) { onLogin(selectedRole); } }}
       ]);
     } catch (error) {
@@ -442,7 +442,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
               <Ionicons name="arrow-back" size={20} color={C.text} />
             </TouchableOpacity>
             <Text style={s.headerTitle}>Create Account</Text>
-            <Text style={s.headerSub}>Join ScholarTrack SA</Text>
+            <Text style={s.headerSub}>Join MalumeScholarTrack SA</Text>
             <View style={s.headerBadge}>
               <BreathingDot color={C.success} size={7} />
               <Text style={s.headerBadgeText}>Get Started</Text>

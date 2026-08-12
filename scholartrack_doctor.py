@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scholartrack_doctor.py - Config + security + RLS invariant checker.
+malumescholartrack_doctor.py - Config + security + RLS invariant checker.
 
 Run before any release / PR / store submission. Catches the issues the
 brutal review flagged as production-blocking:
@@ -14,10 +14,10 @@ brutal review flagged as production-blocking:
   - AuthStack uses setState navigation instead of useNavigation
 
 Usage:
-    python3 scholartrack_doctor.py                # run all, exit 1 on any fail
-    python3 scholartrack_doctor.py --json         # machine-readable
-    python3 scholartrack_doctor.py --check X,Y    # named checks
-    python3 scholartrack_doctor.py --list         # available checks
+    python3 malumescholartrack_doctor.py                # run all, exit 1 on any fail
+    python3 malumescholartrack_doctor.py --json         # machine-readable
+    python3 malumescholartrack_doctor.py --check X,Y    # named checks
+    python3 malumescholartrack_doctor.py --list         # available checks
 """
 from __future__ import annotations
 
@@ -317,7 +317,7 @@ def check_two_services_dirs():
       C) src/services/  +  src/lib/services/  IF they don't re-export
          the same module (e.g. "auth" or "location").
 
-    This check rejects the historic ScholarTrack layout where
+    This check rejects the historic MalumeScholarTrack layout where
     src/lib/services/ (data) and src/services/ (device) both existed
     but were unclear, and warns if the same module name appears in both.
     """
@@ -415,7 +415,7 @@ def run_all(selected=None):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="ScholarTrack invariant checker")
+    ap = argparse.ArgumentParser(description="MalumeScholarTrack invariant checker")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--check", help="comma-separated check names")
     ap.add_argument("--list", action="store_true")
