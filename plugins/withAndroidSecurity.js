@@ -16,6 +16,7 @@
  * Release keystore env vars (set as EAS/CI secrets, never commit):
  *   SCHOLARTRACK_UPLOAD_KEYSTORE_PATH / SCHOLARTRACK_UPLOAD_STORE_PASSWORD
  *   SCHOLARTRACK_UPLOAD_KEY_ALIAS      / SCHOLARTRACK_UPLOAD_KEY_PASSWORD
+ *   SCHOLARTRACK_UPLOAD_KEYSTORE_B64   (EAS cloud builds — keystore as base64)
  */
 
 const {
@@ -33,6 +34,14 @@ function withSigning(config) {
     const releaseSign = `
     release {
         def ksPath = System.getenv('SCHOLARTRACK_UPLOAD_KEYSTORE_PATH') ?: findProperty('SCHOLARTRACK_UPLOAD_KEYSTORE_PATH')
+        // EAS cloud builds receive the keystore as a base64 secret instead of a file path.
+        def ksB64 = System.getenv('SCHOLARTRACK_UPLOAD_KEYSTORE_B64')
+        if ((ksPath == null || ksPath.toString().isEmpty()) && ksB64 != null && !ksB64.isEmpty()) {
+            def ksFile = new File(System.getProperty('java.io.tmpdir'), 'scholartrack-upload.keystore')
+            ksFile.bytes = ksB64.decodeBase64()
+            ksPath = ksFile.absolutePath
+            println 'MalumeScholarTrack: decoded upload keystore from SCHOLARTRACK_UPLOAD_KEYSTORE_B64'
+        }
         if (ksPath != null && !ksPath.toString().isEmpty() && new File(ksPath.toString()).exists()) {
             storeFile file(ksPath.toString())
             storePassword System.getenv('SCHOLARTRACK_UPLOAD_STORE_PASSWORD') ?: findProperty('SCHOLARTRACK_UPLOAD_STORE_PASSWORD') ?: ''
