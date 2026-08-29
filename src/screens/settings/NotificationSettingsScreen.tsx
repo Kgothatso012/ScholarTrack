@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationService } from '../../services/NotificationService';
 import { Spacer, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -78,7 +78,7 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,229,255,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    backBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     section: { padding: 16 },
@@ -87,10 +87,10 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(0,229,255,.3)' },
     statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
     statusLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.md },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'uppercase' },
     statusDesc: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 4, lineHeight: 18 },
-    enableBtn: { ...glass, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16, borderColor: `${C.accent}40` },
+    enableBtn: { ...glass, paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center', marginTop: 16, borderColor: `${C.accent}40` },
     enableBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.accent },
     settingCard: { padding: 0, overflow: 'visible' },
     settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
@@ -98,9 +98,9 @@ export default function NotificationSettingsScreen({ navigation }: Props) {
     settingLabel: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     settingDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     actionBtns: { flexDirection: 'row', gap: 12, marginTop: 20 },
-    outlineBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    outlineBtn: { flex: 1, paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: C.border },
     outlineBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.textSecondary },
-    primaryBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+    primaryBtn: { flex: 1, paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center' },
     primaryBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background },
     bottomPadding: { height: 50 },
   });

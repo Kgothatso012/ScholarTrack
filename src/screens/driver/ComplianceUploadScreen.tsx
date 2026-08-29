@@ -11,74 +11,11 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { documentService } from '../../lib/api';
 import { Spacer, SkeletonCard, Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 import { useAuth } from '../../lib/auth';
+import { validateRSAId, validatePDPNumber, validateSACellNumber, formatDate, getDaysUntilExpiry, getExpiryStatus, ExpiryStatus } from '../../lib/rsaValidation';
 
 const { colors: C } = getTheme('dark');
-
-// ============ RSA VALIDATION UTILITIES ============
-
-export function validateRSAId(idNumber: string): { valid: boolean; error?: string } {
-  if (!idNumber || idNumber.length !== 13) {
-    return { valid: false, error: 'RSA ID must be exactly 13 digits' };
-  }
-
-  if (!/^\d{13}$/.test(idNumber)) {
-    return { valid: false, error: 'ID must contain only numbers' };
-  }
-
-  const year = parseInt(idNumber.substring(0, 2));
-  const month = parseInt(idNumber.substring(2, 4));
-  const day = parseInt(idNumber.substring(4, 6));
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return { valid: false, error: 'Invalid date in ID number' };
-  }
-
-  let sum = 0;
-  let isEven = false;
-  for (let i = idNumber.length - 1; i >= 0; i--) {
-    let digit = parseInt(idNumber[i]);
-    if (isEven) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-    sum += digit;
-    isEven = !isEven;
-  }
-
-  if (sum % 10 !== 0) {
-    return { valid: false, error: 'Invalid ID checksum (Luhn validation failed)' };
-  }
-
-  return { valid: true };
-}
-
-export function validatePDPNumber(pdpNumber: string): { valid: boolean; error?: string } {
-  if (!pdpNumber) {
-    return { valid: false, error: 'PDP number is required' };
-  }
-
-  const clean = pdpNumber.replace(/\s/g, '').toUpperCase();
-  const pdpRegex = /^PDP\d{8}$/;
-  if (!pdpRegex.test(clean)) {
-    return { valid: false, error: 'PDP must be in format: PDP12345678 (8 digits after PDP)' };
-  }
-
-  return { valid: true };
-}
-
-export function validateSACellNumber(phone: string): { valid: boolean; error?: string } {
-  const clean = phone.replace(/\s/g, '').replace(/^\+27/, '0');
-  const saCellRegex = /^0[6-8]\d{8}$/;
-  if (!saCellRegex.test(clean)) {
-    return { valid: false, error: 'Invalid SA cell number (e.g., 0821234567)' };
-  }
-
-  return { valid: true };
-}
-
-// ============ FORM SCHEMA ============
 
 const complianceSchema = z.object({
   fullName: z.string().min(2, 'Full name required'),
@@ -112,6 +49,7 @@ interface ComplianceDocument {
   required: boolean;
   document?: UploadedDocument;
   expiryDate?: Date;
+  uploadStatus?: 'pending' | 'uploading' | 'done' | 'failed';
 }
 
 interface DriverCompliance {
@@ -208,25 +146,6 @@ export default function ComplianceUploadScreen
       setSelectedDay(1);
     }
     setShowDatePicker(docId);
-  };
-
-  const formatDate = (date?: Date) => {
-    if (!date) return null;
-    return date.toLocaleDateString('en-ZA', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
-
-  const getDaysUntilExpiry = (date?: Date) => {
-    if (!date) return null;
-    const today = new Date();
-    return Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  };
-
-  const getExpiryStatusColor = (date?: Date) => {
-    const days = getDaysUntilExpiry(date);
-    if (days === null) return C.textMuted;
-    if (days < 0) return C.error;
-    if (days <= 30) return C.accent;
-    return C.success;
   };
 
   const pickDocument = async (docId: string) => {
@@ -327,6 +246,7 @@ export default function ComplianceUploadScreen
       for (const doc of documents) {
         if (doc.document) {
           try {
+            setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploadStatus: 'uploading' } : d));
             const fileName = `driver/${user.id}/${doc.id}_${Date.now()}`;
             const { error: uploadError } = await supabase.storage
               .from('documents')
@@ -356,8 +276,10 @@ export default function ComplianceUploadScreen
               doc.expiryDate?.toISOString(),
             );
 
+            setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploadStatus: 'done' } : d));
             uploadedDocs.push({ id: doc.id, label: doc.label, name: doc.document.name, uploadedAt: doc.document.uploadedAt });
           } catch (uploadError) {
+            setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, uploadStatus: 'failed' } : d));
             failedDocs.push(doc.label);
           }
         }
@@ -412,7 +334,7 @@ export default function ComplianceUploadScreen
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.accent, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    backBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -429,7 +351,7 @@ export default function ComplianceUploadScreen
     inputGroup: { marginBottom: 16 },
     label: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.textSecondary, marginBottom: 6, letterSpacing: 0.3 },
     labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-    input: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
+    input: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: C.border, borderRadius: borderRadius.md, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     inputError: { borderColor: C.error, backgroundColor: 'rgba(255,61,90,.08)' },
     errorText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.error, marginTop: 4 },
     helperText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
@@ -439,23 +361,23 @@ export default function ComplianceUploadScreen
     docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
     docRequired: { color: C.error },
     docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
-    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,230,118,.1)', borderRadius: 12, padding: 14, marginTop: 12, borderWidth: 1, borderColor: `${C.success}40` },
+    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,230,118,.1)', borderRadius: borderRadius.md, padding: 14, marginTop: 12, borderWidth: 1, borderColor: `${C.success}40` },
     uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.success, marginLeft: 8 },
-    uploadedPreview: { flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: 'rgba(255,255,255,.03)', borderRadius: 10, padding: 8 },
-    previewImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: C.border },
+    uploadedPreview: { flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: 'rgba(255,255,255,.03)', borderRadius: borderRadius.md, padding: 8 },
+    previewImage: { width: 50, height: 50, borderRadius: borderRadius.sm, backgroundColor: C.border },
     previewInfo: { flex: 1, marginLeft: 10 },
     previewName: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.text },
     previewDate: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 2 },
     removeBtn: { padding: 8 },
     expiryContainer: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border },
     expiryLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textSecondary, marginBottom: 6 },
-    expiryBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,.03)', borderRadius: 10, padding: 10, borderWidth: 1 },
+    expiryBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,.03)', borderRadius: borderRadius.md, padding: 10, borderWidth: 1 },
     expiryBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textSecondary, marginLeft: 8 },
     expiryStatus: { marginTop: 4 },
     expiryStatusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '600' },
-    disclaimer: { flexDirection: 'row', padding: 16, marginHorizontal: 16, marginBottom: 16, backgroundColor: 'rgba(255,183,0,.06)', borderRadius: 12, borderLeftWidth: 3, borderLeftColor: C.accent },
+    disclaimer: { flexDirection: 'row', padding: 16, marginHorizontal: 16, marginBottom: 16, backgroundColor: 'rgba(255,183,0,.06)', borderRadius: borderRadius.md, borderLeftWidth: 3, borderLeftColor: C.accent },
     disclaimerText: { flex: 1, marginLeft: 10, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 18 },
-    submitBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: 14, marginBottom: 8 },
+    submitBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: borderRadius.lg, marginBottom: 8 },
     submitBtnDisabled: { opacity: 0.6 },
     submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background, marginLeft: 8 },
     bottomPadding: { height: 50 },
@@ -466,20 +388,20 @@ export default function ComplianceUploadScreen
     pickerColumn: { flex: 1, marginHorizontal: 4 },
     pickerLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textAlign: 'center', marginBottom: 8 },
     pickerScroll: { height: 160 },
-    pickerItem: { paddingVertical: 8, paddingHorizontal: 8, alignItems: 'center', borderRadius: 8 },
+    pickerItem: { paddingVertical: 8, paddingHorizontal: 8, alignItems: 'center', borderRadius: borderRadius.sm },
     pickerItemSelected: { backgroundColor: C.accent },
     pickerItemText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textSecondary },
     pickerItemTextSelected: { color: C.background, fontWeight: '600' },
     modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-    modalCancel: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.06)', marginRight: 8, alignItems: 'center' },
+    modalCancel: { flex: 1, padding: 12, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.06)', marginRight: 8, alignItems: 'center' },
     modalCancelText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
-    modalConfirm: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.accent, marginLeft: 8, alignItems: 'center' },
+    modalConfirm: { flex: 1, padding: 12, borderRadius: borderRadius.md, backgroundColor: C.accent, marginLeft: 8, alignItems: 'center' },
     modalConfirmText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background },
     successCard: { margin: 16, padding: 32, alignItems: 'center', marginTop: 40 },
     successTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8 },
     successText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
     submittedDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 8 },
-    viewDocsBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: 14, marginTop: 20 },
+    viewDocsBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: C.accent, marginHorizontal: 16, padding: 16, borderRadius: borderRadius.lg, marginTop: 20 },
     viewDocsBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background, marginLeft: 8 },
   });
 
@@ -544,7 +466,7 @@ export default function ComplianceUploadScreen
             <Ionicons name="arrow-back" size={18} color={C.text} />
           </TouchableOpacity>
           <View><Text style={s.ltTitle}>Driver Compliance</Text><Text style={s.ltSub}>Complete all required documents</Text></View>
-          <TouchableOpacity onPress={handleLogout} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,61,90,.15)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity onPress={handleLogout} style={{ width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,61,90,.15)', justifyContent: 'center', alignItems: 'center' }}>
             <Ionicons name="log-out-outline" size={18} color={C.error} />
           </TouchableOpacity>
         </View>
@@ -687,7 +609,8 @@ export default function ComplianceUploadScreen
           <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: -8, marginBottom: 16 }}>Upload clear photos or PDFs of each document</Text>
 
           {documents.map((doc) => {
-            const expiryColor = getExpiryStatusColor(doc.expiryDate);
+            const expiryStatus = getExpiryStatus(doc.expiryDate);
+            const expiryColor = expiryStatus === 'expired' ? C.error : expiryStatus === 'expiring' ? C.accent : expiryStatus === 'valid' ? C.success : C.textMuted;
             return (
               <Card key={doc.id} variant='glassAmber' style={s.docCard}>
                 <View style={s.cardTopRefraction} />
@@ -697,7 +620,11 @@ export default function ComplianceUploadScreen
                     <Text style={s.docDesc}>{doc.description}</Text>
                   </View>
                   {doc.document
-                    ? <Ionicons name="checkmark-circle" size={24} color={C.success} />
+                    ? doc.uploadStatus === 'uploading'
+                      ? <ActivityIndicator size="small" color={C.accent} />
+                      : doc.uploadStatus === 'failed'
+                        ? <Ionicons name="close-circle" size={24} color={C.error} />
+                        : <Ionicons name="checkmark-circle" size={24} color={C.success} />
                     : <Ionicons name="time-outline" size={20} color={C.accent} />
                   }
                 </View>

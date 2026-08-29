@@ -5,7 +5,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, borderRadius } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -51,23 +51,23 @@ export default function SafetyTipsScreen() {
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.45)', marginTop: spacing.xs },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.4)' },
-    headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     // SECTION
     section: { padding: spacing.lg },
     sectionLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.2)', marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
     // TIP CARD
     tipCard: {
       backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.08)',
-      borderRadius: 16, padding: 14, marginBottom: 8, flexDirection: 'row' as const, alignItems: 'flex-start' as const,
+      borderRadius: borderRadius.lg, padding: 14, marginBottom: 8, flexDirection: 'row' as const, alignItems: 'flex-start' as const,
     },
-    tipIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    tipIcon: { width: 44, height: 44, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
     tipInfo: { flex: 1, marginLeft: spacing.md },
     tipTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     tipDesc: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 2, lineHeight: 18 },
     // EMERGENCY CARD
     emergencyCard: {
       backgroundColor: 'rgba(255,61,90,.06)', borderWidth: 1, borderColor: 'rgba(255,61,90,.15)',
-      borderRadius: 16, padding: spacing.lg,
+      borderRadius: borderRadius.lg, padding: spacing.lg,
       borderTopWidth: 2, borderTopColor: 'rgba(255,61,90,.25)',
     },
     emergencyItem: { flexDirection: 'row' as const, alignItems: 'center', marginBottom: spacing.sm },
@@ -77,7 +77,7 @@ export default function SafetyTipsScreen() {
     warningBadge: {
       flexDirection: 'row' as const, alignItems: 'center', gap: spacing.sm,
       backgroundColor: 'rgba(255,183,0,.1)', borderWidth: 1, borderColor: 'rgba(255,183,0,.2)',
-      borderRadius: 14, paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+      borderRadius: borderRadius.lg, paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
       marginBottom: spacing.md,
     },
     warningText: { fontFamily: 'Syne_700Bold', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: C.accent, fontWeight: '600' },

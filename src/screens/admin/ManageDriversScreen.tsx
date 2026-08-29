@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { driverService, Driver } from '../../lib/api';
 import { Spacer, Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void };
@@ -69,7 +69,7 @@ const ManageDriversScreen = ({ navigation }: Props) => {
     statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    searchWrap: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 16, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, gap: 8 },
+    searchWrap: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 16, paddingHorizontal: 14, paddingVertical: 10, borderRadius: borderRadius.lg, gap: 8 },
     searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted },
     section: { padding: 16 },
@@ -84,11 +84,11 @@ const ManageDriversScreen = ({ navigation }: Props) => {
     driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     driverPhone: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     badgeRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
-    badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
+    badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: borderRadius.sm },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 9, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     skeletonCard: { height: 80, marginBottom: 10, borderRadius: 20 },
     paginationRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingHorizontal: 4 },
-    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
+    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: borderRadius.md, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
     pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.cyan },
     pageInfo: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },

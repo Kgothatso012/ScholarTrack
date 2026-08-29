@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { supabase, Profile, Driver, Child } from '../lib/api';
 import { ThemeColors } from '../context/ThemeContext';
 
-import { getTheme } from '../ui-plugin/theme';
+import { getTheme, borderRadius } from '../ui-plugin/theme';
 import { SkeletonCard } from '../ui-plugin/components';
 
 const { colors: C } = getTheme('dark');
@@ -355,14 +355,14 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   headerName: { fontSize: 18, fontWeight: 'bold', color: colors.text },
   headerRole: { fontSize: 12, color: colors.primary },
   messagesList: { padding: 15 },
-  messageBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 10 },
+  messageBubble: { maxWidth: '80%', padding: 12, borderRadius: borderRadius.lg, marginBottom: 10 },
   myMessage: { alignSelf: 'flex-end', backgroundColor: C.info },
   theirMessage: { alignSelf: 'flex-start', backgroundColor: colors.card },
   messageText: { fontSize: 15 },
   messageTime: { fontSize: 10, marginTop: 4 },
   inputContainer: { flexDirection: 'row', padding: 10, alignItems: 'flex-end' },
   input: { flex: 1, padding: 12, borderRadius: 20, fontSize: 15, maxHeight: 100, backgroundColor: colors.surface },
-  sendBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginLeft: 8, backgroundColor: C.primary },
+  sendBtn: { width: 44, height: 44, borderRadius: borderRadius.xl, justifyContent: 'center', alignItems: 'center', marginLeft: 8, backgroundColor: C.primary },
   convItem: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border },
   convAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
   convInfo: { flex: 1, marginLeft: 12 },
@@ -371,7 +371,7 @@ const styles = (colors: ThemeColors) => StyleSheet.create({
   convTime: { fontSize: 12 },
   convRole: { fontSize: 12, marginTop: 2 },
   convLast: { fontSize: 13, marginTop: 4 },
-  unreadBadge: { width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  unreadBadge: { width: 24, height: 24, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
   unreadText: { color: C.textInverse, fontSize: 12, fontWeight: 'bold' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 },
   emptyText: { fontSize: 18, fontWeight: '600', marginTop: 20 },

@@ -13,7 +13,7 @@ import { ratingService, DriverRatingSummary } from '../../lib/services/rating';
 import { linkingService } from '../../lib/services/linking';
 import { Driver, Trip, Payment } from '../../lib/services/types';
 import { Spacer, Badge, Skeleton, SpringTouchable, Card } from '../../ui-plugin/components';
-import { getTheme, typography } from '../../ui-plugin/theme';
+import { getTheme, typography, borderRadius } from '../../ui-plugin/theme';
 import { useAuth } from '../../lib/auth';
 
 if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -134,12 +134,12 @@ const DriverAppScreen = ({ navigation }: Props) => {
     ltTitle: { ...typography.displayMedium, color: C.text },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
     headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     verifiedRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 6, position: 'relative', zIndex: 1 },
     verifiedDot: { width: 8, height: 8, borderRadius: 4 },
     verifiedText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.6)' },
-    tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'rgba(0,230,118,.08)' },
-    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, gap: 6 },
+    tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: borderRadius.lg, padding: 4, borderWidth: 1, borderColor: 'rgba(0,230,118,.08)' },
+    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: borderRadius.md, gap: 6 },
     tabBtnActive: { backgroundColor: C.success },
     tabText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,.45)' },
     tabTextActive: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.background },
@@ -160,7 +160,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     ratingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     ratingLeft: { flexDirection: 'row', alignItems: 'center' },
-    ratingIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.3)' },
+    ratingIcon: { width: 52, height: 52, borderRadius: borderRadius.lg, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.3)' },
     ratingScore: { fontFamily: 'Syne_700Bold', fontSize: 32, fontWeight: '800', color: C.text, marginLeft: 14 },
     ratingMeta: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.45)', marginLeft: 14 },
     ratingRight: { alignItems: 'flex-end' },
@@ -170,7 +170,7 @@ const DriverAppScreen = ({ navigation }: Props) => {
     actionsLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: 1.2, marginLeft: 16, marginBottom: 8 },
     actionsDock: { paddingLeft: 16 },
     actionPill: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,230,118,.12)', borderRadius: 20, paddingVertical: 12, paddingHorizontal: 16, marginRight: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
-    actionPillIcon: { width: 28, height: 28, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+    actionPillIcon: { width: 28, height: 28, borderRadius: borderRadius.sm, justifyContent: 'center', alignItems: 'center' },
     actionPillText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text },
     // Section
     section: { paddingHorizontal: 16, paddingTop: 16 },
@@ -191,9 +191,9 @@ const DriverAppScreen = ({ navigation }: Props) => {
     reqChildMeta: { fontFamily: 'Syne_700Bold', fontSize: 13, color: 'rgba(255,255,255,.5)', marginTop: 3 },
     reqChildAddress: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.4)', marginTop: 4 },
     reqActions: { flexDirection: 'row', gap: 10, marginTop: 14 },
-    acceptBtn: { flex: 1, backgroundColor: C.success, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+    acceptBtn: { flex: 1, backgroundColor: C.success, borderRadius: borderRadius.md, paddingVertical: 12, alignItems: 'center' },
     acceptBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.background },
-    declineBtn: { flex: 1, backgroundColor: 'rgba(255,61,90,.15)', borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,61,90,.3)' },
+    declineBtn: { flex: 1, backgroundColor: 'rgba(255,61,90,.15)', borderRadius: borderRadius.md, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,61,90,.3)' },
     declineBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.error },
     bottomPadding: { height: 50 },
   });

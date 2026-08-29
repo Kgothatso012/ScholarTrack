@@ -92,13 +92,15 @@ export function getDaysUntilExpiry(date?: Date): number | null {
   return diffDays;
 }
 
-// Get expiry status color
-export function getExpiryStatusColor(date?: Date): string {
+// Get expiry status color (semantic key — map through theme at call site)
+export type ExpiryStatus = 'expired' | 'expiring' | 'valid' | 'none';
+
+export function getExpiryStatus(date?: Date): ExpiryStatus {
   const days = getDaysUntilExpiry(date);
-  if (days === null) return '#999999';
-  if (days < 0) return '#DC2626'; // error red
-  if (days <= 30) return '#D97706'; // primary amber
-  return '#059669'; // success green
+  if (days === null) return 'none';
+  if (days < 0) return 'expired';
+  if (days <= 30) return 'expiring';
+  return 'valid';
 }
 
 // Format date for display

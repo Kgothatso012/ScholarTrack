@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: _S, borderRadius: _BR } = getTheme('dark');
 
@@ -101,7 +101,7 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
-    searchWrap: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginBottom: 12, gap: 8 },
+    searchWrap: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: borderRadius.lg, marginBottom: 12, gap: 8 },
     searchInput: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     searchPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textMuted },
     paymentCard: { ...glass, padding: 14, marginBottom: 10 },
@@ -112,11 +112,11 @@ const AdminPaymentsScreen = ({ navigation }: Props) => {
     paymentId: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text },
     paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
     paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.primary },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm, marginTop: 4 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },
     paginationRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingHorizontal: 4 },
-    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
+    pageBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: borderRadius.md, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
     pageBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.cyan },
     pageInfo: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
     bottomPadding: { height: 50 },

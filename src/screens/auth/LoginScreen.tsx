@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, SpringTouchable } from '../../ui-plugin/components';
-import { spacing, getTheme } from '../../ui-plugin/theme';
+import { spacing, getTheme, borderRadius } from '../../ui-plugin/theme';
 
 interface Props {
   navigation: { goBack: () => void; navigate: (s: string) => void; onRegister?: () => void; onForgotPassword?: () => void };
@@ -214,7 +214,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4, letterSpacing: 0.5 },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: C.textMuted },
-    headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassCyanBorder, alignItems: 'center', justifyContent: 'center' },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassCyanBorder, alignItems: 'center', justifyContent: 'center' },
     // GLASS
     glass: { backgroundColor: C.glassBg, borderWidth: 1, borderColor: C.glassCyanBorder, borderRadius: 20, overflow: 'hidden' },
     glassRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: C.glassRefraction },
@@ -232,11 +232,11 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     formCard: { marginBottom: spacing.lg },
     welcomeText: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     subtitleText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg },
-    infoBox: { backgroundColor: `${C.cyan}10`, borderRadius: 14, padding: spacing.md, borderLeftWidth: 3, borderLeftColor: C.cyan, marginTop: spacing.sm },
+    infoBox: { backgroundColor: `${C.cyan}10`, borderRadius: borderRadius.lg, padding: spacing.md, borderLeftWidth: 3, borderLeftColor: C.cyan, marginTop: spacing.sm },
     infoTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.cyan, marginBottom: spacing.sm },
     infoText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginBottom: spacing.xs },
     // INPUT
-    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassBg, borderWidth: 1, borderColor: `${C.cyan}1F`, borderRadius: 14, paddingHorizontal: 14, marginBottom: 12, height: 50 },
+    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.glassBg, borderWidth: 1, borderColor: `${C.cyan}1F`, borderRadius: borderRadius.lg, paddingHorizontal: 14, marginBottom: 12, height: 50 },
     inputIcon: { marginRight: 10 },
     input: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 15, color: C.text },
     inputPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 15, color: C.textMuted },
@@ -246,7 +246,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     forgotText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.cyan, fontWeight: '600' },
     // LOGIN BTN — primary amber (taste-skill cyan for login CTA — distinct from amber used in password field)
     loginBtn: {
-      backgroundColor: C.cyan, borderRadius: 14, height: 52,
+      backgroundColor: C.cyan, borderRadius: borderRadius.lg, height: 52,
       justifyContent: 'center', alignItems: 'center',
       shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
     },
@@ -264,7 +264,7 @@ export default function LoginScreen({ navigation, onLogin, confirmationError, on
     modalOverlay: { flex: 1, backgroundColor: C.overlay, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
     modalCard: { backgroundColor: C.surfaceElevated, borderWidth: 1, borderColor: C.border, borderRadius: 24, padding: spacing.xl, width: '100%', maxWidth: 400, position: 'relative' },
     modalRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: C.glassRefraction },
-    modalClose: { position: 'absolute', top: spacing.md, right: spacing.md, width: 36, height: 36, borderRadius: 18, backgroundColor: C.glassBg, alignItems: 'center', justifyContent: 'center' },
+    modalClose: { position: 'absolute', top: spacing.md, right: spacing.md, width: 36, height: 36, borderRadius: borderRadius.xl, backgroundColor: C.glassBg, alignItems: 'center', justifyContent: 'center' },
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '800', color: C.text, marginTop: spacing.xl, marginBottom: spacing.xs },
     modalSub: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, marginBottom: spacing.lg },
     // SUCCESS

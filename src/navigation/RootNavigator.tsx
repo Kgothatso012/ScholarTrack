@@ -34,7 +34,7 @@ export function RootNavigator({
                 return <DriverStack />;
               case 'admin':
                 return <AdminStack />;
-              case 'parent-elder':
+              case 'parent':
                 return <ElderParentTabs />;
               default:
                 return <ElderParentTabs />;

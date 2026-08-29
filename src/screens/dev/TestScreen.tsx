@@ -18,7 +18,7 @@ import { locationService } from '../../services/location';
 import { notificationService, NotificationType } from '../../services/NotificationService';
 import { geofenceService } from '../../services/GeofenceService';
 import { supabase } from '../../lib/supabase';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -235,10 +235,10 @@ const s = StyleSheet.create({
   section: { fontSize: 14, fontWeight: '600', color: C.primary, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 24, marginBottom: 12 },
   testBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    borderWidth: 1.5, borderRadius: 12, padding: 14, marginBottom: 8,
+    borderWidth: 1.5, borderRadius: borderRadius.md, padding: 14, marginBottom: 8,
   },
   testBtnText: { fontSize: 16, fontWeight: '500' },
-  logBox: { backgroundColor: C.surface, borderRadius: 12, padding: 12, marginTop: 8, borderWidth: 1, borderColor: C.border },
+  logBox: { backgroundColor: C.surface, borderRadius: borderRadius.md, padding: 12, marginTop: 8, borderWidth: 1, borderColor: C.border },
   logLine: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
   logText: { fontSize: 13, color: C.textMuted, fontFamily: 'DMMono_400Regular' },
   logEmpty: { fontSize: 14, color: C.textMuted, fontStyle: 'italic' },

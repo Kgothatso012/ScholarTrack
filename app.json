@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MalumeScholarTrack",
-    "slug": "malumescholartrack-expo54",
+    "slug": "scholartrack-expo54",
     "version": "1.1.0",
     "scheme": "malumescholartrack",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1E3A5F"
+      "backgroundColor": "#0A0A0B"
     },
     "extra": {
       "eas": {
@@ -22,13 +22,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "notification": {
-      "icon": "./assets/notification-icon.png",
-      "color": "#1E3A5F",
-      "sounds": [
-        "./assets/sounds/school-bus-horn.wav"
-      ]
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.malumescholartrack.sa",
@@ -37,7 +30,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1E3A5F"
+        "backgroundColor": "#0A0A0B"
       },
       "package": "com.malumescholartrack.sa",
       "versionCode": 3,
@@ -45,7 +38,11 @@
         "googleMaps": {
           "apiKey": "AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-font",
@@ -56,6 +53,7 @@
     ],
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "owner": "kgothatso012"
   }
 }

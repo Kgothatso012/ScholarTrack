@@ -171,7 +171,7 @@ const ReviewDriverScreen = ({ navigation }: Props) => {
       ...glassCard,
       margin: spacing.lg,
       padding: spacing.xl,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       alignItems: 'center',
       position: 'relative' as const,
       overflow: 'hidden' as const,

@@ -27,7 +27,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { childrenService } from '../../lib/services/children';
 import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
-import { spacing, typography } from '../../ui-plugin/theme';
+import { spacing, typography, borderRadius } from '../../ui-plugin/theme';
 import { Spacer, Badge } from '../../ui-plugin/components';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -347,7 +347,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
     ltBack: {
       width: 32,
       height: 32,
-      borderRadius: 8,
+      borderRadius: borderRadius.sm,
       backgroundColor: 'rgba(255,255,255,.07)',
       borderWidth: 1,
       borderColor: 'rgba(255,255,255,.1)',
@@ -393,7 +393,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       borderColor: C.border,
       borderTopWidth: 3,
       borderTopColor: C.cyan,
-      borderRadius: 18,
+      borderRadius: borderRadius.xl,
       padding: 16,
       overflow: 'hidden',
     },
@@ -431,7 +431,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       borderColor: C.border,
       borderTopWidth: 2,
       borderTopColor: C.cyan,
-      borderRadius: 18,
+      borderRadius: borderRadius.xl,
       paddingVertical: 14,
       paddingHorizontal: 8,
       overflow: 'hidden',
@@ -440,7 +440,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
     qaCircle: {
       width: 44,
       height: 44,
-      borderRadius: 12,
+      borderRadius: borderRadius.md,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
@@ -453,7 +453,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
       paddingVertical: 13,
       borderWidth: 1.5,
       borderColor: C.border,
-      borderRadius: 12,
+      borderRadius: borderRadius.md,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row' as const,
@@ -483,7 +483,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
     modalStars: { flexDirection: 'row', gap: 8, marginBottom: 24 },
     modalStarBtn: { padding: 4 },
     modalBtns: { flexDirection: 'row', gap: 8, width: '100%' },
-    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: C.border, alignItems: 'center' },
+    modalBtn: { flex: 1, paddingVertical: 12, borderRadius: borderRadius.md, borderWidth: 1.5, borderColor: C.border, alignItems: 'center' },
     modalBtnText: { fontFamily: 'DMMono_400Regular', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' as const, color: C.textMuted },
     modalBtnPrimary: { backgroundColor: C.cyan, borderColor: C.cyan },
     modalBtnPrimaryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.background },
@@ -555,7 +555,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
           <Spacer size="lg" />
           <TouchableOpacity
             onPress={() => navigation.navigate('LinkChild')}
-            style={{ backgroundColor: C.cyan, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+            style={{ backgroundColor: C.cyan, paddingHorizontal: 24, paddingVertical: 12, borderRadius: borderRadius.md }}
           >
             <Text style={{ fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.background, letterSpacing: 1, textTransform: 'uppercase' }}>Link a Child</Text>
           </TouchableOpacity>

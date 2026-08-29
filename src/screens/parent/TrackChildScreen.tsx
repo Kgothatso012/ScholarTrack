@@ -35,7 +35,7 @@ import { driverTrackingService } from '../../lib/services/tripEnhanced';
 import { locationService } from '../../services/location';
 import { supabase } from '../../lib/supabase';
 
-import { Card, Button, Spacer, Badge, SkeletonMap } from '../../ui-plugin/components';
+import { Card, Button, Spacer, Badge, SkeletonMap, SkeletonTrackingCard } from '../../ui-plugin/components';
 import { spacing, typography, borderRadius, cards } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
@@ -286,7 +286,7 @@ export default function TrackChildScreen({ navigation }: Props) {
       borderBottomWidth: 4,
       borderBottomColor: C.accent,
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     content: { flex: 1 },
     contentPad: { padding: S.lg },
@@ -300,7 +300,7 @@ export default function TrackChildScreen({ navigation }: Props) {
     placeholderText: { ...typography.body, color: C.textMuted, textAlign: 'center' },
     infoCard: {
       ...glassCard,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.lg,
       marginBottom: S.md,
       position: 'relative' as const,
@@ -335,7 +335,7 @@ export default function TrackChildScreen({ navigation }: Props) {
     driverCard: {
       ...glassCard,
       marginHorizontal: S.lg,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.lg,
       marginBottom: S.md,
       position: 'relative' as const,
@@ -371,7 +371,7 @@ export default function TrackChildScreen({ navigation }: Props) {
     statusCard: {
       ...glassCard,
       marginHorizontal: S.lg,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.lg,
       marginBottom: S.md,
       position: 'relative' as const,
@@ -387,7 +387,7 @@ export default function TrackChildScreen({ navigation }: Props) {
       ...glassCard,
       marginHorizontal: S.lg,
       flexDirection: 'row',
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.md,
       justifyContent: 'space-around',
       position: 'relative' as const,
@@ -405,8 +405,11 @@ export default function TrackChildScreen({ navigation }: Props) {
           <Text style={styles.headerTitle}>Track Child</Text>
           <Text style={styles.headerSubtext}>Real-time location tracking</Text>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, padding: S.lg }}>
           <SkeletonMap />
+          <View style={{ marginTop: S.md }}>
+            <SkeletonTrackingCard />
+          </View>
         </View>
       </View>
     );

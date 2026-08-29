@@ -11,7 +11,7 @@ import { supabase } from '../../lib/supabase';
 import { EmergencyContact } from '../../lib/services/types';
 import { Spacer, Badge, Card } from '../../ui-plugin/components';
 import { RSA_EMERGENCY } from '../../constants/app';
-import { getTheme, typography } from '../../ui-plugin/theme';
+import { getTheme, typography, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -121,11 +121,11 @@ const EmergencyScreen = () => {
     section: { paddingHorizontal: 16, paddingTop: 20 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     quickDialItem: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
-    dialIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+    dialIcon: { width: 50, height: 50, borderRadius: borderRadius.lg, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     dialInfo: { flex: 1 },
     dialName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     dialNumber: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.success },
-    callBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+    callBtn: { width: 44, height: 44, borderRadius: borderRadius.xl, justifyContent: 'center', alignItems: 'center' },
     contactCard: { flexDirection: 'row', alignItems: 'center', padding: 14, marginBottom: 10, gap: 14 },
     contactAvatar: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,35,149,.3)' },
     contactInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.primary },

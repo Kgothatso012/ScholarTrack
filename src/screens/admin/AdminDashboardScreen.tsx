@@ -14,7 +14,7 @@ import Animated, {
 
 import { Spacer, Badge, Skeleton, Card } from '../../ui-plugin/components';
 import { SearchBar, Pagination } from '../../ui-plugin/components';
-import { getTheme, cards, typography } from '../../ui-plugin/theme';
+import { getTheme, cards, typography, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -153,16 +153,17 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 },
     headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.65)', marginTop: 4 },
-    headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', marginLeft: 8 },
-    tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,.08)' },
-    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, gap: 6 },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', marginLeft: 8 },
+    tabsOuter: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: borderRadius.lg, padding: 4, borderWidth: 1, borderColor: 'rgba(255,184,28,.08)' },
+    tabBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: borderRadius.md, gap: 6 },
     tabBtnActive: { backgroundColor: C.accent },
     tabText: { fontFamily: 'Syne_600SemiBold', fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,.45)' },
     tabTextActive: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.background },
     section: { paddingHorizontal: 16, paddingTop: 16 },
     sectionLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
-    statCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
+    statCardOuter: { width: '58%', paddingHorizontal: 4, paddingVertical: 4 },
+    statCardOuterNarrow: { width: '42%', paddingHorizontal: 4, paddingVertical: 4 },
     statCard: { paddingVertical: 18, paddingHorizontal: 16, position: 'relative', overflow: 'hidden' },
     statTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     statLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
@@ -174,7 +175,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
     quickGrid: { flexDirection: 'row', flexWrap: 'wrap' },
     quickCardOuter: { width: '50%', paddingHorizontal: 4, paddingVertical: 4 },
     quickCardInner: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
-    quickIconWrap: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+    quickIconWrap: { width: 40, height: 40, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     quickText: { fontFamily: 'Syne_600SemiBold', fontSize: 13, fontWeight: '600', color: C.text },
     searchWrap: { marginBottom: 12 },
     sortRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
@@ -290,7 +291,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
           {/* Stats */}
           <View style={s.statsGrid}>
             {stats.map((stat, index) => (
-              <View key={index} style={s.statCardOuter}>
+              <View key={index} style={index % 4 < 2 ? s.statCardOuter : s.statCardOuterNarrow}>
                 <Card variant='glassAmber' style={s.statCard}>
                   <View style={s.statCardTopRefraction} />
                   <View style={[s.statCardLeftBar, { backgroundColor: stat.positive !== false ? 'rgba(255,183,0,.6)' : 'rgba(255,61,90,.6)' }]} />
@@ -314,7 +315,7 @@ export default function AdminDashboardScreen({ navigation }: Props) {
                 </SpringTouchable>
               </View>
               {quickActions.slice(1).map((action, index) => (
-                <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()} style={{ width: '48%' }}>
+                <Animated.View key={index} entering={FadeIn.delay(index * 60).springify()} style={{ width: '42%' }}>
                   <SpringTouchable onPress={() => navigation.navigate(action.route)} style={s.quickCardInner}>
                     <View style={[s.quickIconWrap, { backgroundColor: `${action.color}20`, borderColor: `${action.color}40` }]}>
                       <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.color} />

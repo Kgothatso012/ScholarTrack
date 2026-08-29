@@ -101,7 +101,7 @@ const childAvatarStyle = (index: number) => ({
 
 const actionBtnStyle = (color: string) => ({
   ...glassCardBase,
-  width: '48%' as const,
+  width: '56%' as const,
   borderRadius: borderRadius.lg,
   padding: spacing.md,
   marginBottom: spacing.sm,
@@ -192,7 +192,7 @@ export default function ChildrenScreen({ navigation }: Props) {
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     addBtn: {
       ...glassCardBase,
@@ -326,7 +326,7 @@ export default function ChildrenScreen({ navigation }: Props) {
             <SpringTouchable
               key={i}
               onPress={() => navigation?.navigate?.(action.route)}
-              style={actionBtnStyle(action.color)}
+              style={[actionBtnStyle(action.color), i % 2 === 1 && { width: '40%' }]}
             >
               <Ionicons name={action.icon as any} size={24} color={action.color} />
               <Text style={styles.actionText}>{action.name}</Text>

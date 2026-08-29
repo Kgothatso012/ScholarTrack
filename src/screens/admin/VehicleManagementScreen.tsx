@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S, borderRadius: BR } = getTheme('dark');
 
@@ -77,7 +77,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
     statCard: { flex: 1, paddingVertical: 18, alignItems: 'center' },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.accent },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    addBtn: { marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 14, backgroundColor: C.primary, gap: 8 },
+    addBtn: { marginHorizontal: 16, marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: borderRadius.lg, backgroundColor: C.primary, gap: 8 },
     addBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, letterSpacing: 0.5 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
@@ -86,7 +86,7 @@ export default function VehicleManagementScreen({ navigation }: Props) {
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(245,158,11,.6)' },
     vehicleHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
     vehiclePlate: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     vehicleDetails: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     vehicleDetail: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
@@ -95,9 +95,9 @@ export default function VehicleManagementScreen({ navigation }: Props) {
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 },
     modalContent: { padding: 24, borderRadius: 24 },
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 20 },
-    modalBtn: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
+    modalBtn: { paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: 10 },
     modalBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background },
-    modalBtnSecondary: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    modalBtnSecondary: { paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: C.border },
     modalBtnSecondaryText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.textMuted },
     bottomPadding: { height: 50 },
   });

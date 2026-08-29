@@ -145,7 +145,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
       borderBottomWidth: 1,
       borderBottomColor: C.border,
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: spacing.xs },
     section: { padding: spacing.lg },
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: spacing.md },
@@ -170,7 +170,7 @@ export default function PaymentDetailsScreen({ navigation }: Props) {
     methodIcon: {
       width: 40,
       height: 40,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       backgroundColor: C.accent + '20',
       justifyContent: 'center',
       alignItems: 'center',

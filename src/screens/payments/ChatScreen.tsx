@@ -51,7 +51,7 @@ export default function ChatScreen({ navigation }: Props) {
       flexDirection: 'row',
       alignItems: 'center',
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
     emptyTitle: { ...typography.h4, color: C.text, marginTop: spacing.md },
     emptyText: { ...typography.body, color: C.textMuted, textAlign: 'center', marginTop: spacing.sm },

@@ -1,5 +1,5 @@
 // Settings Screen — Design System: Dark SA Transport
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Linking, RefreshControl, TextInput, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
 import { Spacer, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 import { useAuth } from '../../lib/auth';
 
 const { colors: C } = getTheme('dark');
@@ -79,6 +79,8 @@ export default function SettingsScreen
     AsyncStorage.setItem('prefs_privacy', JSON.stringify(privacy)).catch(() => {});
     AsyncStorage.setItem('prefs_appSettings', JSON.stringify(appSettings)).catch(() => {});
   }, [notifications, privacy, appSettings]);
+  const [refreshing, setRefreshing] = useState(false);
+
   const loadUserProfile = async () => {
     try {
       const name = await AsyncStorage.getItem('userName');
@@ -89,6 +91,12 @@ export default function SettingsScreen
       setEditProfile({ name: name || '', phone: phone || '' });
     } catch (error) { /* silent */ }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUserProfile();
+    setRefreshing(false);
+  }, []);
 
   const handleSaveProfile = async () => {
     try {
@@ -164,7 +172,7 @@ export default function SettingsScreen
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     section: { paddingHorizontal: 16, paddingTop: 20 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     profileCard: { ...glass, padding: 16, flexDirection: 'row', alignItems: 'center' },
@@ -174,7 +182,7 @@ export default function SettingsScreen
     profileInfo: { flex: 1, marginLeft: 14 },
     profileName: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
     profileEmail: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 2 },
-    badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
+    badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm, marginTop: 6, alignSelf: 'flex-start' },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'capitalize' },
     settingCard: { padding: 0, overflow: 'visible' },
     settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
@@ -184,7 +192,7 @@ export default function SettingsScreen
     settingRowBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border },
     settingRowBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     themeRow: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 8 },
-    themeOption: { alignItems: 'center', padding: 12, borderRadius: 14, gap: 6 },
+    themeOption: { alignItems: 'center', padding: 12, borderRadius: borderRadius.lg, gap: 6 },
     themeIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
     themeLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
     dangerBtn: { ...glass, padding: 16, marginHorizontal: 16, marginTop: 20, alignItems: 'center', borderColor: 'rgba(255,61,90,.3)' },
@@ -193,11 +201,11 @@ export default function SettingsScreen
     modalContent: { ...glass, padding: 24, width: '85%', borderRadius: 24 },
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginBottom: 20 },
     inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.accent, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-    input: { ...glass, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, marginBottom: 16, borderColor: C.border },
+    input: { ...glass, borderRadius: borderRadius.md, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, marginBottom: 16, borderColor: C.border },
     modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
-    saveBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+    saveBtn: { flex: 1, paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center' },
     saveBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background },
-    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: C.border },
+    cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 1, borderColor: C.border },
     cancelBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.textMuted },
     bottomPadding: { height: 50 },
   });
@@ -228,7 +236,7 @@ export default function SettingsScreen
     <ScrollView
       style={s.container}
       showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={false} onRefresh={loadUserProfile} tintColor={C.accent} colors={[C.accent]} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} colors={[C.accent]} />}
     >
 
 

@@ -168,7 +168,7 @@ export default function ParentDocumentsScreen({ navigation }: Props) {
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSub: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     progressCard: {
       ...glassCard,

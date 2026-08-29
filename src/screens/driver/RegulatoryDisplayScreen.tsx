@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -54,7 +54,7 @@ const regulatoryInfo = {
     infoCard: { padding: 16, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-    infoRowIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    infoRowIcon: { width: 36, height: 36, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
     infoContent: { flex: 1, marginLeft: 12 },
     infoLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     infoValue: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.text, marginTop: 2 },
@@ -68,7 +68,7 @@ const regulatoryInfo = {
     contactContent: { marginLeft: 12 },
     contactLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase' },
     contactNumber: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.text },
-    legalNotice: { marginHorizontal: 16, marginTop: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    legalNotice: { marginHorizontal: 16, marginTop: 16, marginBottom: 24, padding: 14, borderRadius: borderRadius.lg, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
     legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     bottomPadding: { height: 50 },
   });

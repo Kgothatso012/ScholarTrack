@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { tripService, Trip } from '../../lib/api';
 import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -83,8 +83,8 @@ const TripScreen = ({ navigation }: Props) => {
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '700', color: C.primary },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     tripActions: { padding: 16 },
-    startBtn: { backgroundColor: C.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
-    endBtn: { backgroundColor: C.error, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: 14, gap: 10 },
+    startBtn: { backgroundColor: C.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: borderRadius.lg, gap: 10 },
+    endBtn: { backgroundColor: C.error, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 16, borderRadius: borderRadius.lg, gap: 10 },
     btnText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.background },
     noTripCard: { marginHorizontal: 16, marginTop: 16, padding: 24, alignItems: 'center' },
     noTripText: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '600', color: C.text, marginTop: 10 },
@@ -96,7 +96,7 @@ const TripScreen = ({ navigation }: Props) => {
     tripInfo: { flex: 1 },
     tripName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     tripTime: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
-    tripStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    tripStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.md },
     tripStatusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'capitalize' },
     quickActions: { flexDirection: 'row', justifyContent: 'space-around' },
     quickAction: { ...glass, padding: 16, alignItems: 'center', flex: 1, marginHorizontal: 4 },

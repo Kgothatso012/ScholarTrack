@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing, getTheme } from '../../ui-plugin/theme';
+import { spacing, getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -114,7 +114,7 @@ export default function OnboardingScreen({ onComplete }: Props) {
     },
     brand: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     brandDot: { color: C.cyan },
-    skipBtn: { paddingVertical: S.sm, paddingHorizontal: S.md, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    skipBtn: { paddingVertical: S.sm, paddingHorizontal: S.md, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
     skipText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
     // SLIDE
     slide: { width, flex: 1, justifyContent: 'center', alignItems: 'center', padding: S.xl },
@@ -142,12 +142,12 @@ export default function OnboardingScreen({ onComplete }: Props) {
       justifyContent: 'space-between',
     },
     backBtn: {
-      width: 48, height: 48, borderRadius: 16,
+      width: 48, height: 48, borderRadius: borderRadius.lg,
       backgroundColor: 'rgba(255,255,255,.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)',
       justifyContent: 'center', alignItems: 'center',
     },
     nextBtn: {
-      backgroundColor: C.cyan, borderRadius: 16, height: 52, paddingHorizontal: S.xl,
+      backgroundColor: C.cyan, borderRadius: borderRadius.lg, height: 52, paddingHorizontal: S.xl,
       justifyContent: 'center', alignItems: 'center',
       flexDirection: 'row', gap: 8,
       shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,

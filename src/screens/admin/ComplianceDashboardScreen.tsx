@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -181,12 +181,12 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    backBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    refreshBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    refreshBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
     statsGrid: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    statCard: { flex: 1, borderRadius: borderRadius.lg, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
     statIcon: { marginBottom: 6 },
     statNumber: { fontFamily: 'Syne_700Bold', fontSize: 30, fontWeight: '800', color: C.text },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 9, color: 'rgba(255,255,255,.8)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
@@ -200,11 +200,11 @@ export default function ComplianceDashboardScreen({ navigation }: Props) {
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12 },
     driverCard: { ...glass, padding: 16, marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
-    driverAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.2)' },
+    driverAvatar: { width: 44, height: 44, borderRadius: borderRadius.xl, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,183,0,.2)' },
     driverInitial: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '800', color: C.warning },
     driverInfo: { flex: 1, marginLeft: 12 },
     driverName: { fontFamily: 'Syne_600SemiBold', fontSize: 14, fontWeight: '600', color: C.text },
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginTop: 4 },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.md, marginTop: 4 },
     badgeText: { fontFamily: 'DMMono_400Regular', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'uppercase' },
     emptyState: { alignItems: 'center', padding: 40 },
     emptyIcon: { marginBottom: 12 },

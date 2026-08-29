@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -94,7 +94,7 @@ export default function TripHistoryScreen() {
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
     filters: { flexDirection: 'row', marginHorizontal: 16, marginTop: 16, padding: 6 },
-    filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 12, marginHorizontal: 3 },
+    filterBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: borderRadius.md, marginHorizontal: 3 },
     filterActive: { backgroundColor: C.accent },
     filterText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.textMuted },
     filterTextActive: { color: C.background },
@@ -104,7 +104,7 @@ export default function TripHistoryScreen() {
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     tripHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
     tripDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     tripRoute: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text, marginBottom: 8 },
     tripDetails: { flexDirection: 'row', justifyContent: 'space-between' },

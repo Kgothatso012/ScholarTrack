@@ -5,7 +5,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, w
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { spacing } from '../../ui-plugin/theme';
+import { spacing, borderRadius } from '../../ui-plugin/theme';
 import { getTheme } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
@@ -29,7 +29,7 @@ const BreathingDot = ({ color = C.success, size = 8 }: { color?: string; size?: 
 
 // Contact card pill
 const contactCardBase = {
-  backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderRadius: 16, padding: 14,
+  backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderRadius: borderRadius.lg, padding: 14,
   marginBottom: 8, flexDirection: 'row' as const, alignItems: 'center' as const,
 };
 
@@ -74,26 +74,26 @@ export default function SupportScreen({ navigation }: { navigation?: { goBack?: 
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: 'rgba(255,255,255,.45)', marginTop: spacing.xs },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     headerBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)' },
-    headerBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
+    headerBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     // SECTION
     section: { padding: spacing.lg },
     sectionLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.2)', marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
     // CONTACT
-    contactCard: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.08)', borderRadius: 16, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
-    contactIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+    contactCard: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.08)', borderRadius: borderRadius.lg, padding: 14, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
+    contactIcon: { width: 44, height: 44, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
     contactInfo: { flex: 1, marginLeft: spacing.md },
     contactTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     contactSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
     contactArrow: { opacity: 0.4 },
     // FAQ
-    faqCard: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.08)', borderRadius: 16, padding: 14, marginBottom: 8, overflow: 'hidden' },
+    faqCard: { backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(0,229,255,.08)', borderRadius: borderRadius.lg, padding: 14, marginBottom: 8, overflow: 'hidden' },
     faqHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     faqQuestion: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text, flex: 1, marginRight: spacing.sm },
     faqAnswer: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: spacing.sm, lineHeight: 18 },
     // REPORT BTN
     reportBtn: {
       backgroundColor: 'rgba(255,61,90,.15)', borderWidth: 1, borderColor: 'rgba(255,61,90,.3)',
-      borderRadius: 16, padding: spacing.lg, marginTop: spacing.md, flexDirection: 'row',
+      borderRadius: borderRadius.lg, padding: spacing.lg, marginTop: spacing.md, flexDirection: 'row',
       alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
     },
     reportBtnText: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '700', color: C.error },

@@ -87,7 +87,7 @@ const driverAvatarStyle = (index: number) => ({
 const childAvatarStyle = (color: string) => ({
   width: 44,
   height: 44,
-  borderRadius: 22,
+  borderRadius: borderRadius.xl,
   backgroundColor: color + '30',
   borderWidth: 1.5,
   borderColor: color,
@@ -203,7 +203,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
       borderBottomWidth: 4,
       borderBottomColor: C.accent,
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     searchContainer: {
       ...glassCard,
@@ -218,7 +218,7 @@ const HireDriverScreen = ({ navigation }: Props) => {
     sectionTitle: { ...typography.h3, color: C.text, marginBottom: S.md },
     driverCard: {
       ...glassCard,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.lg,
       marginBottom: S.md,
       position: 'relative' as const,

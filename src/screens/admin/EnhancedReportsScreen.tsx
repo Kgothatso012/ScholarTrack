@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Spacer, DashboardSkeleton, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -183,15 +183,16 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
     ltHeader: { backgroundColor: C.surface, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.warning, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    backBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    exportBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    exportBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
     content: { padding: 16 },
     sectionTitle: { fontFamily: 'DMMono_400Regular', fontSize: 9, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(255,255,255,.25)', marginBottom: 12, marginTop: 8 },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    statCard: { width: '48%', padding: 14, alignItems: 'center', borderColor: 'rgba(255,255,255,.08)' },
-    statIcon: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+    statCard: { width: '58%', padding: 14, alignItems: 'flex-start', borderColor: 'rgba(255,255,255,.08)' },
+    statCardNarrow: { width: '42%', padding: 14, alignItems: 'flex-start', borderColor: 'rgba(255,255,255,.08)' },
+    statIcon: { width: 44, height: 44, borderRadius: borderRadius.xl, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
     statValue: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text },
     statLabel: { fontFamily: 'DMMono_400Regular', fontSize: 10, color: C.textMuted, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
     chartCard: { padding: 16, marginTop: 8, position: 'relative', overflow: 'hidden' },
@@ -287,7 +288,7 @@ export default function EnhancedReportsScreen({ navigation }: Props) {
             { title: 'Completed Trips', value: reportData?.completedTrips || 0, icon: 'navigate', color: C.warning },
             { title: 'Revenue', value: `R${(reportData?.totalRevenue || 0).toLocaleString()}`, icon: 'cash', color: C.error },
           ].map((stat, i) => (
-            <Card variant='glassAmber' key={i} style={s.statCard}>
+            <Card variant='glassAmber' key={i} style={i % 4 < 2 ? s.statCard : s.statCardNarrow}>
               <View style={[s.statIcon, { backgroundColor: `${stat.color}18` }]}>
                 <Ionicons name={stat.icon as keyof typeof Ionicons.glyphMap} size={22} color={stat.color} />
               </View>

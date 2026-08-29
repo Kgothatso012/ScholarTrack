@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Spacer } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -77,13 +77,13 @@ export default function DriverVerificationScreen() {
     driverInfo: { flex: 1, marginLeft: 12 },
     driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     driverMeta: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     verifyList: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: C.border },
     verifyItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 10 },
     verifyText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, flex: 1 },
     verifyLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
-    verifyBtn: { paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 4 },
+    verifyBtn: { paddingVertical: 12, borderRadius: borderRadius.md, alignItems: 'center', marginTop: 4 },
     verifyBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     driverExtra: { marginTop: 8, gap: 6 },
     extraRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

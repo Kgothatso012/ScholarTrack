@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { CONSENT_VERSION, PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
-import { spacing, getTheme } from '../../ui-plugin/theme';
+import { spacing, getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -51,14 +51,14 @@ const RoleCard = ({ role, selected, onPress }: { role: { id: string; name: strin
     backgroundColor: selected ? 'rgba(255,183,0,.08)' : 'rgba(255,255,255,.04)',
     borderWidth: 1,
     borderColor: selected ? 'rgba(255,183,0,.4)' : 'rgba(255,255,255,.08)',
-    borderRadius: 16,
+    borderRadius: borderRadius.lg,
     padding: 14,
     marginBottom: 8,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
   };
   const iconStyle = {
-    width: 44, height: 44, borderRadius: 12,
+    width: 44, height: 44, borderRadius: borderRadius.md,
     backgroundColor: selected ? 'rgba(255,183,0,.2)' : 'rgba(255,255,255,.06)',
     borderWidth: 1,
     borderColor: selected ? 'rgba(255,183,0,.35)' : 'rgba(255,255,255,.08)',
@@ -297,7 +297,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
     },
     headerGlow1: { position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,183,0,.06)' },
     headerGlow2: { position: 'absolute', bottom: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(0,35,149,.1)' },
-    backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', justifyContent: 'center', alignItems: 'center', marginBottom: S.md },
+    backBtn: { width: 40, height: 40, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', justifyContent: 'center', alignItems: 'center', marginBottom: S.md },
     headerTitle: { fontFamily: 'Syne_700Bold', fontSize: 26, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     headerSub: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.primary, marginTop: S.xs },
     headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: S.sm },
@@ -306,19 +306,19 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
     form: { padding: S.lg, flex: 1 },
     sectionLabel: { fontFamily: 'Syne_700Bold', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,.2)', marginBottom: S.sm, marginTop: S.md },
     // AUTH TOGGLE
-    authToggle: { flexDirection: 'row' as const, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: 14, padding: 4, marginBottom: S.md, borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
+    authToggle: { flexDirection: 'row' as const, backgroundColor: 'rgba(255,255,255,.04)', borderRadius: borderRadius.lg, padding: 4, marginBottom: S.md, borderWidth: 1, borderColor: 'rgba(255,255,255,.08)' },
     authToggleBtn: { flex: 1, flexDirection: 'row' as const, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 11, gap: 6 },
     authToggleActive: { backgroundColor: C.primary },
     authToggleText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600' as const, color: C.textMuted },
     authToggleTextActive: { color: C.background },
     // INPUT
-    inputWrap: { flexDirection: 'row' as const, alignItems: 'center', backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(255,183,0,.1)', borderRadius: 14, paddingHorizontal: 14, marginBottom: 12, height: 52 },
+    inputWrap: { flexDirection: 'row' as const, alignItems: 'center', backgroundColor: 'rgba(255,255,255,.04)', borderWidth: 1, borderColor: 'rgba(255,183,0,.1)', borderRadius: borderRadius.lg, paddingHorizontal: 14, marginBottom: 12, height: 52 },
     inputIcon: { marginRight: 10 },
     input: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 15, color: C.text },
     inputPlaceholder: { fontFamily: 'Syne_700Bold', fontSize: 15, color: C.textMuted },
     // REGISTER BTN
     registerBtn: {
-      backgroundColor: C.primary, borderRadius: 14, height: 52,
+      backgroundColor: C.primary, borderRadius: borderRadius.lg, height: 52,
       justifyContent: 'center', alignItems: 'center', marginTop: S.md,
       shadowColor: C.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
     },
@@ -336,7 +336,7 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
     otpContainer: { flexDirection: 'row' as const, justifyContent: 'center', marginVertical: S.xl },
     otpInput: {
       width: 48, height: 54, borderWidth: 1, borderColor: 'rgba(255,183,0,.3)',
-      borderRadius: 12, marginHorizontal: 4, fontFamily: 'Syne_700Bold', fontSize: 22,
+      borderRadius: borderRadius.md, marginHorizontal: 4, fontFamily: 'Syne_700Bold', fontSize: 22,
       fontWeight: '700', color: C.text, textAlign: 'center' as const,
       backgroundColor: 'rgba(255,255,255,.04)',
     },

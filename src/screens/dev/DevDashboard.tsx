@@ -104,7 +104,7 @@ const DevDashboard = ({ navigation }: Props) => {
     },
     statusLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     statusIconBox: {
-      width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
+      width: 32, height: 32, borderRadius: borderRadius.lg, alignItems: 'center', justifyContent: 'center',
     },
     statusLabel: { fontFamily: 'DMMono_400Regular', fontSize: 12, color: C.textSecondary },
     statusValue: { fontFamily: 'Syne_600SemiBold', fontSize: 12, color: C.text },
@@ -115,7 +115,7 @@ const DevDashboard = ({ navigation }: Props) => {
     },
     actionBtnText: { fontFamily: 'Syne_600SemiBold', fontSize: 14, color: C.text },
     dangerBtn: {
-      borderRadius: 14, paddingVertical: spacing.md, marginBottom: spacing.sm,
+      borderRadius: borderRadius.lg, paddingVertical: spacing.md, marginBottom: spacing.sm,
       backgroundColor: 'rgba(255,61,90,.10)',
       borderWidth: 1, borderColor: 'rgba(255,61,90,.15)',
     },

@@ -14,7 +14,7 @@ import {
   validateSACellNumber,
   validatePDPNumber,
   getDaysUntilExpiry,
-  getExpiryStatusColor,
+  getExpiryStatus,
   formatDate,
 } from '../src/lib/rsaValidation';
 
@@ -202,28 +202,27 @@ describe('Expiry Date Calculations', () => {
     });
   });
 
-  describe('getExpiryStatusColor', () => {
-    test('returns gray for null date', () => {
-      expect(getExpiryStatusColor(undefined)).toBe('#999999');
+  describe('getExpiryStatus', () => {
+    test('returns none for null date', () => {
+      expect(getExpiryStatus(undefined)).toBe('none');
     });
 
-    test('returns red for expired date', () => {
+    test('returns expired for past date', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 5);
-      const result = getExpiryStatusColor(pastDate);
-      expect(result).toBe('#DC2626'); // error red
+      expect(getExpiryStatus(pastDate)).toBe('expired');
     });
 
-    test('returns yellow for date within 30 days', () => {
+    test('returns expiring for date within 30 days', () => {
       const soonDate = new Date();
       soonDate.setDate(soonDate.getDate() + 15);
-      expect(getExpiryStatusColor(soonDate)).toBe('#D97706'); // primary amber
+      expect(getExpiryStatus(soonDate)).toBe('expiring');
     });
 
-    test('returns green for date beyond 30 days', () => {
+    test('returns valid for date beyond 30 days', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 60);
-      expect(getExpiryStatusColor(futureDate)).toBe('#059669'); // success green
+      expect(getExpiryStatus(futureDate)).toBe('valid');
     });
   });
 

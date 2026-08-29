@@ -261,7 +261,7 @@ export default function LinkChildScreen({ navigation }: Props) {
       borderBottomColor: C.accent,
     },
     backBtn: { padding: S.xs },
-    headerTitle: { flex: 1, ...typography.h3, color: C.text, marginLeft: S.sm },
+    headerTitle: { flex: 1, ...typography.h2, color: C.text, marginLeft: S.sm },
     addBtn: { padding: S.xs },
     loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
@@ -278,7 +278,7 @@ export default function LinkChildScreen({ navigation }: Props) {
     list: { padding: S.lg },
     childCard: {
       ...glassCard,
-      borderRadius: 20,
+      borderRadius: borderRadius.card,
       padding: S.lg,
       marginBottom: S.md,
       position: 'relative' as const,

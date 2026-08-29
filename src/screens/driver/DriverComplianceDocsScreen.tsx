@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -146,21 +146,21 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
     scoreTitle: { fontFamily: 'Syne_700Bold', fontSize: 16, fontWeight: '700', color: C.text },
     scoreSubtitle: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted, marginTop: 4 },
     warningText: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.error, marginTop: 6, fontWeight: '600' },
-    legalBox: { marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: 14, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    legalBox: { marginHorizontal: 16, marginTop: 12, padding: 14, borderRadius: borderRadius.lg, backgroundColor: 'rgba(71,85,105,.1)', borderWidth: 1, borderColor: 'rgba(71,85,105,.3)', flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
     legalText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     section: { padding: 16 },
     sectionTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, marginBottom: 12, letterSpacing: 0.5 },
     docCard: { padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center' },
     docTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.1)' },
-    docIcon: { width: 50, height: 50, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+    docIcon: { width: 50, height: 50, borderRadius: borderRadius.lg, justifyContent: 'center', alignItems: 'center' },
     docInfo: { flex: 1, marginLeft: 12 },
     docHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     docName: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text, flex: 1 },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
     docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
     expiryText: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
-    uploadBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: C.success, gap: 10 },
+    uploadBtn: { marginHorizontal: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: borderRadius.lg, backgroundColor: C.success, gap: 10 },
     uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.background, letterSpacing: 0.5 },
     bottomPadding: { height: 50 },
   });
@@ -176,7 +176,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>SA Transport Requirements</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: borderRadius.md, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>

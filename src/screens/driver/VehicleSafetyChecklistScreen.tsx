@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshCon
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -110,24 +110,24 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
+    ltBack: { width: 32, height: 32, borderRadius: borderRadius.sm, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     progressCard: { marginHorizontal: 16, marginTop: 16, padding: 16 },
     progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
     progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
     progressText: { fontFamily: 'Syne_700Bold', fontSize: 12, marginTop: 8, textAlign: 'center', color: C.textMuted },
     categorySection: { marginTop: 16, paddingHorizontal: 16 },
     categoryTitle: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.primary, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
-    checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 14, padding: 14, marginBottom: 8 },
+    checkItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: borderRadius.lg, padding: 14, marginBottom: 8 },
     checkItemChecked: { borderColor: 'rgba(52,211,153,.3)', backgroundColor: 'rgba(52,211,153,.06)' },
     itemIcon: { marginHorizontal: 10 },
     itemText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text },
     itemTextChecked: { color: C.success, fontWeight: '600' },
     buttonContainer: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginTop: 8, marginBottom: 16 },
-    resetBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.card, paddingVertical: 15, borderRadius: 14, borderWidth: 1, borderColor: C.border, gap: 8 },
+    resetBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.card, paddingVertical: 15, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: C.border, gap: 8 },
     resetBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.textMuted },
-    submitBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.success, paddingVertical: 15, borderRadius: 14, gap: 8 },
+    submitBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: C.success, paddingVertical: 15, borderRadius: borderRadius.lg, gap: 8 },
     submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 1, textTransform: 'uppercase' },
-    noticeBox: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 24, padding: 14, borderRadius: 14, backgroundColor: 'rgba(34,211,238,.05)', borderWidth: 1, borderColor: 'rgba(34,211,238,.15)', alignItems: 'flex-start', gap: 10 },
+    noticeBox: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 24, padding: 14, borderRadius: borderRadius.lg, backgroundColor: 'rgba(34,211,238,.05)', borderWidth: 1, borderColor: 'rgba(34,211,238,.15)', alignItems: 'flex-start', gap: 10 },
     noticeText: { flex: 1, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, lineHeight: 17 },
     bottomPadding: { height: 50 },
   });
@@ -143,7 +143,7 @@ export default function VehicleSafetyChecklistScreen({ navigation, setScreen }: 
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Vehicle Safety</Text><Text style={s.ltSub}>Pre-Trip Inspection</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('Emergency SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: borderRadius.md, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>

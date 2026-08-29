@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -92,9 +92,9 @@ export default function IncidentReportScreen() {
     incidentCard: { padding: 14, marginBottom: 10 },
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
     incidentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-    incidentType: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    incidentType: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.sm },
     incidentTypeText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.text },
-    statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, gap: 4 },
+    statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm, gap: 4 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     incidentDesc: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textSecondary, marginBottom: 10, lineHeight: 20 },
     incidentMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
@@ -110,17 +110,17 @@ export default function IncidentReportScreen() {
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 20, fontWeight: '700', color: C.text },
     inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.accent, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
     typeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 4 },
-    typeButton: { width: '31%', padding: 12, borderRadius: 12, alignItems: 'center', marginBottom: 10, backgroundColor: C.card, borderWidth: 1, borderColor: C.border },
+    typeButton: { width: '31%', padding: 12, borderRadius: borderRadius.md, alignItems: 'center', marginBottom: 10, backgroundColor: C.card, borderWidth: 1, borderColor: C.border },
     typeButtonSelected: { backgroundColor: C.error, borderColor: C.error },
     typeText: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, marginTop: 5, textAlign: 'center' },
     typeTextSelected: { color: C.text },
-    textArea: { backgroundColor: C.card, borderRadius: 12, padding: 14, height: 90, textAlignVertical: 'top', fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border },
-    input: { backgroundColor: C.card, borderRadius: 12, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border },
+    textArea: { backgroundColor: C.card, borderRadius: borderRadius.md, padding: 14, height: 90, textAlignVertical: 'top', fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border },
+    input: { backgroundColor: C.card, borderRadius: borderRadius.md, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border },
     anonymousToggle: { flexDirection: 'row', alignItems: 'center', marginTop: 16, gap: 12 },
     checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: C.border, justifyContent: 'center', alignItems: 'center' },
     checkboxChecked: { backgroundColor: C.success, borderColor: C.success },
     anonymousText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted },
-    submitButton: { backgroundColor: C.error, paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 20, marginBottom: 30 },
+    submitButton: { backgroundColor: C.error, paddingVertical: 16, borderRadius: borderRadius.lg, alignItems: 'center', marginTop: 20, marginBottom: 30 },
     submitButtonText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text, letterSpacing: 0.5 },
     bottomPadding: { height: 50 },
   });

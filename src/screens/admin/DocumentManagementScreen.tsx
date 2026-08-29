@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { documentService, DriverDocument, ParentDocument } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { Spacer, SkeletonListItem, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, borderRadius, cards } from '../../ui-plugin/theme';
 
 const glass = cards.glassAmber;
 
@@ -97,14 +97,14 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     ltHeader: { backgroundColor: C.backgroundAlt, padding: 20, paddingTop: 0, borderBottomWidth: 4, borderBottomColor: C.primary, position: 'relative', overflow: 'hidden' },
     ltHeaderBg: { position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,183,0,.05)' },
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
-    backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
+    backBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,255,255,.08)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)' },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    refreshBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
-    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, borderRadius: 16 },
+    refreshBtn: { width: 36, height: 36, borderRadius: borderRadius.md, backgroundColor: 'rgba(255,183,0,.15)', justifyContent: 'center', alignItems: 'center' },
+    tabs: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, borderRadius: borderRadius.lg },
     tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 6 },
     tabText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600' },
-    tabBadge: { width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+    tabBadge: { width: 20, height: 20, borderRadius: borderRadius.md, justifyContent: 'center', alignItems: 'center' },
     tabBadgeText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
     statItem: { flex: 1, paddingVertical: 14, alignItems: 'center' },
@@ -115,15 +115,15 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     cardTopRefraction: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.18)' },
     cardLeftBar: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, backgroundColor: 'rgba(255,183,0,.6)' },
     docHeader: { flexDirection: 'row', alignItems: 'center' },
-    docIcon: { width: 50, height: 50, borderRadius: 14, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+    docIcon: { width: 50, height: 50, borderRadius: borderRadius.lg, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
     docInfo: { flex: 1, marginLeft: 14 },
     docType: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     docMeta: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
-    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: borderRadius.md },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.text, textTransform: 'uppercase' },
     docFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.border },
     docDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted },
-    reviewBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, gap: 6 },
+    reviewBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 7, borderRadius: borderRadius.md, gap: 6 },
     reviewBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.text },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
     emptyIcon: { marginBottom: 12 },
@@ -135,15 +135,15 @@ export default function DocumentManagementScreen({ navigation }: Props) {
     modalTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text },
     modalBody: { padding: 20 },
     previewCard: { height: 200, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-    previewImage: { width: '100%', height: '100%', borderRadius: 16 },
+    previewImage: { width: '100%', height: '100%', borderRadius: borderRadius.lg },
     filePreview: { alignItems: 'center' },
     fileName: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, marginTop: 10 },
     docDetail: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.text, marginBottom: 8 },
     inputLabel: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '600', color: C.primary, marginBottom: 8, marginTop: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
     notesInput: { ...glass, padding: 14, fontFamily: 'Syne_700Bold', fontSize: 14, color: C.text, minHeight: 80, textAlignVertical: 'top' },
     modalActions: { flexDirection: 'row', padding: 20, gap: 12 },
-    rejectBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, gap: 8 },
-    approveBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, gap: 8 },
+    rejectBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: borderRadius.md, gap: 8 },
+    approveBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: borderRadius.md, gap: 8 },
     actionBtnText: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '700', color: C.text },
     bottomPadding: { height: 50 },
   });

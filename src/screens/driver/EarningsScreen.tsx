@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { paymentService, Payment } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
@@ -128,11 +128,12 @@ const EarningsScreen = ({ navigation }: Props) => {
     balanceLabel: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     balanceAmount: { fontFamily: 'Syne_700Bold', fontSize: 42, fontWeight: '800', color: C.primary, marginVertical: 8, letterSpacing: -1 },
     balanceSubtext: { fontFamily: 'Syne_700Bold', fontSize: 12, color: C.textMuted },
-    withdrawBtn: { marginHorizontal: 16, marginTop: 20, paddingVertical: 16, borderRadius: 16, backgroundColor: C.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    withdrawBtn: { marginHorizontal: 16, marginTop: 20, paddingVertical: 16, borderRadius: borderRadius.lg, backgroundColor: C.success, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     withdrawBtnDisabled: { opacity: 0.4 },
     withdrawBtnText: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '700', color: C.background, letterSpacing: 0.5, textTransform: 'uppercase' },
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, marginTop: 16, gap: 10 },
-    statCard: { width: '47%', padding: 16, alignItems: 'center', borderColor: 'rgba(217,119,6,.12)' },
+    statCard: { width: '58%', padding: 16, alignItems: 'flex-start', borderColor: 'rgba(217,119,6,.12)' },
+    statCardNarrow: { width: '42%', padding: 16, alignItems: 'flex-start', borderColor: 'rgba(217,119,6,.12)' },
     statLabel: { fontFamily: 'Syne_700Bold', fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
     statValue: { fontFamily: 'Syne_700Bold', fontSize: 22, fontWeight: '700', color: C.text, marginTop: 6 },
     section: { padding: 16 },
@@ -143,7 +144,7 @@ const EarningsScreen = ({ navigation }: Props) => {
     paymentMonth: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
     paymentDate: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 3 },
     paymentAmount: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.primary },
-    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: borderRadius.sm, marginTop: 4 },
     statusText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: '#fff' },
     emptyText: { fontFamily: 'Syne_700Bold', fontSize: 13, color: C.textMuted, textAlign: 'center', paddingVertical: 40 },
     bottomPadding: { height: 50 },
@@ -201,15 +202,15 @@ const EarningsScreen = ({ navigation }: Props) => {
             <Text style={s.statLabel}>This Month</Text>
             <Text style={s.statValue}>R{(earnings.thisMonth / 100).toFixed(0)}</Text>
           </Card>
-          <Card variant='glassAmber' style={s.statCard}>
+          <Card variant='glassAmber' style={s.statCardNarrow}>
            <Text style={s.statLabel}>Pending</Text>
            <Text style={s.statValue}>R{(earnings.pending / 100).toFixed(0)}</Text>
           </Card>
-          <Card variant='glassAmber' style={s.statCard}>
+          <Card variant='glassAmber' style={s.statCardNarrow}>
            <Text style={s.statLabel}>Total Trips</Text>
            <Text style={s.statValue}>{earnings.totalTrips}</Text>
           </Card>
-          <Card variant='glassAmber' style={s.statCard}>
+          <Card variant='glassAmber' style={s.statCardNarrow}>
            <Text style={s.statLabel}>Rating</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 4 }}>
               <Ionicons name="star" size={16} color={C.primary} />

@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { Spacer, SkeletonCard, Card } from '../../ui-plugin/components';
-import { getTheme } from '../../ui-plugin/theme';
+import { getTheme, borderRadius } from '../../ui-plugin/theme';
 
 const { colors: C, spacing: S } = getTheme('dark');
 
@@ -147,7 +147,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'Syne_700Bold', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4, letterSpacing: 0.5 },
-    ltBack: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
+    ltBack: { width: 32, height: 32, borderRadius: borderRadius.sm, backgroundColor: 'rgba(255,255,255,.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,.1)', alignItems: 'center', justifyContent: 'center' },
     progressCard: { marginHorizontal: 16, marginTop: 12, padding: 16 },
     progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: C.border },
     progressFill: { height: '100%', borderRadius: 4, backgroundColor: C.success },
@@ -165,13 +165,13 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
     docInfo: { flex: 1 },
     docLabel: { fontFamily: 'Syne_700Bold', fontSize: 13, fontWeight: '600', color: C.text },
     docDesc: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 4 },
-    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 12, marginTop: 14, borderWidth: 1.5, borderColor: 'rgba(0,229,255,.3)', borderStyle: 'dashed' },
+    uploadBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: borderRadius.md, marginTop: 14, borderWidth: 1.5, borderColor: 'rgba(0,229,255,.3)', borderStyle: 'dashed' },
     uploadBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.cyan, marginLeft: 8, letterSpacing: 1, textTransform: 'uppercase' },
-    previewRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, padding: 10, borderRadius: 10, backgroundColor: 'rgba(0,230,118,.08)' },
+    previewRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, padding: 10, borderRadius: borderRadius.md, backgroundColor: 'rgba(0,230,118,.08)' },
     previewName: { flex: 1, marginLeft: 8, fontFamily: 'Syne_700Bold', fontSize: 11, color: C.success },
     changeBtn: { paddingHorizontal: 12, paddingVertical: 6 },
     changeBtnText: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '600', color: C.cyan },
-    submitBtn: { marginHorizontal: 16, marginBottom: 24, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: C.success },
+    submitBtn: { marginHorizontal: 16, marginBottom: 24, paddingVertical: 14, borderRadius: borderRadius.lg, alignItems: 'center', backgroundColor: C.success },
     submitBtnText: { fontFamily: 'Syne_700Bold', fontSize: 12, fontWeight: '700', color: C.background, letterSpacing: 1, textTransform: 'uppercase' },
     successCard: { marginHorizontal: 16, marginTop: 16, padding: 32, alignItems: 'center' },
     successTitle: { fontFamily: 'Syne_700Bold', fontSize: 18, fontWeight: '700', color: C.text, marginTop: 16, marginBottom: 8, textAlign: 'center' },
@@ -204,7 +204,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
           <View style={s.ltHeaderBg} />
           <View style={s.ltTop}>
             <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View>
-            <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: borderRadius.md, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
             </TouchableOpacity>
           </View>
@@ -244,7 +244,7 @@ export default function ComplianceScreen({ navigation, setScreen }: Props) {
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
           <View><Text style={s.ltTitle}>Compliance</Text><Text style={s.ltSub}>Driver Documents</Text></View>
-          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TouchableOpacity onPress={() => Alert.alert('SOS', 'Calling emergency services...')} style={{ backgroundColor: C.error, paddingHorizontal: 12, paddingVertical: 6, borderRadius: borderRadius.md, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="warning" size={14} color="#fff" /><Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>SOS</Text>
           </TouchableOpacity>
         </View>

@@ -152,7 +152,7 @@ export default function EmergencyContactsScreen({ navigation }: Props) {
       position: 'relative',
       overflow: 'hidden',
     },
-    headerTitle: { ...typography.h2, color: C.text },
+    headerTitle: { ...typography.displayMedium, color: C.text },
     headerSubtext: { ...typography.bodySmall, color: C.textMuted, marginTop: S.xs },
     addBtn: {
       ...glassCard,

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FleetOSMMap from '../../components/FleetOSMMap';
 import { supabase } from '../../lib/supabase';
 import { Spacer, Badge, Card } from '../../ui-plugin/components';
-import { getTheme, cards } from '../../ui-plugin/theme';
+import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
 
 const glass = cards.glassAmber;
 
@@ -112,7 +112,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     mapContainer: { height: 260, marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
     map: { flex: 1 },
     mapOverlay: { position: 'absolute', top: 8, right: 8, flexDirection: 'row' },
-    liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.success, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, gap: 4 },
+    liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.success, paddingHorizontal: 8, paddingVertical: 4, borderRadius: borderRadius.md, gap: 4 },
     liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.background },
     liveText: { fontFamily: 'Syne_700Bold', fontSize: 10, fontWeight: '700', color: C.background },
     statsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 10 },
@@ -130,7 +130,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     driverInfo: { flex: 1, marginLeft: 12 },
     driverName: { fontFamily: 'Syne_700Bold', fontSize: 14, fontWeight: '600', color: C.text },
     driverVehicle: { fontFamily: 'Syne_700Bold', fontSize: 11, color: C.textMuted, marginTop: 2 },
-    badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
+    badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: borderRadius.sm },
     badgeText: { fontFamily: 'Syne_700Bold', fontSize: 9, fontWeight: '700', color: '#fff', textTransform: 'uppercase' },
     detailRow: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 12 },
     detailItem: { alignItems: 'center' },
