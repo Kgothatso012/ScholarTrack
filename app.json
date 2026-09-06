@@ -30,7 +30,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0A0B"
+        "backgroundColor": "#1E293B"
       },
       "package": "com.malumescholartrack.sa",
       "versionCode": 3,

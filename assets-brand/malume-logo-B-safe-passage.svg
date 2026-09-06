@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- MALUME LOGO — CONCEPT B: "Safe Passage" -->
+  <!-- Shield with walking scholar + path, negative-space feel -->
+  <rect width="512" height="512" rx="112" fill="#18181B"/>
+  <path d="M 256 72 L 404 120 L 404 260 C 404 356 340 414 256 444 C 172 414 108 356 108 260 L 108 120 Z"
+        fill="none" stroke="#F59E0B" stroke-width="20" stroke-linejoin="round"/>
+  <!-- dashed path under the scholar -->
+  <path d="M 168 372 C 210 340 230 330 268 322 C 306 314 330 300 344 276"
+        fill="none" stroke="#F59E0B" stroke-width="10" stroke-dasharray="4 22" stroke-linecap="round"/>
+  <!-- scholar: head, body, backpack, legs -->
+  <circle cx="238" cy="196" r="30" fill="#FFFFFF"/>
+  <rect x="216" y="234" width="44" height="86" rx="22" fill="#FFFFFF"/>
+  <circle cx="286" cy="262" r="20" fill="#F59E0B"/>
+  <rect x="222" y="316" width="16" height="52" rx="8" fill="#FFFFFF" transform="rotate(-14 230 342)"/>
+  <rect x="242" y="316" width="16" height="52" rx="8" fill="#FFFFFF" transform="rotate(16 250 342)"/>
+</svg>
