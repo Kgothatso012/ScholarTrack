@@ -53,7 +53,7 @@ hello@malumescholartrack.co.za
 https://kgothatso012.github.io/malumescholartrack-website/
 
 ## Privacy Policy URL
-https://kgothatso012.github.io/malumescholartrack-website/#privacy-policy
+https://kgothatso012.github.io/scholartrack-website/privacy.html
 
 ## Data Safety (Google Play required since May 2022)
 
