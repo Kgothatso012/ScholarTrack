@@ -32,7 +32,13 @@ jobs:
   supabase-migrate:
     name: Apply Supabase migrations (RLS lockdown)
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.supabase_migrate != 'false' }}
+    # Migrations are OPT-IN only. The production migration history is drifted
+    # (remote versions have no local files, local files lost their timestamp
+    # prefixes) and reconciliation needs the pooler DB password, which is not
+    # on CI. A tag push must never be blocked by that — it would ship no
+    # artifact at all. Flip to `github.event_name != 'workflow_dispatch' ||
+    # github.event.inputs.supabase_migrate == 'true'` once reconciliation is done.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.supabase_migrate != 'false' }}
     steps:
       - uses: actions/checkout@v4
 
