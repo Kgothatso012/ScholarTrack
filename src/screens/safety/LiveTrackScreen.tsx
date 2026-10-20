@@ -644,7 +644,7 @@ export default function LiveTrackScreen({ navigation }: Props) {
                 <Text style={s.legendText}>Pickup Zone</Text>
               </View>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => driverLocation && Linking.openURL(`https://www.openstreetmap.org/?mlat=${driverLocation.latitude}&mlon=${driverLocation.longitude}#map=16/${driverLocation.latitude}/${driverLocation.longitude}`)}>
               <Text style={s.mapExpand}><Ionicons name="expand" size={14} color={C.cyan} /> Fullscreen</Text>
             </TouchableOpacity>
           </View>

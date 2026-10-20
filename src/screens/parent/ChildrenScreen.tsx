@@ -286,7 +286,10 @@ export default function ChildrenScreen({ navigation }: Props) {
         ) : (
           childList.map((child, index) => (
             <Animated.View key={child.id} entering={ZoomIn.duration(300).delay(index * 60)}>
-              <View style={[styles.childCard, { borderRadius: borderRadius.lg, position: 'relative' }]}>
+              <SpringTouchable
+                onPress={() => navigation?.navigate?.(child.status === 'active' ? 'Track' : 'HireDriver')}
+                style={[styles.childCard, { borderRadius: borderRadius.lg, position: 'relative' }]}
+              >
                 {/* Top refraction line */}
                 <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,183,0,.3)' }} />
                 {/* Left bar accent */}
@@ -314,7 +317,7 @@ export default function ChildrenScreen({ navigation }: Props) {
                     )}
                   </View>
                 </View>
-              </View>
+              </SpringTouchable>
             </Animated.View>
           ))
         )}

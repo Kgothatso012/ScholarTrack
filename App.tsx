@@ -1,27 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, Linking, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Syne_400Regular, Syne_600SemiBold, Syne_700Bold, Syne_800ExtraBold } from '@expo-google-fonts/syne';
 import { DMMono_400Regular } from '@expo-google-fonts/dm-mono';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { DeepLinkContext, DeepLinkProvider } from './src/context/DeepLinkContext';
-import { supabase, profileService, Profile } from './src/lib/api';
-import { notificationService } from './src/services/NotificationService';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { RootNavigator } from './src/navigation';
 import ConsentGate from './src/components/ConsentGate';
 import SplashScreen from './src/components/SplashScreen';
 import { AuthProvider, useAuth } from './src/lib/auth';
 import { CrashScreen, installGlobalErrorHandler, getCapturedError } from './src/components/CrashScreen';
+import { NetworkProvider } from './src/lib/useNetwork';
 
 // Install BEFORE React mounts — catches module-load + async errors.
 installGlobalErrorHandler();
-
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from './src/navigation/types';
 
 const linking = {
   prefixes: ['malumescholartrack://', 'https://malumescholartrack.co.za'],
@@ -65,131 +60,32 @@ function ThemedApp() {
 function AppContentWithTheme() {
   const { colors } = useTheme();
   const { setConfirmationError } = React.useContext(DeepLinkContext);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // ─── DEV BYPASS — skip auth, go straight to elder UI ──────────────────────
-  const __DEV_SKIP_AUTH__ = true;
+  const { user: authUser, initializing } = useAuth();
+  const [showOnboarding] = useState(false);
 
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
-      const { url } = event;
-      if (url.includes('confirm') && (url.includes('error=') || url.includes('error_code='))) {
-        const parsed = new URL(url);
-        const errorDescription = parsed.searchParams.get('error_description');
-        const errorCode = parsed.searchParams.get('error_code');
-        const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
-        setConfirmationError(error);
+      if (event.url.includes('confirm') && (event.url.includes('error=') || event.url.includes('error_code='))) {
+        const parsed = new URL(event.url);
+        setConfirmationError(parsed.searchParams.get('error_description') || parsed.searchParams.get('error_code') || 'Confirmation link is invalid or has expired.');
       }
     };
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    Linking.getInitialURL().then((url) => {
-      if (url && url.includes('confirm') && (url.includes('error=') || url.includes('error_code='))) {
+    Linking.getInitialURL().then((url: string | null) => {
+      if (url?.includes('confirm') && (url.includes('error=') || url.includes('error_code='))) {
         const parsed = new URL(url);
-        const errorDescription = parsed.searchParams.get('error_description');
-        const errorCode = parsed.searchParams.get('error_code');
-        const error = errorDescription || errorCode || 'Confirmation link is invalid or has expired.';
-        setConfirmationError(error);
+        setConfirmationError(parsed.searchParams.get('error_description') || parsed.searchParams.get('error_code') || 'Confirmation link is invalid or has expired.');
       }
     });
 
     return () => subscription.remove();
-  }, []);
+  }, [setConfirmationError]);
 
-  const { user: authUser } = useAuth();
+  if (initializing) return <SplashScreen />;
 
-  // Sync App.tsx auth state with AuthContext — covers dev bypass where
-  // Supabase onAuthStateChange never fires (no real session).
-  useEffect(() => {
-    if (!authUser) {
-      setUserRole(null);
-      setIsAuthenticated(false);
-    }
-  }, [authUser]);
-
-  useEffect(() => {
-    init();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        try {
-          const profile = await profileService.getProfile(session.user.id);
-          setUserRole(profile.role);
-          setIsAuthenticated(true);
-          await AsyncStorage.setItem('userRole', profile.role);
-
-          // Register push token
-          const pushToken = await notificationService.getPushToken();
-          if (pushToken) {
-            await notificationService.registerPushToken(session.user.id, pushToken);
-          }
-        } catch (error) {
-          console.error('Error fetching profile:', error);
-        }
-      } else {
-        setUserRole(null);
-        setIsAuthenticated(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-
-    async function init() {
-      if (__DEV_SKIP_AUTH__) {
-        setUserRole('parent');
-        setIsAuthenticated(true);
-        setLoading(false);
-        return;
-      }
-      try {
-        const role = await AsyncStorage.getItem('userRole');
-        if (role) {
-          setUserRole(role);
-          setIsAuthenticated(true);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Init error:', error);
-        setLoading(false);
-      }
-    }
-  }, []);
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    AsyncStorage.setItem('onboardingComplete', 'true');
-  };
-
-  const handleLogin = async (role: string) => {
-    setUserRole(role);
-    setIsAuthenticated(true);
-    await AsyncStorage.setItem('userRole', role);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('SignOut error:', error);
-    }
-    await AsyncStorage.removeItem('userRole');
-    setUserRole(null);
-    setIsAuthenticated(false);
-  };
-
-  // Expose for web fallback
-  if (typeof window !== 'undefined') {
-    (window as any).__handleLogin = handleLogin;
-    (window as any).logout = handleLogout;
-  }
-
-  if (loading) {
-    return <SplashScreen />;
-  }
+  const userRole = authUser?.role ?? null;
+  const isAuthenticated = Boolean(authUser);
 
   return (
     <NavigationContainer linking={linking}>
@@ -197,8 +93,8 @@ function AppContentWithTheme() {
         userRole={userRole}
         isAuthenticated={isAuthenticated}
         showOnboarding={showOnboarding}
-        onLogin={handleLogin}
-        onOnboardingComplete={handleOnboardingComplete}
+        onLogin={() => {}}
+        onOnboardingComplete={() => {}}
       />
       {isAuthenticated && <ConsentGate />}
     </NavigationContainer>
@@ -226,8 +122,10 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider>
-      <ThemedApp />
-    </ThemeProvider>
+    <NetworkProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
+    </NetworkProvider>
   );
 }

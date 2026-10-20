@@ -246,7 +246,7 @@ export default function DriverComplianceScreen({ navigation, setScreen }: Props)
         </View>
 
         {/* Upload Button */}
-        <TouchableOpacity style={s.uploadBtn}>
+        <TouchableOpacity style={s.uploadBtn} onPress={() => navigation.navigate('ComplianceUpload')}>
           <Ionicons name="cloud-upload" size={22} color={C.background} />
           <Text style={s.uploadBtnText}>Upload All Documents</Text>
         </TouchableOpacity>

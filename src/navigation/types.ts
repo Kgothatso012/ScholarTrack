@@ -63,6 +63,7 @@ export type DriverStackParamList = {
   TripManifest: undefined;
   VehicleChecklist: undefined;
   Compliance: undefined;
+  ComplianceUpload: undefined;
   RegulatoryDisplay: undefined;
   Panic: undefined;
   IncidentReport: undefined;
@@ -99,4 +100,15 @@ export type CommonStackParamList = {
   Support: undefined;
   SafetyTips: undefined;
   IncidentReport: undefined;
+};
+
+export type ElderTabParamList = {
+  Track: undefined;
+  Trips: undefined;
+  Profile: undefined;
+  Children: undefined;
+  HireDriver: undefined;
+  Payments: undefined;
+  Settings: undefined;
+  Support: undefined;
 };

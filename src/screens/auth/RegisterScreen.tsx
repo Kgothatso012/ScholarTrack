@@ -565,13 +565,16 @@ export default function RegisterScreen({ navigation, onLogin }: Props) {
 
           {/* Register Button */}
           <Animated.View entering={FadeIn.delay(250).springify()}>
-            <SpringTouchable onPress={() => usePhoneAuth ? handleSendOTP() : handleEmailRegister()} style={{}}>
-              <TouchableOpacity
-                disabled={loading || !consentAccepted}
-                style={[s.registerBtn, loading && s.registerBtnDisabled]}
+            <SpringTouchable
+              onPress={() => { if (!loading && consentAccepted) usePhoneAuth ? handleSendOTP() : handleEmailRegister(); }}
+              style={{}}
+            >
+              <View
+                pointerEvents="none"
+                style={[s.registerBtn, (!consentAccepted || loading) && s.registerBtnDisabled]}
               >
                 <Text style={s.registerBtnText}>{loading ? 'Creating Account…' : 'Create Account'}</Text>
-              </TouchableOpacity>
+              </View>
             </SpringTouchable>
           </Animated.View>
 

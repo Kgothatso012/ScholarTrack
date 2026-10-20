@@ -13,7 +13,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { elderTheme as t } from '../../ui-plugin/elder';
 import { Button, Card, StatusBadge } from '../../ui-plugin/elder';
 import { childrenService } from '../../lib/services/children';
+import { ElderTabParamList } from '../../navigation/types';
 import { locationService } from '../../services/location';
+import OSMMap from '../../components/OSMMap';
 
 interface DriverLocation {
   latitude: number;
@@ -25,7 +27,7 @@ interface DriverLocation {
 interface ChildInfo {
   id: string;
   full_name: string;
-  school?: { name: string };
+  school?: { name: string; latitude?: number; longitude?: number };
   driver?: {
     id: string;
     full_name: string;
@@ -49,7 +51,9 @@ const formatTime = (d?: string) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-export default function TrackScreen() {
+interface Props { navigation: { navigate: <K extends keyof ElderTabParamList>(screen: K) => void } }
+
+export default function TrackScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,7 +95,11 @@ export default function TrackScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 
@@ -115,7 +123,7 @@ export default function TrackScreen() {
           <Text style={ss.emptyBody}>
             Link your child to a driver to start tracking their school transport.
           </Text>
-          <Button label="Link a Child" onPress={() => {}} />
+          <Button label="Link a Child" onPress={() => navigation.navigate('HireDriver')} />
         </View>
       </View>
     );
@@ -155,19 +163,23 @@ export default function TrackScreen() {
         </Card>
 
         <Card style={ss.mapCard}>
-          <View style={ss.mapPlaceholder}>
-            <Ionicons name="location-outline" size={32} color={t.colors.primary} />
-            <Text style={ss.mapText}>
-              {driverLocation
-                ? 'Driver location active'
-                : 'Waiting for driver location...'}
-            </Text>
-            {driverLocation && (
-              <Text style={ss.mapCoords}>
-                {driverLocation.latitude.toFixed(4)}, {driverLocation.longitude.toFixed(4)}
-              </Text>
-            )}
-          </View>
+          {driverLocation ? (
+            <View style={ss.mapShell}>
+              <OSMMap
+                latitude={driverLocation.latitude}
+                longitude={driverLocation.longitude}
+                driverName={child?.driver?.full_name}
+                speed={driverLocation.speed}
+                schoolLat={child?.school?.latitude}
+                schoolLng={child?.school?.longitude}
+              />
+            </View>
+          ) : (
+            <View style={ss.mapPlaceholder}>
+              <Ionicons name="location-outline" size={32} color={t.colors.primary} />
+              <Text style={ss.mapText}>Waiting for driver location...</Text>
+            </View>
+          )}
         </Card>
 
         {child?.driver && (
@@ -277,8 +289,11 @@ const ss = StyleSheet.create({
     color: t.colors.primary,
   },
   mapCard: {
-    minHeight: 180,
-    justifyContent: 'center',
+    padding: 0,
+    overflow: 'hidden',
+  },
+  mapShell: {
+    height: 300,
   },
   mapPlaceholder: {
     flex: 1,
@@ -290,11 +305,6 @@ const ss = StyleSheet.create({
     ...t.typography.body,
     color: t.colors.textSecondary,
     marginTop: t.spacing.md,
-  },
-  mapCoords: {
-    ...t.typography.bodySmall,
-    fontSize: 13,
-    marginTop: t.spacing.xs,
   },
   cardHeading: {
     ...t.typography.cardHeading,

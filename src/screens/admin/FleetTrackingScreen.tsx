@@ -38,6 +38,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [driverLocations, setDriverLocations] = useState<DriverLocation[]>([]);
+  const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<DriverLocation | null>(null);
 
@@ -68,24 +69,57 @@ export default function FleetTrackingScreen({ navigation }: Props) {
 
   const loadDriverLocations = async () => {
     try {
-      const { data: drivers, error } = await supabase.from('drivers').select('id, full_name, vehicle_type, status').limit(50);
+      setError('');
+      // Admin fleet needs every driver row, including those with no tracking history yet.
+      const { data: drivers, error } = await supabase
+        .from('drivers')
+        .select('id, full_name, vehicle_type, is_available, current_latitude, current_longitude, last_location_update')
+        .limit(50);
       if (error) throw error;
 
-      interface DriverBasic { id: string; full_name: string; vehicle_type?: string; status: string };
+      interface DriverBasic { id: string; full_name: string; vehicle_type?: string; is_available?: boolean | null; current_latitude?: number | null; current_longitude?: number | null; last_location_update?: string };
+      // drivers.current_* is the fleet cache. Query tracking history only for rows missing it.
       const driversWithLocations = await Promise.all(
         (drivers as DriverBasic[] || []).map(async (driver) => {
-          try {
-            const { data: tracking } = await supabase.from('driver_tracking').select('latitude, longitude, speed, last_updated, status').eq('driver_id', driver.id).order('last_updated', { ascending: false }).limit(1);
-            if (tracking && tracking.length > 0) {
-              return { driver_id: driver.id, driver_name: driver.full_name || 'Unknown', vehicle: driver.vehicle_type || 'Vehicle', latitude: tracking[0].latitude || 0, longitude: tracking[0].longitude || 0, speed: tracking[0].speed || 0, status: tracking[0].status || driver.status || 'active', last_updated: tracking[0].last_updated };
-            }
-          } catch (e) { /* silent */ }
-          return { driver_id: driver.id, driver_name: driver.full_name || 'Unknown', vehicle: driver.vehicle_type || 'Vehicle', latitude: 0, longitude: 0, speed: 0, status: driver.status || 'active', last_updated: new Date().toISOString() };
+          const base = {
+            driver_id: driver.id,
+            driver_name: driver.full_name || 'Unknown',
+            vehicle: driver.vehicle_type || 'Vehicle',
+            status: driver.is_available === false ? 'idle' : 'active',
+          };
+
+          if (driver.current_latitude != null && driver.current_longitude != null) {
+            return {
+              ...base,
+              latitude: driver.current_latitude,
+              longitude: driver.current_longitude,
+              speed: 0,
+              last_updated: driver.last_location_update || new Date().toISOString(),
+            };
+          }
+
+          const { data: tracking } = await supabase
+            .from('driver_tracking')
+            .select('latitude, longitude, speed, last_updated, status')
+            .eq('driver_id', driver.id)
+            .order('last_updated', { ascending: false })
+            .limit(1);
+
+          return {
+            ...base,
+            latitude: tracking?.[0]?.latitude || 0,
+            longitude: tracking?.[0]?.longitude || 0,
+            speed: tracking?.[0]?.speed || 0,
+            status: tracking?.[0]?.status || base.status,
+            last_updated: tracking?.[0]?.last_updated || new Date().toISOString(),
+          };
         })
       );
 
-      setDriverLocations(driversWithLocations.filter(d => d.latitude !== 0 && d.longitude !== 0));
-    } catch (error) { /* silent */ }
+      setDriverLocations(driversWithLocations);
+    } catch (error) {
+      setError('Could not load fleet drivers. Pull down to retry.');
+    }
     finally { setLoading(false); }
   };
 
@@ -109,7 +143,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
     ltTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: 12 },
     ltTitle: { fontFamily: 'Syne_700Bold', fontSize: 24, fontWeight: '800', color: C.text, letterSpacing: -0.5 },
     ltSub: { fontFamily: 'DMMono_400Regular', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 4 },
-    mapContainer: { height: 260, marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
+    mapContainer: { height: Math.max(360, Dimensions.get('window').height * 0.62), marginHorizontal: 16, marginTop: 16, borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: C.border },
     map: { flex: 1 },
     mapOverlay: { position: 'absolute', top: 8, right: 8, flexDirection: 'row' },
     liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.success, paddingHorizontal: 8, paddingVertical: 4, borderRadius: borderRadius.md, gap: 4 },
@@ -164,9 +198,14 @@ export default function FleetTrackingScreen({ navigation }: Props) {
       <View style={s.ltHeader}>
         <View style={s.ltHeaderBg} />
         <View style={s.ltTop}>
-          <View><Text style={s.ltTitle}>Fleet Tracking</Text><Text style={s.ltSub}>{driversWithLocation.length} vehicles on map</Text></View>
-        </View>
+          <View><Text style={s.ltTitle}>Fleet Tracking</Text><Text style={s.ltSub}>{driversWithLocation.length} vehicles on map • {driverLocations.length} drivers total</Text></View></View>
       </View>
+
+      {error ? (
+        <Card variant='glassAmber' style={{ ...s.emptyCard, marginHorizontal: 16, marginTop: 16 }}>
+          <Text style={[s.emptyText, { color: '#FCA5A5', paddingVertical: 0 }]}>{error}</Text>
+        </Card>
+      ) : null}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -237,7 +276,7 @@ export default function FleetTrackingScreen({ navigation }: Props) {
         <View style={s.section}>
           <Text style={s.sectionTitle}>All Drivers ({driverLocations.length})</Text>
           {driverLocations.length === 0 ? (
-            <Card variant='glassAmber' style={s.emptyCard}><Text style={s.emptyText}>No drivers found</Text></Card>
+            <Card variant='glassAmber' style={s.emptyCard}><Text style={s.emptyText}>{error || 'No drivers found'}</Text></Card>
           ) : (
             driverLocations.map((driver) => (
               <TouchableOpacity key={driver.driver_id} style={s.driverCard} onPress={() => setSelectedDriver(driver)} activeOpacity={0.7}>

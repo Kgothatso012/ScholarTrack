@@ -48,7 +48,8 @@ export function NetworkProvider({ children }: NetworkProviderProps) {
     isConnected: networkState?.isConnected ?? true,
     isInternetReachable: networkState?.isInternetReachable ?? true,
     connectionType: networkState?.type ?? null,
-    isOffline: !(networkState?.isConnected && networkState?.isInternetReachable),
+    // Treat an unfinished reachability check as online; only a definite failure blocks the map.
+    isOffline: networkState?.isConnected === false || networkState?.isInternetReachable === false,
     refresh: () => NetInfo.fetch().then(setNetworkState),
   };
 

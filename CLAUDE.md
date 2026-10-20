@@ -204,3 +204,10 @@ tags: [malumescholartrack, session, YYYY-MM-DD]
 
 ## Follow-up
 - ...
+
+## 2026-10-01 Disk Cleanup State
+
+- Upload keystore: `~/.scholartrack/scholartrack-upload.keystore` (kept, do NOT delete)
+- `android/` build dir deleted (regenerate: `npx expo prebuild`); signing config was gitignored/local — password survives in scholartrack skill example
+- Local Android toolchain REMOVED: ~/android-sdk, ~/.gradle, ~/.android, android-studio snap — reinstall (sdkmanager + gradle) before any local bare build; EAS cloud builds unaffected
+- node_modules deleted — run `npm install --legacy-peer-deps` before working

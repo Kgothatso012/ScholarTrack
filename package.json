@@ -8,7 +8,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "seed:test-workers": "node scripts/seed-test-workers.js"
   },
   "dependencies": {
     "@expo-google-fonts/dm-mono": "^0.4.2",

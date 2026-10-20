@@ -1,6 +1,6 @@
 // Manage Drivers Screen — Design System: Dark SA Transport
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Linking, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { driverService, Driver } from '../../lib/api';
@@ -135,13 +135,14 @@ const ManageDriversScreen = ({ navigation }: Props) => {
         {/* Search */}
         <Card variant='glassAmber' style={s.searchWrap}>
           <Ionicons name="search" size={16} color={C.textMuted} />
-          <View style={{ flex: 1 }}>
-            {searchQuery ? (
-              <Text style={s.searchInput}>{searchQuery}</Text>
-            ) : (
-              <Text style={s.searchPlaceholder}>Search by name or phone...</Text>
-            )}
-          </View>
+          <TextInput
+            style={s.searchInput}
+            placeholder="Search by name or phone..."
+            placeholderTextColor={C.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+          />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
               <Ionicons name="close-circle" size={16} color={C.textMuted} />
@@ -157,7 +158,12 @@ const ManageDriversScreen = ({ navigation }: Props) => {
           ) : (
             <>
               {paginatedDrivers.map((driver) => (
-                <TouchableOpacity key={driver.id} style={s.driverCard} activeOpacity={0.7}>
+                <TouchableOpacity
+                  key={driver.id}
+                  style={s.driverCard}
+                  activeOpacity={0.7}
+                  onPress={() => driver.phone ? Linking.openURL(`tel:${driver.phone}`) : Alert.alert('No phone', 'This driver has no phone number.')}
+                >
                   <View style={s.cardTopRefraction} />
                   <View style={s.driverRow}>
                     <View style={[s.driverAvatar, { backgroundColor: 'rgba(255,183,0,.12)' }]}>

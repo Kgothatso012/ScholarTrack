@@ -197,7 +197,7 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
         {tables.map((table, i) => (
           <SpringTouchable
             key={i}
-            onPress={() => Alert.alert(table.name, `${table.rows} rows, ${table.size}`)}
+            onPress={() => Alert.alert(table.name, 'Demo table metadata. Live queries are disabled in dev tools.')}
             style={s.tableCard}
           >
             <View style={[s.tableIconBox, { backgroundColor: table.color + '20' }]}>
@@ -207,9 +207,9 @@ const DevDatabaseScreen = ({ navigation }: Props) => {
               <Text style={s.tableName}>{table.name}</Text>
               <Text style={s.tableMeta}>{table.rows} rows · {table.size}</Text>
             </View>
-            <TouchableOpacity style={s.viewBtn}>
+            <View style={s.viewBtn}>
               <Ionicons name="eye-outline" size={18} color={C.textMuted} />
-            </TouchableOpacity>
+            </View>
           </SpringTouchable>
         ))}
       </View>

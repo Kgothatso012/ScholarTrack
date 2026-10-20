@@ -1,12 +1,15 @@
 // Live Location - theme aware
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getTheme } from '../ui-plugin/theme';
 
 const { colors: C } = getTheme('dark');
 
-export default function LiveLocation({ driverName, destination }: { driverName?: string; destination?: string }) {
+export default function LiveLocation({ driverName, destination, driverPhone }: { driverName?: string; destination?: string; driverPhone?: string }) {
+  const noPhone = () => Alert.alert('No phone', 'Driver phone number is unavailable.');
+  const noDestination = () => Alert.alert('No destination', 'Destination address is unavailable.');
+  const noWhatsApp = () => Alert.alert('WhatsApp unavailable', 'Driver phone number is missing or WhatsApp is not installed.');
   return (
     <View style={[s.container, { backgroundColor: C.background }]}>
       <View style={s.header}>
@@ -24,13 +27,13 @@ export default function LiveLocation({ driverName, destination }: { driverName?:
           <View style={s.destinationInfo}><Ionicons name="location" size={20} color={C.primary} />
             <View style={s.destinationText}><Text style={{ color: C.textMuted, fontSize: 12 }}>Going to</Text><Text style={{ color: C.text, fontWeight: '600' }}>{destination}</Text></View>
           </View>
-          <TouchableOpacity style={[s.directionsButton, { backgroundColor: C.primary }]}><Ionicons name="navigate" size={20} color={C.textInverse} /></TouchableOpacity>
+          <TouchableOpacity style={[s.directionsButton, { backgroundColor: C.primary }]} onPress={() => destination ? Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`) : noDestination()}><Ionicons name="navigate" size={20} color={C.textInverse} /></TouchableOpacity>
         </View>
       )}
       <View style={[s.actions, { borderTopColor: C.border }]}>
-        <TouchableOpacity style={s.actionButton}><Ionicons name="call" size={20} color={C.primary} /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>Call</Text></TouchableOpacity>
-        <TouchableOpacity style={s.actionButton}><Ionicons name="logo-whatsapp" size={20} color="#25D366" /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>WhatsApp</Text></TouchableOpacity>
-        <TouchableOpacity style={s.actionButton}><Ionicons name="warning" size={20} color={C.error} /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>Emergency</Text></TouchableOpacity>
+        <TouchableOpacity style={s.actionButton} onPress={() => driverPhone ? Linking.openURL(`tel:${driverPhone}`) : noPhone()}><Ionicons name="call" size={20} color={C.primary} /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>Call</Text></TouchableOpacity>
+        <TouchableOpacity style={s.actionButton} onPress={() => driverPhone ? Linking.openURL(`whatsapp://send?phone=${driverPhone.replace(/[^0-9]/g, '')}`) : noWhatsApp()}><Ionicons name="logo-whatsapp" size={20} color="#25D366" /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>WhatsApp</Text></TouchableOpacity>
+        <TouchableOpacity style={s.actionButton} onPress={() => Linking.openURL('tel:10111')}><Ionicons name="warning" size={20} color={C.error} /><Text style={{ color: C.textMuted, fontSize: 12, marginTop: 4 }}>Emergency</Text></TouchableOpacity>
       </View>
     </View>
   );

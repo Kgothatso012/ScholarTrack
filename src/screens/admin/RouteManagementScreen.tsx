@@ -218,7 +218,7 @@ export default function RouteManagementScreen({ navigation }: Props) {
                 </View>
               )}
 
-              <TouchableOpacity style={s.viewBtn}>
+              <TouchableOpacity style={s.viewBtn} onPress={() => setSelectedRoute(route)}>
                 <Text style={s.viewBtnText}>Manage Route</Text>
               </TouchableOpacity>
             </Card>

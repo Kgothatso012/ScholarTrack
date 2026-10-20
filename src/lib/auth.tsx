@@ -5,6 +5,9 @@ import { supabase, authService, Profile, UserRole } from './api';
 import { cacheService } from './cache';
 import { geofenceService } from '../services/GeofenceService';
 
+// Preferences intentionally survive logout/session swaps.
+const PREFERENCE_KEYS = ['themeMode', 'appLanguage', 'prefs_notifications', 'prefs_privacy', 'prefs_appSettings', 'onboardingComplete'];
+
 interface AuthUser {
   id: string;
   email: string;
@@ -16,6 +19,7 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
+  initializing: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, role: UserRole, fullName: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
@@ -28,20 +32,16 @@ const USER_ID_KEY = 'userId';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     init();
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') return;
       if (!session?.user) {
-        // Sign-out event: clear user state
         setUser(null);
         setLoading(false);
-        return;
-      }
-      // Skip duplicate fetch if init() already handled this session
-      if (initialized) {
         return;
       }
       const profile = await authService.getCurrentUser();
@@ -57,31 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [initialized]);
-
-  // ─── DEV BYPASS — mock user so all screens work without real auth ──────
-  const DEV_BYPASS = typeof window !== 'undefined' && window.location?.hostname === 'localhost' ? true : __DEV__;
+  }, []);
 
   const init = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (DEV_BYPASS && !session?.user) {
-        // Provide a mock user so screens that call getUser() don't break
-        setUser({
-          id: 'dev-bypass-user',
-          email: 'dev@malumescholartrack.co.za',
-          role: 'parent',
-          full_name: 'Dev User',
-          phone: '0820000000',
-        });
-        await AsyncStorage.setItem(USER_ID_KEY, 'dev-bypass-user');
-        await AsyncStorage.setItem('userRole', 'parent');
-        await AsyncStorage.setItem('userName', 'Dev User');
-        cacheService.setActiveUser('dev-bypass-user');
-        setInitialized(true);
-        setLoading(false);
-        return;
-      }
       if (session?.user) {
         const profile = await authService.getCurrentUser();
         if (profile) {
@@ -102,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Auth init error:', error);
     } finally {
-      setInitialized(true);
+      setInitializing(false);
       setLoading(false);
     }
   };
@@ -189,9 +169,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     await cacheService.clearAll();
     cacheService.setActiveUser(null);
-    await AsyncStorage.removeItem(USER_ID_KEY);
-    await AsyncStorage.removeItem('userRole');
-    await AsyncStorage.removeItem('userName');
+    const keys = await AsyncStorage.getAllKeys();
+    await AsyncStorage.multiRemove(keys.filter((key) => !PREFERENCE_KEYS.includes(key)));
     try {
       await geofenceService.stopBackgroundGeofencing();
     } catch (e) {
@@ -211,7 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, initializing, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

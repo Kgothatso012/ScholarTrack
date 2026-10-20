@@ -1,5 +1,6 @@
 // Language Settings Screen — Design System: Dark SA Transport
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,8 @@ export default function LanguageSettingsScreen() {
   const insets = useSafeAreaInsets();
   const [currentLang, setCurrentLang] = useState('en');
 
+  useEffect(() => { AsyncStorage.getItem('appLanguage').then(v => v && setCurrentLang(v)); }, []);
+
   const languages: Language[] = [
     { code: 'en', name: 'English', flag: 'GB' },
     { code: 'zu', name: 'Zulu', flag: 'ZA' },
@@ -31,16 +34,11 @@ export default function LanguageSettingsScreen() {
 
   const selectLanguage = (code: string) => {
     setCurrentLang(code);
+    AsyncStorage.setItem('appLanguage', code).catch(() => {});
     Alert.alert('Language Changed', `Language set to ${languages.find(l => l.code === code)?.name}`);
   };
 
-  const translations: Record<string, string> = {
-    dashboard: 'Dashboard',
-    track: 'Track',
-    safety: 'Safety',
-    payments: 'Payments',
-    settings: 'Settings',
-  };
+
   const now = new Date();
     const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: C.background },
@@ -57,10 +55,6 @@ export default function LanguageSettingsScreen() {
     langFlag: { fontSize: 24 },
     langName: { fontFamily: 'Syne_700Bold', fontSize: 15, fontWeight: '600', color: C.text, flex: 1, marginLeft: 14 },
     checkmark: { marginLeft: 'auto' },
-    previewCard: { padding: 20 },
-    cardTopRefraction2: { position: 'absolute', top: 0, left: 0, right: 0, height: 1, backgroundColor: 'rgba(255,255,255,.08)' },
-    previewTitle: { fontFamily: 'Syne_700Bold', fontSize: 11, fontWeight: '700', color: C.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
-    previewItem: { fontFamily: 'Syne_700Bold', fontSize: 14, color: C.textSecondary, marginBottom: 8, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: C.accent },
     bottomPadding: { height: 50 },
   });
 
@@ -95,18 +89,6 @@ export default function LanguageSettingsScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      {/* Preview */}
-      <View style={s.section}>
-        <Text style={s.sectionTitle}>Preview</Text>
-        <Card variant='glassAmber' style={s.previewCard}>
-          <View style={s.cardTopRefraction2} />
-          <Text style={s.previewTitle}>App Translations</Text>
-          {Object.entries(translations).map(([key, value]) => (
-            <Text key={key} style={s.previewItem}>{value}</Text>
-          ))}
-        </Card>
-      </View>
-
       <Spacer size="xl" />
       <View style={s.bottomPadding} />
     </ScrollView>

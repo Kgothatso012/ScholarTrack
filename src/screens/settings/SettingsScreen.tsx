@@ -7,10 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../../constants/app';
 import { Spacer, Card } from '../../ui-plugin/components';
-import { getTheme, cards, borderRadius } from '../../ui-plugin/theme';
+import { cards, borderRadius } from '../../ui-plugin/theme';
 import { useAuth } from '../../lib/auth';
-
-const { colors: C } = getTheme('dark');
+import { useTheme, ThemeMode } from '../../context/ThemeContext';
 
 const glass = cards.glassAmber;
 
@@ -28,6 +27,7 @@ interface Props {
 export default function SettingsScreen
 ({ navigation }: Props) {
   const { signOut } = useAuth();
+  const { colors: C, themeMode, setThemeMode } = useTheme();
   const insets = useSafeAreaInsets();
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', email: '', phone: '', role: 'parent' });
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -115,7 +115,6 @@ export default function SettingsScreen
         style: 'destructive',
         onPress: async () => {
           await signOut();
-          await AsyncStorage.clear();
           navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
         },
       },
@@ -151,7 +150,6 @@ export default function SettingsScreen
               const { error } = await supabase.functions.invoke('delete-user');
               if (error) throw error;
               await signOut();
-              await AsyncStorage.clear();
               Alert.alert('Account deleted', 'Your data has been erased.', [
                 { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Auth' }] }) },
               ]);
@@ -299,6 +297,13 @@ export default function SettingsScreen
         <View style={s.settingCard}>
           <SettingRow label="Emergency Alert" description="Enable SOS button" value={appSettings.emergencyAlert} onValueChange={v => setAppSettings(s => ({ ...s, emergencyAlert: v }))} />
           <SettingRow label="Auto Refresh" description="Automatically refresh data" value={appSettings.autoRefresh} onValueChange={v => setAppSettings(s => ({ ...s, autoRefresh: v }))} />
+          {(['dark', 'blue', 'light'] as ThemeMode[]).map(mode => (
+            <SettingRowBtn
+              key={mode}
+              label={`Theme: ${mode[0].toUpperCase() + mode.slice(1)}`}
+              onPress={() => setThemeMode(mode)}
+            />
+          ))}
         </View>
       </View>
 

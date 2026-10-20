@@ -9,6 +9,7 @@ import DriverTripScreen from '../screens/driver/DriverTripScreen';
 import TripManifestScreen from '../screens/driver/TripManifestScreen';
 import VehicleSafetyChecklistScreen from '../screens/driver/VehicleSafetyChecklistScreen';
 import ComplianceScreen from '../screens/driver/ComplianceScreen';
+import ComplianceUploadScreen from '../screens/driver/ComplianceUploadScreen';
 import RegulatoryDisplayScreen from '../screens/driver/RegulatoryDisplayScreen';
 import ChatScreen from '../screens/ChatScreen';
 import TripHistoryScreen from '../screens/safety/TripHistoryScreen';
@@ -57,6 +58,11 @@ export function DriverStack() {
         name="Compliance"
         component={ComplianceScreen}
         options={{ title: 'Compliance', headerShown: false }}
+      />
+      <Stack.Screen
+        name="ComplianceUpload"
+        component={ComplianceUploadScreen}
+        options={{ title: 'Upload Compliance Documents' }}
       />
       <Stack.Screen
         name="RegulatoryDisplay"

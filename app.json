@@ -2,7 +2,7 @@
   "expo": {
     "name": "MalumeScholarTrack",
     "slug": "scholartrack-expo54",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "scheme": "malumescholartrack",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
@@ -33,7 +33,7 @@
         "backgroundColor": "#1E293B"
       },
       "package": "com.malumescholartrack.sa",
-      "versionCode": 3,
+      "versionCode": 4,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyA1AB3gkzA9zxgoGqYMmfGyl5srTr4eVxI"

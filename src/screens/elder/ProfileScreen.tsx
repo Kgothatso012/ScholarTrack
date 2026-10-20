@@ -13,8 +13,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { elderTheme as t } from '../../ui-plugin/elder';
 import { Card, Button } from '../../ui-plugin/elder';
 import { useAuth } from '../../lib/auth';
+import { ElderTabParamList } from '../../navigation/types';
 
-export default function ProfileScreen() {
+interface Props { navigation: { navigate: <K extends keyof ElderTabParamList>(screen: K) => void } }
+
+export default function ProfileScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { signOut } = useAuth();
   const [userName, setUserName] = useState('');
@@ -62,7 +65,7 @@ export default function ProfileScreen() {
         contentContainerStyle={ss.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={ss.pageTitle}>Profile</Text>
+        <Text style={ss.pageTitle}>More</Text>
 
         <Card>
           <View style={ss.userRow}>
@@ -81,19 +84,25 @@ export default function ProfileScreen() {
         <View style={ss.menuSection}>
           <Text style={ss.sectionTitle}>Account</Text>
           <Card>
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('HireDriver')}>
+              <Ionicons name="person-add-outline" size={22} color={t.colors.text} />
+              <Text style={ss.menuLabel}>Hire Driver</Text>
+              <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={ss.divider} />
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Settings')}>
               <Ionicons name="person-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>Edit Profile</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
             </TouchableOpacity>
             <View style={ss.divider} />
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Children')}>
               <Ionicons name="people-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>My Children</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
             </TouchableOpacity>
             <View style={ss.divider} />
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Payments')}>
               <Ionicons name="card-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>Payments</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
@@ -104,19 +113,19 @@ export default function ProfileScreen() {
         <View style={ss.menuSection}>
           <Text style={ss.sectionTitle}>Settings</Text>
           <Card>
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Settings')}>
               <Ionicons name="notifications-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>Notifications</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
             </TouchableOpacity>
             <View style={ss.divider} />
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Settings')}>
               <Ionicons name="shield-checkmark-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>Privacy & Security</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />
             </TouchableOpacity>
             <View style={ss.divider} />
-            <TouchableOpacity style={ss.menuRow}>
+            <TouchableOpacity style={ss.menuRow} onPress={() => navigation.navigate('Support')}>
               <Ionicons name="help-circle-outline" size={22} color={t.colors.text} />
               <Text style={ss.menuLabel}>Help & Support</Text>
               <Ionicons name="chevron-forward" size={18} color={t.colors.textSecondary} />

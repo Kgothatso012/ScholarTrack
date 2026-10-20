@@ -25,8 +25,7 @@ export default function ConsentGate() {
     (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        // Dev bypass: no real user, skip consent gate entirely
-        if (!user || user.id === 'dev-bypass-user') { if (active) { setChecking(false); } return; }
+        if (!user) { if (active) { setChecking(false); } return; }
         const { data, error } = await supabase
           .from('profiles')
           .select('consent_version')

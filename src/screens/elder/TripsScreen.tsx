@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { elderTheme as t } from '../../ui-plugin/elder';
-import { Card, StatusBadge } from '../../ui-plugin/elder';
+import { Button, Card, StatusBadge } from '../../ui-plugin/elder';
 import { childrenService } from '../../lib/services/children';
 import { supabase } from '../../lib/supabase';
 
@@ -47,6 +47,7 @@ export default function TripsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [error, setError] = useState('');
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -75,7 +76,7 @@ export default function TripsScreen() {
 
       setTrips(mapped);
     } catch (err) {
-      // silent
+      setError('Could not load trips. Check your connection and try again.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -110,6 +111,14 @@ export default function TripsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={ss.pageTitle}>Trips</Text>
+
+        {error ? (
+          <Card style={ss.errorCard}>
+            <Ionicons name="cloud-offline-outline" size={24} color={t.colors.danger} />
+            <Text style={ss.errorText}>{error}</Text>
+            <Button label="Try Again" onPress={fetchTrips} style={ss.retryButton} />
+          </Card>
+        ) : null}
 
         {loading ? null : trips.length === 0 ? (
           <View style={ss.emptyWrap}>
@@ -238,6 +247,19 @@ const ss = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     marginTop: t.spacing.sm,
+  },
+  errorCard: {
+    marginBottom: t.layout.cardGap,
+    gap: t.spacing.md,
+    borderColor: t.colors.danger,
+  },
+  errorText: {
+    ...t.typography.bodySmall,
+    color: t.colors.danger,
+    flex: 1,
+  },
+  retryButton: {
+    height: 48,
   },
   section: {
     marginBottom: t.layout.cardGap,
