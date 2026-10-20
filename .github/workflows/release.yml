@@ -61,6 +61,8 @@ jobs:
     name: Build & verify signed production AAB
     runs-on: ubuntu-latest
     needs: supabase-migrate
+    permissions:
+      contents: write  # GitHub Release publish (tag builds)
     if: always() && (needs.supabase-migrate.result == 'success' || needs.supabase-migrate.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
@@ -122,7 +124,7 @@ jobs:
 
       - name: Gradle release build (signed with upload keystore)
         working-directory: android
-        run: ./gradlew bundleRelease -x lint
+        run: ./gradlew bundleRelease assembleRelease -x lint
         env:
           SCHOLARTRACK_UPLOAD_KEYSTORE_PATH: ${{ env.RUNNER_KEYSTORE }}
           SCHOLARTRACK_UPLOAD_STORE_PASSWORD: ${{ secrets.SCHOLARTRACK_UPLOAD_STORE_PASSWORD }}
@@ -194,3 +196,38 @@ jobs:
           name: android-production-aab
           path: ${{ steps.aab.outputs.path }}
           if-no-files-found: error
+
+      - name: Locate + verify signed APK (sideload build)
+        id: apk
+        run: |
+          set -e
+          APK=$(ls android/app/build/outputs/apk/release/app-release.apk | head -1)
+          test -s "$APK" || { echo "no APK produced"; exit 1; }
+          # apksigner (build-tools 34 installed above) — APKs are v2-only signed, keytool can't read them
+          apksigner verify --print-certs "$APK" > apkcerts.txt 2>&1 || { cat apkcerts.txt; exit 1; }
+          if grep -q "CN=Android Debug" apkcerts.txt; then
+            echo "FATAL: APK is signed with the Android DEBUG keystore — do not ship."; exit 1
+          fi
+          EXPECTED=$(echo -n "${{ secrets.SCHOLARTRACK_UPLOAD_CERT_SHA256 }}" | tr -d '[:space:]')
+          if [ -n "$EXPECTED" ] && ! grep -qi "SHA256.*$EXPECTED\|$EXPECTED" apkcerts.txt; then
+            echo "FATAL: APK signing cert SHA-256 mismatch."; exit 1
+          fi
+          echo "OK: APK signed with the production keystore."
+          cp "$APK" "MalumeScholarTrack-${{ github.ref_name }}.apk"
+          echo "path=MalumeScholarTrack-${{ github.ref_name }}.apk" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-production-apk
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+
+      - name: Publish APK to GitHub Release (tag builds)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" "${{ steps.apk.outputs.path }}" \
+            --title "MalumeScholarTrack ${{ github.ref_name }}" --generate-notes \
+            || gh release upload "${{ github.ref_name }}" "${{ steps.apk.outputs.path }}" --clobber
+          echo "Release live: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
