@@ -59,20 +59,94 @@ function withSigning(config) {
     // content within a single brace pair (no nested `{}`).
     if (!/signingConfigs\s*\{[^{}]*release\s*\{/.test(src)) {
       src = src.replace(
-        /(signingConfigs\s*\{[^{}]*?debug\s*\{[^{}]*?\n\s*}\s*\n)/,
+        /(signingConfigs\s*\{[^{}]*?debug\s*\{[^{}]*?\n\s*\}\s*\n)/,
         `$1${releaseSign}\n`
       );
     }
 
-    // Point release buildType at the release signing config.
-    src = src.replace(
-      /(release\s*{[\s\S]*?)signingConfig\s+signingConfigs\.debug/,
-      `$1signingConfig signingConfigs.release`
-    );
+    // Point the release buildType at the release signing config.
+    src = swapReleaseSigningConfig(src);
+
+    // ponytail: bug-fix 2026-10-20 — fail fast HERE (prebuild ≈2 min) instead of
+    // at signing verification (≈35 min build). A release buildType that still
+    // points at the debug keystore is a shipping defect, not a warning.
+    if (!releaseBuildTypeUses(src, 'signingConfigs.release')) {
+      throw new Error(
+        'withAndroidSecurity: buildTypes.release does not use signingConfigs.release — '
+        + 'refusing to produce a debug-signed release. Check the buildTypes block shape.'
+      );
+    }
 
     cfg.modResults.contents = src;
     return cfg;
   });
+}
+
+/**
+ * Return [openIdx, closeIdx] of the balanced brace block that starts at the
+ * first '{' at or after `from`, or null when unbalanced/absent.
+ */
+function braceBlock(src, from) {
+  const open = src.indexOf('{', from);
+  if (open === -1) return null;
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return [open, i];
+    }
+  }
+  return null;
+}
+
+/** The `buildTypes { ... }` block, or null. */
+function buildTypesBlock(src) {
+  const idx = src.indexOf('buildTypes');
+  if (idx === -1) return null;
+  const b = braceBlock(src, idx);
+  return b ? { start: b[0], end: b[1], text: src.slice(b[0], b[1] + 1) } : null;
+}
+
+/** The `release { ... }` buildType inside buildTypes, or null. */
+function releaseBuildType(src) {
+  const bt = buildTypesBlock(src);
+  if (!bt) return null;
+  const m = /\n\s+release\s*\{/.exec(bt.text);
+  if (!m) return null;
+  const b = braceBlock(bt.text, m.index);
+  if (!b) return null;
+  return { start: bt.start + b[0], end: bt.start + b[1], text: bt.text.slice(b[0], b[1] + 1) };
+}
+
+/**
+ * Point buildTypes.release at signingConfigs.release.
+ *
+ * ponytail: bug-fix 2026-10-20 — the previous regex
+ *   /(release\s*{[\s\S]*?)signingConfig\s+signingConfigs\.debug/
+ * matched the FIRST `release {` in the file. After the signing block is
+ * injected, that is the signingConfigs.release block — so the swap rewrote
+ * buildTypes.DEBUG to signingConfigs.release and left buildTypes.RELEASE on
+ * signingConfigs.debug. The release AAB/APK was then signed with the Android
+ * debug key. Scope the swap to the buildTypes.release block by brace matching.
+ */
+function swapReleaseSigningConfig(src) {
+  const rel = releaseBuildType(src);
+  if (!rel) return src;
+  if (!/signingConfig\s+signingConfigs\.debug/.test(rel.text)) return src;
+  const newRel = rel.text.replace(
+    /signingConfig\s+signingConfigs\.debug/,
+    'signingConfig signingConfigs.release'
+  );
+  return src.slice(0, rel.start) + newRel + src.slice(rel.end + 1);
+}
+
+/** True when buildTypes.release references the given signing config name. */
+function releaseBuildTypeUses(src, configName) {
+  const rel = releaseBuildType(src);
+  if (!rel) return false;
+  return new RegExp(`signingConfig\\s+${configName.replace(/\./g, '\\.')}`).test(rel.text);
 }
 
 // 2. Enable R8 minify + resource shrinking for release via gradle.properties.
@@ -132,3 +206,6 @@ function withManifest(config) {
 }
 
 module.exports = (config) => withManifest(withMinify(withSigning(config)));
+
+// Exported for the unit test (__tests__/withAndroidSecurity.signing.test.js).
+module.exports.__test = { swapReleaseSigningConfig, releaseBuildTypeUses, releaseBuildType };
